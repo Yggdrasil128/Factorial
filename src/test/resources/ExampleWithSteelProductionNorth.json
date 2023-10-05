@@ -1,0 +1,40 @@
+{
+    "name" : "Example",
+    "game" : "Satisfactory",
+    "version" : "Update 7",
+    "factories" : [
+        {
+            "name" : "Steel Production North",
+            "productionSteps" : [
+                {
+                    "machineName" : "Water Extractor",
+                    "recipeName" : "Water",
+                    "machineCount" : "4"
+                },
+                {
+                    "machineName" : "Miner Mk. 3",
+                    "recipeName" : "Iron Ore",
+                    "modifierNames" : [
+                        "Pure Node"
+                    ],
+                    "machineCount" : "13 / 8"
+                },
+                {
+                    "machineName" : "Miner Mk. 3",
+                    "recipeName" : "Coal",
+                    "machineCount" : "9 / 2"
+                },
+                {
+                    "machineName" : "Refinery",
+                    "recipeName" : "Pure Iron Ingot",
+                    "machineCount" : "312 / 14"
+                },
+                {
+                    "machineName" : "Foundry",
+                    "recipeName" : "Solid Steel Ingot",
+                    "machineCount" : "36"
+                }
+            ]
+        }
+    ]
+}

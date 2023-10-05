@@ -1,0 +1,134 @@
+package de.yggdrasil128.factorial.model.recipe;
+
+import de.yggdrasil128.factorial.model.Fraction;
+import de.yggdrasil128.factorial.model.FractionConverter;
+import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.machine.Machine;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
+import de.yggdrasil128.factorial.model.resource.Resource;
+import jakarta.persistence.*;
+
+import static java.util.Collections.emptyList;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_version_id", "name" }))
+public class Recipe {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+    @ManyToOne(optional = false)
+    @JsonBackReference
+    private GameVersion gameVersion;
+    @Column(nullable = false)
+    private String name;
+    @ElementCollection
+    private List<Resource> input = emptyList();
+    @ElementCollection
+    private List<Resource> output = emptyList();
+    @Column(nullable = false)
+    @Convert(converter = FractionConverter.class)
+    private Fraction duration;
+    @ManyToMany
+    private List<RecipeModifier> applicableModifiers = emptyList();
+    @ManyToMany
+    private List<Machine> applicableMachines = emptyList();
+
+    public Recipe() {
+    }
+
+    public Recipe(GameVersion gameVersion, String name, List<Resource> input, List<Resource> output, Fraction duration,
+        List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines) {
+        this.gameVersion = gameVersion;
+        this.name = name;
+        this.input = input;
+        this.output = output;
+        this.duration = duration;
+        this.applicableModifiers = applicableModifiers;
+        this.applicableMachines = applicableMachines;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public GameVersion getGameVersion() {
+        return gameVersion;
+    }
+
+    public void setGameVersion(GameVersion gameVersion) {
+        this.gameVersion = gameVersion;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Resource> getInput() {
+        return input;
+    }
+
+    public void setInput(List<Resource> input) {
+        this.input = input;
+    }
+
+    public List<Resource> getOutput() {
+        return output;
+    }
+
+    public void setOutput(List<Resource> output) {
+        this.output = output;
+    }
+
+    public Fraction getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Fraction duration) {
+        this.duration = duration;
+    }
+
+    public List<RecipeModifier> getApplicableModifiers() {
+        return applicableModifiers;
+    }
+
+    public void setApplicableModifiers(List<RecipeModifier> applicableModifiers) {
+        this.applicableModifiers = applicableModifiers;
+    }
+
+    public List<Machine> getApplicableMachines() {
+        return applicableMachines;
+    }
+
+    public void setApplicableMachines(List<Machine> applicableMachines) {
+        this.applicableMachines = applicableMachines;
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) return true;
+        if (that == null || getClass() != that.getClass()) return false;
+
+        Recipe recipe = (Recipe) that;
+
+        return id == recipe.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return input + " to " + output + " in " + duration + " s";
+    }
+}

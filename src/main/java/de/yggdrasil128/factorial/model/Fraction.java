@@ -1,6 +1,16 @@
 package de.yggdrasil128.factorial.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
+@JsonSerialize(using = ToStringSerializer.class)
+@JsonDeserialize(using = FractionDeserializer.class)
 public class Fraction extends Number {
+
+    // generated
+    private static final long serialVersionUID = 8312326480060238103L;
+
     public static final Fraction ZERO = Fraction.of(0);
     public static final Fraction ONE = Fraction.of(1);
 
@@ -136,4 +146,5 @@ public class Fraction extends Number {
         result = 31 * result + (int) (denominator ^ (denominator >>> 32));
         return result;
     }
+
 }

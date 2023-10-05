@@ -1,6 +1,22 @@
 package de.yggdrasil128.factorial.repository;
 
 import de.yggdrasil128.factorial.model.*;
+import de.yggdrasil128.factorial.model.factory.Factory;
+import de.yggdrasil128.factorial.model.factory.FactoryRepository;
+import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.icon.IconRepository;
+import de.yggdrasil128.factorial.model.item.Item;
+import de.yggdrasil128.factorial.model.item.ItemRepository;
+import de.yggdrasil128.factorial.model.machine.Machine;
+import de.yggdrasil128.factorial.model.machine.MachineRepository;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepRepository;
+import de.yggdrasil128.factorial.model.recipe.Recipe;
+import de.yggdrasil128.factorial.model.recipe.RecipeRepository;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierRepository;
+import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.transportlink.TransportLinkRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,15 +118,15 @@ public class RepositoriesTest {
         assembler = machineRepository.save(assembler);
 
         Recipe oreToIngotRecipe = new Recipe();
-        oreToIngotRecipe.setInput(List.of(new ItemWithQuantity(ironOre, Fraction.of(1))));
-        oreToIngotRecipe.setOutput(List.of(new ItemWithQuantity(ironIngot, Fraction.of(1))));
+        oreToIngotRecipe.setInput(List.of(new Resource(ironOre, Fraction.of(1))));
+        oreToIngotRecipe.setOutput(List.of(new Resource(ironIngot, Fraction.of(1))));
         oreToIngotRecipe.setApplicableMachines(List.of(smelter));
         oreToIngotRecipe.setDuration(Fraction.of(1));
         oreToIngotRecipe = recipeRepository.save(oreToIngotRecipe);
 
         Recipe ingotToGearRecipe = new Recipe();
-        ingotToGearRecipe.setInput(List.of(new ItemWithQuantity(ironIngot, Fraction.of(1))));
-        ingotToGearRecipe.setOutput(List.of(new ItemWithQuantity(ironGear, Fraction.of(1))));
+        ingotToGearRecipe.setInput(List.of(new Resource(ironIngot, Fraction.of(1))));
+        ingotToGearRecipe.setOutput(List.of(new Resource(ironGear, Fraction.of(1))));
         ingotToGearRecipe.setApplicableMachines(List.of(smelter));
         ingotToGearRecipe.setDuration(Fraction.of(1));
         ingotToGearRecipe = recipeRepository.save(ingotToGearRecipe);
