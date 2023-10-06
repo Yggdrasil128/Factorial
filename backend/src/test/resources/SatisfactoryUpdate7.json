@@ -1,0 +1,77 @@
+{
+  "name": "Satisfactory",
+  "versions": {
+    "Update 7": {
+      "name": "Update 7",
+      "items": {
+        "Water": {},
+        "Iron Ore": {},
+        "Iron Ingot": {},
+        "Coal": {},
+        "Steel Ingot": {}
+      },
+      "recipies": {
+        "Water": {
+          "output": {
+            "Water": "2"
+          },
+          "duration": "1"
+        },
+        "Iron Ore": {
+          "output": {
+            "Iron Ore": "1"
+          },
+          "duration": "1"
+        },
+        "Coal": {
+          "output": {
+            "Coal": "1"
+          },
+          "duration": "1"
+        },
+        "Pure Iron Ingot": {
+          "input": {
+            "Iron Ore": "7",
+            "Water": "4"
+          },
+          "output": {
+            "Iron Ingot": "13"
+          },
+          "duration": "12"
+        },
+        "Solid Steel Ingot": {
+          "input": {
+            "Iron Ingot": "2",
+            "Coal": "2"
+          },
+          "output": {
+            "Steel Ingot": "3"
+          },
+          "duration": "3"
+        }
+      },
+      "recipeModifiers": {
+        "Mk. 3": {
+          "durationMultiplier": "1 / 4",
+          "inputQuantityMultiplier": "1",
+          "outputQuantityMultiplier": "1"
+        },
+        "Pure Node": {
+          "durationMultiplier": "1",
+          "inputQuantityMultiplier": "1",
+          "outputQuantityMultiplier": "2"
+        }
+      },
+      "machines": {
+        "Water Extractor": {},
+        "Miner Mk. 3": {
+          "machineModifierNames": [
+            "Mk. 3"
+          ]
+        },
+        "Refinery": {},
+        "Foundry": {}
+      }
+    }
+  }
+}
