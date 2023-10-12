@@ -1,6 +1,15 @@
 package de.yggdrasil128.factorial.model.save;
 
+import static java.util.Collections.emptyList;
+
+import java.util.ArrayList;
+
+import org.springframework.stereotype.Service;
+
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.changelist.ChangeListStandalone;
+import de.yggdrasil128.factorial.model.changelist.Changelist;
+import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryMigration;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
@@ -9,11 +18,6 @@ import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-
-import static java.util.Collections.emptyList;
 
 @Service
 public class SaveService extends ModelService<Save, SaveRepository> {
@@ -21,13 +25,15 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     private final GameService games;
     private final GameVersionService gameVersions;
     private final FactoryService factories;
+    private final ChangelistService changelists;
 
     public SaveService(SaveRepository repository, GameService games, GameVersionService gameVersions,
-                       FactoryService factories) {
+        FactoryService factories, ChangelistService changelists) {
         super(repository);
         this.games = games;
         this.gameVersions = gameVersions;
         this.factories = factories;
+        this.changelists = changelists;
     }
 
     public Save create(int gameVersionId, SaveStandalone input) {
@@ -46,6 +52,14 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         save.getFactories().add(factory);
         repository.save(save);
         return factory;
+    }
+
+    public Changelist addChangelist(int saveId, ChangeListStandalone input) {
+        Save save = get(saveId);
+        Changelist changelist = changelists.create(save, input);
+        save.getChangelists().add(changelist);
+        repository.save(save);
+        return changelist;
     }
 
     public Save doImport(SaveMigration input) {

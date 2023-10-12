@@ -10,7 +10,6 @@ import java.io.Serial;
 @JsonDeserialize(using = FractionDeserializer.class)
 public class Fraction extends Number {
 
-    // generated
     @Serial
     private static final long serialVersionUID = 8312326480060238103L;
 
@@ -55,7 +54,7 @@ public class Fraction extends Number {
         if (b == 0) {
             return a;
         }
-        return gcd(b, a % b);
+        return gcd(b, Math.floorMod(a, b));
     }
 
     private void normalize() {

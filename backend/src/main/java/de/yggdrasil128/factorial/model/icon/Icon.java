@@ -8,6 +8,8 @@ public class Icon {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
     private byte[] imageData;
     @Column(nullable = false)
     private String mimeType;

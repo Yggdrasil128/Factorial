@@ -8,6 +8,7 @@ public class SaveStandalone {
 
     private String name;
     private List<Integer> factoryIds = emptyList();
+    private List<Integer> changeListIds = emptyList();
 
     public String getName() {
         return name;
@@ -23,6 +24,14 @@ public class SaveStandalone {
 
     public void setFactoryIds(List<Integer> factoryIds) {
         this.factoryIds = factoryIds;
+    }
+
+    public List<Integer> getChangeListIds() {
+        return changeListIds;
+    }
+
+    public void setChangeListIds(List<Integer> changeListIds) {
+        this.changeListIds = changeListIds;
     }
 
 }
