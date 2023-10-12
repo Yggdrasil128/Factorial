@@ -8,7 +8,9 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStepMigration;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
 import de.yggdrasil128.factorial.model.save.Save;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 
@@ -43,6 +45,15 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
             factory.getProductionSteps().add(productionSteps.doImport(factory, entry));
         }
         return factory;
+    }
+
+    @Override
+    public void delete(int id) {
+        Factory factory = get(id);
+        if (1 == factory.getSave().getFactories().size()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot delete last factory");
+        }
+        super.delete(id);
     }
 
 }

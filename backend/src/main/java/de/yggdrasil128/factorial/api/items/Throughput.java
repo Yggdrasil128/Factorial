@@ -1,7 +1,6 @@
 package de.yggdrasil128.factorial.api.items;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.item.Item;
 

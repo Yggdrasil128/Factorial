@@ -1,15 +1,14 @@
 package de.yggdrasil128.factorial.api.items;
 
-import java.util.List;
-
+import de.yggdrasil128.factorial.model.changelist.Changelist;
+import de.yggdrasil128.factorial.model.factory.Factory;
+import de.yggdrasil128.factorial.model.factory.FactoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.yggdrasil128.factorial.model.changelist.Changelist;
-import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.factory.FactoryService;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/items")

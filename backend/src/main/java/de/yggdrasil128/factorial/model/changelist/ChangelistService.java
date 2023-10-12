@@ -1,13 +1,12 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import static java.util.Collections.emptyList;
-
-import org.springframework.stereotype.Service;
-
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.save.Save;
+import org.springframework.stereotype.Service;
+
+import static java.util.Collections.emptyList;
 
 @Service
 public class ChangelistService extends ModelService<Changelist, ChangelistRepository> {

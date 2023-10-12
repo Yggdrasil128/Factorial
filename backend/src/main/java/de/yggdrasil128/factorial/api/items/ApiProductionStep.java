@@ -1,9 +1,5 @@
 package de.yggdrasil128.factorial.api.items;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
@@ -11,6 +7,10 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.productionstepchange.ProductionStepChange;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.resource.Resource;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 public class ApiProductionStep {
 

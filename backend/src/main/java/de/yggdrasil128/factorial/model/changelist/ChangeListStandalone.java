@@ -1,10 +1,10 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import java.util.List;
-
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstepchange.ProductionStepChange;
 import de.yggdrasil128.factorial.model.save.Save;
+
+import java.util.List;
 
 public class ChangeListStandalone {
 

@@ -1,11 +1,5 @@
 package de.yggdrasil128.factorial.model.save;
 
-import static java.util.Collections.emptyList;
-
-import java.util.ArrayList;
-
-import org.springframework.stereotype.Service;
-
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.ChangeListStandalone;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
@@ -18,6 +12,11 @@ import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+
+import static java.util.Collections.emptyList;
 
 @Service
 public class SaveService extends ModelService<Save, SaveRepository> {

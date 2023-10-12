@@ -1,22 +1,14 @@
 package de.yggdrasil128.factorial.model.save;
 
-import static java.util.Collections.emptyList;
-
-import java.util.List;
-
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.transportlink.TransportLink;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 @Entity
 public class Save {
