@@ -25,12 +25,16 @@ public class GameVersion {
     private String name;
     @ManyToOne
     private Icon icon;
+    @JoinColumn
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Item> items;
+    @JoinColumn
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Recipe> recipies;
+    @JoinColumn
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<RecipeModifier> recipeModifiers;
+    @JoinColumn
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Machine> machines;
 

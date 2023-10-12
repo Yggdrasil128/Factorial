@@ -14,6 +14,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -27,10 +28,13 @@ public class Save {
     private GameVersion gameVersion;
     @Column(nullable = false)
     private String name;
+    @JoinColumn
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<Factory> factories = emptyList();
+    @JoinColumn
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<TransportLink> transportLinks = emptyList();
+    @JoinColumn
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<Changelist> changelists = emptyList();
 

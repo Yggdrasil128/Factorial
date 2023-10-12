@@ -15,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -32,6 +33,7 @@ public class Factory {
     private String description;
     @ManyToOne
     private Icon icon;
+    @JoinColumn
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<ProductionStep> productionSteps = emptyList();
 

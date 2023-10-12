@@ -174,6 +174,11 @@ public class ExplorationController {
         return saves.create(gameVersionId, save);
     }
 
+    @DeleteMapping("save")
+    public void deleteSave(int id) {
+        saves.delete(id);
+    }
+
     @GetMapping("/factory")
     public Factory getFactory(int id) {
         return factories.get(id);
