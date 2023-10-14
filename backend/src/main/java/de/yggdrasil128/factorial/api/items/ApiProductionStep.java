@@ -14,13 +14,15 @@ import java.util.function.Function;
 
 public class ApiProductionStep {
 
-    private final ProductionStep delegate;
+    private final ApiRecipe recipe;
+    private final ApiMachine machine;
     private final List<Throughput> input;
     private final List<Throughput> output;
     private final QuantityByChangelist machineCount;
 
     public ApiProductionStep(ProductionStep delegate, Changelist primary, Iterable<Changelist> active) {
-        this.delegate = delegate;
+        this.recipe = new ApiRecipe(delegate.getRecipe());
+        this.machine = new ApiMachine(delegate.getMachine());
         this.machineCount = getMachineCounts(delegate, primary, active);
 
         RecipeModifier effectiveModifier = delegate.getEffectiveModifier();
@@ -32,9 +34,9 @@ public class ApiProductionStep {
         applyMachineCount(withActiveChangelists, machineCount.getWithActiveChangelists());
 
         input = getThroughputs(delegate, delegate.getRecipe().getInput(), RecipeModifier::getInputSpeedMultiplier,
-            modifierCurrent, withPrimaryChangelist, withActiveChangelists);
+                modifierCurrent, withPrimaryChangelist, withActiveChangelists);
         output = getThroughputs(delegate, delegate.getRecipe().getOutput(), RecipeModifier::getOutputSpeedMultiplier,
-            modifierCurrent, withPrimaryChangelist, withActiveChangelists);
+                modifierCurrent, withPrimaryChangelist, withActiveChangelists);
     }
 
     private static RecipeModifier getEffectiveCopy(RecipeModifier effectiveModifier) {
@@ -46,7 +48,7 @@ public class ApiProductionStep {
     }
 
     private static QuantityByChangelist getMachineCounts(ProductionStep delegate, Changelist current,
-        Iterable<Changelist> active) {
+                                                         Iterable<Changelist> active) {
         Fraction withAllChangelists = delegate.getMachineCount();
         Fraction withCurrentChangelist = withAllChangelists.add(getChangeFor(current, delegate));
         for (Changelist changelist : active) {
@@ -66,32 +68,33 @@ public class ApiProductionStep {
 
     private static void applyMachineCount(RecipeModifier effectiveModifier, Fraction machineCount) {
         effectiveModifier
-            .setInputQuantityMultiplier(effectiveModifier.getInputQuantityMultiplier().multiply(machineCount));
+                .setInputQuantityMultiplier(effectiveModifier.getInputQuantityMultiplier().multiply(machineCount));
         effectiveModifier
-            .setOutputQuantityMultiplier(effectiveModifier.getOutputQuantityMultiplier().multiply(machineCount));
+                .setOutputQuantityMultiplier(effectiveModifier.getOutputQuantityMultiplier().multiply(machineCount));
     }
 
     private static List<Throughput> getThroughputs(ProductionStep productionStep, List<Resource> resources,
-        Function<RecipeModifier, Fraction> speedMultiplier, RecipeModifier current,
-        RecipeModifier withPrimaryChangelist, RecipeModifier withActiveChangelists) {
+                                                   Function<RecipeModifier, Fraction> speedMultiplier,
+                                                   RecipeModifier current, RecipeModifier withPrimaryChangelist,
+                                                   RecipeModifier withActiveChangelists) {
         List<Throughput> throughputs = new ArrayList<>(resources.size());
         for (Resource resource : resources) {
             Fraction baseSpeed = resource.getQuantity().divide(productionStep.getRecipe().getDuration());
             QuantityByChangelist throughput = new QuantityByChangelist(
-                baseSpeed.multiply(speedMultiplier.apply(current)),
-                baseSpeed.multiply(speedMultiplier.apply(withPrimaryChangelist)),
-                baseSpeed.multiply(speedMultiplier.apply(withActiveChangelists)));
+                    baseSpeed.multiply(speedMultiplier.apply(current)),
+                    baseSpeed.multiply(speedMultiplier.apply(withPrimaryChangelist)),
+                    baseSpeed.multiply(speedMultiplier.apply(withActiveChangelists)));
             throughputs.add(new Throughput(resource.getItem(), throughput));
         }
         return throughputs;
     }
 
-    public int getMachineId() {
-        return delegate.getMachine().getId();
+    public ApiRecipe getRecipe() {
+        return recipe;
     }
 
-    public int getRecipeId() {
-        return delegate.getRecipe().getId();
+    public ApiMachine getMachine() {
+        return machine;
     }
 
     public List<Throughput> getInput() {

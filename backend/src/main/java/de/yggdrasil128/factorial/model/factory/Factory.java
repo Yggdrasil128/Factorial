@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 @Entity
 public class Factory {
@@ -30,7 +31,7 @@ public class Factory {
     @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<ProductionStep> productionSteps = emptyList();
     @ElementCollection
-    private Map<Item, Integer> itemOrder;
+    private Map<Item, Integer> itemOrder = emptyMap();
 
     public Factory() {
     }

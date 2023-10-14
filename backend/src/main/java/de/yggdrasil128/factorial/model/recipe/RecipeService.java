@@ -3,6 +3,8 @@ package de.yggdrasil128.factorial.model.recipe;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.resource.Resource;
@@ -19,10 +21,12 @@ import static java.util.Collections.emptyList;
 public class RecipeService extends ModelService<Recipe, RecipeRepository> {
 
     private final ItemService items;
+    private final IconService icons;
 
-    public RecipeService(RecipeRepository repository, ItemService items) {
+    public RecipeService(RecipeRepository repository, ItemService items, IconService icons) {
         super(repository);
         this.items = items;
+        this.icons = icons;
     }
 
     public Recipe get(GameVersion gameVersion, String name) {
@@ -31,10 +35,11 @@ public class RecipeService extends ModelService<Recipe, RecipeRepository> {
     }
 
     public Recipe create(GameVersion gameVersion, RecipeStandalone input) {
+        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
         List<Resource> inputs = fromStandalones(input.getInput());
         List<Resource> outputs = fromStandalones(input.getOutput());
-        return repository.save(
-                new Recipe(gameVersion, input.getName(), inputs, outputs, input.getDuration(), emptyList(), emptyList()));
+        return repository.save(new Recipe(gameVersion, input.getName(), icon, inputs, outputs, input.getDuration(),
+                emptyList(), emptyList()));
     }
 
     private List<Resource> fromStandalones(List<ResourceStandalone> resources) {
@@ -45,7 +50,8 @@ public class RecipeService extends ModelService<Recipe, RecipeRepository> {
     public Recipe doImport(GameVersion version, String name, RecipeMigration input) {
         List<Resource> inputs = fromMigrations(version, input.getInput());
         List<Resource> outputs = fromMigrations(version, input.getOutput());
-        return new Recipe(version, name, inputs, outputs, input.getDuration(), new ArrayList<>(), new ArrayList<>());
+        return new Recipe(version, name, null, inputs, outputs, input.getDuration(), new ArrayList<>(),
+                new ArrayList<>());
     }
 
     private static List<Resource> fromMigrations(GameVersion version, Map<String, Fraction> resources) {

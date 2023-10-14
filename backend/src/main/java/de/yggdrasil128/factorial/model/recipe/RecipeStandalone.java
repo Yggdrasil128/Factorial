@@ -10,6 +10,7 @@ import static java.util.Collections.emptyList;
 public class RecipeStandalone {
 
     private String name;
+    private int iconId;
     private List<ResourceStandalone> input = emptyList();
     private List<ResourceStandalone> output = emptyList();
     private Fraction duration;
@@ -22,6 +23,14 @@ public class RecipeStandalone {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getIconId() {
+        return iconId;
+    }
+
+    public void setIconId(int iconId) {
+        this.iconId = iconId;
     }
 
     public List<ResourceStandalone> getInput() {
