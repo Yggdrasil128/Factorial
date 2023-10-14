@@ -1,14 +1,13 @@
 package de.yggdrasil128.factorial.model.changelist;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.productionstepchange.ProductionStepChange;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
-import java.util.List;
-
-import static java.util.Collections.emptyList;
+import java.util.Map;
 
 @Entity
 public class Changelist {
@@ -26,13 +25,13 @@ public class Changelist {
     private boolean primary;
     private boolean active;
     @ElementCollection
-    private List<ProductionStepChange> productionStepChanges = emptyList();
+    private Map<ProductionStep, Fraction> productionStepChanges;
 
     public Changelist() {
     }
 
     public Changelist(Save save, String name, boolean primary, boolean active, Icon icon,
-        List<ProductionStepChange> productionStepChanges) {
+                      Map<ProductionStep, Fraction> productionStepChanges) {
         this.save = save;
         this.name = name;
         this.primary = primary;
@@ -85,11 +84,11 @@ public class Changelist {
         this.active = active;
     }
 
-    public List<ProductionStepChange> getProductionStepChanges() {
+    public Map<ProductionStep, Fraction> getProductionStepChanges() {
         return productionStepChanges;
     }
 
-    public void setProductionStepChanges(List<ProductionStepChange> productionStepChanges) {
+    public void setProductionStepChanges(Map<ProductionStep, Fraction> productionStepChanges) {
         this.productionStepChanges = productionStepChanges;
     }
 

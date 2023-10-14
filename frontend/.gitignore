@@ -33,3 +33,5 @@ coverage
 /.project
 /.classpath
 /.settings/
+
+/target/

@@ -1,4 +1,6 @@
 <script setup>
+import {computed} from "vue";
+
 const props = defineProps({
   'quantity': Object,
   'color': {
@@ -9,47 +11,60 @@ const props = defineProps({
   'showUnit': Boolean,
 });
 
-function formatFraction(s) {
+const parsedQuantity = computed(() => {
+  return {
+    current: parseFraction(props.quantity.current),
+    withPrimaryChangelist: parseFraction(props.quantity.withPrimaryChangelist),
+    withActiveChangelists: parseFraction(props.quantity.withActiveChangelists),
+  };
+})
+
+function parseFraction(s) {
   let i = s.indexOf("/");
   if (i < 0) {
     return Number(s);
   }
-  let v = Number(s.substring(0, i)) / Number(s.substring(i + 1));
-  if (v < 1) {
-    return +v.toFixed(3);
+  return Number(s.substring(0, i)) / Number(s.substring(i + 1));
+}
+
+function formatNumber(value) {
+  if (value < 1) {
+    return +value.toFixed(3);
   }
-  if (v < 10) {
-    return +v.toFixed(2);
+  if (value < 10) {
+    return +value.toFixed(2);
   }
-  if (v < 100) {
-    return +v.toFixed(1);
+  if (value < 100) {
+    return +value.toFixed(1);
   }
-  return Math.round(v);
+  return Math.round(value);
 }
 
 </script>
 
 <template>
   <span :class="color">
-    <span :class="{number: 1, positive: quantity.actual > 0, negative: quantity.actual < 0}">
-      {{ formatFraction(quantity.actual) }}
-    </span>
-    <span
-        v-if="!(props.quantity.actual === props.quantity.desiredCurrentChangelist && props.quantity.desiredCurrentChangelist === props.quantity.desiredAllChangelists)">
-      /
-      <span
-          :class="{number: 1, positive: quantity.desiredCurrentChangelist > 0, negative: quantity.desiredCurrentChangelist < 0}">
-        {{ formatFraction(quantity.desiredCurrentChangelist) }}
+    <template v-if="quantity">
+      <span :class="{number: 1, positive: parsedQuantity.current > 0, negative: parsedQuantity.current < 0}">
+        {{ formatNumber(parsedQuantity.current) }}
       </span>
-    </span>
-    <span v-if="props.quantity.desiredCurrentChangelist !== props.quantity.desiredAllChangelists">
-      /
       <span
-          :class="{number: 1, positive: quantity.desiredAllChangelists > 0, negative: quantity.desiredAllChangelists < 0}">
-        {{ formatFraction(quantity.desiredAllChangelists) }}
+          v-if="!(parsedQuantity.current === parsedQuantity.withPrimaryChangelist && parsedQuantity.withPrimaryChangelist === parsedQuantity.withActiveChangelists)">
+        |
+        <span
+            :class="{number: 1, positive: parsedQuantity.withPrimaryChangelist > 0, negative: parsedQuantity.withPrimaryChangelist < 0}">
+          {{ formatNumber(parsedQuantity.withPrimaryChangelist) }}
+        </span>
       </span>
-    </span>
-    <span class="unit" v-if="showUnit"> / min</span>
+      <span v-if="parsedQuantity.withPrimaryChangelist !== parsedQuantity.withActiveChangelists">
+        |
+        <span
+            :class="{number: 1, positive: parsedQuantity.withActiveChangelists > 0, negative: parsedQuantity.withActiveChangelists < 0}">
+          {{ formatNumber(parsedQuantity.withActiveChangelists) }}
+        </span>
+      </span>
+    </template>
+    <span class="unit" v-if="showUnit"> / sec</span>
   </span>
 </template>
 
@@ -64,6 +79,6 @@ function formatFraction(s) {
 }
 
 .unit {
-  color: #808080;
+  color: #a0a0a0;
 }
 </style>

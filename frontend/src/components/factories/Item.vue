@@ -1,8 +1,9 @@
 <script setup>
 import ProductionStep from "@/components/factories/ProductionStep.vue";
 import QuantityDisplay from "@/components/factories/QuantityDisplay.vue";
+import IconImg from "@/components/IconImg.vue";
 
-defineProps(["item", "productionSteps"]);
+defineProps(["item", "productionSteps", "itemMap"]);
 
 </script>
 
@@ -10,7 +11,7 @@ defineProps(["item", "productionSteps"]);
   <div class="item">
     <div style="overflow:auto;">
       <div class="itemIcon">
-        <img :src="item.icon.url" :alt="item.name"/>
+        <icon-img :icon="item.icon" :size="64"/>
       </div>
       <div class="itemInfo">
         <div class="itemName">{{ item.name }}</div>
@@ -26,7 +27,7 @@ defineProps(["item", "productionSteps"]);
         </div>
       </div>
     </div>
-    <production-step v-for="step in productionSteps" :step="step"/>
+    <production-step v-for="step in productionSteps" :step="step" :item-map="itemMap"/>
   </div>
 </template>
 
@@ -40,11 +41,6 @@ defineProps(["item", "productionSteps"]);
 
 .itemIcon {
   float: left;
-}
-
-.itemIcon img {
-  height: 64px;
-  width: 64px;
 }
 
 .itemInfo {

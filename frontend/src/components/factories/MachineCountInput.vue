@@ -9,10 +9,11 @@ const minusButtonLoading = ref(false);
 const checkButtonLoading = ref(false);
 const requestRunning = ref(false);
 
-const props = defineProps(["quantity"]);
-const inputValue = ref(props.quantity.desiredCurrentChangelist);
+const props = defineProps(["quantity", "productionStepId"]);
+const inputValue = ref(props.quantity.withPrimaryChangelist);
 
 const eventBus = inject("globalEventBus");
+const axios = inject('axios');
 
 let timeoutHandle = null;
 
@@ -28,9 +29,10 @@ function onInputUpdate() {
 }
 
 async function submit() {
-  console.log("submit", inputValue.value);
-  let result = await new Promise(r => setTimeout(() => r(42), 500));
-  eventBus.emit("updateFactoryData", result);
+  let response = await axios.patch("api/factoryItemList/reportProductionStepMachineCount?" +
+      "productionStepId=" + props.productionStepId +
+      "&machineCount=" + inputValue.value)
+  eventBus.emit("applyFactoryData", response.data);
 }
 
 async function plusOne() {

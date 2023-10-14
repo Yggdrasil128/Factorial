@@ -31,6 +31,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
   min-height: 100vh;
+  overflow: auto;
 }
 
 .el-dark, body.el-dark-popper .el-popper {

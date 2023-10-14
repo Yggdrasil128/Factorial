@@ -2,48 +2,51 @@
 import {Delete, Edit,} from '@element-plus/icons-vue';
 import MachineCountInput from "@/components/factories/MachineCountInput.vue";
 import QuantityDisplay from "@/components/factories/QuantityDisplay.vue";
+import IconImg from "@/components/IconImg.vue";
 
-defineProps(["step"]);
+defineProps(["step", "itemMap"]);
 </script>
 
 <template>
   <div class="step">
     <div style="overflow:auto;">
       <div class="stepIcon">
-        <img :src="step.machine.icon.url" :alt="step.machine.name"/>
+        <icon-img :icon="step.machine.icon" :size="48"/>
         <div style="vertical-align: top; display: inline; line-height: 60px">
           x
           <quantity-display :quantity="step.machineCount"/>
           &emsp;
         </div>
-        <img :src="step.recipe.icon.url" :alt="step.recipe.name"/>
+        <icon-img :icon="step.recipe.icon" :size="48"/>
       </div>
       <div class="stepInfo">
         <div class="stepName">Recipe: {{ step.recipe.name }}</div>
         <div class="stepThroughput">
           <div>
-            <div v-for="resource in step.throughput.output" style="margin-right: 10px; ">
+            <div v-for="resource in step.output" style="margin-right: 10px; ">
               <quantity-display :quantity="resource.quantity"/>
-              <img :src="resource.item.icon.url" :alt="resource.item.name" style="margin-left: 3px"/>
-              <span>{{ resource.item.name }}</span>
-              <span class="unit">/ min</span>
+              <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px;"/>
+              <span>{{ itemMap[resource.itemId].name }}</span>
+              <quantity-display :quantity="null" show-unit/>
             </div>
+            <div v-if="step.output.length === 0" class="nothing">(nothing)</div>
           </div>
           <span>
             &#x27F5;&ensp;
           </span>
           <div>
-            <div v-for="resource in step.throughput.input" style="margin-right: 10px">
+            <div v-for="resource in step.input" style="margin-right: 10px">
               <quantity-display :quantity="resource.quantity"/>
-              <img :src="resource.item.icon.url" :alt="resource.item.name" style="margin-left: 3px"/>
-              <span>{{ resource.item.name }}</span>
-              <span class="unit">/ min</span>
+              <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px;"/>
+              <span>{{ itemMap[resource.itemId].name }}</span>
+              <quantity-display :quantity="null" show-unit/>
             </div>
+            <div v-if="step.input.length === 0" class="nothing">(nothing)</div>
           </div>
         </div>
       </div>
       <div class="stepActions">
-        <machine-count-input v-model:quantity="step.machineCount"/>
+        <machine-count-input v-model:quantity="step.machineCount" :production-step-id="step.id"/>
         &ensp;
         <el-button-group>
           <el-button type="" :icon="Edit"/>
@@ -66,11 +69,6 @@ defineProps(["step"]);
 
 .stepIcon {
   float: left;
-}
-
-.stepIcon img {
-  height: 48px;
-  width: 48px;
 }
 
 .stepInfo {
@@ -96,19 +94,18 @@ defineProps(["step"]);
   display: inline;
 }
 
-.stepThroughput img {
-  height: 24px;
-  width: 24px;
-}
-
 .stepThroughput span {
   line-height: 24px;
   vertical-align: top;
   margin-left: 5px;
 }
 
-.unit {
-  color: #909090;
+.nothing {
+  color: #a0a0a0;
+}
+
+.nothing {
+  margin-top: 3px;
 }
 
 .stepActions {

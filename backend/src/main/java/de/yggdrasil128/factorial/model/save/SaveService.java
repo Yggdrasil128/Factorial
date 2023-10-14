@@ -37,7 +37,7 @@ public class SaveService extends ModelService<Save, SaveRepository> {
 
     public Save create(int gameVersionId, SaveStandalone input) {
         GameVersion gameVersion = gameVersions.get(gameVersionId);
-        return repository.save(new Save(gameVersion, input.getName(), emptyList(), emptyList()));
+        return repository.save(new Save(gameVersion, input.getName(), emptyList(), emptyList(), emptyList()));
     }
 
     public void addFactory(Save save, Factory factory) {
@@ -64,12 +64,25 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     public Save doImport(SaveMigration input) {
         Game game = games.get(input.getGame());
         GameVersion version = gameVersions.get(game, input.getVersion());
-        Save save = new Save(version, input.getName(), new ArrayList<>(), new ArrayList<>());
+        Save save = new Save(version, input.getName(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         for (FactoryMigration entry : input.getFactories()) {
             save.getFactories().add(factories.doImport(save, entry));
         }
+        inferDefaultChangelist(save);
         repository.save(save);
         return save;
+    }
+
+    private static void inferDefaultChangelist(Save save) {
+        if (!save.getChangelists().isEmpty()) {
+            return;
+        }
+        Changelist primary = new Changelist();
+        primary.setSave(save);
+        primary.setName("default");
+        primary.setPrimary(true);
+        primary.setActive(true);
+        save.getChangelists().add(primary);
     }
 
 }

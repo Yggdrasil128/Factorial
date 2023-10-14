@@ -1,11 +1,12 @@
 <script setup>
-import {computed, ref} from "vue";
+import {computed, inject, ref} from "vue";
 import draggable from 'vuedraggable';
 import {Delete, Edit, Plus} from "@element-plus/icons-vue";
 import {useRoute, useRouter} from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
+const axios = inject('axios');
 
 const factories = ref([]);
 const currentFactoryId = computed(() => route.params.factoryId);
@@ -19,27 +20,8 @@ function editFactory(editFactoryId) {
 }
 
 async function loadFactories() {
-  await new Promise(r => setTimeout(r, 500));
-  factories.value = [
-    {
-      id: 1,
-      name: "Main factory",
-      // icon: {
-      //   url: "https://satisfactory.wiki.gg/images/thumb/a/ae/Assembler.png/300px-Assembler.png"
-      // },
-      ordinal: 1
-    },
-    {
-      id: 2,
-      name: "Steel production north",
-      icon: {
-        id: 2,
-        name: "Steel Ingot",
-        url: "https://satisfactory.wiki.gg/images/b/bd/Steel_Ingot.png"
-      },
-      ordinal: 2
-    }
-  ];
+  let response = await axios.get("api/factories?saveId=1");
+  factories.value = response.data;
   if (factories.value.length > 0 && !currentFactoryId.value) {
     await router.replace({name: 'factories', params: {factoryId: factories.value[0].id}});
   }
@@ -62,7 +44,7 @@ loadFactories();
     <draggable :list="factories" item-key="id">
       <!--suppress VueUnrecognizedSlot -->
       <template #item="{ element }">
-        <div class="list-group-item" :class="{active: element.id === currentFactoryId}">
+        <div class="list-group-item" :class="{active: element.id == currentFactoryId}">
           <div class="icon" @click="viewFactory(element.id)">
             <img :src="element.icon.url" :alt="element.name" v-if="element.icon"/>
           </div>
@@ -71,11 +53,11 @@ loadFactories();
           </div>
           <div class="buttons">
             <el-button-group>
-              <el-tooltip effect="dark" placement="top-start" transition="none" hide-after="0"
+              <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
                           content="Edit">
                 <el-button :icon="Edit" @click="editFactory(element.id)"/>
               </el-tooltip>
-              <el-tooltip effect="dark" placement="top-start" transition="none" hide-after="0"
+              <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
                           content="Delete">
                 <el-button type="danger" :icon="Delete" :disabled="factories.length === 1"/>
               </el-tooltip>

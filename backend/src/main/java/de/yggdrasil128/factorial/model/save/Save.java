@@ -33,11 +33,13 @@ public class Save {
     public Save() {
     }
 
-    public Save(GameVersion gameVersion, String name, List<Factory> factories, List<TransportLink> transportLinks) {
+    public Save(GameVersion gameVersion, String name, List<Factory> factories, List<TransportLink> transportLinks,
+                List<Changelist> changelists) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.factories = factories;
         this.transportLinks = transportLinks;
+        this.changelists = changelists;
     }
 
     public int getId() {

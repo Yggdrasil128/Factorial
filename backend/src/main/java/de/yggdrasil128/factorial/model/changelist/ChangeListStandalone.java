@@ -1,10 +1,9 @@
 package de.yggdrasil128.factorial.model.changelist;
 
 import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.productionstepchange.ProductionStepChange;
 import de.yggdrasil128.factorial.model.save.Save;
 
-import java.util.List;
+import java.util.Collections;
 
 public class ChangeListStandalone {
 
@@ -45,8 +44,8 @@ public class ChangeListStandalone {
         this.iconId = iconId;
     }
 
-    public Changelist with(Save save, Icon icon, List<ProductionStepChange> prodductionStepChanges) {
-        return new Changelist(save, name, primary, active, icon, prodductionStepChanges);
+    public Changelist with(Save save, Icon icon) {
+        return new Changelist(save, name, primary, active, icon, Collections.emptyMap());
     }
 
 }

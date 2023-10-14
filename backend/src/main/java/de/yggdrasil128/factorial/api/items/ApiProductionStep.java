@@ -4,16 +4,17 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.productionstepchange.ProductionStepChange;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.resource.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class ApiProductionStep {
 
+    private final ProductionStep delegate;
     private final ApiRecipe recipe;
     private final ApiMachine machine;
     private final List<Throughput> input;
@@ -21,6 +22,7 @@ public class ApiProductionStep {
     private final QuantityByChangelist machineCount;
 
     public ApiProductionStep(ProductionStep delegate, Changelist primary, Iterable<Changelist> active) {
+        this.delegate = delegate;
         this.recipe = new ApiRecipe(delegate.getRecipe());
         this.machine = new ApiMachine(delegate.getMachine());
         this.machineCount = getMachineCounts(delegate, primary, active);
@@ -58,9 +60,9 @@ public class ApiProductionStep {
     }
 
     private static Fraction getChangeFor(Changelist changelist, ProductionStep target) {
-        for (ProductionStepChange entry : changelist.getProductionStepChanges()) {
-            if (entry.getProductionStep().equals(target)) {
-                return entry.getChange();
+        for (Map.Entry<ProductionStep, Fraction> entry : changelist.getProductionStepChanges().entrySet()) {
+            if (entry.getKey().equals(target)) {
+                return entry.getValue();
             }
         }
         return Fraction.ZERO;
@@ -87,6 +89,10 @@ public class ApiProductionStep {
             throughputs.add(new Throughput(resource.getItem(), throughput));
         }
         return throughputs;
+    }
+
+    public int getId() {
+        return delegate.getId();
     }
 
     public ApiRecipe getRecipe() {
