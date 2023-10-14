@@ -3,7 +3,9 @@ package de.yggdrasil128.factorial.model.gameversion;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.icon.IconMigration;
 import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemMigration;
 import de.yggdrasil128.factorial.model.item.ItemService;
@@ -20,6 +22,7 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierMigration;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -52,13 +55,16 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
 
     public GameVersion create(Game game, GameVersionStandalone input) {
         Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-        return repository
-                .save(new GameVersion(game, input.getName(), icon, emptyList(), emptyList(), emptyList(), emptyList()));
+        return repository.save(new GameVersion(game, input.getName(), icon, emptyList(), emptyList(), emptyList(),
+                emptyList(), emptyList()));
     }
 
     public GameVersion doImport(Game game, String name, GameVersionMigration input) {
         GameVersion gameVersion = new GameVersion(game, name, null, new ArrayList<>(), new ArrayList<>(),
-                new ArrayList<>(), new ArrayList<>());
+                new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        for (Map.Entry<String, IconMigration> entry : input.getIcons().entrySet()) {
+            gameVersion.getIcons().add(icons.doImport(gameVersion, entry.getKey(), entry.getValue()));
+        }
         for (Map.Entry<String, ItemMigration> entry : input.getItems().entrySet()) {
             gameVersion.getItems().add(items.doImport(gameVersion, entry.getKey(), entry.getValue()));
         }
@@ -66,10 +72,14 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
             gameVersion.getRecipies().add(recipies.doImport(gameVersion, entry.getKey(), entry.getValue()));
         }
         for (Map.Entry<String, RecipeModifierMigration> entry : input.getRecipeModifiers().entrySet()) {
-            gameVersion.getRecipeModifiers().add(recipeModifiers.doImport(gameVersion, entry.getKey(), entry.getValue()));
+            gameVersion.getRecipeModifiers()
+                    .add(recipeModifiers.doImport(gameVersion, entry.getKey(), entry.getValue()));
         }
         for (Map.Entry<String, MachineMigration> entry : input.getMachines().entrySet()) {
             gameVersion.getMachines().add(machines.doImport(gameVersion, entry.getKey(), entry.getValue()));
+        }
+        if (null != input.getIconName()) {
+            gameVersion.setIcon(getDetachedIcon(gameVersion, input.getIconName()));
         }
         return gameVersion;
     }
@@ -104,6 +114,24 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
         gameVersion.getMachines().add(machine);
         repository.save(gameVersion);
         return machine;
+    }
+
+    public Icon addIcon(int gameVersionId, IconStandalone input) {
+        GameVersion gameVersion = get(gameVersionId);
+        Icon icon = icons.create(gameVersion, input);
+        gameVersion.getIcons().add(icon);
+        repository.save(gameVersion);
+        return icon;
+    }
+
+    public static Item getDetachedItem(GameVersion gameVersion, String itemName) {
+        return gameVersion.getItems().stream().filter(item -> item.getName().equals(itemName)).findAny().orElseThrow(
+                () -> report(HttpStatus.BAD_REQUEST, "nested entity refers to non existent item '" + itemName + "'"));
+    }
+
+    public static Icon getDetachedIcon(GameVersion gameVersion, String iconName) {
+        return gameVersion.getIcons().stream().filter(icon -> icon.getName().equals(iconName)).findAny().orElseThrow(
+                () -> report(HttpStatus.BAD_REQUEST, "nested entity refers to non existent icon '" + iconName + "'"));
     }
 
 }

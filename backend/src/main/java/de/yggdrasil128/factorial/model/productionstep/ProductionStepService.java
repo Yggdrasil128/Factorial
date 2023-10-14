@@ -35,12 +35,12 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         return repository.save(input.with(factory, machine, recipe, modifiers));
     }
 
-    public ProductionStep doImport(Factory factory, ProductionStepMigration entry) {
+    public ProductionStep doImport(Factory factory, ProductionStepMigration input) {
         GameVersion gameVersion = factory.getSave().getGameVersion();
-        Machine machine = machines.get(gameVersion, entry.getMachineName());
-        Recipe recipe = recipies.get(gameVersion, entry.getRecipeName());
-        List<RecipeModifier> modifiers = recipeModifiers.get(gameVersion, entry.getModifierNames());
-        return new ProductionStep(factory, machine, recipe, modifiers, entry.getMachineCount());
+        Machine machine = machines.get(gameVersion, input.getMachineName());
+        Recipe recipe = recipies.get(gameVersion, input.getRecipeName());
+        List<RecipeModifier> modifiers = recipeModifiers.get(gameVersion, input.getModifierNames());
+        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount());
     }
 
 }

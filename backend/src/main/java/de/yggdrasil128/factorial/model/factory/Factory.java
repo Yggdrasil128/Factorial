@@ -1,20 +1,17 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import de.yggdrasil128.factorial.model.Balance;
-import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
-import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 @Entity
 public class Factory {
@@ -30,18 +27,23 @@ public class Factory {
     private String description;
     @ManyToOne
     private Icon icon;
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<ProductionStep> productionSteps = emptyList();
+    @ElementCollection
+    private Map<Item, Integer> itemOrder = emptyMap();
 
     public Factory() {
     }
 
-    public Factory(Save save, String name, String description, Icon icon, List<ProductionStep> productionSteps) {
+    public Factory(Save save, String name, String description, Icon icon, List<ProductionStep> productionSteps,
+                   Map<Item, Integer> itemOrder) {
         this.save = save;
         this.name = name;
         this.description = description;
         this.icon = icon;
         this.productionSteps = productionSteps;
+        this.itemOrder = itemOrder;
     }
 
     public int getId() {
@@ -88,24 +90,12 @@ public class Factory {
         this.productionSteps = productionSteps;
     }
 
-    public Map<String, Balance> getBalances() {
-        Map<String, Balance> balances = new HashMap<>();
-        for (ProductionStep productionStep : productionSteps) {
-            RecipeModifier effectiveModifier = productionStep.getEffectiveModifier();
-            for (Resource input : productionStep.getRecipe().getInput()) {
-                Balance balance = balances.computeIfAbsent(input.getItem().getName(), key -> new Balance());
-                balance.setConsumption(
-                        balance.getConsumption().add(input.getQuantity().divide(productionStep.getRecipe().getDuration())
-                                .multiply(effectiveModifier.getInputSpeedMultiplier()).multiply(Fraction.of(60))));
-            }
-            for (Resource output : productionStep.getRecipe().getOutput()) {
-                Balance balance = balances.computeIfAbsent(output.getItem().getName(), key -> new Balance());
-                balance.setProduction(
-                        balance.getProduction().add(output.getQuantity().divide(productionStep.getRecipe().getDuration())
-                                .multiply(effectiveModifier.getOutputSpeedMultiplier()).multiply(Fraction.of(60))));
-            }
-        }
-        return balances;
+    public Map<Item, Integer> getItemOrder() {
+        return itemOrder;
+    }
+
+    public void setItemOrder(Map<Item, Integer> itemOrder) {
+        this.itemOrder = itemOrder;
     }
 
 }

@@ -25,20 +25,27 @@ public class GameVersion {
     private String name;
     @ManyToOne
     private Icon icon;
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Icon> icons;
+    @JoinColumn
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Item> items;
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Recipe> recipies;
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<RecipeModifier> recipeModifiers;
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Machine> machines;
 
     public GameVersion() {
     }
 
     public GameVersion(Game game, String name, Icon icon, List<Item> items, List<Recipe> recipies,
-                       List<RecipeModifier> recipeModifiers, List<Machine> machines) {
+                       List<RecipeModifier> recipeModifiers, List<Machine> machines, List<Icon> icons) {
         this.game = game;
         this.name = name;
         this.icon = icon;
@@ -46,6 +53,7 @@ public class GameVersion {
         this.recipies = recipies;
         this.recipeModifiers = recipeModifiers;
         this.machines = machines;
+        this.icons = icons;
     }
 
     public int getId() {
@@ -74,6 +82,14 @@ public class GameVersion {
 
     public void setIcon(Icon icon) {
         this.icon = icon;
+    }
+
+    public List<Icon> getIcons() {
+        return icons;
+    }
+
+    public void setIcons(List<Icon> icons) {
+        this.icons = icons;
     }
 
     public List<Item> getItems() {

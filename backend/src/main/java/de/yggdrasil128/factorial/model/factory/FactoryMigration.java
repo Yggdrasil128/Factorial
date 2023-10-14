@@ -10,6 +10,7 @@ public class FactoryMigration {
 
     private String name;
     private String description;
+    private String iconName;
     private List<ProductionStepMigration> productionSteps = emptyList();
 
     public String getName() {
@@ -26,6 +27,14 @@ public class FactoryMigration {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
     }
 
     public List<ProductionStepMigration> getProductionSteps() {

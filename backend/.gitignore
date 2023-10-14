@@ -1,3 +1,8 @@
 /data/
 /target/
 /src/main/resources/public/
+
+# eclipse project files
+/.project
+/.classpath
+/.settings/

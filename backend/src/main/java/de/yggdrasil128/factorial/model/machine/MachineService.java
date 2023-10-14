@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.machine;
 
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
@@ -34,8 +35,10 @@ public class MachineService extends ModelService<Machine, MachineRepository> {
     }
 
     public Machine doImport(GameVersion gameVersion, String name, MachineMigration input) {
+        Icon icon = null == input.getIconName() ? null
+                : GameVersionService.getDetachedIcon(gameVersion, input.getIconName());
         List<RecipeModifier> machineModifiers = fromMigrations(gameVersion, input.getMachineModifierNames());
-        return new Machine(gameVersion, name, null, machineModifiers);
+        return new Machine(gameVersion, name, icon, machineModifiers);
     }
 
     private static List<RecipeModifier> fromMigrations(GameVersion gameVersion, List<String> modifierNames) {

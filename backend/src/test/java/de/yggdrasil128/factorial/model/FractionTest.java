@@ -32,6 +32,12 @@ class FractionTest {
         assertEquals(Fraction.of(3, 4),
                 Fraction.of(3, 2).divide(Fraction.of(2)));
     }
+    
+    @Test
+    public void denominatorAlwaysPositive() {
+        assertEquals("-13/2", Fraction.of(-13, 2).toString());
+        assertEquals("-13/2", Fraction.of(13, -2).toString());
+    }
 
     @Test
     public void testParseAndToString() {

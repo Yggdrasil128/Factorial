@@ -4,7 +4,6 @@ import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
 import de.yggdrasil128.factorial.model.game.Game;
-import de.yggdrasil128.factorial.model.game.GameMigration;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.game.GameStandalone;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
@@ -12,6 +11,7 @@ import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
@@ -28,14 +28,19 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import de.yggdrasil128.factorial.model.save.Save;
-import de.yggdrasil128.factorial.model.save.SaveMigration;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * A controller I used for exploring Spring during development.
+ * 
+ * @author Izruo
+ */
 @RestController
-public class MainController {
+@RequestMapping("/noapi/exploration")
+public class ExplorationController {
 
     private final GameService games;
     private final GameVersionService gameVersions;
@@ -49,9 +54,9 @@ public class MainController {
     private final IconService icons;
 
     @Autowired
-    public MainController(GameService games, GameVersionService gameVersions, ItemService items, RecipeService recipies,
-                          RecipeModifierService recipeModifiers, MachineService machines, SaveService saves, FactoryService factories,
-                          ProductionStepService productionSteps, IconService icons) {
+    public ExplorationController(GameService games, GameVersionService gameVersions, ItemService items,
+        RecipeService recipies, RecipeModifierService recipeModifiers, MachineService machines, SaveService saves,
+        FactoryService factories, ProductionStepService productionSteps, IconService icons) {
         this.games = games;
         this.gameVersions = gameVersions;
         this.items = items;
@@ -62,16 +67,6 @@ public class MainController {
         this.factories = factories;
         this.productionSteps = productionSteps;
         this.icons = icons;
-    }
-
-    @PostMapping("/gameMigration")
-    public Game importGame(@RequestBody GameMigration gameInput) {
-        return games.doImport(gameInput);
-    }
-
-    @PostMapping("/saveMigration")
-    public Save importSave(@RequestBody SaveMigration input) {
-        return saves.doImport(input);
     }
 
     @GetMapping("/game")
@@ -174,6 +169,11 @@ public class MainController {
         return saves.create(gameVersionId, save);
     }
 
+    @DeleteMapping("save")
+    public void deleteSave(int id) {
+        saves.delete(id);
+    }
+
     @GetMapping("/factory")
     public Factory getFactory(int id) {
         return factories.get(id);
@@ -210,8 +210,8 @@ public class MainController {
     }
 
     @PostMapping("/icon")
-    public Icon postIcon(@RequestBody Icon icon) {
-        return icons.create(icon);
+    public Icon postIcon(@RequestBody IconStandalone icon) {
+        return icons.create(null, icon);
     }
 
     @DeleteMapping("/icon")

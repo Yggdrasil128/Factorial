@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.save;
 
+import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.transportlink.TransportLink;
@@ -19,10 +20,15 @@ public class Save {
     private GameVersion gameVersion;
     @Column(nullable = false)
     private String name;
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<Factory> factories = emptyList();
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @JoinColumn
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<TransportLink> transportLinks = emptyList();
+    @JoinColumn
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+    private List<Changelist> changelists = emptyList();
 
     public Save() {
     }
@@ -72,6 +78,14 @@ public class Save {
 
     public void setTransportLinks(List<TransportLink> transportLinks) {
         this.transportLinks = transportLinks;
+    }
+
+    public List<Changelist> getChangelists() {
+        return changelists;
+    }
+
+    public void setChangelists(List<Changelist> changelists) {
+        this.changelists = changelists;
     }
 
 }

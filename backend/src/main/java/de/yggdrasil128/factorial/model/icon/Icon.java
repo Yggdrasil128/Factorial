@@ -1,5 +1,7 @@
 package de.yggdrasil128.factorial.model.icon;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import jakarta.persistence.*;
 
 @Entity
@@ -7,6 +9,12 @@ public class Icon {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    @ManyToOne
+    @JsonBackReference
+    private GameVersion gameVersion;
+    @Column(nullable = false)
+    private String name;
+    @Lob
     @Column(nullable = false)
     private byte[] imageData;
     @Column(nullable = false)
@@ -15,8 +23,8 @@ public class Icon {
     public Icon() {
     }
 
-    public Icon(int id, byte[] imageData, String mimeType) {
-        this.id = id;
+    public Icon(GameVersion gameVersion, String name, byte[] imageData, String mimeType) {
+        this.name = name;
         this.imageData = imageData;
         this.mimeType = mimeType;
     }
@@ -27,6 +35,22 @@ public class Icon {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public GameVersion getGameVersion() {
+        return gameVersion;
+    }
+
+    public void setGameVersion(GameVersion gameVersion) {
+        this.gameVersion = gameVersion;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public byte[] getImageData() {
@@ -62,6 +86,6 @@ public class Icon {
 
     @Override
     public String toString() {
-        return imageData.length + " bytes of " + mimeType;
+        return name + ": " + imageData.length + " bytes of " + mimeType;
     }
 }

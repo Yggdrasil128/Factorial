@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.resource.Resource;
@@ -14,7 +15,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_version_id", "name" }))
 public class Recipe {
 
     @Id
@@ -25,6 +26,8 @@ public class Recipe {
     private GameVersion gameVersion;
     @Column(nullable = false)
     private String name;
+    @ManyToOne
+    private Icon icon;
     @ElementCollection
     private List<Resource> input = emptyList();
     @ElementCollection
@@ -40,10 +43,11 @@ public class Recipe {
     public Recipe() {
     }
 
-    public Recipe(GameVersion gameVersion, String name, List<Resource> input, List<Resource> output, Fraction duration,
-                  List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines) {
+    public Recipe(GameVersion gameVersion, String name, Icon icon, List<Resource> input, List<Resource> output,
+                  Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines) {
         this.gameVersion = gameVersion;
         this.name = name;
+        this.icon = icon;
         this.input = input;
         this.output = output;
         this.duration = duration;
@@ -69,6 +73,14 @@ public class Recipe {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     public List<Resource> getInput() {

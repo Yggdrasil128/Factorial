@@ -103,8 +103,6 @@ public class ProductionStep {
                     result.getOutputQuantityMultiplier().multiply(modifier.getOutputQuantityMultiplier()));
             result.setDurationMultiplier(result.getDurationMultiplier().multiply(modifier.getDurationMultiplier()));
         }
-        result.setInputQuantityMultiplier(result.getInputQuantityMultiplier().multiply(machineCount));
-        result.setOutputQuantityMultiplier(result.getOutputQuantityMultiplier().multiply(machineCount));
         return result;
     }
 

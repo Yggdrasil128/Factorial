@@ -13,6 +13,7 @@ public class Game {
     private int id;
     @Column(nullable = false, unique = true)
     private String name;
+    @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<GameVersion> versions;
 

@@ -8,7 +8,7 @@ import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_version_id", "name" }))
 public class RecipeModifier {
 
     @Id
@@ -36,7 +36,7 @@ public class RecipeModifier {
     }
 
     public RecipeModifier(GameVersion gameVersion, String name, String description, Icon icon,
-                          Fraction durationMultiplier, Fraction inputQuantityMultiplier, Fraction outputQuantityMultiplier) {
+        Fraction durationMultiplier, Fraction inputQuantityMultiplier, Fraction outputQuantityMultiplier) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.description = description;
@@ -132,7 +132,7 @@ public class RecipeModifier {
     @Override
     public String toString() {
         return "duration x " + durationMultiplier + " / input x " + inputQuantityMultiplier + " / output x "
-                + outputQuantityMultiplier;
+            + outputQuantityMultiplier;
     }
 
 }

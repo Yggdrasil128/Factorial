@@ -8,9 +8,18 @@ import static java.util.Collections.emptyMap;
 
 public class RecipeMigration {
 
+    private String iconName;
     private Map<String, Fraction> input = emptyMap();
     private Map<String, Fraction> output = emptyMap();
     private Fraction duration;
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
+    }
 
     public Map<String, Fraction> getInput() {
         return input;
