@@ -7,7 +7,7 @@ const versionInfo = ref({version: "1.0-SNAPSHOT"});
 <template>
   <div id="header">
     <div id="headerLeft">
-      <img alt="Banner" src="img/banner.png"/>
+      <img alt="Banner" src="/img/banner.png"/>
     </div>
 
     <div id="headerRight">

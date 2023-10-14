@@ -24,6 +24,7 @@ public class Icon {
     }
 
     public Icon(GameVersion gameVersion, String name, byte[] imageData, String mimeType) {
+        this.gameVersion = gameVersion;
         this.name = name;
         this.imageData = imageData;
         this.mimeType = mimeType;

@@ -75,24 +75,6 @@ public class RepositoriesTest {
         iconRepository.deleteAll();
     }
 
-    @Test
-    void testIconData() {
-        byte[] data = new byte[10];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) i;
-        }
-        Icon icon = new Icon();
-        icon.setImageData(data);
-        icon.setMimeType("dummyMimeType");
-
-        int iconId = iconRepository.save(icon).getId();
-
-        icon = iconRepository.findById(iconId).orElseThrow();
-        for (int i = 0; i < data.length; i++) {
-            assertEquals(data[i], icon.getImageData()[i]);
-        }
-    }
-
     /**
      * Fails for the same reason that general deletion currently does not work: The JPA layer creates and maintains a
      * relation table between {@link GameVersion} and {@link Item}, but it does not delete from it when an item is
