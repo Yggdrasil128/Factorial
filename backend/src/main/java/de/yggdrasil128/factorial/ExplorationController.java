@@ -11,6 +11,7 @@ import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
@@ -209,8 +210,8 @@ public class ExplorationController {
     }
 
     @PostMapping("/icon")
-    public Icon postIcon(@RequestBody Icon icon) {
-        return icons.create(icon);
+    public Icon postIcon(@RequestBody IconStandalone icon) {
+        return icons.create(null, icon);
     }
 
     @DeleteMapping("/icon")

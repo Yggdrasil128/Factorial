@@ -11,7 +11,6 @@ import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +42,8 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     }
 
     public Factory doImport(Save save, FactoryMigration input) {
-        Factory factory = new Factory(save, input.getName(), input.getDescription(), null, new ArrayList<>(),
+        Icon icon = null == input.getIconName() ? null : icons.get(save.getGameVersion(), input.getIconName());
+        Factory factory = new Factory(save, input.getName(), input.getDescription(), icon, new ArrayList<>(),
                 new HashMap<>());
         for (ProductionStepMigration entry : input.getProductionSteps()) {
             ProductionStep productionStep = productionSteps.doImport(factory, entry);
@@ -66,7 +66,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     public void delete(int id) {
         Factory factory = get(id);
         if (1 == factory.getSave().getFactories().size()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
+            throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
         }
         super.delete(id);
     }

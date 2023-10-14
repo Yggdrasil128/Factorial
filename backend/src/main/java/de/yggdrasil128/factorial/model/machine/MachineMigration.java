@@ -6,7 +6,16 @@ import static java.util.Collections.emptyList;
 
 public class MachineMigration {
 
+    private String iconName;
     private List<String> machineModifierNames = emptyList();
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
+    }
 
     public List<String> getMachineModifierNames() {
         return machineModifierNames;

@@ -47,6 +47,7 @@ public class Recipe {
                   Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines) {
         this.gameVersion = gameVersion;
         this.name = name;
+        this.icon = icon;
         this.input = input;
         this.output = output;
         this.duration = duration;

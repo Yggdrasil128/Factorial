@@ -6,11 +6,13 @@ public class ApiItem {
 
     private final Item delegate;
     private final int ordinal;
+    private final ApiIcon icon;
     private final Balances balances = new Balances();
 
     public ApiItem(Item delegate, int ordinal) {
         this.delegate = delegate;
         this.ordinal = ordinal;
+        this.icon = null == delegate.getIcon() ? null : new ApiIcon(delegate.getIcon());
     }
 
     public int getId() {
@@ -29,8 +31,8 @@ public class ApiItem {
         return ordinal;
     }
 
-    public int getIconId() {
-        return null == delegate.getIcon() ? 0 : delegate.getIcon().getId();
+    public ApiIcon getIcon() {
+        return icon;
     }
 
     public Balances getBalances() {

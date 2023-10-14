@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -17,13 +18,21 @@ public class ModelService<E, R extends CrudRepository<E, Integer>> {
     }
 
     public E get(int id) {
-        // TODO find out how to report more info
-        // we should establish something custom here, so we can handle proprietary stuff, like model conflicts transparently
         return repository.findById(id).orElseThrow(ModelService::reportNotFound);
     }
 
     protected static ResponseStatusException reportNotFound() {
-        return new ResponseStatusException(NOT_FOUND);
+        return report(NOT_FOUND, "");
+    }
+
+    protected static ResponseStatusException report(HttpStatus status, String message) {
+        // TODO find out how to report more info
+        // we should establish something custom here, so we can handle proprietary stuff, like model conflicts
+        // transparently
+        ResponseStatusException response = new ResponseStatusException(status, message);
+        response.printStackTrace();
+        return response;
+
     }
 
     public List<E> get(List<Integer> ids) {

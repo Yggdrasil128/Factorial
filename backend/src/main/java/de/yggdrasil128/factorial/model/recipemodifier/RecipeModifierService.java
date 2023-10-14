@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.recipemodifier;
 
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,9 @@ public class RecipeModifierService extends ModelService<RecipeModifier, RecipeMo
     }
 
     public RecipeModifier doImport(GameVersion gameVersion, String name, RecipeModifierMigration input) {
-        return new RecipeModifier(gameVersion, name, input.getDescription(), null, input.getDurationMultiplier(),
+        Icon icon = null == input.getIconName() ? null
+                : GameVersionService.getDetachedIcon(gameVersion, input.getIconName());
+        return new RecipeModifier(gameVersion, name, input.getDescription(), icon, input.getDurationMultiplier(),
                 input.getInputQuantityMultiplier(), input.getOutputQuantityMultiplier());
     }
 

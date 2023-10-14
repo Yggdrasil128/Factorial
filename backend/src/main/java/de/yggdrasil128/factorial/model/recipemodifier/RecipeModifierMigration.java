@@ -5,6 +5,7 @@ import de.yggdrasil128.factorial.model.Fraction;
 public class RecipeModifierMigration {
 
     private String description;
+    private String iconName;
     private Fraction durationMultiplier;
     private Fraction inputQuantityMultiplier;
     private Fraction outputQuantityMultiplier;
@@ -15,6 +16,14 @@ public class RecipeModifierMigration {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
     }
 
     public Fraction getDurationMultiplier() {

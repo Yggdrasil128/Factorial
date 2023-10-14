@@ -3,9 +3,9 @@ package de.yggdrasil128.factorial.model.recipe;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
-import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
@@ -20,13 +20,13 @@ import static java.util.Collections.emptyList;
 @Service
 public class RecipeService extends ModelService<Recipe, RecipeRepository> {
 
-    private final ItemService items;
     private final IconService icons;
+    private final ItemService items;
 
-    public RecipeService(RecipeRepository repository, ItemService items, IconService icons) {
+    public RecipeService(RecipeRepository repository, IconService icons, ItemService items) {
         super(repository);
-        this.items = items;
         this.icons = icons;
+        this.items = items;
     }
 
     public Recipe get(GameVersion gameVersion, String name) {
@@ -47,21 +47,19 @@ public class RecipeService extends ModelService<Recipe, RecipeRepository> {
                 .toList();
     }
 
-    public Recipe doImport(GameVersion version, String name, RecipeMigration input) {
-        List<Resource> inputs = fromMigrations(version, input.getInput());
-        List<Resource> outputs = fromMigrations(version, input.getOutput());
-        return new Recipe(version, name, null, inputs, outputs, input.getDuration(), new ArrayList<>(),
+    public Recipe doImport(GameVersion gameVersion, String name, RecipeMigration input) {
+        Icon icon = null == input.getIconName() ? null
+                : GameVersionService.getDetachedIcon(gameVersion, input.getIconName());
+        List<Resource> inputs = fromMigrations(gameVersion, input.getInput());
+        List<Resource> outputs = fromMigrations(gameVersion, input.getOutput());
+        return new Recipe(gameVersion, name, icon, inputs, outputs, input.getDuration(), new ArrayList<>(),
                 new ArrayList<>());
     }
 
     private static List<Resource> fromMigrations(GameVersion version, Map<String, Fraction> resources) {
-        return resources.entrySet().stream()
-                .map(entry -> new Resource(getDetachedItem(version, entry.getKey()), entry.getValue())).toList();
-    }
-
-    private static Item getDetachedItem(GameVersion version, String itemName) {
-        return version.getItems().stream().filter(item -> item.getName().equals(itemName)).findAny()
-                .orElseThrow(ModelService::reportNotFound);
+        return resources.entrySet().stream().map(
+                entry -> new Resource(GameVersionService.getDetachedItem(version, entry.getKey()), entry.getValue()))
+                .toList();
     }
 
 }

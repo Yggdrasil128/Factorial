@@ -5,9 +5,11 @@ import de.yggdrasil128.factorial.model.machine.Machine;
 public class ApiMachine {
 
     private final Machine delegate;
+    private final ApiIcon icon;
 
     public ApiMachine(Machine delegate) {
         this.delegate = delegate;
+        this.icon = null == delegate.getIcon() ? null : new ApiIcon(delegate.getIcon());
     }
 
     public int getId() {
@@ -18,8 +20,8 @@ public class ApiMachine {
         return delegate.getName();
     }
 
-    public int getIconId() {
-        return null == delegate.getIcon() ? 0 : delegate.getIcon().getId();
+    public ApiIcon getIcon() {
+        return icon;
     }
 
 }

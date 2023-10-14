@@ -5,9 +5,11 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 public class ApiRecipe {
 
     private final Recipe delegate;
+    private final ApiIcon icon;
 
     public ApiRecipe(Recipe delegate) {
         this.delegate = delegate;
+        this.icon = null == delegate.getIcon() ? null : new ApiIcon(delegate.getIcon());
     }
 
     public int getId() {
@@ -18,8 +20,8 @@ public class ApiRecipe {
         return delegate.getName();
     }
 
-    public int getIconId() {
-        return null == delegate.getIcon() ? 0 : delegate.getIcon().getId();
+    public ApiIcon getIcon() {
+        return icon;
     }
 
 }

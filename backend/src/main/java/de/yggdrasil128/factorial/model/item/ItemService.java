@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.item;
 
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,9 @@ public class ItemService extends ModelService<Item, ItemRepository> {
     }
 
     public Item doImport(GameVersion gameVersion, String name, ItemMigration input) {
-        return new Item(gameVersion, name, input.getDescription(), null);
+        Icon icon = null == input.getIconName() ? null
+                : GameVersionService.getDetachedIcon(gameVersion, input.getIconName());
+        return new Item(gameVersion, name, input.getDescription(), icon);
     }
 
 }
