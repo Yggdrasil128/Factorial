@@ -1,47 +1,108 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import AppHeader from "@/components/AppHeader.vue";
+import Navbar from "@/components/Navbar.vue";
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125"/>
+  <AppHeader/>
+  <Navbar/>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!"/>
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome/>
-  </main>
+  <div style="margin: 20px;">
+    <router-view/>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+
+</style>
+
+<!--suppress CssUnusedSymbol -->
+<style>
+html {
+  overflow-y: scroll;
+  background-color: #373737;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+body {
+  width: 1600px !important;
+  background-color: #414141;
+  margin: 0 auto;
+  color: #dddddd;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.el-dark, body.el-dark-popper .el-popper {
+  color-scheme: dark;
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #3375b9;
+  --el-color-primary-light-5: #2a598a;
+  --el-color-primary-light-7: #213d5b;
+  --el-color-primary-light-8: #1d3043;
+  --el-color-primary-light-9: #18222c;
+  --el-color-primary-dark-2: #66b1ff;
+  --el-color-success: #67c23a;
+  --el-color-success-light-3: #4e8e2f;
+  --el-color-success-light-5: #3e6b27;
+  --el-color-success-light-7: #2d481f;
+  --el-color-success-light-8: #25371c;
+  --el-color-success-light-9: #1c2518;
+  --el-color-success-dark-2: #85ce61;
+  --el-color-warning: #e6a23c;
+  --el-color-warning-light-3: #a77730;
+  --el-color-warning-light-5: #7d5b28;
+  --el-color-warning-light-7: #533f20;
+  --el-color-warning-light-8: #3e301c;
+  --el-color-warning-light-9: #292218;
+  --el-color-warning-dark-2: #ebb563;
+  --el-color-danger: #f56c6c;
+  --el-color-danger-light-3: #b25252;
+  --el-color-danger-light-5: #854040;
+  --el-color-danger-light-7: #582e2e;
+  --el-color-danger-light-8: #412626;
+  --el-color-danger-light-9: #2b1d1d;
+  --el-color-danger-dark-2: #f78989;
+  --el-color-error: #f56c6c;
+  --el-color-error-light-3: #b25252;
+  --el-color-error-light-5: #854040;
+  --el-color-error-light-7: #582e2e;
+  --el-color-error-light-8: #412626;
+  --el-color-error-light-9: #2b1d1d;
+  --el-color-error-dark-2: #f78989;
+  --el-color-info: #909399;
+  --el-color-info-light-3: #6b6d71;
+  --el-color-info-light-5: #525457;
+  --el-color-info-light-7: #393a3c;
+  --el-color-info-light-8: #2d2d2f;
+  --el-color-info-light-9: #202121;
+  --el-color-info-dark-2: #a6a9ad;
+  --el-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.36), 0px 8px 20px rgba(0, 0, 0, 0.72);
+  --el-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.72);
+  --el-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.72);
+  --el-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.72), 0px 12px 32px #000000, 0px 8px 16px -8px #000000;
+  --el-bg-color-page: #0a0a0a;
+  --el-bg-color: #141414;
+  --el-bg-color-overlay: #1d1e1f;
+  --el-text-color-primary: #E5EAF3;
+  --el-text-color-regular: #CFD3DC;
+  --el-text-color-secondary: #A3A6AD;
+  --el-text-color-placeholder: #8D9095;
+  --el-text-color-disabled: #6C6E72;
+  --el-border-color-darker: #636466;
+  --el-border-color-dark: #58585B;
+  --el-border-color: #4C4D4F;
+  --el-border-color-light: #414243;
+  --el-border-color-lighter: #363637;
+  --el-border-color-extra-light: #2B2B2C;
+  --el-fill-color-darker: #424243;
+  --el-fill-color-dark: #39393A;
+  --el-fill-color: #303030;
+  --el-fill-color-light: #262727;
+  --el-fill-color-lighter: #1D1D1D;
+  --el-fill-color-extra-light: #191919;
+  --el-fill-color-blank: transparent;
+  --el-mask-color: rgba(0, 0, 0, 0.8);
+  --el-mask-color-extra-light: rgba(0, 0, 0, 0.3);
 }
 </style>
