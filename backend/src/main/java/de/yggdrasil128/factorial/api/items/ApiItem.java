@@ -5,10 +5,12 @@ import de.yggdrasil128.factorial.model.item.Item;
 public class ApiItem {
 
     private final Item delegate;
+    private final int ordinal;
     private final Balances balances = new Balances();
 
-    public ApiItem(Item delegate) {
+    public ApiItem(Item delegate, int ordinal) {
         this.delegate = delegate;
+        this.ordinal = ordinal;
     }
 
     public int getId() {
@@ -21,6 +23,10 @@ public class ApiItem {
 
     public String getDescription() {
         return delegate.getDescription();
+    }
+
+    public int getOrdinal() {
+        return ordinal;
     }
 
     public int getIconId() {

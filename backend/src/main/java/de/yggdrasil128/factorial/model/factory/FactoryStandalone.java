@@ -6,6 +6,7 @@ import de.yggdrasil128.factorial.model.save.Save;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 public class FactoryStandalone {
 
@@ -47,7 +48,7 @@ public class FactoryStandalone {
     }
 
     Factory with(Save save, Icon icon) {
-        return new Factory(save, name, description, icon, emptyList());
+        return new Factory(save, name, description, icon, emptyList(), emptyMap());
     }
 
 }

@@ -25,10 +25,10 @@ public class ItemListController {
     public ItemList getFullList(int factoryId) {
         Factory factory = factories.get(factoryId);
         List<Changelist> changelists = factory.getSave().getChangelists();
-        Changelist primary = changelists.stream().filter(Changelist::isPrimary).findAny()
-            .orElseGet(ItemListController::makeDefaultPrimaryChangelist);
+        Changelist primary = changelists.stream().filter(Changelist::isPrimary).findAny().orElseGet(
+                ItemListController::makeDefaultPrimaryChangelist);
         List<Changelist> active = changelists.stream().filter(Changelist::isActive).toList();
-        return new ItemList(factory.getProductionSteps(), primary, active);
+        return new ItemList(factory, primary, active);
     }
 
     private static Changelist makeDefaultPrimaryChangelist() {
