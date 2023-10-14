@@ -10,8 +10,8 @@ const router = useRouter();
 const route = useRoute();
 
 const visible = ref(true);
-const factory = ref(emptyFactoryData());
-const original = ref(factory.value);
+const changelist = ref(emptyChangelistData());
+const original = ref(changelist.value);
 const loading = ref(true);
 
 document.body.classList.add('el-dark-popper');
@@ -32,7 +32,7 @@ async function beforeClose() {
 }
 
 async function checkLeave() {
-  if (!_.isEqual(factory.value, original.value)) {
+  if (!_.isEqual(changelist.value, original.value)) {
     const answer = await new Promise(r => ElMessageBox({
       title: 'Warning',
       message: 'Do you really want to leave? You have unsaved changes!',
@@ -49,24 +49,26 @@ async function checkLeave() {
   return true;
 }
 
-onBeforeRouteUpdate(loadFactoryData);
+onBeforeRouteUpdate(loadChangelistData);
 
-function emptyFactoryData() {
+function emptyChangelistData() {
   return {
     id: null,
-    name: "",
+    name: '',
     icon: null,
+    primary: true,
+    active: true,
   }
 }
 
-async function loadFactoryData(route) {
-  if (route.name === 'newFactory') {
-    factory.value = emptyFactoryData();
+async function loadChangelistData(route) {
+  if (route.name === 'newChangelist') {
+    changelist.value = emptyChangelistData();
   } else {
     await new Promise(r => setTimeout(r, 1000));
-    factory.value = {
-      id: 1,
-      name: "Main factory",
+    changelist.value = {
+      id: 2,
+      name: "Upgrade steel production",
       icon: {
         id: 2,
         name: "Steel Ingot",
@@ -74,30 +76,41 @@ async function loadFactoryData(route) {
       },
     };
   }
-  original.value = Object.assign({}, factory.value);
+  original.value = Object.assign({}, changelist.value);
   loading.value = false;
 }
 
-loadFactoryData(route);
+loadChangelistData(route);
 
 </script>
 
 <template>
   <el-dialog :model-value="visible" :before-close="beforeClose" class="el-dark" width="600px"
-             :title="route.name === 'newFactory' ? 'New factory' : 'Edit factory'">
+             :title="route.name === 'newChangelist' ? 'New changelist' : 'Edit changelist'">
     <p style="margin-top: 0; margin-bottom: 30px;">
-      Factories allow you to group production steps. Blablabla, more explanation here...
+      Insert changelist explanation here...
     </p>
 
-    <el-form :model="factory" label-width="120px" style="width: 500px; overflow: auto;"
+    <el-form :model="changelist" label-width="120px" style="width: 500px; overflow: auto;"
              v-loading="loading" element-loading-background="rgba(20, 20, 20, 0.8)">
       <el-form-item label="Factory name">
-        <el-input v-model="factory.name"/>
+        <el-input v-model="changelist.name"/>
       </el-form-item>
 
       <el-form-item label="Icon">
-        <icon-select v-model="factory.icon" style="width: 100%;"/>
+        <icon-select v-model="changelist.icon" style="width: 100%;"/>
       </el-form-item>
+
+      <template v-if="route.name === 'newChangelist'">
+        <el-form-item label="Primary">
+          <el-switch v-model="changelist.primary"
+                     @update:model-value="changelist.primary ? changelist.active = true : ''"/>
+        </el-form-item>
+
+        <el-form-item label="Active">
+          <el-switch v-model="changelist.active" :disabled="changelist.primary"/>
+        </el-form-item>
+      </template>
 
       <div style="margin-top: 10px; float: right;">
         <el-button :icon="Close" @click="beforeClose">Cancel</el-button>

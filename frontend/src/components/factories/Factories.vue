@@ -20,7 +20,9 @@ function editFactory(editFactoryId) {
 }
 
 async function loadFactories() {
-  let response = await axios.get("api/factories?saveId=1");
+  let response = await axios.get(
+      "api/factories",
+      {params: {saveId: 1}});
   factories.value = response.data;
   if (factories.value.length > 0 && !currentFactoryId.value) {
     await router.replace({name: 'factories', params: {factoryId: factories.value[0].id}});
@@ -44,7 +46,7 @@ loadFactories();
     <draggable :list="factories" item-key="id">
       <!--suppress VueUnrecognizedSlot -->
       <template #item="{ element }">
-        <div class="list-group-item" :class="{active: element.id == currentFactoryId}">
+        <div class="list-group-item" :class="{active: String(element.id) === currentFactoryId}">
           <div class="icon" @click="viewFactory(element.id)">
             <img :src="element.icon.url" :alt="element.name" v-if="element.icon"/>
           </div>

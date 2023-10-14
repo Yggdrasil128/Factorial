@@ -1,5 +1,5 @@
 <script setup>
-import Items from "@/components/factories/Items.vue";
+import FactoryItems from "@/components/factories/FactoryItems.vue";
 import Factories from "@/components/factories/Factories.vue";
 import Changelists from "@/components/factories/Changelists.vue";
 </script>
@@ -11,7 +11,7 @@ import Changelists from "@/components/factories/Changelists.vue";
     <changelists/>
   </div>
   <div class="right">
-    <Items/>
+    <factory-items/>
   </div>
 
   <router-view name="modal"/>

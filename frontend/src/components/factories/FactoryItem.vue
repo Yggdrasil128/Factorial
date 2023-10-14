@@ -58,16 +58,4 @@ defineProps(["item", "productionSteps", "itemMap"]);
 .itemBalance {
   margin-top: 4px;
 }
-
-.negative {
-  color: #ff6666;
-}
-
-.positive {
-  color: #89ff89;
-}
-
-.unit {
-  color: #808080;
-}
 </style>

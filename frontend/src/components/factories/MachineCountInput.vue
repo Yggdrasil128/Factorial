@@ -29,9 +29,9 @@ function onInputUpdate() {
 }
 
 async function submit() {
-  let response = await axios.patch("api/factoryItemList/reportProductionStepMachineCount?" +
-      "productionStepId=" + props.productionStepId +
-      "&machineCount=" + inputValue.value)
+  let response = await axios.patch(
+      "api/factoryItemList/reportProductionStepMachineCount",
+      {params: {productionStepId: props.productionStepId, machineCount: inputValue.value}});
   eventBus.emit("applyFactoryData", response.data);
 }
 
@@ -90,11 +90,11 @@ function editFraction(fraction, delta) {
 }
 
 .mciButtonGroup {
-//margin-left: -1px;
+  /*margin-left: -1px;*/
 }
 
 .mciButtonGroup button:nth-child(1) {
   border-left: none;
-//padding-left: 16px;
+  /*padding-left: 16px;*/
 }
 </style>

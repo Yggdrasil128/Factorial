@@ -45,23 +45,34 @@ function formatNumber(value) {
 <template>
   <span :class="color">
     <template v-if="quantity">
-      <span :class="{number: 1, positive: parsedQuantity.current > 0, negative: parsedQuantity.current < 0}">
-        {{ formatNumber(parsedQuantity.current) }}
-      </span>
+      <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                  :content="quantity.current.replace('/', ' / ')" :disabled="quantity.current.indexOf('/') < 0">
+        <span :class="{number: 1, positive: parsedQuantity.current > 0, negative: parsedQuantity.current < 0}">
+          {{ formatNumber(parsedQuantity.current) }}
+        </span>
+      </el-tooltip>
       <span
           v-if="!(parsedQuantity.current === parsedQuantity.withPrimaryChangelist && parsedQuantity.withPrimaryChangelist === parsedQuantity.withActiveChangelists)">
         |
-        <span
-            :class="{number: 1, positive: parsedQuantity.withPrimaryChangelist > 0, negative: parsedQuantity.withPrimaryChangelist < 0}">
-          {{ formatNumber(parsedQuantity.withPrimaryChangelist) }}
-        </span>
+        <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                    :content="quantity.withPrimaryChangelist.replace('/', ' / ')"
+                    :disabled="quantity.withPrimaryChangelist.indexOf('/') < 0">
+          <span
+              :class="{number: 1, positive: parsedQuantity.withPrimaryChangelist > 0, negative: parsedQuantity.withPrimaryChangelist < 0}">
+            {{ formatNumber(parsedQuantity.withPrimaryChangelist) }}
+          </span>
+        </el-tooltip>
       </span>
       <span v-if="parsedQuantity.withPrimaryChangelist !== parsedQuantity.withActiveChangelists">
         |
-        <span
-            :class="{number: 1, positive: parsedQuantity.withActiveChangelists > 0, negative: parsedQuantity.withActiveChangelists < 0}">
-          {{ formatNumber(parsedQuantity.withActiveChangelists) }}
-        </span>
+        <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                    :content="quantity.withActiveChangelists.replace('/', ' / ')"
+                    :disabled="quantity.withActiveChangelists.indexOf('/') < 0">
+          <span
+              :class="{number: 1, positive: parsedQuantity.withActiveChangelists > 0, negative: parsedQuantity.withActiveChangelists < 0}">
+            {{ formatNumber(parsedQuantity.withActiveChangelists) }}
+          </span>
+        </el-tooltip>
       </span>
     </template>
     <span class="unit" v-if="showUnit"> / sec</span>

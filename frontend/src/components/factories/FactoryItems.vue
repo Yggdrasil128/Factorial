@@ -1,8 +1,9 @@
 <script setup>
 import {computed, inject, onMounted, onUnmounted, ref, watch} from "vue";
 import draggable from 'vuedraggable';
-import Item from "@/components/factories/Item.vue";
+import FactoryItem from "@/components/factories/FactoryItem.vue";
 import {useRoute} from "vue-router";
+import {Plus} from "@element-plus/icons-vue";
 
 const globalEventBus = inject("globalEventBus");
 const axios = inject('axios');
@@ -14,18 +15,15 @@ const factory = ref(null);
 const itemMap = ref({});
 const loading = ref(true);
 
-const dummy = computed(() => {
-  console.log(factory.value.items);
-  return factory.value.items;
-});
-
 async function reloadFactoryData() {
   if (!currentFactoryId.value) {
     return;
   }
   loading.value = true;
 
-  let response = await axios.get('api/factoryItemList?factoryId=' + currentFactoryId.value);
+  let response = await axios.get(
+      'api/factoryItemList',
+      {params: {factoryId: currentFactoryId.value}});
   applyFactoryData(response.data);
 
   loading.value = false;
@@ -53,7 +51,26 @@ reloadFactoryData();
 watch(currentFactoryId, reloadFactoryData);
 
 function getRelevantProductionSteps(item) {
-  return factory.value.productionSteps.filter(e => e.output.filter(ee => ee.itemId === item.id).length > 0);
+  // noinspection JSUnresolvedReference
+  return factory.value.productionSteps.filter(
+      step => step.output.filter(
+          output => output.itemId === item.id).length > 0);
+}
+
+function newProductionStep() {
+
+}
+
+function newTransportLink() {
+
+}
+
+function newIngress() {
+
+}
+
+function newEgress() {
+
 }
 
 </script>
@@ -61,11 +78,31 @@ function getRelevantProductionSteps(item) {
 <template>
   <div v-loading="loading" element-loading-background="rgba(65, 65, 65, 0.6)" style="min-height: 400px;">
     <template v-if="factory">
-      <h2>{{ factory.name }}</h2>
+      <div style="overflow: auto;">
+        <div style="float: left;">
+          <h2>Factory name: {{ factory.name }}</h2>
+        </div>
+        <div style="float: right; margin-top: 16px;">
+          <el-dropdown split-button type="primary" @click="newProductionStep">
+            <el-icon class="el-icon--left">
+              <plus/>
+            </el-icon>
+            New production step
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="newTransportLink">New transport link</el-dropdown-item>
+                <el-dropdown-item @click="newIngress">New ingress</el-dropdown-item>
+                <el-dropdown-item @click="newEgress">New egress</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </div>
+
       <draggable :list="factory.items" item-key="id">
         <!--suppress VueUnrecognizedSlot -->
         <template #item="{ element }">
-          <Item :item="element" :production-steps="getRelevantProductionSteps(element)" :item-map="itemMap"/>
+          <factory-item :item="element" :production-steps="getRelevantProductionSteps(element)" :item-map="itemMap"/>
         </template>
       </draggable>
     </template>
