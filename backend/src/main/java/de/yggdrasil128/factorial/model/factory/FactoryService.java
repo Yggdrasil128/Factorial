@@ -6,6 +6,7 @@ import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
+import de.yggdrasil128.factorial.model.save.SaveRepository;
 import de.yggdrasil128.factorial.model.xgress.Xgress;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,12 @@ import static java.util.Collections.emptyMap;
 public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     private final IconService icons;
+    private final SaveRepository saves;
 
-    public FactoryService(FactoryRepository repository, IconService icons) {
+    public FactoryService(FactoryRepository repository, IconService icons, SaveRepository saves) {
         super(repository);
         this.icons = icons;
+        this.saves = saves;
     }
 
     public Factory create(Save save, FactoryInput input) {
@@ -73,11 +76,11 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     @Override
     public void delete(int id) {
-        Factory factory = get(id);
-        if (1 == factory.getSave().getFactories().size()) {
+        Save save = saves.findByFactoriesId(id).orElse(null);
+        if (null != save && 1 == repository.countBySaveId(save.getId())) {
             throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
         }
-        super.delete(id);
+        repository.deleteById(id);
     }
 
 }
