@@ -5,13 +5,11 @@ import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
+import de.yggdrasil128.factorial.model.xgress.Xgress;
 import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 @Entity
 public class Factory {
@@ -22,27 +20,39 @@ public class Factory {
     @ManyToOne(optional = false)
     @JsonBackReference
     private Save save;
+    @Column(nullable = false)
+    private int ordinal = 0;
     @Column(unique = true, nullable = false)
     private String name;
     private String description;
     @ManyToOne
     private Icon icon;
     @JoinColumn
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
-    private List<ProductionStep> productionSteps = emptyList();
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<ProductionStep> productionSteps;
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Xgress> ingresses;
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Xgress> egresses;
     @ElementCollection
-    private Map<Item, Integer> itemOrder = emptyMap();
+    private Map<Item, Integer> itemOrder;
 
     public Factory() {
     }
 
-    public Factory(Save save, String name, String description, Icon icon, List<ProductionStep> productionSteps,
+    public Factory(Save save, int ordinal, String name, String description, Icon icon,
+                   List<ProductionStep> productionSteps, List<Xgress> ingresses, List<Xgress> egresses,
                    Map<Item, Integer> itemOrder) {
         this.save = save;
+        this.ordinal = ordinal;
         this.name = name;
         this.description = description;
         this.icon = icon;
         this.productionSteps = productionSteps;
+        this.ingresses = ingresses;
+        this.egresses = egresses;
         this.itemOrder = itemOrder;
     }
 
@@ -56,6 +66,14 @@ public class Factory {
 
     public void setSave(Save save) {
         this.save = save;
+    }
+
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
     }
 
     public String getName() {
@@ -88,6 +106,22 @@ public class Factory {
 
     public void setProductionSteps(List<ProductionStep> productionSteps) {
         this.productionSteps = productionSteps;
+    }
+
+    public List<Xgress> getIngresses() {
+        return ingresses;
+    }
+
+    public void setIngresses(List<Xgress> ingresses) {
+        this.ingresses = ingresses;
+    }
+
+    public List<Xgress> getEgresses() {
+        return egresses;
+    }
+
+    public void setEgresses(List<Xgress> egresses) {
+        this.egresses = egresses;
     }
 
     public Map<Item, Integer> getItemOrder() {

@@ -33,7 +33,7 @@ public class GameVersion {
     private List<Item> items;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<Recipe> recipies;
+    private List<Recipe> recipes;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<RecipeModifier> recipeModifiers;
@@ -44,13 +44,13 @@ public class GameVersion {
     public GameVersion() {
     }
 
-    public GameVersion(Game game, String name, Icon icon, List<Item> items, List<Recipe> recipies,
+    public GameVersion(Game game, String name, Icon icon, List<Item> items, List<Recipe> recipes,
                        List<RecipeModifier> recipeModifiers, List<Machine> machines, List<Icon> icons) {
         this.game = game;
         this.name = name;
         this.icon = icon;
         this.items = items;
-        this.recipies = recipies;
+        this.recipes = recipes;
         this.recipeModifiers = recipeModifiers;
         this.machines = machines;
         this.icons = icons;
@@ -100,12 +100,12 @@ public class GameVersion {
         this.items = items;
     }
 
-    public List<Recipe> getRecipies() {
-        return recipies;
+    public List<Recipe> getRecipes() {
+        return recipes;
     }
 
-    public void setRecipies(List<Recipe> recipies) {
-        this.recipies = recipies;
+    public void setRecipes(List<Recipe> recipes) {
+        this.recipes = recipes;
     }
 
     public List<RecipeModifier> getRecipeModifiers() {

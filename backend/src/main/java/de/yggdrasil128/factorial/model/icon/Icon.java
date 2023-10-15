@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Icon {
     @Id
@@ -19,15 +21,18 @@ public class Icon {
     private byte[] imageData;
     @Column(nullable = false)
     private String mimeType;
+    @ElementCollection
+    private List<String> category;
 
     public Icon() {
     }
 
-    public Icon(GameVersion gameVersion, String name, byte[] imageData, String mimeType) {
+    public Icon(GameVersion gameVersion, String name, byte[] imageData, String mimeType, List<String> category) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.imageData = imageData;
         this.mimeType = mimeType;
+        this.category = category;
     }
 
     public int getId() {
@@ -68,6 +73,14 @@ public class Icon {
 
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
     @Override

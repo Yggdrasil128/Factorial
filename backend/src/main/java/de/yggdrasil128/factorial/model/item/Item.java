@@ -5,8 +5,10 @@ import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_version_id", "name" }))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class Item {
 
     @Id
@@ -20,15 +22,18 @@ public class Item {
     private String description;
     @ManyToOne
     private Icon icon;
+    @ElementCollection
+    private List<String> category;
 
     public Item() {
     }
 
-    public Item(GameVersion gameVersion, String name, String description, Icon icon) {
+    public Item(GameVersion gameVersion, String name, String description, Icon icon, List<String> category) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.description = description;
         this.icon = icon;
+        this.category = category;
     }
 
     public int getId() {
@@ -65,6 +70,14 @@ public class Item {
 
     public void setIcon(Icon icon) {
         this.icon = icon;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
     @Override

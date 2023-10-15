@@ -18,21 +18,24 @@ public class Changelist {
     @ManyToOne(optional = false)
     @JsonBackReference
     private Save save;
+    @Column(nullable = false)
+    private int ordinal;
     private String name;
-    @ManyToOne
-    private Icon icon;
     @Column(name = "is_primary")
     private boolean primary;
     private boolean active;
+    @ManyToOne
+    private Icon icon;
     @ElementCollection
     private Map<ProductionStep, Fraction> productionStepChanges;
 
     public Changelist() {
     }
 
-    public Changelist(Save save, String name, boolean primary, boolean active, Icon icon,
+    public Changelist(Save save, int ordinal, String name, boolean primary, boolean active, Icon icon,
                       Map<ProductionStep, Fraction> productionStepChanges) {
         this.save = save;
+        this.ordinal = ordinal;
         this.name = name;
         this.primary = primary;
         this.active = active;
@@ -52,20 +55,20 @@ public class Changelist {
         this.save = save;
     }
 
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Icon getIcon() {
-        return icon;
-    }
-
-    public void setIcon(Icon icon) {
-        this.icon = icon;
     }
 
     public boolean isPrimary() {
@@ -82,6 +85,14 @@ public class Changelist {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     public Map<ProductionStep, Fraction> getProductionStepChanges() {

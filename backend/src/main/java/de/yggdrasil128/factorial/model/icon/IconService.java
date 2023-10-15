@@ -4,6 +4,10 @@ import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+import static java.util.Collections.emptyList;
+
 @Service
 public class IconService extends ModelService<Icon, IconRepository> {
 
@@ -11,17 +15,27 @@ public class IconService extends ModelService<Icon, IconRepository> {
         super(repository);
     }
 
-    public Icon get(GameVersion gameVersion, String name) {
-        return repository.findByGameVersionIdAndName(gameVersion.getId(), name)
-                .orElseThrow(ModelService::reportNotFound);
+    public Icon create(GameVersion gameVersion, IconInput input) {
+        List<String> category = null == input.getCategory() ? emptyList() : input.getCategory();
+        return repository
+                .save(new Icon(gameVersion, input.getName(), input.getImageData(), input.getMimeType(), category));
     }
 
-    public Icon create(GameVersion gameVersion, IconStandalone input) {
-        return repository.save(new Icon(gameVersion, input.getName(), input.getImageData(), input.getMimeType()));
-    }
-
-    public Icon doImport(GameVersion gameVersion, String name, IconMigration input) {
-        return new Icon(gameVersion, name, input.getImageData(), input.getMimeType());
+    public Icon update(int id, IconInput input) {
+        Icon icon = get(id);
+        if (null != input.getName()) {
+            icon.setName(input.getName());
+        }
+        if (null != input.getImageData()) {
+            icon.setImageData(input.getImageData());
+        }
+        if (null != input.getMimeType()) {
+            icon.setMimeType(input.getMimeType());
+        }
+        if (null != input.getCategory()) {
+            icon.setCategory(input.getCategory());
+        }
+        return repository.save(icon);
     }
 
 }

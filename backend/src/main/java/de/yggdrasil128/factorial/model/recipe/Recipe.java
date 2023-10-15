@@ -12,10 +12,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_version_id", "name" }))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class Recipe {
 
     @Id
@@ -29,22 +27,25 @@ public class Recipe {
     @ManyToOne
     private Icon icon;
     @ElementCollection
-    private List<Resource> input = emptyList();
+    private List<Resource> input;
     @ElementCollection
-    private List<Resource> output = emptyList();
+    private List<Resource> output;
     @Column(nullable = false)
     @Convert(converter = FractionConverter.class)
     private Fraction duration;
     @ManyToMany
-    private List<RecipeModifier> applicableModifiers = emptyList();
+    private List<RecipeModifier> applicableModifiers;
     @ManyToMany
-    private List<Machine> applicableMachines = emptyList();
+    private List<Machine> applicableMachines;
+    @ElementCollection
+    private List<String> category;
 
     public Recipe() {
     }
 
     public Recipe(GameVersion gameVersion, String name, Icon icon, List<Resource> input, List<Resource> output,
-                  Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines) {
+                  Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines,
+                  List<String> category) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.icon = icon;
@@ -53,6 +54,7 @@ public class Recipe {
         this.duration = duration;
         this.applicableModifiers = applicableModifiers;
         this.applicableMachines = applicableMachines;
+        this.category = category;
     }
 
     public int getId() {
@@ -121,6 +123,14 @@ public class Recipe {
 
     public void setApplicableMachines(List<Machine> applicableMachines) {
         this.applicableMachines = applicableMachines;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
     @Override

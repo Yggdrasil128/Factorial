@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class Machine {
@@ -25,16 +23,20 @@ public class Machine {
     @ManyToOne
     private Icon icon;
     @ManyToMany
-    private List<RecipeModifier> machineModifiers = emptyList();
+    private List<RecipeModifier> machineModifiers;
+    @ElementCollection
+    private List<String> category;
 
     public Machine() {
     }
 
-    public Machine(GameVersion gameVersion, String name, Icon icon, List<RecipeModifier> machineModifiers) {
+    public Machine(GameVersion gameVersion, String name, Icon icon, List<RecipeModifier> machineModifiers,
+                   List<String> category) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.icon = icon;
         this.machineModifiers = machineModifiers;
+        this.category = category;
     }
 
     public int getId() {
@@ -71,6 +73,14 @@ public class Machine {
 
     public void setMachineModifiers(List<RecipeModifier> machineModifiers) {
         this.machineModifiers = machineModifiers;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
     @Override

@@ -4,62 +4,71 @@ import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepMigration;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
+import de.yggdrasil128.factorial.model.xgress.Xgress;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 @Service
 public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     private final IconService icons;
-    private final ProductionStepService productionSteps;
 
-    public FactoryService(FactoryRepository repository, IconService icons, ProductionStepService productionSteps) {
+    public FactoryService(FactoryRepository repository, IconService icons) {
         super(repository);
         this.icons = icons;
-        this.productionSteps = productionSteps;
     }
 
-    public Factory create(Save save, FactoryStandalone input) {
+    public Factory create(Save save, FactoryInput input) {
+        int ordinal = 0 == input.getOrdinal()
+                ? save.getFactories().stream().mapToInt(Factory::getOrdinal).max().orElse(0) + 1
+                : input.getOrdinal();
         Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-        return repository.save(input.with(save, icon));
+        return repository.save(new Factory(save, ordinal, input.getName(), input.getDescription(), icon, emptyList(),
+                emptyList(), emptyList(), emptyMap()));
     }
 
-    public ProductionStep addProductionStep(int factoryId, ProductionStepStandalone input) {
-        Factory factory = get(factoryId);
-        ProductionStep productionStep = productionSteps.create(factory, input);
+    public void addAttachedProductionStep(Factory factory, ProductionStep productionStep) {
         factory.getProductionSteps().add(productionStep);
         initItemOrder(factory, productionStep);
         repository.save(factory);
-        return productionStep;
     }
 
-    public Factory doImport(Save save, FactoryMigration input) {
-        Icon icon = null == input.getIconName() ? null : icons.get(save.getGameVersion(), input.getIconName());
-        Factory factory = new Factory(save, input.getName(), input.getDescription(), icon, new ArrayList<>(),
-                new HashMap<>());
-        for (ProductionStepMigration entry : input.getProductionSteps()) {
-            ProductionStep productionStep = productionSteps.doImport(factory, entry);
-            factory.getProductionSteps().add(productionStep);
-            initItemOrder(factory, productionStep);
-        }
-        return factory;
+    public void addAttachedIngress(Factory factory, Xgress ingress) {
+        factory.getIngresses().add(ingress);
+        repository.save(factory);
+    }
+
+    public void addAttachedEgress(Factory factory, Xgress egress) {
+        factory.getEgresses().add(egress);
+        repository.save(factory);
     }
 
     private static void initItemOrder(Factory factory, ProductionStep productionStep) {
         for (Resource resource : productionStep.getRecipe().getInput()) {
-            factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size());
+            factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size() + 1);
         }
         for (Resource resource : productionStep.getRecipe().getOutput()) {
-            factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size());
+            factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size() + 1);
         }
+    }
+
+    public Factory update(int id, FactoryInput input) {
+        Factory factory = get(id);
+        if (null != input.getName()) {
+            factory.setName(input.getName());
+        }
+        if (null != input.getDescription()) {
+            factory.setDescription(input.getDescription());
+        }
+        if (0 != input.getIconId()) {
+            factory.setIcon(icons.get(input.getIconId()));
+        }
+        return repository.save(factory);
     }
 
     @Override

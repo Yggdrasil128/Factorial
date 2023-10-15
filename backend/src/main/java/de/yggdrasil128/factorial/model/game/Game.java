@@ -15,14 +15,14 @@ public class Game {
     private String name;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<GameVersion> versions;
+    private List<GameVersion> gameVersions;
 
     public Game() {
     }
 
-    public Game(String name, List<GameVersion> versions) {
+    public Game(String name, List<GameVersion> gameVersions) {
         this.name = name;
-        this.versions = versions;
+        this.gameVersions = gameVersions;
     }
 
     public int getId() {
@@ -41,12 +41,12 @@ public class Game {
         this.name = name;
     }
 
-    public List<GameVersion> getVersions() {
-        return versions;
+    public List<GameVersion> getGameVersions() {
+        return gameVersions;
     }
 
-    public void setVersions(List<GameVersion> versions) {
-        this.versions = versions;
+    public void setVersions(List<GameVersion> gameVersions) {
+        this.gameVersions = gameVersions;
     }
 
     @Override

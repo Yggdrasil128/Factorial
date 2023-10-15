@@ -2,8 +2,10 @@ package de.yggdrasil128.factorial.model.recipe;
 
 import de.yggdrasil128.factorial.model.Fraction;
 
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
 public class RecipeMigration {
@@ -12,6 +14,7 @@ public class RecipeMigration {
     private Map<String, Fraction> input = emptyMap();
     private Map<String, Fraction> output = emptyMap();
     private Fraction duration;
+    private List<String> category = emptyList();
 
     public String getIconName() {
         return iconName;
@@ -43,6 +46,14 @@ public class RecipeMigration {
 
     public void setDuration(Fraction duration) {
         this.duration = duration;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
 }
