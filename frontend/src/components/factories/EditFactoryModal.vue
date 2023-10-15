@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from "vue";
+import {reactive, ref} from "vue";
 import {onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter} from "vue-router";
 import IconSelect from "@/components/IconSelect.vue";
 import {Check, Close} from "@element-plus/icons-vue";
@@ -80,6 +80,26 @@ async function loadFactoryData(route) {
 
 loadFactoryData(route);
 
+// form validation
+
+const form = ref();
+
+const rules = reactive({
+  name: [
+    {required: true, message: 'Please enter a name for the factory', trigger: 'blur'},
+  ],
+});
+
+async function submitForm() {
+  factory.value.name = factory.value.name.trim();
+
+  if (!await form.value.validate(() => ({}))) {
+    return;
+  }
+
+  console.log("submit");
+}
+
 </script>
 
 <template>
@@ -89,9 +109,10 @@ loadFactoryData(route);
       Factories allow you to group production steps. Blablabla, more explanation here...
     </p>
 
-    <el-form :model="factory" label-width="120px" style="width: 500px; overflow: auto;"
-             v-loading="loading" element-loading-background="rgba(20, 20, 20, 0.8)">
-      <el-form-item label="Factory name">
+    <el-form label-width="120px" style="width: 500px; overflow: auto;"
+             v-loading="loading" element-loading-background="rgba(20, 20, 20, 0.8)"
+             :model="factory" ref="form" :rules="rules">
+      <el-form-item label="Factory name" prop="name">
         <el-input v-model="factory.name"/>
       </el-form-item>
 
@@ -101,7 +122,7 @@ loadFactoryData(route);
 
       <div style="margin-top: 10px; float: right;">
         <el-button :icon="Close" @click="beforeClose">Cancel</el-button>
-        <el-button type="primary" :icon="Check">Save</el-button>
+        <el-button type="primary" :icon="Check" @click="submitForm()">Save</el-button>
       </div>
     </el-form>
   </el-dialog>

@@ -46,9 +46,10 @@ loadFactories();
     <draggable :list="factories" item-key="id">
       <!--suppress VueUnrecognizedSlot -->
       <template #item="{ element }">
-        <div class="list-group-item" :class="{active: String(element.id) === currentFactoryId}">
-          <div class="icon" @click="viewFactory(element.id)">
-            <img :src="element.icon.url" :alt="element.name" v-if="element.icon"/>
+        <div class="list-group-item"
+             :class="{active: String(element.id) === currentFactoryId, hasIcon: !!element.icon}">
+          <div class="icon" @click="viewFactory(element.id)" v-if="element.icon">
+            <img :src="element.icon.url" :alt="element.name"/>
           </div>
           <div class="name" @click="viewFactory(element.id)">
             {{ element.name }}
@@ -75,6 +76,7 @@ loadFactories();
   </div>
 </template>
 
+<!--suppress CssUnusedSymbol -->
 <style scoped>
 .list-group-item {
   width: 100%;
@@ -108,6 +110,14 @@ loadFactories();
   padding-bottom: 8px;
   cursor: pointer;
   width: 280px;
+}
+
+.list-group-item.active .name {
+  cursor: default;
+}
+
+.list-group-item:not(.hasIcon) .name {
+  margin-left: 16px;
 }
 
 .active .name {

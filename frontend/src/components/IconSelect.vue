@@ -64,12 +64,13 @@ loadIcons();
 
 .iconSelected {
   margin-left: -4px;
-  height: 40px;
+  height: 38px;
 }
 
 .iconSelected img {
   width: 40px;
   height: 40px;
+  top: -1px;
 }
 
 .iconSelected span {
@@ -79,6 +80,7 @@ loadIcons();
 </style>
 
 <style>
+/*noinspection CssUnusedSymbol*/
 .iconSelect .el-input:not(.is-focus) .el-input__prefix + .el-input__inner {
   visibility: hidden;
 }

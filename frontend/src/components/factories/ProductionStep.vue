@@ -12,7 +12,7 @@ defineProps(["step", "itemMap"]);
     <div style="overflow:auto;">
       <div class="stepIcon">
         <icon-img :icon="step.machine.icon" :size="48"/>
-        <div style="vertical-align: top; display: inline; line-height: 60px">
+        <div style="vertical-align: top; display: inline; line-height: 48px;">
           x
           <quantity-display :quantity="step.machineCount"/>
           &emsp;
@@ -35,7 +35,7 @@ defineProps(["step", "itemMap"]);
             &#x27F5;&ensp;
           </span>
           <div>
-            <div v-for="resource in step.input" style="margin-right: 10px">
+            <div v-for="resource in step.input" style="margin-right: 10px;">
               <quantity-display :quantity="resource.quantity"/>
               <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px;"/>
               <span>{{ itemMap[resource.itemId].name }}</span>
