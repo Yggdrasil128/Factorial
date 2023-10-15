@@ -38,7 +38,7 @@ public class ItemListController {
     @PatchMapping("reportProductionStepMachineCount")
     public ItemList reportProductionStepMachineCount(int productionStepId, String machineCount) {
         ProductionStep productionStep = productionSteps.get(productionStepId);
-        Changelist primary = service.getPrimaryChangelist(productionStep.getFactory());
+        Changelist primary = ChangelistService.getPrimaryChangelist(productionStep.getFactory().getSave());
         changelists.reportMachineCount(primary, productionStep, Fraction.of(machineCount));
         return service.getFullList(productionStep.getFactory());
     }

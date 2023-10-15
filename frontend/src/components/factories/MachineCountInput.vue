@@ -31,6 +31,7 @@ function onInputUpdate() {
 async function submit() {
   let response = await axios.patch(
       "api/factoryItemList/reportProductionStepMachineCount",
+      null,
       {params: {productionStepId: props.productionStepId, machineCount: inputValue.value}});
   eventBus.emit("applyFactoryData", response.data);
 }

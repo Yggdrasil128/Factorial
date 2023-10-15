@@ -68,7 +68,9 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         if (null != input.getDescription()) {
             factory.setDescription(input.getDescription());
         }
-        if (0 != input.getIconId()) {
+        if (0 == input.getIconId()) {
+            factory.setIcon(null);
+        } else if (0 < input.getIconId()) {
             factory.setIcon(icons.get(input.getIconId()));
         }
         return repository.save(factory);

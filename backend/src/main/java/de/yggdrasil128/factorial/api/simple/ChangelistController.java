@@ -54,4 +54,14 @@ public class ChangelistController {
         changelistService.delete(changelistId);
     }
 
+    @PatchMapping("/changelist/primary")
+    public void setPrimary(int changelistId) {
+        changelistService.setPrimary(changelistId);
+    }
+
+    @PatchMapping("/changelist/active")
+    public void setActive(int changelistId, boolean active) {
+        changelistService.setActive(changelistId, active);
+    }
+
 }

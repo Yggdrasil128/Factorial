@@ -1,12 +1,14 @@
 <script setup>
-import {computed, inject, ref} from "vue";
+import {computed, inject, onMounted, onUnmounted, ref} from "vue";
 import draggable from 'vuedraggable';
 import {Delete, Edit, Plus} from "@element-plus/icons-vue";
 import {useRoute, useRouter} from "vue-router";
+import IconImg from "@/components/IconImg.vue";
 
 const router = useRouter();
 const route = useRoute();
 const axios = inject('axios');
+const globalEventBus = inject('globalEventBus');
 
 const factories = ref([]);
 const currentFactoryId = computed(() => route.params.factoryId);
@@ -21,12 +23,18 @@ function editFactory(editFactoryId) {
 
 async function loadFactories() {
   let response = await axios.get(
-      "api/factories",
+      "api/save/factories",
       {params: {saveId: 1}});
   factories.value = response.data;
   if (factories.value.length > 0 && !currentFactoryId.value) {
     await router.replace({name: 'factories', params: {factoryId: factories.value[0].id}});
   }
+}
+
+async function deleteFactory(factoryId) {
+  await axios.delete('api/factory', {params: {factoryId: factoryId}});
+
+  await loadFactories();
 }
 
 function viewFactory(id) {
@@ -37,6 +45,17 @@ function viewFactory(id) {
 }
 
 loadFactories();
+
+function onUpdateFactories() {
+  loadFactories();
+}
+
+onMounted(() => {
+  globalEventBus.on("updateFactories", onUpdateFactories);
+});
+onUnmounted(() => {
+  globalEventBus.off("updateFactories", onUpdateFactories);
+});
 
 </script>
 
@@ -49,7 +68,7 @@ loadFactories();
         <div class="list-group-item"
              :class="{active: String(element.id) === currentFactoryId, hasIcon: !!element.icon}">
           <div class="icon" @click="viewFactory(element.id)" v-if="element.icon">
-            <img :src="element.icon.url" :alt="element.name"/>
+            <icon-img :icon="element.icon" :size="40"/>
           </div>
           <div class="name" @click="viewFactory(element.id)">
             {{ element.name }}
@@ -60,10 +79,18 @@ loadFactories();
                           content="Edit">
                 <el-button :icon="Edit" @click="editFactory(element.id)"/>
               </el-tooltip>
-              <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
-                          content="Delete">
-                <el-button type="danger" :icon="Delete" :disabled="factories.length === 1"/>
-              </el-tooltip>
+
+              <el-popconfirm title="Delete this factory?" width="200px" @confirm="deleteFactory(element.id)">
+                <template #reference>
+                  <span class="row center tooltipHelperSpan">
+                    <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                                content="Delete">
+                      <el-button type="danger" :icon="Delete"
+                                 :disabled="factories.length === 1"/>
+                    </el-tooltip>
+                  </span>
+                </template>
+              </el-popconfirm>
             </el-button-group>
           </div>
         </div>

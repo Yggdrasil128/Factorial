@@ -1,62 +1,49 @@
 <script setup>
-import {computed, h, ref} from "vue";
+import {h, inject, onMounted, onUnmounted, ref} from "vue";
 import draggable from 'vuedraggable';
 import {Check, Delete, Edit, Plus, Star} from "@element-plus/icons-vue";
 import {useRoute, useRouter} from "vue-router";
 import {ElMessageBox, ElSwitch} from "element-plus";
+import IconImg from "@/components/IconImg.vue";
 
 const router = useRouter();
 const route = useRoute();
 
-const changelists = ref([
-  {
-    id: 1,
-    name: "Default changelist bla",
-    icon: null,
-    // icon: {
-    //   url: "https://satisfactory.wiki.gg/images/thumb/a/ae/Assembler.png/300px-Assembler.png"
-    // },
-    primary: true,
-    active: true,
-    ordinal: 1
-  },
-  {
-    id: 2,
-    name: "Upgrade steel production",
-    icon: {
-      url: "https://satisfactory.wiki.gg/images/b/bd/Steel_Ingot.png"
-    },
-    primary: false,
-    active: true,
-    ordinal: 2
-  }
-]);
+const axios = inject('axios');
+const globalEventBus = inject('globalEventBus');
 
-const primaryChangelistId = computed({
-  get() {
-    for (let changelist of changelists.value) {
-      if (changelist.primary) {
-        return changelist.id;
-      }
-    }
-    return null;
-  },
-  set(id) {
-    for (let changelist of changelists.value) {
-      changelist.primary = changelist.id === id;
-    }
-  },
-});
+const changelists = ref([]);
 
-function newChangelist() {
-  router.push({name: 'newChangelist', params: {factoryId: route.params.factoryId}});
+async function loadChangelists() {
+  let response = await axios.get(
+      "api/save/changelists",
+      {params: {saveId: 1}});
+  changelists.value = response.data;
 }
 
-function editChangelist(changelistId) {
-  router.push({
-    name: 'editChangelist',
-    params: {factoryId: route.params.factoryId, editChangelistId: changelistId}
-  });
+loadChangelists();
+
+async function setPrimary(changelistId) {
+  await axios.patch('/api/changelist/primary', null,
+      {params: {changelistId: changelistId}});
+
+  for (let changelist of changelists.value) {
+    if (changelist.id === changelistId) {
+      changelist.primary = true;
+      changelist.active = true;
+    } else {
+      changelist.primary = false;
+    }
+  }
+
+  globalEventBus.emit('reloadFactoryData');
+}
+
+async function setActive(changelistId, active) {
+  await axios.patch('/api/changelist/active', null,
+      {params: {changelistId: changelistId, active: active}});
+
+  globalEventBus.emit('reloadFactoryData');
 }
 
 async function askApplyChangelist(changelistId, primary) {
@@ -67,7 +54,6 @@ async function askApplyChangelist(changelistId, primary) {
     cancelButtonText: "No",
     showCancelButton: true,
     customClass: "el-dark",
-    // Should pass a function if VNode contains dynamic props
     message: () =>
         h("div", null, [
           h(ElSwitch, {
@@ -84,8 +70,34 @@ async function askApplyChangelist(changelistId, primary) {
   console.log("applyChangelist", checked.value, changelistId);
 }
 
-function deleteChangelist(changelistId) {
-  console.log("deleteChangelist", changelistId);
+async function deleteChangelist(changelistId) {
+  await axios.delete('/api/changelist', {params: {changelistId: changelistId}});
+
+  globalEventBus.emit('reloadFactoryData');
+
+  await loadChangelists();
+}
+
+function onUpdateChangelists() {
+  loadChangelists();
+}
+
+onMounted(() => {
+  globalEventBus.on("updateChangelists", onUpdateChangelists);
+});
+onUnmounted(() => {
+  globalEventBus.off("updateChangelists", onUpdateChangelists);
+});
+
+function newChangelist() {
+  router.push({name: 'newChangelist', params: {factoryId: route.params.factoryId}});
+}
+
+function editChangelist(changelistId) {
+  router.push({
+    name: 'editChangelist',
+    params: {factoryId: route.params.factoryId, editChangelistId: changelistId}
+  });
 }
 
 </script>
@@ -100,7 +112,7 @@ function deleteChangelist(changelistId) {
              :class="{active: element.active, primary: element.primary, hasIcon: !!element.icon}">
           <div class="left">
             <div class="icon" v-if="element.icon">
-              <img :src="element.icon.url" :alt="element.name" v-if="element.icon"/>
+              <icon-img :icon="element.icon" :size="80" v-if="element.icon"/>
             </div>
             <div class="name" v-if="!element.icon">
               {{ element.name }}
@@ -114,13 +126,14 @@ function deleteChangelist(changelistId) {
               <div style="float: right;">
                 <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
                             content="Set active">
-                  <el-switch v-model="element.active" :disabled="element.primary" style="margin-right: 8px;"/>
+                  <el-switch v-model="element.active" :disabled="element.primary" style="margin-right: 8px;"
+                             @update:model-value="val => setActive(element.id, val)"/>
                 </el-tooltip>
 
                 <el-button-group>
                   <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
                               content="Set primary" v-if="!element.primary">
-                    <el-button :icon="Star" @click="element.active = true; primaryChangelistId = element.id"/>
+                    <el-button :icon="Star" @click="setPrimary(element.id)"/>
                   </el-tooltip>
                   <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
                               content="Apply all changes">

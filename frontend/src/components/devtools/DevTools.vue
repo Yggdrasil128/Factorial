@@ -2,8 +2,11 @@
 import {inject, ref} from "vue";
 import * as satisfactoryUpdate7 from "./json/SatisfactoryUpdate7.json";
 import * as exampleWithSteelProductionNorth from "./json/ExampleWithSteelProductionNorth.json";
-import IconSelect from "@/components/iconselect/IconSelect.vue";
 import {Check} from "@element-plus/icons-vue";
+import MachineSelect from "@/components/iconselect/MachineSelect.vue";
+import IconSelect from "@/components/iconselect/IconSelect.vue";
+import ItemSelect from "@/components/iconselect/ItemSelect.vue";
+import RecipeSelect from "@/components/iconselect/RecipeSelect.vue";
 
 const axios = inject('axios');
 
@@ -30,6 +33,15 @@ async function setupTestData() {
   </p>
   <p>
     <icon-select :model-value="null" @update:model-value="console.log"/>
+  </p>
+  <p>
+    <item-select :model-value="null" @update:model-value="console.log"/>
+  </p>
+  <p>
+    <machine-select :model-value="null" @update:model-value="console.log"/>
+  </p>
+  <p>
+    <recipe-select :model-value="null" @update:model-value="console.log"/>
   </p>
 </template>
 

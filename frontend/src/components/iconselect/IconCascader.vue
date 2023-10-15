@@ -31,7 +31,6 @@ async function loadData() {
   let response = await axios.get(props.fetchEndpoint, {params: {saveId: 1}});
 
   let items = response.data;
-  console.log(items);
   if (props.entityName === 'icon') {
     for (let item of items) {
       item.icon = item;
@@ -173,7 +172,7 @@ function onInputBlur() {
 }
 
 function onInputClear() {
-  selectedId.value = null;
+  selectedId.value = 0;
   setEventBackoff(100);
 }
 

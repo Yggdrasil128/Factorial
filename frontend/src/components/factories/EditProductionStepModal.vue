@@ -1,10 +1,11 @@
 <script setup>
 import {inject, reactive, ref} from "vue";
 import {onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter} from "vue-router";
-import IconSelect from "@/components/iconselect/IconSelect.vue";
 import {Check, Close} from "@element-plus/icons-vue";
 import _ from 'lodash';
 import {ElMessageBox} from "element-plus";
+import RecipeSelect from "@/components/iconselect/RecipeSelect.vue";
+import MachineSelect from "@/components/iconselect/MachineSelect.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -13,8 +14,8 @@ const axios = inject('axios');
 const globalEventBus = inject('globalEventBus');
 
 const visible = ref(true);
-const factory = ref(emptyFactoryData());
-const original = ref(factory.value);
+const productionStep = ref(emptyProductionStepData());
+const original = ref(productionStep.value);
 const loading = ref(true);
 const saving = ref(false);
 
@@ -39,7 +40,7 @@ async function checkLeave() {
   if (saving.value) {
     return true;
   }
-  if (!_.isEqual(factory.value, original.value)) {
+  if (!_.isEqual(productionStep.value, original.value)) {
     const answer = await new Promise(r => ElMessageBox({
       title: 'Warning',
       message: 'Do you really want to leave? You have unsaved changes!',
@@ -56,55 +57,67 @@ async function checkLeave() {
   return true;
 }
 
-onBeforeRouteUpdate(loadFactoryData);
+onBeforeRouteUpdate(loadProductionStepData);
 
-function emptyFactoryData() {
+function emptyProductionStepData() {
   return {
     id: null,
-    name: "",
-    iconId: 0,
+    recipeId: 0,
+    machineId: 0,
+    machineCount: "1",
+    changelistDeltas: {},
   }
 }
 
-async function loadFactoryData(route) {
-  if (route.name === 'newFactory') {
-    factory.value = emptyFactoryData();
+async function loadProductionStepData(route) {
+  if (route.name === 'newProductionStep') {
+    productionStep.value = emptyProductionStepData();
   } else {
-    let response = await axios.get('/api/factory', {params: {factoryId: route.params.editFactoryId}});
-    factory.value = response.data;
-    factory.value.iconId = factory.value.icon ? factory.value.icon.id : 0;
+    let response = await axios.get('/api/productionStep',
+        {params: {productionStepId: route.params.editProductionStepId}});
+    productionStep.value = response.data;
   }
-  original.value = Object.assign({}, factory.value);
+  original.value = Object.assign({}, productionStep.value);
   loading.value = false;
 }
 
-loadFactoryData(route);
+loadProductionStepData(route);
 
 // form validation
 
 const form = ref();
 const rules = reactive({
-  name: [
-    {required: true, message: 'Please enter a name for the factory', trigger: 'blur'},
-  ],
+  recipeId: [
+    {validator: checkGreaterZero, trigger: 'blur', params: {entityName: 'recipe'}}
+  ]
 });
 
-async function submitForm() {
-  factory.value.name = factory.value.name.trim();
+function checkGreaterZero(rule, value, callback) {
+  if (!value || value <= 0) {
+    return callback(new Error('Please select a ' + rule.params.entityName));
+  }
+}
 
+async function submitForm() {
   if (!await form.value.validate(() => ({}))) {
+    return;
+  }
+
+  if (true) {
     return;
   }
 
   saving.value = true;
 
-  if (route.name === 'newFactory') {
-    await axios.post('/api/save/factories', factory.value, {params: {saveId: 1}});
+  if (route.name === 'newProductionStep') {
+    await axios.post('/api/factory/productionSteps', productionStep.value,
+        {params: {factoryId: route.params.factoryId}});
   } else {
-    await axios.patch('/api/factory', factory.value, {params: {factoryId: route.params.editFactoryId}});
+    await axios.patch('/api/productionStep', productionStep.value,
+        {params: {productionStepId: route.params.editProductionStepId}});
   }
 
-  globalEventBus.emit('updateFactories');
+  globalEventBus.emit('updateChangelists');
 
   await router.push({name: 'factories', params: {factoryId: route.params.factoryId}});
 }
@@ -113,21 +126,21 @@ async function submitForm() {
 
 <template>
   <el-dialog :model-value="visible" :before-close="beforeClose" class="el-dark" width="1000px"
-             :title="route.name === 'newFactory' ? 'New factory' : 'Edit factory'">
+             :title="route.name === 'newChangelist' ? 'New changelist' : 'Edit changelist'">
     <p style="margin-top: 0; margin-bottom: 30px;">
-      Factories allow you to group production steps. Blablabla, more explanation here...
+      Insert production step explanation here...
     </p>
 
-    <el-form label-width="120px" style="width: 900px; overflow: auto;"
+    <el-form label-width="150px" style="width: 900px; overflow: auto;"
              v-loading="loading" element-loading-background="rgba(20, 20, 20, 0.8)"
-             :model="factory" ref="form" :rules="rules">
+             :model="productionStep" ref="form" :rules="rules">
 
-      <el-form-item label="Factory name" prop="name">
-        <el-input v-model="factory.name"/>
+      <el-form-item label="Recipe">
+        <recipe-select v-model="productionStep.recipeId"/>
       </el-form-item>
 
-      <el-form-item label="Icon">
-        <icon-select v-model="factory.iconId"/>
+      <el-form-item label="Machine">
+        <machine-select v-model="productionStep.machineId"/>
       </el-form-item>
 
       <div style="margin-top: 10px; float: right;">

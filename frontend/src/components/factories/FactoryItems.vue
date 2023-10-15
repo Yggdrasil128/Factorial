@@ -2,12 +2,13 @@
 import {computed, inject, onMounted, onUnmounted, ref, watch} from "vue";
 import draggable from 'vuedraggable';
 import FactoryItem from "@/components/factories/FactoryItem.vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {Plus} from "@element-plus/icons-vue";
 
 const globalEventBus = inject("globalEventBus");
 const axios = inject('axios');
 const route = useRoute();
+const router = useRouter();
 
 const currentFactoryId = computed(() => route.params.factoryId);
 
@@ -58,7 +59,7 @@ function getRelevantProductionSteps(item) {
 }
 
 function newProductionStep() {
-
+  router.push({name: 'newProductionStep', params: {factoryId: route.params.factoryId}});
 }
 
 function newTransportLink() {

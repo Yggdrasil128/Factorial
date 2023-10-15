@@ -13,6 +13,7 @@ import FactoriesOverview from "@/components/factories/FactoriesOverview.vue";
 import DevTools from "@/components/devtools/DevTools.vue";
 import EditFactoryModal from "@/components/factories/EditFactoryModal.vue";
 import EditChangelistModal from "@/components/factories/EditChangelistModal.vue";
+import EditProductionStepModal from "@/components/factories/EditProductionStepModal.vue";
 
 const axiosInstance = axios.create({
     baseURL: 'http://25.53.80.171:8080'
@@ -45,7 +46,17 @@ const routes = [
                 path: 'editChangelist/:editChangelistId',
                 name: 'editChangelist',
                 components: {modal: EditChangelistModal}
-            }
+            },
+            {
+                path: 'newProductionStep',
+                name: 'newProductionStep',
+                components: {modal: EditProductionStepModal}
+            },
+            {
+                path: 'editProductionStep/:editProductionStepId',
+                name: 'editProductionStep',
+                components: {modal: EditProductionStepModal}
+            },
         ]
     },
     {path: '/devtools', component: DevTools},

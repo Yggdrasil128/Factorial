@@ -1,7 +1,7 @@
 <script setup>
-import {reactive, ref} from "vue";
+import {inject, reactive, ref} from "vue";
 import {onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter} from "vue-router";
-import IconSelect from "@/components/IconSelect.vue";
+import IconSelect from "@/components/iconselect/IconSelect.vue";
 import {Check, Close} from "@element-plus/icons-vue";
 import _ from 'lodash';
 import {ElMessageBox} from "element-plus";
@@ -9,10 +9,14 @@ import {ElMessageBox} from "element-plus";
 const router = useRouter();
 const route = useRoute();
 
+const axios = inject('axios');
+const globalEventBus = inject('globalEventBus');
+
 const visible = ref(true);
 const changelist = ref(emptyChangelistData());
 const original = ref(changelist.value);
 const loading = ref(true);
+const saving = ref(false);
 
 document.body.classList.add('el-dark-popper');
 
@@ -32,6 +36,9 @@ async function beforeClose() {
 }
 
 async function checkLeave() {
+  if (saving.value) {
+    return true;
+  }
   if (!_.isEqual(changelist.value, original.value)) {
     const answer = await new Promise(r => ElMessageBox({
       title: 'Warning',
@@ -55,7 +62,7 @@ function emptyChangelistData() {
   return {
     id: null,
     name: '',
-    icon: null,
+    iconId: 0,
     primary: true,
     active: true,
   }
@@ -65,18 +72,9 @@ async function loadChangelistData(route) {
   if (route.name === 'newChangelist') {
     changelist.value = emptyChangelistData();
   } else {
-    await new Promise(r => setTimeout(r, 1000));
-    changelist.value = {
-      id: 2,
-      name: "Upgrade steel production",
-      icon: {
-        id: 2,
-        name: "Steel Ingot",
-        url: "https://satisfactory.wiki.gg/images/b/bd/Steel_Ingot.png"
-      },
-      primary: true,
-      active: true,
-    };
+    let response = await axios.get('/api/changelist', {params: {changelistId: route.params.editChangelistId}});
+    changelist.value = response.data;
+    changelist.value.iconId = changelist.value.icon ? changelist.value.icon.id : 0;
   }
   original.value = Object.assign({}, changelist.value);
   loading.value = false;
@@ -87,7 +85,6 @@ loadChangelistData(route);
 // form validation
 
 const form = ref();
-
 const rules = reactive({
   name: [
     {required: true, message: 'Please enter a name for the changelist', trigger: 'blur'},
@@ -101,27 +98,38 @@ async function submitForm() {
     return;
   }
 
-  console.log("submit");
+  saving.value = true;
+
+  if (route.name === 'newChangelist') {
+    await axios.post('/api/save/changelists', changelist.value, {params: {saveId: 1}});
+  } else {
+    await axios.patch('/api/changelist', changelist.value, {params: {changelistId: route.params.editChangelistId}});
+  }
+
+  globalEventBus.emit('updateChangelists');
+
+  await router.push({name: 'factories', params: {factoryId: route.params.factoryId}});
 }
 
 </script>
 
 <template>
-  <el-dialog :model-value="visible" :before-close="beforeClose" class="el-dark" width="600px"
+  <el-dialog :model-value="visible" :before-close="beforeClose" class="el-dark" width="1000px"
              :title="route.name === 'newChangelist' ? 'New changelist' : 'Edit changelist'">
     <p style="margin-top: 0; margin-bottom: 30px;">
       Insert changelist explanation here...
     </p>
 
-    <el-form label-width="120px" style="width: 500px; overflow: auto;"
+    <el-form label-width="150px" style="width: 900px; overflow: auto;"
              v-loading="loading" element-loading-background="rgba(20, 20, 20, 0.8)"
              :model="changelist" ref="form" :rules="rules">
-      <el-form-item label="Factory name" prop="name">
+
+      <el-form-item label="Changelist name" prop="name">
         <el-input v-model="changelist.name"/>
       </el-form-item>
 
       <el-form-item label="Icon">
-        <icon-select v-model="changelist.icon" style="width: 100%;"/>
+        <icon-select v-model="changelist.iconId"/>
       </el-form-item>
 
       <template v-if="route.name === 'newChangelist'">
@@ -137,7 +145,7 @@ async function submitForm() {
 
       <div style="margin-top: 10px; float: right;">
         <el-button :icon="Close" @click="beforeClose">Cancel</el-button>
-        <el-button type="primary" :icon="Check" @click="submitForm()">Save</el-button>
+        <el-button type="primary" :icon="Check" @click="submitForm()" :loading="saving">Save</el-button>
       </div>
     </el-form>
   </el-dialog>
