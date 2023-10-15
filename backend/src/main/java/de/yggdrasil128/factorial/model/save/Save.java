@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-
 @Entity
 public class Save {
 
@@ -21,14 +19,14 @@ public class Save {
     @Column(nullable = false)
     private String name;
     @JoinColumn
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
-    private List<Factory> factories = emptyList();
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Factory> factories;
     @JoinColumn
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
-    private List<TransportLink> transportLinks = emptyList();
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<TransportLink> transportLinks;
     @JoinColumn
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
-    private List<Changelist> changelists = emptyList();
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Changelist> changelists;
 
     public Save() {
     }

@@ -9,6 +9,8 @@ import de.yggdrasil128.factorial.model.save.Save;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import static java.util.Collections.emptyMap;
+
 @Service
 public class ChangelistService extends ModelService<Changelist, ChangelistRepository> {
 
@@ -19,9 +21,24 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         this.icons = icons;
     }
 
-    public Changelist create(Save save, ChangeListStandalone input) {
+    public Changelist create(Save save, ChangeListInput input) {
+        int ordinal = 0 == input.getOrdinal()
+                ? save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1
+                : input.getOrdinal();
         Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-        return repository.save(input.with(save, icon));
+        return repository.save(
+                new Changelist(save, ordinal, input.getName(), input.isPrimary(), input.isActive(), icon, emptyMap()));
+    }
+
+    public Changelist update(int id, ChangeListInput input) {
+        Changelist changelist = get(id);
+        if (null != input.getName()) {
+            changelist.setName(input.getName());
+        }
+        if (0 != input.getIconId()) {
+            changelist.setIcon(icons.get(input.getIconId()));
+        }
+        return repository.save(changelist);
     }
 
     public void reportMachineCount(Changelist changelist, ProductionStep productionStep, Fraction machineCount) {

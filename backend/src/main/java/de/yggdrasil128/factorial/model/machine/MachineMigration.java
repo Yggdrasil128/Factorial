@@ -8,6 +8,7 @@ public class MachineMigration {
 
     private String iconName;
     private List<String> machineModifierNames = emptyList();
+    private List<String> category = emptyList();
 
     public String getIconName() {
         return iconName;
@@ -23,6 +24,14 @@ public class MachineMigration {
 
     public void setMachineModifierNames(List<String> machineModifierNames) {
         this.machineModifierNames = machineModifierNames;
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
 }

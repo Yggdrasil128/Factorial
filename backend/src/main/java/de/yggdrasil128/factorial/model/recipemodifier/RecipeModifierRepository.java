@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface RecipeModifierRepository extends CrudRepository<RecipeModifier, Integer> {
 
-    List<RecipeModifier> getAllByGameVersionIdAndNameIn(int gameVersionId, List<String> names);
+    List<RecipeModifier> findAllByGameVersionIdAndNameIn(int gameVersionId, List<String> names);
 
 }

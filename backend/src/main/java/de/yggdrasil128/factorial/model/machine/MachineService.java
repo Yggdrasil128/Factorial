@@ -2,7 +2,6 @@ package de.yggdrasil128.factorial.model.machine;
 
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
@@ -10,6 +9,8 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 @Service
 public class MachineService extends ModelService<Machine, MachineRepository> {
@@ -23,32 +24,29 @@ public class MachineService extends ModelService<Machine, MachineRepository> {
         this.recipeModifiers = recipeModifiers;
     }
 
-    public Machine get(GameVersion gameVersion, String name) {
-        return repository.findByGameVersionIdAndName(gameVersion.getId(), name)
-                .orElseThrow(ModelService::reportNotFound);
-    }
-
-    public Machine create(GameVersion gameVersion, MachineStandalone input) {
+    public Machine create(GameVersion gameVersion, MachineInput input) {
         Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-        List<RecipeModifier> machineModifiers = recipeModifiers.get(input.getMachineModifierIds());
-        return repository.save(new Machine(gameVersion, input.getName(), icon, machineModifiers));
+        List<RecipeModifier> machineModifiers = null == input.getMachineModifierIds() ? null
+                : recipeModifiers.get(input.getMachineModifierIds());
+        List<String> category = null == input.getCategory() ? emptyList() : input.getCategory();
+        return repository.save(new Machine(gameVersion, input.getName(), icon, machineModifiers, category));
     }
 
-    public Machine doImport(GameVersion gameVersion, String name, MachineMigration input) {
-        Icon icon = null == input.getIconName() ? null
-                : GameVersionService.getDetachedIcon(gameVersion, input.getIconName());
-        List<RecipeModifier> machineModifiers = fromMigrations(gameVersion, input.getMachineModifierNames());
-        return new Machine(gameVersion, name, icon, machineModifiers);
-    }
-
-    private static List<RecipeModifier> fromMigrations(GameVersion gameVersion, List<String> modifierNames) {
-        return modifierNames.stream().map(name -> getDetachedRecipeModifier(gameVersion, name)).toList();
-    }
-
-    private static RecipeModifier getDetachedRecipeModifier(GameVersion version, String recipeModifierName) {
-        return version.getRecipeModifiers().stream()
-                .filter(recipeModifier -> recipeModifier.getName().equals(recipeModifierName)).findAny()
-                .orElseThrow(ModelService::reportNotFound);
+    public Machine update(int id, MachineInput input) {
+        Machine machine = get(id);
+        if (null != input.getName()) {
+            machine.setName(input.getName());
+        }
+        if (0 != input.getIconId()) {
+            machine.setIcon(icons.get(input.getIconId()));
+        }
+        if (null != input.getMachineModifierIds()) {
+            machine.setMachineModifiers(recipeModifiers.get(input.getMachineModifierIds()));
+        }
+        if (null != input.getCategory()) {
+            machine.setCategory(input.getCategory());
+        }
+        return repository.save(machine);
     }
 
 }

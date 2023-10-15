@@ -1,31 +1,58 @@
 package de.yggdrasil128.factorial.model.transportlink;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 public class TransportLink {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    @ManyToOne(optional = false)
+    @JsonBackReference
+    private Save save;
     private String name;
     private String description;
     @ManyToOne
     private Icon icon;
     @ManyToOne(optional = false)
-    private Factory targetFactory;
-    @ManyToOne(optional = false)
     private Factory sourceFactory;
+    @ManyToOne(optional = false)
+    private Factory targetFactory;
     @ElementCollection
-    private List<Resource> items = new ArrayList<>();
+    private List<Resource> resources;
+
+    public TransportLink() {
+    }
+
+    public TransportLink(Save save, String name, String description, Icon icon, Factory sourceFactory,
+                         Factory targetFactory, List<Resource> resources) {
+        this.save = save;
+        this.name = name;
+        this.description = description;
+        this.icon = icon;
+        this.sourceFactory = sourceFactory;
+        this.targetFactory = targetFactory;
+        this.resources = resources;
+    }
 
     public int getId() {
         return id;
+    }
+
+    public Save getSave() {
+        return save;
+    }
+
+    public void setSave(Save save) {
+        this.save = save;
     }
 
     public String getName() {
@@ -52,14 +79,6 @@ public class TransportLink {
         this.icon = icon;
     }
 
-    public Factory getTargetFactory() {
-        return targetFactory;
-    }
-
-    public void setTargetFactory(Factory targetFactory) {
-        this.targetFactory = targetFactory;
-    }
-
     public Factory getSourceFactory() {
         return sourceFactory;
     }
@@ -68,12 +87,20 @@ public class TransportLink {
         this.sourceFactory = sourceFactory;
     }
 
-    public List<Resource> getItems() {
-        return items;
+    public Factory getTargetFactory() {
+        return targetFactory;
     }
 
-    public void setItems(List<Resource> items) {
-        this.items = items;
+    public void setTargetFactory(Factory targetFactory) {
+        this.targetFactory = targetFactory;
+    }
+
+    public List<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<Resource> resources) {
+        this.resources = resources;
     }
 
     @Override
@@ -90,4 +117,5 @@ public class TransportLink {
     public int hashCode() {
         return id;
     }
+
 }

@@ -11,8 +11,6 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-
 @Entity
 public class ProductionStep {
 
@@ -27,7 +25,7 @@ public class ProductionStep {
     @ManyToOne(optional = false)
     private Recipe recipe;
     @ManyToMany
-    private List<RecipeModifier> modifiers = emptyList();
+    private List<RecipeModifier> modifiers;
     @Convert(converter = FractionConverter.class)
     private Fraction machineCount = Fraction.ONE;
 

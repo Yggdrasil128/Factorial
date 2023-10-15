@@ -105,7 +105,7 @@ public class RepositoriesTest {
         gameVersion.setItems(List.of(item));
 
         game = gameRepository.save(game);
-        item = game.getVersions().get(0).getItems().get(0);
+        item = game.getGameVersions().get(0).getItems().get(0);
 
         assertTrue(itemRepository.existsById(item.getId()));
 
@@ -165,7 +165,7 @@ public class RepositoriesTest {
         ingotToGearRecipe.setApplicableMachines(List.of(smelter));
         ingotToGearRecipe.setDuration(Fraction.of(1));
 
-        gameVersion.setRecipies(List.of(oreToIngotRecipe, ingotToGearRecipe));
+        gameVersion.setRecipes(List.of(oreToIngotRecipe, ingotToGearRecipe));
 
         gameRepository.save(game);
 

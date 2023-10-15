@@ -62,26 +62,30 @@ public class Fraction extends Number {
             throw new ArithmeticException("Division by zero");
         }
         if (denominator < 0) {
-            numerator *= -1;
-            denominator *= -1;
+            numerator = Math.negateExact(numerator);
+            denominator = Math.negateExact(denominator);
         }
         long gcd = Fraction.gcd(numerator, denominator);
         if (gcd == 1) {
             return;
         }
+        // division cannot cause overflow, so no Math# call needed here
         numerator /= gcd;
         denominator /= gcd;
     }
 
     public Fraction add(Fraction that) {
         return new Fraction(
-                this.numerator * that.denominator + that.numerator * this.denominator,
-                this.denominator * that.denominator
+                Math.addExact(
+                        Math.multiplyExact(this.numerator, that.denominator),
+                        Math.multiplyExact(that.numerator, this.denominator)
+                ),
+                Math.multiplyExact(this.denominator, that.denominator)
         );
     }
 
     public Fraction negative() {
-        return new Fraction(-this.numerator, this.denominator);
+        return new Fraction(Math.negateExact(this.numerator), this.denominator);
     }
 
     public Fraction subtract(Fraction that) {
@@ -90,8 +94,8 @@ public class Fraction extends Number {
 
     public Fraction multiply(Fraction that) {
         return new Fraction(
-                this.numerator * that.numerator,
-                this.denominator * that.denominator
+                Math.multiplyExact(this.numerator, that.numerator),
+                Math.multiplyExact(this.denominator, that.denominator)
         );
     }
 
