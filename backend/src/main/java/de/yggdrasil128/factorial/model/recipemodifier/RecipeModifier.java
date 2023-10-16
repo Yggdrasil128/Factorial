@@ -131,7 +131,7 @@ public class RecipeModifier {
 
     @Override
     public String toString() {
-        return "duration x " + durationMultiplier + " / input x " + inputQuantityMultiplier + " / output x "
+        return "duration x " + durationMultiplier + " | input x " + inputQuantityMultiplier + " | output x "
             + outputQuantityMultiplier;
     }
 

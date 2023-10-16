@@ -57,4 +57,19 @@ public class Xgress {
         this.resources = resources;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Xgress && id == ((Xgress) obj).id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

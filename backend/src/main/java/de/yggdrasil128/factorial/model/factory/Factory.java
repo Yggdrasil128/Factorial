@@ -139,7 +139,12 @@ public class Factory {
 
     @Override
     public int hashCode() {
-        return 31 + Integer.hashCode(id);
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
 }

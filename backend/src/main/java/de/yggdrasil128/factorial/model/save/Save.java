@@ -88,4 +88,19 @@ public class Save {
         this.changelists = changelists;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Save && id == ((Save) obj).id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

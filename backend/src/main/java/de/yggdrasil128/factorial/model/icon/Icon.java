@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
+
 @Entity
 public class Icon {
     @Id
@@ -100,6 +102,7 @@ public class Icon {
 
     @Override
     public String toString() {
-        return name + ": " + imageData.length + " bytes of " + mimeType;
+        return name + ": " + imageData.length + " bytes of " + mimeType
+                + category.stream().collect(joining(".", " (", ")"));
     }
 }

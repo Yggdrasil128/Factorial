@@ -103,4 +103,19 @@ public class Changelist {
         this.productionStepChanges = productionStepChanges;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Changelist && id == ((Changelist) obj).id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

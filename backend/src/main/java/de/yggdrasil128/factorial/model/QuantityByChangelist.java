@@ -30,14 +30,20 @@ public class QuantityByChangelist {
 
     public QuantityByChangelist add(QuantityByChangelist that) {
         return new QuantityByChangelist(this.current.add(that.current),
-            this.withPrimaryChangelist.add(that.withPrimaryChangelist),
-            this.withActiveChangelists.add(that.withActiveChangelists));
+                this.withPrimaryChangelist.add(that.withPrimaryChangelist),
+                this.withActiveChangelists.add(that.withActiveChangelists));
     }
 
     public QuantityByChangelist subtract(QuantityByChangelist that) {
         return new QuantityByChangelist(this.current.subtract(that.current),
-            this.withPrimaryChangelist.subtract(that.withPrimaryChangelist),
-            this.withActiveChangelists.subtract(that.withActiveChangelists));
+                this.withPrimaryChangelist.subtract(that.withPrimaryChangelist),
+                this.withActiveChangelists.subtract(that.withActiveChangelists));
+    }
+
+    @Override
+    public String toString() {
+        return "[ current = " + current + ",  primary = " + withActiveChangelists + ", active = "
+                + withActiveChangelists + " ]";
     }
 
 }

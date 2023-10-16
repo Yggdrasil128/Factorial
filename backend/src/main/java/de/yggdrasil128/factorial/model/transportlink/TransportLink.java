@@ -118,4 +118,9 @@ public class TransportLink {
         return id;
     }
 
+    @Override
+    public String toString() {
+        return name + " from " + sourceFactory + " to " + targetFactory;
+    }
+
 }
