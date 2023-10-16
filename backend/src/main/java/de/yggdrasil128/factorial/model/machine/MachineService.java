@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.machine;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
@@ -9,8 +10,6 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 @Service
 public class MachineService extends ModelService<Machine, MachineRepository> {
@@ -25,27 +24,20 @@ public class MachineService extends ModelService<Machine, MachineRepository> {
     }
 
     public Machine create(GameVersion gameVersion, MachineInput input) {
-        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-        List<RecipeModifier> machineModifiers = null == input.getMachineModifierIds() ? null
-                : recipeModifiers.get(input.getMachineModifierIds());
-        List<String> category = null == input.getCategory() ? emptyList() : input.getCategory();
+        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
+        List<RecipeModifier> machineModifiers = OptionalInputField
+                .ofIds(input.getMachineModifierIds(), recipeModifiers::get).get();
+        List<String> category = OptionalInputField.of(input.getCategory()).get();
         return repository.save(new Machine(gameVersion, input.getName(), icon, machineModifiers, category));
     }
 
     public Machine update(int id, MachineInput input) {
         Machine machine = get(id);
-        if (null != input.getName()) {
-            machine.setName(input.getName());
-        }
-        if (0 != input.getIconId()) {
-            machine.setIcon(icons.get(input.getIconId()));
-        }
-        if (null != input.getMachineModifierIds()) {
-            machine.setMachineModifiers(recipeModifiers.get(input.getMachineModifierIds()));
-        }
-        if (null != input.getCategory()) {
-            machine.setCategory(input.getCategory());
-        }
+        OptionalInputField.of(input.getName()).apply(machine::setName);
+        OptionalInputField.ofId(input.getIconId(), icons::get).apply(machine::setIcon);
+        OptionalInputField.ofIds(input.getMachineModifierIds(), recipeModifiers::get)
+                .apply(machine::setMachineModifiers);
+        OptionalInputField.of(input.getCategory()).apply(machine::setCategory);
         return repository.save(machine);
     }
 

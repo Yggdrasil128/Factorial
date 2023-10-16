@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.recipemodifier;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
@@ -18,7 +19,7 @@ public class RecipeModifierService extends ModelService<RecipeModifier, RecipeMo
     }
 
     public RecipeModifier create(GameVersion gameVersion, RecipeModifierInput input) {
-        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
+        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         Fraction durationMultiplier = null == input.getDurationMultiplier() ? Fraction.ONE
                 : input.getDurationMultiplier();
         Fraction inputQuantityMultiplier = null == input.getInputQuantityMultiplier() ? Fraction.ONE
@@ -31,15 +32,9 @@ public class RecipeModifierService extends ModelService<RecipeModifier, RecipeMo
 
     public RecipeModifier update(int id, RecipeModifierInput input) {
         RecipeModifier recipeModifier = get(id);
-        if (null != input.getName()) {
-            recipeModifier.setName(input.getName());
-        }
-        if (null != input.getDescription()) {
-            recipeModifier.setDescription(input.getDescription());
-        }
-        if (0 != input.getIconId()) {
-            recipeModifier.setIcon(icons.get(input.getIconId()));
-        }
+        OptionalInputField.of(input.getName()).apply(recipeModifier::setName);
+        OptionalInputField.of(input.getDescription()).apply(recipeModifier::setDescription);
+        OptionalInputField.ofId(input.getIconId(), icons::get).apply(recipeModifier::setIcon);
         if (null != input.getDurationMultiplier()) {
             recipeModifier.setDurationMultiplier(input.getDurationMultiplier());
         }

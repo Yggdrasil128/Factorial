@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
@@ -30,7 +31,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         int ordinal = 0 == input.getOrdinal()
                 ? save.getFactories().stream().mapToInt(Factory::getOrdinal).max().orElse(0) + 1
                 : input.getOrdinal();
-        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
+        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         return repository.save(new Factory(save, ordinal, input.getName(), input.getDescription(), icon, emptyList(),
                 emptyList(), emptyList(), emptyMap()));
     }
@@ -62,17 +63,9 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     public Factory update(int id, FactoryInput input) {
         Factory factory = get(id);
-        if (null != input.getName()) {
-            factory.setName(input.getName());
-        }
-        if (null != input.getDescription()) {
-            factory.setDescription(input.getDescription());
-        }
-        if (0 == input.getIconId()) {
-            factory.setIcon(null);
-        } else if (0 < input.getIconId()) {
-            factory.setIcon(icons.get(input.getIconId()));
-        }
+        OptionalInputField.of(input.getName()).apply(factory::setName);
+        OptionalInputField.of(input.getDescription()).apply(factory::setDescription);
+        OptionalInputField.ofId(input.getIconId(), icons::get).apply(factory::setIcon);
         return repository.save(factory);
     }
 

@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.recipe;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
@@ -25,34 +26,24 @@ public class RecipeService extends ModelService<Recipe, RecipeRepository> {
     }
 
     public Recipe create(GameVersion gameVersion, RecipeInput input) {
-        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-        List<Resource> inputs = null == input.getInput() ? emptyList() : resources.get(input.getInput());
-        List<Resource> outputs = null == input.getOutput() ? emptyList() : resources.get(input.getOutput());
-        List<String> category = null == input.getCategory() ? emptyList() : input.getCategory();
+        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
+        List<Resource> inputs = OptionalInputField.of(input.getInput()).map(resources::get).get();
+        List<Resource> outputs = OptionalInputField.of(input.getOutput()).map(resources::get).get();
+        List<String> category = OptionalInputField.of(input.getCategory()).get();
         return repository.save(new Recipe(gameVersion, input.getName(), icon, inputs, outputs, input.getDuration(),
                 emptyList(), emptyList(), category));
     }
 
     public Recipe update(int id, RecipeInput input) {
         Recipe recipe = get(id);
-        if (null != input.getName()) {
-            recipe.setName(input.getName());
-        }
-        if (0 != input.getIconId()) {
-            recipe.setIcon(icons.get(input.getIconId()));
-        }
-        if (null != input.getInput()) {
-            recipe.setInput(resources.get(input.getInput()));
-        }
-        if (null != input.getOutput()) {
-            recipe.setOutput(resources.get(input.getOutput()));
-        }
+        OptionalInputField.of(input.getName()).apply(recipe::setName);
+        OptionalInputField.ofId(input.getIconId(), icons::get).apply(recipe::setIcon);
+        OptionalInputField.of(input.getInput()).map(resources::get).apply(recipe::setInput);
+        OptionalInputField.of(input.getOutput()).map(resources::get).apply(recipe::setOutput);
         if (null != input.getDuration()) {
             recipe.setDuration(input.getDuration());
         }
-        if (null != input.getCategory()) {
-            recipe.setCategory(input.getCategory());
-        }
+        OptionalInputField.of(input.getCategory()).apply(recipe::setCategory);
         return repository.save(recipe);
     }
 

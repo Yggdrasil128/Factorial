@@ -1,9 +1,13 @@
 package de.yggdrasil128.factorial.model.xgress;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.factory.Factory;
+import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class XgressService extends ModelService<Xgress, XgressRepository> {
@@ -16,17 +20,14 @@ public class XgressService extends ModelService<Xgress, XgressRepository> {
     }
 
     public Xgress create(Factory factory, XgressInput input) {
-        return new Xgress(factory, input.getName(), resources.get(input.getResources()));
+        List<Resource> gressedResources = OptionalInputField.of(input.getResources()).map(resources::get).get();
+        return new Xgress(factory, input.getName(), gressedResources);
     }
 
     public Xgress update(int id, XgressInput input) {
         Xgress xgress = get(id);
-        if (null != input.getName()) {
-            xgress.setName(input.getName());
-        }
-        if (null != input.getResources()) {
-            xgress.setResources(resources.get(input.getResources()));
-        }
+        OptionalInputField.of(input.getName()).apply(xgress::setName);
+        OptionalInputField.of(input.getResources()).map(resources::get).apply(xgress::setResources);
         return repository.save(xgress);
     }
 

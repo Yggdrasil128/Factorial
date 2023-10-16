@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +25,7 @@ public class GameService extends ModelService<Game, GameRepository> {
 
     public Game update(int id, GameInput input) {
         Game game = get(id);
-        if (null != input.getName()) {
-            game.setName(input.getName());
-        }
+        OptionalInputField.of(input.getName()).apply(game::setName);
         return repository.save(game);
     }
 

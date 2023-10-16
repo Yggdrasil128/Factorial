@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.changelist;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
@@ -23,11 +24,9 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
     }
 
     public Changelist create(Save save, ChangeListInput input) {
-        int ordinal = 0 == input.getOrdinal()
-                ? save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1
-                : input.getOrdinal();
-        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
-
+        int ordinal = 0 < input.getOrdinal() ? input.getOrdinal()
+                : save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1;
+        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         Changelist result = repository.save(
                 new Changelist(save, ordinal, input.getName(), input.isPrimary(), input.isActive(), icon, emptyMap()));
         if (result.isPrimary()) {
@@ -40,31 +39,9 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
 
     public Changelist update(int id, ChangeListInput input) {
         Changelist changelist = get(id);
-        if (null != input.getName()) {
-            changelist.setName(input.getName());
-        }
-        if (0 != input.getIconId()) {
-            changelist.setIcon(icons.get(input.getIconId()));
-        }
+        OptionalInputField.of(input.getName()).apply(changelist::setName);
+        OptionalInputField.ofId(input.getIconId(), icons::get).apply(changelist::setIcon);
         return repository.save(changelist);
-    }
-
-    public void reportMachineCount(Changelist changelist, ProductionStep productionStep, Fraction machineCount) {
-        Fraction delta = machineCount.subtract(productionStep.getMachineCount());
-        if (Fraction.ZERO.equals(delta)) {
-            changelist.getProductionStepChanges().remove(productionStep);
-        } else {
-            changelist.getProductionStepChanges().put(productionStep, delta);
-        }
-        repository.save(changelist);
-    }
-
-    @Override
-    public void delete(int id) {
-        if (repository.existsByIdAndPrimaryIsTrue(id)) {
-            throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
-        }
-        super.delete(id);
     }
 
     public void setPrimary(int id) {
@@ -89,6 +66,24 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         } else if (!active) {
             throw report(HttpStatus.CONFLICT, "cannot set primary changelist to inactive");
         }
+    }
+
+    public void reportMachineCount(Changelist changelist, ProductionStep productionStep, Fraction machineCount) {
+        Fraction delta = machineCount.subtract(productionStep.getMachineCount());
+        if (Fraction.ZERO.equals(delta)) {
+            changelist.getProductionStepChanges().remove(productionStep);
+        } else {
+            changelist.getProductionStepChanges().put(productionStep, delta);
+        }
+        repository.save(changelist);
+    }
+
+    @Override
+    public void delete(int id) {
+        if (repository.existsByIdAndPrimaryIsTrue(id)) {
+            throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
+        }
+        super.delete(id);
     }
 
     public static Changelist getPrimaryChangelist(Save save) {

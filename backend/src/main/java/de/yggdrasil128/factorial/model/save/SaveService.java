@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.save;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
@@ -38,9 +39,7 @@ public class SaveService extends ModelService<Save, SaveRepository> {
 
     public Save update(int id, SaveInput input) {
         Save save = get(id);
-        if (null != input.getName()) {
-            save.setName(input.getName());
-        }
+        OptionalInputField.of(input.getName()).apply(save::setName);
         if (0 != input.getGameVersionId()) {
             throw report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
         }

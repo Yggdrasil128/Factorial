@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.gameversion;
 
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
@@ -23,7 +24,7 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
     }
 
     public GameVersion create(Game game, GameVersionInput input) {
-        Icon icon = 0 == input.getIconId() ? null : icons.get(input.getIconId());
+        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         return repository.save(new GameVersion(game, input.getName(), icon, emptyList(), emptyList(), emptyList(),
                 emptyList(), emptyList()));
     }
@@ -54,12 +55,8 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
 
     public GameVersion update(int id, GameVersionInput input) {
         GameVersion gameVersion = get(id);
-        if (null != input.getName()) {
-            gameVersion.setName(input.getName());
-        }
-        if (0 != input.getIconId()) {
-            gameVersion.setIcon(icons.get(input.getIconId()));
-        }
+        OptionalInputField.of(input.getName()).apply(gameVersion::setName);
+        OptionalInputField.ofId(input.getIconId(), icons::get).apply(gameVersion::setIcon);
         return repository.save(gameVersion);
     }
 
