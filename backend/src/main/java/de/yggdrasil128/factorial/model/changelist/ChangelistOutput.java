@@ -1,22 +1,20 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.icon.IconOutput;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class ChangelistOutput {
 
     private final Changelist delegate;
     private final IconOutput icon;
-    private final Map<Integer, Fraction> productionStepChanges;
+    private final List<ProductionStepChangeOutput> productionStepChanges;
 
     public ChangelistOutput(Changelist delegate) {
         this.delegate = delegate;
         this.icon = IconOutput.of(delegate.getIcon());
         this.productionStepChanges = delegate.getProductionStepChanges().entrySet().stream()
-                .collect(Collectors.toMap(entry -> entry.getKey().getId(), entry -> entry.getValue()));
+                .map(entry -> new ProductionStepChangeOutput(entry.getKey(), entry.getValue())).toList();
     }
 
     public int getId() {
@@ -47,7 +45,7 @@ public class ChangelistOutput {
         return icon;
     }
 
-    public Map<Integer, Fraction> getProductionStepChanges() {
+    public List<ProductionStepChangeOutput> getProductionStepChanges() {
         return productionStepChanges;
     }
 

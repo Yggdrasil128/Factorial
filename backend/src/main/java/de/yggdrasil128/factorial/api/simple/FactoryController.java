@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.api.simple;
 
+import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryInput;
 import de.yggdrasil128.factorial.model.factory.FactoryOutput;
@@ -39,6 +40,11 @@ public class FactoryController {
                 .sorted(Comparator.comparing(FactoryOutput::getOrdinal)).toList();
     }
 
+    @PatchMapping("/save/factories/order")
+    public void reorder(int saveId, @RequestBody List<ReorderInputEntry> input) {
+        factoryService.reorder(saveService.get(saveId), input);
+    }
+
     @GetMapping("/factory")
     public FactoryOutput retrieve(int factoryId) {
         return new FactoryOutput(factoryService.get(factoryId));
@@ -52,6 +58,12 @@ public class FactoryController {
     @DeleteMapping("/factory")
     public void delete(int factoryId) {
         factoryService.delete(factoryId);
+    }
+
+    // this does not fit into the item controller, since items do not carry an ordinal themselves
+    @PatchMapping("/factory/items/order")
+    public void reorderItems(int factoryId, @RequestBody List<ReorderInputEntry> input) {
+        factoryService.reorderItems(factoryId, input);
     }
 
 }

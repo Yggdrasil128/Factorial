@@ -25,19 +25,41 @@ public class ApiProductionStep {
     public ApiProductionStep(ProductionStep delegate, Changelist primary, Iterable<Changelist> active) {
         this.delegate = new ProductionStepOutput(delegate);
         this.machineCount = getMachineCounts(delegate, primary, active);
-
-        RecipeModifier effectiveModifier = delegate.getEffectiveModifier();
+        /*
+         * To save some cycles, we calculate the "internal" effective modifier of the given production step once and
+         * then, for each variant of changelist application, make an independent copy and multiply its machine count by
+         * the respective value. We then use these modifiers to calculate the throughputs for all inputs and outputs.
+         */
+        RecipeModifier effectiveModifier = getEffectiveModifier(delegate);
         RecipeModifier modifierCurrent = getEffectiveCopy(effectiveModifier);
         applyMachineCount(modifierCurrent, machineCount.getCurrent());
         RecipeModifier withPrimaryChangelist = getEffectiveCopy(effectiveModifier);
         applyMachineCount(withPrimaryChangelist, machineCount.getWithPrimaryChangelist());
         RecipeModifier withActiveChangelists = getEffectiveCopy(effectiveModifier);
         applyMachineCount(withActiveChangelists, machineCount.getWithActiveChangelists());
-
         input = getThroughputs(delegate, delegate.getRecipe().getInput(), RecipeModifier::getInputSpeedMultiplier,
                 modifierCurrent, withPrimaryChangelist, withActiveChangelists);
         output = getThroughputs(delegate, delegate.getRecipe().getOutput(), RecipeModifier::getOutputSpeedMultiplier,
                 modifierCurrent, withPrimaryChangelist, withActiveChangelists);
+    }
+
+    private static RecipeModifier getEffectiveModifier(ProductionStep delegate) {
+        RecipeModifier result = new RecipeModifier();
+        for (RecipeModifier modifier : delegate.getMachine().getMachineModifiers()) {
+            result.setInputQuantityMultiplier(
+                    result.getInputQuantityMultiplier().multiply(modifier.getInputQuantityMultiplier()));
+            result.setOutputQuantityMultiplier(
+                    result.getOutputQuantityMultiplier().multiply(modifier.getOutputQuantityMultiplier()));
+            result.setDurationMultiplier(result.getDurationMultiplier().multiply(modifier.getDurationMultiplier()));
+        }
+        for (RecipeModifier modifier : delegate.getModifiers()) {
+            result.setInputQuantityMultiplier(
+                    result.getInputQuantityMultiplier().multiply(modifier.getInputQuantityMultiplier()));
+            result.setOutputQuantityMultiplier(
+                    result.getOutputQuantityMultiplier().multiply(modifier.getOutputQuantityMultiplier()));
+            result.setDurationMultiplier(result.getDurationMultiplier().multiply(modifier.getDurationMultiplier()));
+        }
+        return result;
     }
 
     private static RecipeModifier getEffectiveCopy(RecipeModifier effectiveModifier) {

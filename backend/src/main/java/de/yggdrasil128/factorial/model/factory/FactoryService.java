@@ -2,8 +2,10 @@ package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -12,8 +14,12 @@ import de.yggdrasil128.factorial.model.xgress.Xgress;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class FactoryService extends ModelService<Factory, FactoryRepository> {
@@ -67,6 +73,35 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         OptionalInputField.of(input.getDescription()).apply(factory::setDescription);
         OptionalInputField.ofId(input.getIconId(), icons::get).apply(factory::setIcon);
         return repository.save(factory);
+    }
+
+    public void reorder(Save save, List<ReorderInputEntry> input) {
+        Map<Integer, Integer> order = input.stream()
+                .collect(toMap(ReorderInputEntry::getId, ReorderInputEntry::getOrdinal));
+        for (Factory factory : save.getFactories()) {
+            Integer ordinal = order.get(factory.getId());
+            if (null != ordinal) {
+                factory.setOrdinal(ordinal.intValue());
+                repository.save(factory);
+            }
+        }
+    }
+
+    public void reorderItems(int id, List<ReorderInputEntry> input) {
+        Factory factory = get(id);
+        Map<Integer, Integer> order = input.stream()
+                .collect(toMap(ReorderInputEntry::getId, ReorderInputEntry::getOrdinal));
+        boolean modified = false;
+        for (Map.Entry<Item, Integer> entry : factory.getItemOrder().entrySet()) {
+            Integer ordinal = order.get(entry.getKey().getId());
+            if (null != ordinal) {
+                entry.setValue(ordinal);
+                modified = true;
+            }
+        }
+        if (modified) {
+            repository.save(factory);
+        }
     }
 
     @Override

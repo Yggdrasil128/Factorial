@@ -183,7 +183,7 @@ public class MigrationService {
                 getAttachedIcon(save.getGameVersion(), input.getIconName()), nl(), nl(), nl(), nm());
         Map<String, Integer> itemOrder = new HashMap<>();
         for (int i = 0; i < input.getItemOrder().size(); i++) {
-            itemOrder.put(input.getItemOrder().get(i), i);
+            itemOrder.put(input.getItemOrder().get(i), i + 1);
         }
         for (ProductionStepMigration entry : input.getProductionSteps()) {
             ProductionStep productionStep = importProductionStep(factory, entry);

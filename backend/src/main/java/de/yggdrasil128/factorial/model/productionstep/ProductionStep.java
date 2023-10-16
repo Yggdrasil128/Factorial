@@ -85,25 +85,6 @@ public class ProductionStep {
         this.machineCount = machineCount;
     }
 
-    public RecipeModifier getEffectiveModifier() {
-        RecipeModifier result = new RecipeModifier();
-        for (RecipeModifier modifier : machine.getMachineModifiers()) {
-            result.setInputQuantityMultiplier(
-                    result.getInputQuantityMultiplier().multiply(modifier.getInputQuantityMultiplier()));
-            result.setOutputQuantityMultiplier(
-                    result.getOutputQuantityMultiplier().multiply(modifier.getOutputQuantityMultiplier()));
-            result.setDurationMultiplier(result.getDurationMultiplier().multiply(modifier.getDurationMultiplier()));
-        }
-        for (RecipeModifier modifier : modifiers) {
-            result.setInputQuantityMultiplier(
-                    result.getInputQuantityMultiplier().multiply(modifier.getInputQuantityMultiplier()));
-            result.setOutputQuantityMultiplier(
-                    result.getOutputQuantityMultiplier().multiply(modifier.getOutputQuantityMultiplier()));
-            result.setDurationMultiplier(result.getDurationMultiplier().multiply(modifier.getDurationMultiplier()));
-        }
-        return result;
-    }
-
     @Override
     public boolean equals(Object that) {
         if (this == that) return true;

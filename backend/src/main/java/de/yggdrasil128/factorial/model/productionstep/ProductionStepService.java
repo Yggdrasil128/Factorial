@@ -48,4 +48,9 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         return repository.save(productionStep);
     }
 
+    public void applyChange(ProductionStep productionStep, Fraction change) {
+        productionStep.setMachineCount(productionStep.getMachineCount().add(change));
+        repository.save(productionStep);
+    }
+
 }

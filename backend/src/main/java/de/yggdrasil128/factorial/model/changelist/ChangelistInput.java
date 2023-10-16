@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-public class ChangeListInput {
+public class ChangelistInput {
 
     private int ordinal;
     private String name;

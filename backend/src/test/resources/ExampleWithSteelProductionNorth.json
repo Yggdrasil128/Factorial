@@ -4,7 +4,7 @@
     "version": "Update 7",
     "factories": [
         {
-            "ordinal" : 0,
+            "ordinal" : 1,
             "name": "Steel Production North",
             "productionSteps": [
                 {
@@ -36,11 +36,6 @@
                     "machineCount": "36"
                 }
             ],
-            "ingresses" : {
-                "Storage" : {
-                    "Coal" : "6"
-                }
-            },
             "itemOrder": [
                 "Water",
                 "Iron Ore",
@@ -48,14 +43,43 @@
                 "Coal",
                 "Steel Ingot"
             ]
+        },
+        {
+            "ordinal" : 2,
+            "name" : "Steel Sink",
+            "egresses" : {
+                "Awesome Sink" : {
+                    "Steel Ingot" : "36"
+                }
+            }
+        }
+    ],
+    "transportLinks" : [
+        {
+            "name" : "Steel Train",
+            "iconName" : "Steel Ingot",
+            "sourceFactoryName" : "Steel Production North",
+            "targetFactoryName" : "Steel Sink",
+            "resources" : {
+                "Steel Ingot" : "36"
+            }
         }
     ],
     "changelists": [
         {
-            "ordinal" : 0,
+            "ordinal" : 1,
             "name": "default",
             "primary": true,
             "active": true
+        },
+        {
+            "ordinal" : 2,
+            "name": "Extend Coal Extraction",
+            "primary": false,
+            "active": true,
+            "productionStepChanges" : {
+                "Coal" : "3 / 2"
+            }
         }
     ]
 }

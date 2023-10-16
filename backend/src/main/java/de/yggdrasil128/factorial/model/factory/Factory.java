@@ -132,4 +132,14 @@ public class Factory {
         this.itemOrder = itemOrder;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Factory && id == ((Factory) obj).id;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 + Integer.hashCode(id);
+    }
+
 }
