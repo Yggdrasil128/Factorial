@@ -1,4 +1,6 @@
-package de.yggdrasil128.factorial.model;
+package de.yggdrasil128.factorial.engine;
+
+import de.yggdrasil128.factorial.model.Fraction;
 
 public class QuantityByChangelist {
 
@@ -6,7 +8,7 @@ public class QuantityByChangelist {
     private final Fraction withPrimaryChangelist;
     private final Fraction withActiveChangelists;
 
-    public static QuantityByChangelist at(Fraction initial) {
+    public static QuantityByChangelist allAt(Fraction initial) {
         return new QuantityByChangelist(initial, initial, initial);
     }
 

@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.changelist;
 
+import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
@@ -12,7 +13,6 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.save.Save;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -21,16 +21,6 @@ import static java.util.stream.Collectors.toMap;
 
 @Service
 public class ChangelistService extends ModelService<Changelist, ChangelistRepository> {
-
-    public static Changelist getPrimaryChangelist(Save save) {
-        return save.getChangelists().stream().filter(Changelist::isPrimary).findAny()
-                .orElseThrow(ChangelistService::reportPrimaryChangelistNotAvailable);
-    }
-
-    private static ResponseStatusException reportPrimaryChangelistNotAvailable() {
-        return ModelService.report(HttpStatus.INTERNAL_SERVER_ERROR,
-                "assertion failed: no primary changelist available");
-    }
 
     private final IconService icons;
     private final ProductionStepService productionSteps;
@@ -49,7 +39,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         Changelist result = repository.save(
                 new Changelist(save, ordinal, input.getName(), input.isPrimary(), input.isActive(), icon, emptyMap()));
         if (result.isPrimary()) {
-            Changelist primary = getPrimaryChangelist(save);
+            Changelist primary = Changelists.getPrimary(save);
             primary.setPrimary(false);
             repository.save(primary);
         }
@@ -78,7 +68,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
     public void setPrimary(int id) {
         Changelist changelist = get(id);
         if (!changelist.isPrimary()) {
-            Changelist primary = getPrimaryChangelist(changelist.getSave());
+            Changelist primary = Changelists.getPrimary(changelist.getSave());
             changelist.setPrimary(true);
             changelist.setActive(true);
             repository.save(changelist);

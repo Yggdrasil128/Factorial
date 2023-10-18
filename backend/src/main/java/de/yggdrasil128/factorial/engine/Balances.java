@@ -1,12 +1,11 @@
-package de.yggdrasil128.factorial.api.factoryitemlist;
+package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.QuantityByChangelist;
 
 public class Balances {
 
-    private QuantityByChangelist production = QuantityByChangelist.at(Fraction.ZERO);
-    private QuantityByChangelist consumption = QuantityByChangelist.at(Fraction.ZERO);
+    private QuantityByChangelist production = QuantityByChangelist.allAt(Fraction.ZERO);
+    private QuantityByChangelist consumption = QuantityByChangelist.allAt(Fraction.ZERO);
 
     public QuantityByChangelist getProduction() {
         return production;

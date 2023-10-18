@@ -1,8 +1,10 @@
 package de.yggdrasil128.factorial.api.factoryitemlist;
 
+import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
+import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
@@ -31,16 +33,17 @@ public class ItemListController {
     }
 
     @GetMapping
-    public ItemList getFullList(int factoryId) {
-        return service.getFullList(factories.get(factoryId));
+    public ItemListOutput getFullList(int factoryId) {
+        Factory factory = factories.get(factoryId);
+        return new ItemListOutput(factory, service.getFullList(factory));
     }
 
     @PatchMapping("reportProductionStepMachineCount")
-    public ItemList reportProductionStepMachineCount(int productionStepId, String machineCount) {
+    public ItemListOutput reportProductionStepMachineCount(int productionStepId, String machineCount) {
         ProductionStep productionStep = productionSteps.get(productionStepId);
-        Changelist primary = ChangelistService.getPrimaryChangelist(productionStep.getFactory().getSave());
+        Changelist primary = Changelists.getPrimary(productionStep.getFactory().getSave());
         changelists.reportMachineCount(primary, productionStep, Fraction.of(machineCount));
-        return service.getFullList(productionStep.getFactory());
+        return new ItemListOutput(productionStep.getFactory(), service.getFullList(productionStep.getFactory()));
     }
 
 }
