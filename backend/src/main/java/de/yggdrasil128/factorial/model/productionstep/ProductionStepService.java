@@ -1,8 +1,10 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
+import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.machine.MachineService;
@@ -51,6 +53,16 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
     public void applyChange(ProductionStep productionStep, Fraction change) {
         productionStep.setMachineCount(productionStep.getMachineCount().add(change));
         repository.save(productionStep);
+    }
+
+    public ProductionStep applyPrimaryChangelist(int id) {
+        ProductionStep productionStep = get(id);
+        Changelist primary = Changelists.getPrimary(productionStep.getFactory().getSave());
+        Fraction change = primary.getProductionStepChanges().get(productionStep);
+        if (null != change) {
+            applyChange(productionStep, change);
+        }
+        return productionStep;
     }
 
 }

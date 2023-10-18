@@ -52,4 +52,9 @@ public class ProductionStepController {
         productionStepService.delete(productionStepId);
     }
 
+    @PostMapping("/productionStep/applyPrimaryChangelist")
+    public ProductionStepOutput applyPrimaryChangelist(int productionStepId) {
+        return new ProductionStepOutput(productionStepService.applyPrimaryChangelist(productionStepId));
+    }
+
 }
