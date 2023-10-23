@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.recipe;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
@@ -20,7 +19,6 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne(optional = false)
-    @JsonBackReference
     private GameVersion gameVersion;
     @Column(nullable = false)
     private String name;

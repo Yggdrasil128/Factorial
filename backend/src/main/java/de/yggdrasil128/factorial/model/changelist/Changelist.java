@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
@@ -16,7 +15,6 @@ public class Changelist {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne(optional = false)
-    @JsonBackReference
     private Save save;
     @Column(nullable = false)
     private int ordinal;

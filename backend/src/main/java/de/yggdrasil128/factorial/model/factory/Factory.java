@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.factory;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
@@ -18,7 +17,6 @@ public class Factory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne(optional = false)
-    @JsonBackReference
     private Save save;
     @Column(nullable = false)
     private int ordinal = 0;

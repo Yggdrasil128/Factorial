@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.machine;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
@@ -16,7 +15,6 @@ public class Machine {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne(optional = false)
-    @JsonBackReference
     private GameVersion gameVersion;
     @Column(nullable = false)
     private String name;

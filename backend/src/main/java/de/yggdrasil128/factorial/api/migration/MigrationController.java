@@ -1,8 +1,6 @@
 package de.yggdrasil128.factorial.api.migration;
 
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionMigration;
-import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveMigration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,13 +20,13 @@ public class MigrationController {
     }
 
     @PostMapping("/gameVersion")
-    public GameVersion importGameVersion(@RequestBody GameVersionMigration input) {
-        return service.importGameVersion(input);
+    public void importGameVersion(@RequestBody GameVersionMigration input) {
+        service.importGameVersion(input);
     }
 
     @PostMapping("/save")
-    public Save importSave(@RequestBody SaveMigration input) {
-        return service.importSave(input);
+    public void importSave(@RequestBody SaveMigration input) {
+        service.importSave(input);
     }
 
 }

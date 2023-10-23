@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.item;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
@@ -15,7 +14,6 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne(optional = false)
-    @JsonBackReference
     private GameVersion gameVersion;
     @Column(nullable = false)
     private String name;

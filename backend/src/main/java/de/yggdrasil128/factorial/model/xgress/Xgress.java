@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.xgress;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import jakarta.persistence.*;
@@ -14,7 +13,6 @@ public class Xgress {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne(optional = false)
-    @JsonBackReference
     private Factory factory;
     private String name;
     @ElementCollection
