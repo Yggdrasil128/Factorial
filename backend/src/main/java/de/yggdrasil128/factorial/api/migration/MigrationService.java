@@ -7,7 +7,6 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistMigration;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryMigration;
 import de.yggdrasil128.factorial.model.game.Game;
-import de.yggdrasil128.factorial.model.game.GameMigration;
 import de.yggdrasil128.factorial.model.game.GameRepository;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionMigration;
@@ -73,16 +72,25 @@ public class MigrationService {
         this.icons = icons;
     }
 
-    public Game importGame(GameMigration input) {
-        Game game = new Game(input.getName(), nl());
-        input.getVersions().entrySet().stream().map(entry -> importGameVersion(game, entry.getKey(), entry.getValue()))
-                .forEach(game.getGameVersions()::add);
-        games.save(game);
-        return game;
+    public GameVersion importGameVersion(GameVersionMigration input) {
+        Game game = games.findByName(input.getGame()).orElse(null);
+        GameVersion gameVersion;
+        if (null == game) {
+            game = new Game(input.getGame(), nl());
+            gameVersion = importGameVersion(game, input);
+            game.getGameVersions().add(gameVersion);
+            games.save(game);
+        } else {
+            gameVersion = importGameVersion(input);
+            gameVersions.save(gameVersion);
+            game.getGameVersions().add(gameVersion);
+            games.save(game);
+        }
+        return gameVersion;
     }
 
-    private static GameVersion importGameVersion(Game game, String name, GameVersionMigration input) {
-        GameVersion gameVersion = new GameVersion(game, name, null, nl(), nl(), nl(), nl(), nl());
+    private static GameVersion importGameVersion(Game game, GameVersionMigration input) {
+        GameVersion gameVersion = new GameVersion(game, input.getVersion(), null, nl(), nl(), nl(), nl(), nl());
         input.getIcons().entrySet().stream().map(entry -> importIcon(gameVersion, entry.getKey(), entry.getValue()))
                 .forEach(gameVersion.getIcons()::add);
         input.getItems().entrySet().stream().map(entry -> importItem(gameVersion, entry.getKey(), entry.getValue()))
@@ -179,19 +187,19 @@ public class MigrationService {
     }
 
     private Factory importFactory(Save save, FactoryMigration input) {
-        Factory factory = new Factory(save, input.getOrdinal(), input.getName(), input.getDescription(),
-                getAttachedIcon(save.getGameVersion(), input.getIconName()), nl(), nl(), nl(), nm());
-        Map<String, Integer> itemOrder = new HashMap<>();
+        Map<Item, Integer> itemOrder = new HashMap<>();
         for (int i = 0; i < input.getItemOrder().size(); i++) {
-            itemOrder.put(input.getItemOrder().get(i), i + 1);
+            itemOrder.put(getAttachedItem(save.getGameVersion(), input.getItemOrder().get(i)), i + 1);
         }
+        Factory factory = new Factory(save, input.getOrdinal(), input.getName(), input.getDescription(),
+                getAttachedIcon(save.getGameVersion(), input.getIconName()), nl(), nl(), nl(), itemOrder);
         for (ProductionStepMigration entry : input.getProductionSteps()) {
             ProductionStep productionStep = importProductionStep(factory, entry);
             factory.getProductionSteps().add(productionStep);
             productionStep.getRecipe().getInput().forEach(resource -> factory.getItemOrder()
-                    .computeIfAbsent(resource.getItem(), item -> itemOrder.get(item.getName())));
+                    .computeIfAbsent(resource.getItem(), item -> itemOrder.get(item)));
             productionStep.getRecipe().getOutput().forEach(resource -> factory.getItemOrder()
-                    .computeIfAbsent(resource.getItem(), item -> itemOrder.get(item.getName())));
+                    .computeIfAbsent(resource.getItem(), item -> itemOrder.get(item)));
         }
         input.getIngresses().entrySet().stream().map(entry -> importXgress(factory, entry.getKey(), entry.getValue()))
                 .forEach(factory.getIngresses()::add);
@@ -239,12 +247,12 @@ public class MigrationService {
 
     private List<Resource> importAttachedResources(GameVersion gameVersion, Map<String, Fraction> input) {
         return input.entrySet().stream()
-                .map(entry -> new Resource(
-                        items.findByGameVersionIdAndName(gameVersion.getId(), entry.getKey())
-                                .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                                        "entity in save refers to non-existent item '" + entry.getKey() + "'")),
-                        entry.getValue()))
-                .toList();
+                .map(entry -> new Resource(getAttachedItem(gameVersion, entry.getKey()), entry.getValue())).toList();
+    }
+
+    private Item getAttachedItem(GameVersion gameVersion, String name) {
+        return items.findByGameVersionIdAndName(gameVersion.getId(), name).orElseThrow(() -> ModelService
+                .report(HttpStatus.CONFLICT, "entity in save refers to non-existent item '" + name + "'"));
     }
 
     private static Factory getDetachedFactory(Save save, String name) {
@@ -269,13 +277,9 @@ public class MigrationService {
                 .report(HttpStatus.CONFLICT, "entity in save refers to non-existent icon '" + name + "'"));
     }
 
-    // since we need empty modifiable collections so often
+    // since we need it so often
     private static <E> List<E> nl() {
         return new ArrayList<>();
-    }
-
-    private static <K, V> Map<K, V> nm() {
-        return new HashMap<>();
     }
 
 }

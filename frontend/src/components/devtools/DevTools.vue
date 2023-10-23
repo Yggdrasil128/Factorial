@@ -15,7 +15,7 @@ const setupTestDataButtonState = ref(0);
 async function setupTestData() {
   setupTestDataButtonState.value = 1;
 
-  await axios.post('api/migration/game', satisfactoryUpdate7.default);
+  await axios.post('api/migration/gameVersion', satisfactoryUpdate7.default);
   await axios.post('api/migration/save', exampleWithSteelProductionNorth.default);
 
   setupTestDataButtonState.value = 2;

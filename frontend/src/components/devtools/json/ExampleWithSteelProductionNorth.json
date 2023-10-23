@@ -51,7 +51,10 @@
                 "Awesome Sink" : {
                     "Steel Ingot" : "36"
                 }
-            }
+            },
+            "itemOrder": [
+                "Steel Ingot"
+            ]
         }
     ],
     "transportLinks" : [

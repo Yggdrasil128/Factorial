@@ -18,6 +18,10 @@ public class ThroughputOutput {
         return item;
     }
 
+    public int getItemId() {
+        return item.getId();
+    }
+
     public QuantityByChangelist getQuantity() {
         return quantity;
     }

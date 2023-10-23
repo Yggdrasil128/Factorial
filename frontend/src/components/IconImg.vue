@@ -7,7 +7,7 @@ const src = computed(() => {
   if (props.icon.url.startsWith("http")) {
     return props.icon.url;
   }
-  return "http://25.53.80.171:8080" + props.icon.url;
+  return "http://localhost:8080" + props.icon.url;
 });
 </script>
 
