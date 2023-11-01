@@ -9,6 +9,7 @@ import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
 import de.yggdrasil128.factorial.model.save.Save;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class TransportLinkService extends ModelService<TransportLink, TransportL
         Factory sourceFactory = factories.get(input.getSourceFactoryId());
         Factory targetFactory = factories.get(input.getTargetFactoryId());
         List<Resource> linkedResources = OptionalInputField.of(input.getResources()).map(resources::get).get();
+        checkForLoop(input, sourceFactory, targetFactory);
         return repository.save(new TransportLink(save, input.getName(), input.getDescription(), icon, sourceFactory,
                 targetFactory, linkedResources));
     }
@@ -45,7 +47,15 @@ public class TransportLinkService extends ModelService<TransportLink, TransportL
         OptionalInputField.ofId(input.getSourceFactoryId(), factories::get).apply(transportLink::setSourceFactory);
         OptionalInputField.ofId(input.getTargetFactoryId(), factories::get).apply(transportLink::setTargetFactory);
         OptionalInputField.of(input.getResources()).map(resources::get).apply(transportLink::setResources);
+        checkForLoop(input, transportLink.getSourceFactory(), transportLink.getTargetFactory());
         return repository.save(transportLink);
+    }
+
+    private static void checkForLoop(TransportLinkInput input, Factory sourceFactory, Factory targetFactory) {
+        if (sourceFactory.equals(targetFactory)) {
+            throw ModelService.report(HttpStatus.CONFLICT, "transport link '" + input.getName()
+                    + "' constitutes a loop for factory '" + sourceFactory.getName() + "'");
+        }
     }
 
 }

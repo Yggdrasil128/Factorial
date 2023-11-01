@@ -16,14 +16,14 @@ defineProps(["item", "productionSteps", "itemMap"]);
       <div class="itemInfo">
         <div class="itemName">{{ item.name }}</div>
         <div class="itemBalance">
-          Production:
-          <quantity-display :quantity="item.balances.production" color="green" show-unit/>
+          Production Capacity:
+          <quantity-display :quantity="item.balances.productionCapacity" color="green" show-unit/>
           &emsp;
           Consumption:
-          <quantity-display :quantity="item.balances.consumption" color="red" show-unit/>
+          <quantity-display :quantity="item.balances.consumptionRequired" color="red" show-unit/>
           &emsp;
-          Net:
-          <quantity-display :quantity="item.balances.net" color="auto" show-unit/>
+          Available Production:
+          <quantity-display :quantity="item.balances.productionAvailable" color="auto" show-unit/>
         </div>
       </div>
     </div>

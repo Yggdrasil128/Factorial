@@ -51,18 +51,18 @@ public class XgressController {
     }
 
     @GetMapping("/xgress")
-    public XgressOutput retrieve(int ingressId) {
-        return new XgressOutput(xgressService.get(ingressId));
+    public XgressOutput retrieve(int xgressId) {
+        return new XgressOutput(xgressService.get(xgressId));
     }
 
     @PatchMapping("/xgress")
-    public XgressOutput update(int itemId, @RequestBody XgressInput input) {
-        return new XgressOutput(xgressService.update(itemId, input));
+    public XgressOutput update(int xgressId, @RequestBody XgressInput input) {
+        return new XgressOutput(xgressService.update(xgressId, input));
     }
 
     @DeleteMapping("/xgress")
-    public void delete(int ingressId) {
-        xgressService.delete(ingressId);
+    public void delete(int xgressId) {
+        xgressService.delete(xgressId);
     }
 
 }

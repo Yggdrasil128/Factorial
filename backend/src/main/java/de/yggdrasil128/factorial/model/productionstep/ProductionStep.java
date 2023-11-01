@@ -3,12 +3,14 @@ package de.yggdrasil128.factorial.model.productionstep;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.factory.Factory;
+import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class ProductionStep {
@@ -26,17 +28,23 @@ public class ProductionStep {
     private List<RecipeModifier> modifiers;
     @Convert(converter = FractionConverter.class)
     private Fraction machineCount = Fraction.ONE;
+    @ManyToMany
+    private Set<Item> inputGreed;
+    @ManyToMany
+    private Set<Item> outputGreed;
 
     public ProductionStep() {
     }
 
     public ProductionStep(Factory factory, Machine machine, Recipe recipe, List<RecipeModifier> modifiers,
-                          Fraction machineCount) {
+                          Fraction machineCount, Set<Item> inputGreed, Set<Item> outputGreed) {
         this.factory = factory;
         this.machine = machine;
         this.recipe = recipe;
         this.modifiers = modifiers;
         this.machineCount = machineCount;
+        this.inputGreed = inputGreed;
+        this.outputGreed = outputGreed;
     }
 
     public int getId() {
@@ -81,6 +89,22 @@ public class ProductionStep {
 
     public void setMachineCount(Fraction machineCount) {
         this.machineCount = machineCount;
+    }
+
+    public Set<Item> getInputGreed() {
+        return inputGreed;
+    }
+
+    public void setInputGreed(Set<Item> inputGreed) {
+        this.inputGreed = inputGreed;
+    }
+
+    public Set<Item> getOutputGreed() {
+        return outputGreed;
+    }
+
+    public void setOutputGreed(Set<Item> outputGreed) {
+        this.outputGreed = outputGreed;
     }
 
     @Override

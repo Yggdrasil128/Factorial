@@ -15,15 +15,17 @@ public class Xgress {
     @ManyToOne(optional = false)
     private Factory factory;
     private String name;
+    private boolean greedy;
     @ElementCollection
     private List<Resource> resources;
 
     public Xgress() {
     }
 
-    public Xgress(Factory factory, String name, List<Resource> resources) {
+    public Xgress(Factory factory, String name, boolean greedy, List<Resource> resources) {
         this.factory = factory;
         this.name = name;
+        this.greedy = greedy;
         this.resources = resources;
     }
 
@@ -49,6 +51,14 @@ public class Xgress {
 
     public List<Resource> getResources() {
         return resources;
+    }
+
+    public boolean isGreedy() {
+        return greedy;
+    }
+
+    public void setGreedy(boolean greedy) {
+        this.greedy = greedy;
     }
 
     public void setResources(List<Resource> resources) {

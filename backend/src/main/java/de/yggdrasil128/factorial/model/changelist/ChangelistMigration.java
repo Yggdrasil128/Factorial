@@ -1,7 +1,6 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import de.yggdrasil128.factorial.model.Fraction;
-
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -13,7 +12,7 @@ public class ChangelistMigration {
     private boolean primary;
     private boolean active;
     private String iconName;
-    private Map<String, Fraction> productionStepChanges = emptyMap();
+    private Map<String, List<ProductionStepChangeMigration>> productionStepChanges = emptyMap();
 
     public int getOrdinal() {
         return ordinal;
@@ -55,11 +54,11 @@ public class ChangelistMigration {
         this.iconName = iconName;
     }
 
-    public Map<String, Fraction> getProductionStepChanges() {
+    public Map<String, List<ProductionStepChangeMigration>> getProductionStepChanges() {
         return productionStepChanges;
     }
 
-    public void setProductionStepChanges(Map<String, Fraction> productionStepChanges) {
+    public void setProductionStepChanges(Map<String, List<ProductionStepChangeMigration>> productionStepChanges) {
         this.productionStepChanges = productionStepChanges;
     }
 

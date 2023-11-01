@@ -21,12 +21,13 @@ public class XgressService extends ModelService<Xgress, XgressRepository> {
 
     public Xgress create(Factory factory, XgressInput input) {
         List<Resource> gressedResources = OptionalInputField.of(input.getResources()).map(resources::get).get();
-        return new Xgress(factory, input.getName(), gressedResources);
+        return new Xgress(factory, input.getName(), input.isGreedy(), gressedResources);
     }
 
     public Xgress update(int id, XgressInput input) {
         Xgress xgress = get(id);
         OptionalInputField.of(input.getName()).apply(xgress::setName);
+        OptionalInputField.of(input.isGreedy()).apply(xgress::setGreedy);
         OptionalInputField.of(input.getResources()).map(resources::get).apply(xgress::setResources);
         return repository.save(xgress);
     }

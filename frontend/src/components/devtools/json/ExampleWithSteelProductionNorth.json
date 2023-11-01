@@ -4,7 +4,7 @@
     "version": "Update 7",
     "factories": [
         {
-            "ordinal" : 1,
+            "ordinal": 1,
             "name": "Steel Production North",
             "productionSteps": [
                 {
@@ -28,12 +28,20 @@
                 {
                     "machineName": "Refinery",
                     "recipeName": "Pure Iron Ingot",
-                    "machineCount": "312 / 14"
+                    "machineCount": "312 / 14",
+                    "inputGreed": [
+                        "Iron Ore",
+                        "Water"
+                    ]
                 },
                 {
                     "machineName": "Foundry",
                     "recipeName": "Solid Steel Ingot",
-                    "machineCount": "36"
+                    "machineCount": "36",
+                    "outputGreed": [
+                        "Iron Ingot",
+                        "Coal"
+                    ]
                 }
             ],
             "itemOrder": [
@@ -45,43 +53,52 @@
             ]
         },
         {
-            "ordinal" : 2,
-            "name" : "Steel Sink",
-            "egresses" : {
-                "Awesome Sink" : {
-                    "Steel Ingot" : "36"
+            "ordinal": 2,
+            "name": "Steel Sink",
+            "egresses": [
+                {
+                    "name": "Awesome Sink",
+                    "greedy": false,
+                    "resources": {
+                        "Steel Ingot": "39"
+                    }
                 }
-            },
+            ],
             "itemOrder": [
                 "Steel Ingot"
             ]
         }
     ],
-    "transportLinks" : [
+    "transportLinks": [
         {
-            "name" : "Steel Train",
-            "iconName" : "Steel Ingot",
-            "sourceFactoryName" : "Steel Production North",
-            "targetFactoryName" : "Steel Sink",
-            "resources" : {
-                "Steel Ingot" : "36"
+            "name": "Steel Train",
+            "iconName": "Steel Ingot",
+            "sourceFactoryName": "Steel Production North",
+            "targetFactoryName": "Steel Sink",
+            "resources": {
+                "Steel Ingot": "36"
             }
         }
     ],
     "changelists": [
         {
-            "ordinal" : 1,
+            "ordinal": 1,
             "name": "default",
             "primary": true,
             "active": true
         },
         {
-            "ordinal" : 2,
+            "ordinal": 2,
             "name": "Extend Coal Extraction",
             "primary": false,
             "active": true,
-            "productionStepChanges" : {
-                "Coal" : "3 / 2"
+            "productionStepChanges": {
+                "Steel Production North": [
+                    {
+                        "productionStepIndex": 2,
+                        "change": "3 / 2"
+                    }
+                ]
             }
         }
     ]

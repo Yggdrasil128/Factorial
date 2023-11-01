@@ -4,27 +4,47 @@ import de.yggdrasil128.factorial.model.Fraction;
 
 public class Balances {
 
-    private QuantityByChangelist production = QuantityByChangelist.allAt(Fraction.ZERO);
-    private QuantityByChangelist consumption = QuantityByChangelist.allAt(Fraction.ZERO);
+    private QuantityByChangelist productionCapacity = QuantityByChangelist.allAt(Fraction.ZERO);
+    private QuantityByChangelist productionRequired = QuantityByChangelist.allAt(Fraction.ZERO);
+    private QuantityByChangelist consumptionCapacity = QuantityByChangelist.allAt(Fraction.ZERO);
+    private QuantityByChangelist consumptionRequired = QuantityByChangelist.allAt(Fraction.ZERO);
 
-    public QuantityByChangelist getProduction() {
-        return production;
+    public QuantityByChangelist getProductionCapacity() {
+        return productionCapacity;
     }
 
-    public void setProduction(QuantityByChangelist production) {
-        this.production = production;
+    public QuantityByChangelist getProductionRequired() {
+        return productionRequired;
     }
 
-    public QuantityByChangelist getConsumption() {
-        return consumption;
+    public void recordProduction(QuantityByChangelist production, boolean required) {
+        productionCapacity = productionCapacity.add(production);
+        if (required) {
+            productionRequired = productionRequired.add(production);
+        }
     }
 
-    public void setConsumption(QuantityByChangelist consumption) {
-        this.consumption = consumption;
+    public QuantityByChangelist getConsumptionCapacity() {
+        return consumptionCapacity;
     }
 
-    public QuantityByChangelist getNet() {
-        return production.subtract(consumption);
+    public QuantityByChangelist getConsumptionRequired() {
+        return consumptionRequired;
+    }
+
+    public void recordConsumption(QuantityByChangelist consumption, boolean required) {
+        consumptionCapacity = consumptionCapacity.add(consumption);
+        if (required) {
+            consumptionRequired = consumptionRequired.add(consumption);
+        }
+    }
+
+    public QuantityByChangelist getProductionAvailable() {
+        return productionCapacity.subtract(consumptionRequired);
+    }
+
+    public QuantityByChangelist getConsumptionAvailable() {
+        return consumptionCapacity.subtract(productionRequired);
     }
 
 }

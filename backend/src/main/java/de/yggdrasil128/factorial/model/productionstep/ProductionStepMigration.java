@@ -3,8 +3,10 @@ package de.yggdrasil128.factorial.model.productionstep;
 import de.yggdrasil128.factorial.model.Fraction;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 public class ProductionStepMigration {
 
@@ -12,6 +14,8 @@ public class ProductionStepMigration {
     private String recipeName;
     private List<String> modifierNames = emptyList();
     private Fraction machineCount;
+    private Set<String> inputGreedNames = emptySet();
+    private Set<String> outputGreedNames = emptySet();
 
     public String getMachineName() {
         return machineName;
@@ -43,6 +47,22 @@ public class ProductionStepMigration {
 
     public void setMachineCount(Fraction machineCount) {
         this.machineCount = machineCount;
+    }
+
+    public Set<String> getInputGreedNames() {
+        return inputGreedNames;
+    }
+
+    public void setInputGreedNames(Set<String> inputGreedNames) {
+        this.inputGreedNames = inputGreedNames;
+    }
+
+    public Set<String> getOutputGreedNames() {
+        return outputGreedNames;
+    }
+
+    public void setOutputGreedNames(Set<String> outputGreedNames) {
+        this.outputGreedNames = outputGreedNames;
     }
 
 }

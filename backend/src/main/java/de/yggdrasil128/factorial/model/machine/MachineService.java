@@ -26,7 +26,7 @@ public class MachineService extends ModelService<Machine, MachineRepository> {
     public Machine create(GameVersion gameVersion, MachineInput input) {
         Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         List<RecipeModifier> machineModifiers = OptionalInputField
-                .ofIds(input.getMachineModifierIds(), recipeModifiers::get).get();
+                .ofIds(input.getMachineModifierIds(), recipeModifiers::get).asList();
         List<String> category = OptionalInputField.of(input.getCategory()).get();
         return repository.save(new Machine(gameVersion, input.getName(), icon, machineModifiers, category));
     }
@@ -36,7 +36,7 @@ public class MachineService extends ModelService<Machine, MachineRepository> {
         OptionalInputField.of(input.getName()).apply(machine::setName);
         OptionalInputField.ofId(input.getIconId(), icons::get).apply(machine::setIcon);
         OptionalInputField.ofIds(input.getMachineModifierIds(), recipeModifiers::get)
-                .apply(machine::setMachineModifiers);
+                .applyList(machine::setMachineModifiers);
         OptionalInputField.of(input.getCategory()).apply(machine::setCategory);
         return repository.save(machine);
     }

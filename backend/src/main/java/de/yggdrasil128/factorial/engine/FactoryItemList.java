@@ -28,41 +28,43 @@ public class FactoryItemList {
          * factory. Each time, we calculate the effective production/consumption and reduce the corresponding sum in
          * this mapping's values. Thus, after we finished our work, those values resemble this item list's main entries.
          */
-        for (ProductionStepThroughputs productionStep : productionStepTroughputs.values()) {
-            for (Map.Entry<Item, QuantityByChangelist> input : productionStep.getInput().entrySet()) {
-                recordConsumption(computeBalances(itemBalances, input.getKey()), input.getValue());
+        for (Map.Entry<ProductionStep, ProductionStepThroughputs> entry : productionStepTroughputs.entrySet()) {
+            for (Map.Entry<Item, QuantityByChangelist> input : entry.getValue().getInput().entrySet()) {
+                boolean greedy = entry.getKey().getInputGreed().contains(input.getKey());
+                computeBalances(itemBalances, input.getKey()).recordConsumption(input.getValue(), greedy);
             }
-            for (Map.Entry<Item, QuantityByChangelist> output : productionStep.getOutput().entrySet()) {
-                recordProduction(computeBalances(itemBalances, output.getKey()), output.getValue());
+            for (Map.Entry<Item, QuantityByChangelist> output : entry.getValue().getOutput().entrySet()) {
+                boolean greedy = entry.getKey().getOutputGreed().contains(output.getKey());
+                computeBalances(itemBalances, output.getKey()).recordProduction(output.getValue(), greedy);
             }
         }
         Set<TransportLink> participatingTransportLinks = new HashSet<>();
         for (TransportLink transportLink : factory.getSave().getTransportLinks()) {
-            // TODO prohibit a transport link leading from a factory to itself
+            // TODO decide on greediness for transport links
             if (transportLink.getSourceFactory().equals(factory)) {
                 for (Resource resource : transportLink.getResources()) {
-                    recordConsumption(computeBalances(itemBalances, resource.getItem()),
-                            QuantityByChangelist.allAt(resource.getQuantity()));
+                    computeBalances(itemBalances, resource.getItem())
+                            .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), true);
                     participatingTransportLinks.add(transportLink);
                 }
             } else if (transportLink.getTargetFactory().equals(factory)) {
                 for (Resource resource : transportLink.getResources()) {
-                    recordProduction(computeBalances(itemBalances, resource.getItem()),
-                            QuantityByChangelist.allAt(resource.getQuantity()));
+                    computeBalances(itemBalances, resource.getItem())
+                            .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), true);
                     participatingTransportLinks.add(transportLink);
                 }
             }
         }
         for (Xgress ingress : factory.getIngresses()) {
             for (Resource resource : ingress.getResources()) {
-                recordProduction(computeBalances(itemBalances, resource.getItem()),
-                        QuantityByChangelist.allAt(resource.getQuantity()));
+                computeBalances(itemBalances, resource.getItem())
+                        .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), ingress.isGreedy());
             }
         }
         for (Xgress egress : factory.getEgresses()) {
             for (Resource resource : egress.getResources()) {
-                recordConsumption(computeBalances(itemBalances, resource.getItem()),
-                        QuantityByChangelist.allAt(resource.getQuantity()));
+                computeBalances(itemBalances, resource.getItem())
+                        .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), egress.isGreedy());
             }
         }
         return new FactoryItemList(itemBalances, productionStepTroughputs, participatingTransportLinks);
@@ -70,14 +72,6 @@ public class FactoryItemList {
 
     private static Balances computeBalances(Map<Item, Balances> itemBalances, Item delegate) {
         return itemBalances.computeIfAbsent(delegate, key -> new Balances());
-    }
-
-    private static void recordConsumption(Balances balances, QuantityByChangelist consumption) {
-        balances.setConsumption(balances.getConsumption().add(consumption));
-    }
-
-    private static void recordProduction(Balances balances, QuantityByChangelist production) {
-        balances.setProduction(balances.getProduction().add(production));
     }
 
     private Map<Item, Balances> itemBalances = new HashMap<>();

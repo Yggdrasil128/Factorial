@@ -1,13 +1,11 @@
 package de.yggdrasil128.factorial.model.factory;
 
-import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepMigration;
+import de.yggdrasil128.factorial.model.xgress.XgressMigration;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 public class FactoryMigration {
 
@@ -17,8 +15,8 @@ public class FactoryMigration {
     private String iconName;
     private List<ProductionStepMigration> productionSteps = emptyList();
     private List<String> itemOrder = emptyList();
-    private Map<String, Map<String, Fraction>> ingresses = emptyMap();
-    private Map<String, Map<String, Fraction>> egresses = emptyMap();
+    private List<XgressMigration> ingresses = emptyList();
+    private List<XgressMigration> egresses = emptyList();
 
     public int getOrdinal() {
         return ordinal;
@@ -60,19 +58,19 @@ public class FactoryMigration {
         this.productionSteps = productionSteps;
     }
 
-    public Map<String, Map<String, Fraction>> getIngresses() {
+    public List<XgressMigration> getIngresses() {
         return ingresses;
     }
 
-    public void setIngresses(Map<String, Map<String, Fraction>> ingresses) {
+    public void setIngresses(List<XgressMigration> ingresses) {
         this.ingresses = ingresses;
     }
 
-    public Map<String, Map<String, Fraction>> getEgresses() {
+    public List<XgressMigration> getEgresses() {
         return egresses;
     }
 
-    public void setEgresses(Map<String, Map<String, Fraction>> egresses) {
+    public void setEgresses(List<XgressMigration> egresses) {
         this.egresses = egresses;
     }
 

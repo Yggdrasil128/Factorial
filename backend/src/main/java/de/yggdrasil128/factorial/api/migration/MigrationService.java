@@ -4,6 +4,7 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistMigration;
+import de.yggdrasil128.factorial.model.changelist.ProductionStepChangeMigration;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryMigration;
 import de.yggdrasil128.factorial.model.game.Game;
@@ -35,16 +36,14 @@ import de.yggdrasil128.factorial.model.save.SaveRepository;
 import de.yggdrasil128.factorial.model.transportlink.TransportLink;
 import de.yggdrasil128.factorial.model.transportlink.TransportLinkMigration;
 import de.yggdrasil128.factorial.model.xgress.Xgress;
+import de.yggdrasil128.factorial.model.xgress.XgressMigration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 public class MigrationService {
@@ -201,10 +200,8 @@ public class MigrationService {
             productionStep.getRecipe().getOutput().forEach(resource -> factory.getItemOrder()
                     .computeIfAbsent(resource.getItem(), item -> itemOrder.get(item)));
         }
-        input.getIngresses().entrySet().stream().map(entry -> importXgress(factory, entry.getKey(), entry.getValue()))
-                .forEach(factory.getIngresses()::add);
-        input.getEgresses().entrySet().stream().map(entry -> importXgress(factory, entry.getKey(), entry.getValue()))
-                .forEach(factory.getEgresses()::add);
+        input.getIngresses().stream().map(entry -> importXgress(factory, entry)).forEach(factory.getIngresses()::add);
+        input.getEgresses().stream().map(entry -> importXgress(factory, entry)).forEach(factory.getEgresses()::add);
         return factory;
     }
 
@@ -222,16 +219,30 @@ public class MigrationService {
             throw ModelService.report(HttpStatus.CONFLICT,
                     "entity in save refers to at least one non-existent recipe modifier");
         }
-        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount());
+        Set<Item> inputGreed = recipe.getInput().stream().map(Resource::getItem).collect(toSet());
+        Set<Item> outputGreed = recipe.getOutput().size() > 2
+                ? recipe.getOutput().stream().map(Resource::getItem).collect(toSet())
+                : ns();
+        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount(), inputGreed,
+                outputGreed);
     }
 
-    private Xgress importXgress(Factory factory, String name, Map<String, Fraction> resources) {
-        return new Xgress(factory, name, importAttachedResources(factory.getSave().getGameVersion(), resources));
+    private Xgress importXgress(Factory factory, XgressMigration input) {
+        List<Resource> resources = importAttachedResources(factory.getSave().getGameVersion(), input.getResources());
+        return new Xgress(factory, input.getName(), input.isGreedy(), resources);
     }
 
     private Changelist importChangelist(Save save, ChangelistMigration input) {
-        Map<ProductionStep, Fraction> productionStepChanges = input.getProductionStepChanges().entrySet().stream()
-                .collect(toMap(entry -> getDetachedProductionStep(save, entry.getKey()), entry -> entry.getValue()));
+        Map<ProductionStep, Fraction> productionStepChanges = new HashMap<>();
+        for (Map.Entry<String, List<ProductionStepChangeMigration>> factoryEntry : input.getProductionStepChanges()
+                .entrySet()) {
+            Factory factory = getDetachedFactory(save, factoryEntry.getKey());
+            for (ProductionStepChangeMigration productionStepEntry : factoryEntry.getValue()) {
+                productionStepChanges.put(
+                        factory.getProductionSteps().get(productionStepEntry.getProductionStepIndex()),
+                        productionStepEntry.getChange());
+            }
+        }
         return new Changelist(save, input.getOrdinal(), input.getName(), input.isPrimary(), input.isActive(),
                 getAttachedIcon(save.getGameVersion(), input.getIconName()), productionStepChanges);
     }
@@ -240,6 +251,10 @@ public class MigrationService {
         Icon icon = getAttachedIcon(save.getGameVersion(), input.getIconName());
         Factory sourceFactory = getDetachedFactory(save, input.getSourceFactoryName());
         Factory targetFactory = getDetachedFactory(save, input.getTargetFactoryName());
+        if (sourceFactory.getName().equals(targetFactory.getName())) {
+            throw ModelService.report(HttpStatus.CONFLICT, "transport link '" + input.getName()
+                    + "' constitutes a loop for factory '" + sourceFactory.getName() + "'");
+        }
         List<Resource> resources = importAttachedResources(save.getGameVersion(), input.getResources());
         return new TransportLink(save, input.getName(), input.getDescription(), icon, sourceFactory, targetFactory,
                 resources);
@@ -261,14 +276,6 @@ public class MigrationService {
                         "entity in save refers to non-existent factory '" + name + "'"));
     }
 
-    private static ProductionStep getDetachedProductionStep(Save save, String name) {
-        // TODO production steps need names now?
-        return save.getFactories().stream().map(Factory::getProductionSteps).flatMap(List::stream)
-                .filter(productionStep -> productionStep.getRecipe().getName().equals(name)).findAny()
-                .orElseThrow(() -> ModelService.report(HttpStatus.BAD_REQUEST,
-                        "entity in save refers to non-existent production step '" + name + "'"));
-    }
-
     private Icon getAttachedIcon(GameVersion gameVersion, String name) {
         if (null == name) {
             return null;
@@ -277,9 +284,13 @@ public class MigrationService {
                 .report(HttpStatus.CONFLICT, "entity in save refers to non-existent icon '" + name + "'"));
     }
 
-    // since we need it so often
+    // since we need these so often
     private static <E> List<E> nl() {
         return new ArrayList<>();
+    }
+
+    private static <E> Set<E> ns() {
+        return new HashSet<>();
     }
 
 }
