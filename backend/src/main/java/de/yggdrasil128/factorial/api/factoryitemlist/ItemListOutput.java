@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.api.factoryitemlist;
 
 import de.yggdrasil128.factorial.engine.FactoryItemList;
 import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.transportlink.TransportLinkOutput;
+import de.yggdrasil128.factorial.model.transportline.TransportLineOutput;
 import de.yggdrasil128.factorial.model.xgress.XgressOutput;
 
 import java.util.Comparator;
@@ -12,7 +12,7 @@ public class ItemListOutput {
 
     private final List<ListItemOutput> items;
     private final List<ListProductionStepOutput> productionSteps;
-    private final List<TransportLinkOutput> transportLinks;
+    private final List<TransportLineOutput> transportLines;
     private final List<XgressOutput> ingresses;
     private final List<XgressOutput> egresses;
 
@@ -23,7 +23,7 @@ public class ItemListOutput {
                 .sorted(Comparator.comparing(ListItemOutput::getOrdinal)).toList();
         productionSteps = delegate.getProductionStepThroughputs().entrySet().stream()
                 .map(entry -> new ListProductionStepOutput(entry.getKey(), entry.getValue())).toList();
-        transportLinks = delegate.getParticipatingTransportLinks().stream().map(TransportLinkOutput::new).toList();
+        transportLines = delegate.getParticipatingTransportLines().stream().map(TransportLineOutput::new).toList();
         ingresses = factory.getIngresses().stream().map(XgressOutput::new).toList();
         egresses = factory.getEgresses().stream().map(XgressOutput::new).toList();
     }
@@ -36,8 +36,8 @@ public class ItemListOutput {
         return productionSteps;
     }
 
-    public List<TransportLinkOutput> getTransportLinks() {
-        return transportLinks;
+    public List<TransportLineOutput> getTransportLines() {
+        return transportLines;
     }
 
     public List<XgressOutput> getIngresses() {

@@ -1,10 +1,10 @@
-package de.yggdrasil128.factorial.model.transportlink;
+package de.yggdrasil128.factorial.model.transportline;
 
 import de.yggdrasil128.factorial.model.Fraction;
 
 import java.util.Map;
 
-public class TransportLinkMigration {
+public class TransportLineMigration {
 
     private String name;
     private String description;

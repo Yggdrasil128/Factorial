@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.transportlink;
+package de.yggdrasil128.factorial.model.transportline;
 
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.icon.Icon;
@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-public class TransportLink {
+public class TransportLine {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,10 +27,10 @@ public class TransportLink {
     @ElementCollection
     private List<Resource> resources;
 
-    public TransportLink() {
+    public TransportLine() {
     }
 
-    public TransportLink(Save save, String name, String description, Icon icon, Factory sourceFactory,
+    public TransportLine(Save save, String name, String description, Icon icon, Factory sourceFactory,
                          Factory targetFactory, List<Resource> resources) {
         this.save = save;
         this.name = name;
@@ -106,9 +106,9 @@ public class TransportLink {
         if (this == that) return true;
         if (that == null || getClass() != that.getClass()) return false;
 
-        TransportLink transportLink = (TransportLink) that;
+        TransportLine transportLine = (TransportLine) that;
 
-        return id == transportLink.id;
+        return id == transportLine.id;
     }
 
     @Override

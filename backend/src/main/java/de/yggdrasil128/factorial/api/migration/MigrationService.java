@@ -33,8 +33,8 @@ import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveMigration;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
-import de.yggdrasil128.factorial.model.transportlink.TransportLink;
-import de.yggdrasil128.factorial.model.transportlink.TransportLinkMigration;
+import de.yggdrasil128.factorial.model.transportline.TransportLine;
+import de.yggdrasil128.factorial.model.transportline.TransportLineMigration;
 import de.yggdrasil128.factorial.model.xgress.Xgress;
 import de.yggdrasil128.factorial.model.xgress.XgressMigration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,8 +179,8 @@ public class MigrationService {
         Save save = new Save(gameVersion, input.getName(), nl(), nl(), nl());
         input.getFactories().stream().map(entry -> importFactory(save, entry)).forEach(save.getFactories()::add);
         input.getChangelists().stream().map(entry -> importChangelist(save, entry)).forEach(save.getChangelists()::add);
-        input.getTransportLinks().stream().map(entry -> importTransportLink(save, entry))
-                .forEach(save.getTransportLinks()::add);
+        input.getTransportLines().stream().map(entry -> importTransportLine(save, entry))
+                .forEach(save.getTransportLines()::add);
         saves.save(save);
         return save;
     }
@@ -247,16 +247,16 @@ public class MigrationService {
                 getAttachedIcon(save.getGameVersion(), input.getIconName()), productionStepChanges);
     }
 
-    private TransportLink importTransportLink(Save save, TransportLinkMigration input) {
+    private TransportLine importTransportLine(Save save, TransportLineMigration input) {
         Icon icon = getAttachedIcon(save.getGameVersion(), input.getIconName());
         Factory sourceFactory = getDetachedFactory(save, input.getSourceFactoryName());
         Factory targetFactory = getDetachedFactory(save, input.getTargetFactoryName());
         if (sourceFactory.getName().equals(targetFactory.getName())) {
-            throw ModelService.report(HttpStatus.CONFLICT, "transport link '" + input.getName()
+            throw ModelService.report(HttpStatus.CONFLICT, "transport line '" + input.getName()
                     + "' constitutes a loop for factory '" + sourceFactory.getName() + "'");
         }
         List<Resource> resources = importAttachedResources(save.getGameVersion(), input.getResources());
-        return new TransportLink(save, input.getName(), input.getDescription(), icon, sourceFactory, targetFactory,
+        return new TransportLine(save, input.getName(), input.getDescription(), icon, sourceFactory, targetFactory,
                 resources);
     }
 

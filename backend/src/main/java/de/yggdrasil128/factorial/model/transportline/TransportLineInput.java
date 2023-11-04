@@ -1,10 +1,10 @@
-package de.yggdrasil128.factorial.model.transportlink;
+package de.yggdrasil128.factorial.model.transportline;
 
 import de.yggdrasil128.factorial.model.resource.ResourceInput;
 
 import java.util.List;
 
-public class TransportLinkInput {
+public class TransportLineInput {
 
     private String description;
     private String name;

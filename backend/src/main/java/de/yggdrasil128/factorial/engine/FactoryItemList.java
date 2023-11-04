@@ -4,7 +4,7 @@ import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.transportlink.TransportLink;
+import de.yggdrasil128.factorial.model.transportline.TransportLine;
 import de.yggdrasil128.factorial.model.xgress.Xgress;
 
 import java.util.HashMap;
@@ -38,20 +38,20 @@ public class FactoryItemList {
                 computeBalances(itemBalances, output.getKey()).recordProduction(output.getValue(), greedy);
             }
         }
-        Set<TransportLink> participatingTransportLinks = new HashSet<>();
-        for (TransportLink transportLink : factory.getSave().getTransportLinks()) {
+        Set<TransportLine> participatingTransportLines = new HashSet<>();
+        for (TransportLine transportLine : factory.getSave().getTransportLines()) {
             // TODO decide on greediness for transport links
-            if (transportLink.getSourceFactory().equals(factory)) {
-                for (Resource resource : transportLink.getResources()) {
+            if (transportLine.getSourceFactory().equals(factory)) {
+                for (Resource resource : transportLine.getResources()) {
                     computeBalances(itemBalances, resource.getItem())
                             .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), true);
-                    participatingTransportLinks.add(transportLink);
+                    participatingTransportLines.add(transportLine);
                 }
-            } else if (transportLink.getTargetFactory().equals(factory)) {
-                for (Resource resource : transportLink.getResources()) {
+            } else if (transportLine.getTargetFactory().equals(factory)) {
+                for (Resource resource : transportLine.getResources()) {
                     computeBalances(itemBalances, resource.getItem())
                             .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), true);
-                    participatingTransportLinks.add(transportLink);
+                    participatingTransportLines.add(transportLine);
                 }
             }
         }
@@ -67,7 +67,7 @@ public class FactoryItemList {
                         .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), egress.isGreedy());
             }
         }
-        return new FactoryItemList(itemBalances, productionStepTroughputs, participatingTransportLinks);
+        return new FactoryItemList(itemBalances, productionStepTroughputs, participatingTransportLines);
     }
 
     private static Balances computeBalances(Map<Item, Balances> itemBalances, Item delegate) {
@@ -76,14 +76,14 @@ public class FactoryItemList {
 
     private Map<Item, Balances> itemBalances = new HashMap<>();
     private Map<ProductionStep, ProductionStepThroughputs> productionStepTroughputs = new HashMap<>();
-    private Set<TransportLink> participatingTransportLinks = new HashSet<>();
+    private Set<TransportLine> participatingTransportLines = new HashSet<>();
 
     public FactoryItemList(Map<Item, Balances> itemBalances,
                            Map<ProductionStep, ProductionStepThroughputs> productionStepTroughputs,
-                           Set<TransportLink> participatingTransportLinks) {
+                           Set<TransportLine> participatingTransportLines) {
         this.itemBalances = itemBalances;
         this.productionStepTroughputs = productionStepTroughputs;
-        this.participatingTransportLinks = participatingTransportLinks;
+        this.participatingTransportLines = participatingTransportLines;
     }
 
     public Map<Item, Balances> getItemBalances() {
@@ -94,8 +94,8 @@ public class FactoryItemList {
         return productionStepTroughputs;
     }
 
-    public Set<TransportLink> getParticipatingTransportLinks() {
-        return participatingTransportLinks;
+    public Set<TransportLine> getParticipatingTransportLines() {
+        return participatingTransportLines;
     }
 
 }

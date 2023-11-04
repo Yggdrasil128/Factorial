@@ -5,7 +5,7 @@ import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.transportlink.TransportLink;
+import de.yggdrasil128.factorial.model.transportline.TransportLine;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +32,8 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         repository.save(save);
     }
 
-    public void addAttachedTransportLink(Save save, TransportLink transportLink) {
-        save.getTransportLinks().add(transportLink);
+    public void addAttachedTransportLine(Save save, TransportLine transportLine) {
+        save.getTransportLines().add(transportLine);
         repository.save(save);
     }
 

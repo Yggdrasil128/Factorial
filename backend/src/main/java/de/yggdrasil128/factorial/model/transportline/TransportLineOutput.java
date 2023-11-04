@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.transportlink;
+package de.yggdrasil128.factorial.model.transportline;
 
 import de.yggdrasil128.factorial.model.factory.FactoryOutput;
 import de.yggdrasil128.factorial.model.icon.IconOutput;
@@ -6,15 +6,15 @@ import de.yggdrasil128.factorial.model.resource.ResourceOutput;
 
 import java.util.List;
 
-public class TransportLinkOutput {
+public class TransportLineOutput {
 
-    private final TransportLink delegate;
+    private final TransportLine delegate;
     private final IconOutput icon;
     private final FactoryOutput sourceFactory;
     private final FactoryOutput targetFactory;
     private final List<ResourceOutput> resources;
 
-    public TransportLinkOutput(TransportLink delegate) {
+    public TransportLineOutput(TransportLine delegate) {
         this.delegate = delegate;
         this.icon = IconOutput.of(delegate.getIcon());
         this.sourceFactory = new FactoryOutput(delegate.getSourceFactory());
