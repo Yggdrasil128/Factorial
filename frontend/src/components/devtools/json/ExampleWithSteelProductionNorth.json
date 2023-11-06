@@ -73,11 +73,15 @@
         {
             "name": "Steel Train",
             "iconName": "Steel Ingot",
-            "sourceFactoryName": "Steel Production North",
-            "targetFactoryName": "Steel Sink",
-            "resources": {
-                "Steel Ingot": "36"
-            }
+            "sourceFactoryNames": [
+                "Steel Production North"
+            ],
+            "targetFactoryNames": [
+                "Steel Sink"
+            ],
+            "itemNames": [
+                "Steel Ingot"
+            ]
         }
     ],
     "changelists": [

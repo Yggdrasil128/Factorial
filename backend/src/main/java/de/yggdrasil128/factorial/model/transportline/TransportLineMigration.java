@@ -1,17 +1,15 @@
 package de.yggdrasil128.factorial.model.transportline;
 
-import de.yggdrasil128.factorial.model.Fraction;
-
-import java.util.Map;
+import java.util.List;
 
 public class TransportLineMigration {
 
     private String name;
     private String description;
     private String iconName;
-    private String sourceFactoryName;
-    private String targetFactoryName;
-    private Map<String, Fraction> resources;
+    private List<String> sourceFactoryNames;
+    private List<String> targetFactoryNames;
+    private List<String> itemNames;
 
     public String getName() {
         return name;
@@ -37,28 +35,28 @@ public class TransportLineMigration {
         this.iconName = iconName;
     }
 
-    public String getSourceFactoryName() {
-        return sourceFactoryName;
+    public List<String> getSourceFactoryNames() {
+        return sourceFactoryNames;
     }
 
-    public void setSourceFactoryName(String sourceFactoryName) {
-        this.sourceFactoryName = sourceFactoryName;
+    public void setSourceFactoryNames(List<String> sourceFactoryNames) {
+        this.sourceFactoryNames = sourceFactoryNames;
     }
 
-    public String getTargetFactoryName() {
-        return targetFactoryName;
+    public List<String> getTargetFactoryNames() {
+        return targetFactoryNames;
     }
 
-    public void setTargetFactoryName(String targetFactoryName) {
-        this.targetFactoryName = targetFactoryName;
+    public void setTargetFactoryNames(List<String> targetFactoryNames) {
+        this.targetFactoryNames = targetFactoryNames;
     }
 
-    public Map<String, Fraction> getResources() {
-        return resources;
+    public List<String> getItemNames() {
+        return itemNames;
     }
 
-    public void setResources(Map<String, Fraction> resources) {
-        this.resources = resources;
+    public void setItemNames(List<String> itemNames) {
+        this.itemNames = itemNames;
     }
 
 }

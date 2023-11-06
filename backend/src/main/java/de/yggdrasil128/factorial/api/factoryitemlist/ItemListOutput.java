@@ -12,9 +12,10 @@ public class ItemListOutput {
 
     private final List<ListItemOutput> items;
     private final List<ListProductionStepOutput> productionSteps;
-    private final List<TransportLineOutput> transportLines;
     private final List<XgressOutput> ingresses;
     private final List<XgressOutput> egresses;
+    private final List<TransportLineOutput> ingoingTransportLines;
+    private final List<TransportLineOutput> outgoingTransportLines;
 
     public ItemListOutput(Factory factory, FactoryItemList delegate) {
         items = delegate
@@ -23,7 +24,8 @@ public class ItemListOutput {
                 .sorted(Comparator.comparing(ListItemOutput::getOrdinal)).toList();
         productionSteps = delegate.getProductionStepThroughputs().entrySet().stream()
                 .map(entry -> new ListProductionStepOutput(entry.getKey(), entry.getValue())).toList();
-        transportLines = delegate.getParticipatingTransportLines().stream().map(TransportLineOutput::new).toList();
+        ingoingTransportLines = delegate.getIngoingTransportLines().stream().map(TransportLineOutput::new).toList();
+        outgoingTransportLines = delegate.getOutgoingTransportLines().stream().map(TransportLineOutput::new).toList();
         ingresses = factory.getIngresses().stream().map(XgressOutput::new).toList();
         egresses = factory.getEgresses().stream().map(XgressOutput::new).toList();
     }
@@ -36,16 +38,20 @@ public class ItemListOutput {
         return productionSteps;
     }
 
-    public List<TransportLineOutput> getTransportLines() {
-        return transportLines;
-    }
-
     public List<XgressOutput> getIngresses() {
         return ingresses;
     }
 
     public List<XgressOutput> getEgresses() {
         return egresses;
+    }
+
+    public List<TransportLineOutput> getIngoingTransportLines() {
+        return ingoingTransportLines;
+    }
+
+    public List<TransportLineOutput> getOutgoingTransportLines() {
+        return outgoingTransportLines;
     }
 
 }

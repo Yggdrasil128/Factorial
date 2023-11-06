@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.model.transportline;
 
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
@@ -20,25 +20,25 @@ public class TransportLine {
     private String description;
     @ManyToOne
     private Icon icon;
-    @ManyToOne(optional = false)
-    private Factory sourceFactory;
-    @ManyToOne(optional = false)
-    private Factory targetFactory;
-    @ElementCollection
-    private List<Resource> resources;
+    @ManyToMany
+    private List<Factory> sourceFactories;
+    @ManyToMany
+    private List<Factory> targetFactories;
+    @ManyToMany
+    private List<Item> items;
 
     public TransportLine() {
     }
 
-    public TransportLine(Save save, String name, String description, Icon icon, Factory sourceFactory,
-                         Factory targetFactory, List<Resource> resources) {
+    public TransportLine(Save save, String name, String description, Icon icon, List<Factory> sourceFactories,
+                         List<Factory> targetFactories, List<Item> items) {
         this.save = save;
         this.name = name;
         this.description = description;
         this.icon = icon;
-        this.sourceFactory = sourceFactory;
-        this.targetFactory = targetFactory;
-        this.resources = resources;
+        this.sourceFactories = sourceFactories;
+        this.targetFactories = targetFactories;
+        this.items = items;
     }
 
     public int getId() {
@@ -77,28 +77,28 @@ public class TransportLine {
         this.icon = icon;
     }
 
-    public Factory getSourceFactory() {
-        return sourceFactory;
+    public List<Factory> getSourceFactories() {
+        return sourceFactories;
     }
 
-    public void setSourceFactory(Factory sourceFactory) {
-        this.sourceFactory = sourceFactory;
+    public void setSourceFactories(List<Factory> sourceFactories) {
+        this.sourceFactories = sourceFactories;
     }
 
-    public Factory getTargetFactory() {
-        return targetFactory;
+    public List<Factory> getTargetFactories() {
+        return targetFactories;
     }
 
-    public void setTargetFactory(Factory targetFactory) {
-        this.targetFactory = targetFactory;
+    public void setTargetFactories(List<Factory> targetFactories) {
+        this.targetFactories = targetFactories;
     }
 
-    public List<Resource> getResources() {
-        return resources;
+    public List<Item> getItems() {
+        return items;
     }
 
-    public void setResources(List<Resource> resources) {
-        this.resources = resources;
+    public void setItems(List<Item> items) {
+        this.items = items;
     }
 
     @Override
@@ -118,7 +118,7 @@ public class TransportLine {
 
     @Override
     public String toString() {
-        return name + " from " + sourceFactory + " to " + targetFactory;
+        return name + " transporting " + items + " from " + sourceFactories + " to " + targetFactories;
     }
 
 }

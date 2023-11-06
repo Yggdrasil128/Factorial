@@ -8,6 +8,8 @@ public class Balances {
     private QuantityByChangelist productionRequired = QuantityByChangelist.allAt(Fraction.ZERO);
     private QuantityByChangelist consumptionCapacity = QuantityByChangelist.allAt(Fraction.ZERO);
     private QuantityByChangelist consumptionRequired = QuantityByChangelist.allAt(Fraction.ZERO);
+    private boolean transportedIn;
+    private boolean transportedOut;
 
     public QuantityByChangelist getProductionCapacity() {
         return productionCapacity;
@@ -45,6 +47,22 @@ public class Balances {
 
     public QuantityByChangelist getConsumptionAvailable() {
         return consumptionCapacity.subtract(productionRequired);
+    }
+
+    public boolean isTransportedIn() {
+        return transportedIn;
+    }
+
+    public void setTransportedIn(boolean transportedIn) {
+        this.transportedIn = transportedIn;
+    }
+
+    public boolean isTransportedOut() {
+        return transportedOut;
+    }
+
+    public void setTransportedOut(boolean transportedOut) {
+        this.transportedOut = transportedOut;
     }
 
 }

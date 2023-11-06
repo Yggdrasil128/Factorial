@@ -249,15 +249,14 @@ public class MigrationService {
 
     private TransportLine importTransportLine(Save save, TransportLineMigration input) {
         Icon icon = getAttachedIcon(save.getGameVersion(), input.getIconName());
-        Factory sourceFactory = getDetachedFactory(save, input.getSourceFactoryName());
-        Factory targetFactory = getDetachedFactory(save, input.getTargetFactoryName());
-        if (sourceFactory.getName().equals(targetFactory.getName())) {
-            throw ModelService.report(HttpStatus.CONFLICT, "transport line '" + input.getName()
-                    + "' constitutes a loop for factory '" + sourceFactory.getName() + "'");
-        }
-        List<Resource> resources = importAttachedResources(save.getGameVersion(), input.getResources());
-        return new TransportLine(save, input.getName(), input.getDescription(), icon, sourceFactory, targetFactory,
-                resources);
+        List<Factory> sourceFactories = input.getSourceFactoryNames().stream()
+                .map(factoryName -> getDetachedFactory(save, factoryName)).toList();
+        List<Factory> targetFactories = input.getTargetFactoryNames().stream()
+                .map(factoryName -> getDetachedFactory(save, factoryName)).toList();
+        List<Item> transportedItems = input.getItemNames().stream()
+                .map(itemName -> getDetachedItem(save.getGameVersion(), itemName)).toList();
+        return new TransportLine(save, input.getName(), input.getDescription(), icon, sourceFactories, targetFactories,
+                transportedItems);
     }
 
     private List<Resource> importAttachedResources(GameVersion gameVersion, Map<String, Fraction> input) {

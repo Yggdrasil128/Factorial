@@ -1,7 +1,5 @@
 package de.yggdrasil128.factorial.model.transportline;
 
-import de.yggdrasil128.factorial.model.resource.ResourceInput;
-
 import java.util.List;
 
 public class TransportLineInput {
@@ -9,9 +7,9 @@ public class TransportLineInput {
     private String description;
     private String name;
     private int iconId;
-    private int sourceFactoryId;
-    private int targetFactoryId;
-    private List<ResourceInput> resources;
+    private List<Integer> sourceFactoryIds;
+    private List<Integer> targetFactoryIds;
+    private List<Integer> itemIds;
 
     public String getName() {
         return name;
@@ -37,28 +35,28 @@ public class TransportLineInput {
         this.iconId = iconId;
     }
 
-    public int getSourceFactoryId() {
-        return sourceFactoryId;
+    public List<Integer> getSourceFactoryIds() {
+        return sourceFactoryIds;
     }
 
-    public void setSourceFactoryId(int sourceFactoryId) {
-        this.sourceFactoryId = sourceFactoryId;
+    public void setSourceFactoryIds(List<Integer> sourceFactoryIds) {
+        this.sourceFactoryIds = sourceFactoryIds;
     }
 
-    public int getTargetFactoryId() {
-        return targetFactoryId;
+    public List<Integer> getTargetFactoryIds() {
+        return targetFactoryIds;
     }
 
-    public void setTargetFactoryId(int targetFactoryId) {
-        this.targetFactoryId = targetFactoryId;
+    public void setTargetFactoryIds(List<Integer> targetFactoryIds) {
+        this.targetFactoryIds = targetFactoryIds;
     }
 
-    public List<ResourceInput> getResources() {
-        return resources;
+    public List<Integer> getItemIds() {
+        return itemIds;
     }
 
-    public void setResources(List<ResourceInput> resources) {
-        this.resources = resources;
+    public void setItemIds(List<Integer> itemIds) {
+        this.itemIds = itemIds;
     }
 
 }

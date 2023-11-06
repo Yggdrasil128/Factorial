@@ -12,12 +12,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toMap;
 
 public class FactoryItemList {
 
     public static FactoryItemList of(Factory factory) {
+        return of(factory, item -> true);
+    }
+
+    public static FactoryItemList of(Factory factory, Predicate<Item> itemFilter) {
         Changelists changelists = Changelists.of(factory.getSave());
         Map<ProductionStep, ProductionStepThroughputs> productionStepTroughputs = factory.getProductionSteps().stream()
                 .collect(toMap(Function.identity(),
@@ -30,60 +35,80 @@ public class FactoryItemList {
          */
         for (Map.Entry<ProductionStep, ProductionStepThroughputs> entry : productionStepTroughputs.entrySet()) {
             for (Map.Entry<Item, QuantityByChangelist> input : entry.getValue().getInput().entrySet()) {
-                boolean greedy = entry.getKey().getInputGreed().contains(input.getKey());
-                computeBalances(itemBalances, input.getKey()).recordConsumption(input.getValue(), greedy);
+                if (itemFilter.test(input.getKey())) {
+                    boolean greedy = entry.getKey().getInputGreed().contains(input.getKey());
+                    computeBalances(itemBalances, input.getKey()).recordConsumption(input.getValue(), greedy);
+                }
             }
             for (Map.Entry<Item, QuantityByChangelist> output : entry.getValue().getOutput().entrySet()) {
-                boolean greedy = entry.getKey().getOutputGreed().contains(output.getKey());
-                computeBalances(itemBalances, output.getKey()).recordProduction(output.getValue(), greedy);
-            }
-        }
-        Set<TransportLine> participatingTransportLines = new HashSet<>();
-        for (TransportLine transportLine : factory.getSave().getTransportLines()) {
-            // TODO decide on greediness for transport links
-            if (transportLine.getSourceFactory().equals(factory)) {
-                for (Resource resource : transportLine.getResources()) {
-                    computeBalances(itemBalances, resource.getItem())
-                            .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), true);
-                    participatingTransportLines.add(transportLine);
-                }
-            } else if (transportLine.getTargetFactory().equals(factory)) {
-                for (Resource resource : transportLine.getResources()) {
-                    computeBalances(itemBalances, resource.getItem())
-                            .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), true);
-                    participatingTransportLines.add(transportLine);
+                if (itemFilter.test(output.getKey())) {
+                    boolean greedy = entry.getKey().getOutputGreed().contains(output.getKey());
+                    computeBalances(itemBalances, output.getKey()).recordProduction(output.getValue(), greedy);
                 }
             }
         }
         for (Xgress ingress : factory.getIngresses()) {
             for (Resource resource : ingress.getResources()) {
-                computeBalances(itemBalances, resource.getItem())
-                        .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), ingress.isGreedy());
+                if (itemFilter.test(resource.getItem())) {
+                    computeBalances(itemBalances, resource.getItem())
+                            .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), ingress.isGreedy());
+                }
             }
         }
         for (Xgress egress : factory.getEgresses()) {
             for (Resource resource : egress.getResources()) {
-                computeBalances(itemBalances, resource.getItem())
-                        .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), egress.isGreedy());
+                if (itemFilter.test(resource.getItem())) {
+                    computeBalances(itemBalances, resource.getItem())
+                            .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), egress.isGreedy());
+                }
             }
         }
-        return new FactoryItemList(itemBalances, productionStepTroughputs, participatingTransportLines);
+        Set<TransportLine> ingoingTransportLines = new HashSet<>();
+        Set<TransportLine> outgoingTransportLines = new HashSet<>();
+        for (TransportLine transportLine : factory.getSave().getTransportLines()) {
+            if (transportLine.getSourceFactories().contains(factory)) {
+                for (Item item : transportLine.getItems()) {
+                    if (itemFilter.test(item)) {
+                        Balances balances = itemBalances.get(item);
+                        if (null != balances) {
+                            balances.setTransportedOut(true);
+                            outgoingTransportLines.add(transportLine);
+                        }
+                    }
+                }
+            }
+            if (transportLine.getTargetFactories().contains(factory)) {
+                for (Item item : transportLine.getItems()) {
+                    if (itemFilter.test(item)) {
+                        Balances balances = itemBalances.get(item);
+                        if (null != balances) {
+                            balances.setTransportedIn(true);
+                            ingoingTransportLines.add(transportLine);
+                        }
+                    }
+                }
+            }
+        }
+        return new FactoryItemList(itemBalances, productionStepTroughputs, ingoingTransportLines,
+                outgoingTransportLines);
     }
 
     private static Balances computeBalances(Map<Item, Balances> itemBalances, Item delegate) {
         return itemBalances.computeIfAbsent(delegate, key -> new Balances());
     }
 
-    private Map<Item, Balances> itemBalances = new HashMap<>();
-    private Map<ProductionStep, ProductionStepThroughputs> productionStepTroughputs = new HashMap<>();
-    private Set<TransportLine> participatingTransportLines = new HashSet<>();
+    private final Map<Item, Balances> itemBalances;
+    private final Map<ProductionStep, ProductionStepThroughputs> productionStepTroughputs;
+    private final Set<TransportLine> ingoingTransportLines;
+    private final Set<TransportLine> outgoingTransportLines;
 
     public FactoryItemList(Map<Item, Balances> itemBalances,
                            Map<ProductionStep, ProductionStepThroughputs> productionStepTroughputs,
-                           Set<TransportLine> participatingTransportLines) {
+                           Set<TransportLine> ingoingTransportLines, Set<TransportLine> outgoingTransportLines) {
         this.itemBalances = itemBalances;
         this.productionStepTroughputs = productionStepTroughputs;
-        this.participatingTransportLines = participatingTransportLines;
+        this.ingoingTransportLines = ingoingTransportLines;
+        this.outgoingTransportLines = outgoingTransportLines;
     }
 
     public Map<Item, Balances> getItemBalances() {
@@ -94,8 +119,12 @@ public class FactoryItemList {
         return productionStepTroughputs;
     }
 
-    public Set<TransportLine> getParticipatingTransportLines() {
-        return participatingTransportLines;
+    public Set<TransportLine> getIngoingTransportLines() {
+        return ingoingTransportLines;
+    }
+
+    public Set<TransportLine> getOutgoingTransportLines() {
+        return outgoingTransportLines;
     }
 
 }
