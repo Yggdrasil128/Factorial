@@ -29,22 +29,22 @@ public class ProductionStep {
     @Convert(converter = FractionConverter.class)
     private Fraction machineCount = Fraction.ONE;
     @ManyToMany
-    private Set<Item> inputGreed;
+    private Set<Item> uncloggingInputs;
     @ManyToMany
-    private Set<Item> outputGreed;
+    private Set<Item> uncloggingOutputs;
 
     public ProductionStep() {
     }
 
     public ProductionStep(Factory factory, Machine machine, Recipe recipe, List<RecipeModifier> modifiers,
-                          Fraction machineCount, Set<Item> inputGreed, Set<Item> outputGreed) {
+                          Fraction machineCount, Set<Item> uncloggingInputs, Set<Item> uncloggingOutputs) {
         this.factory = factory;
         this.machine = machine;
         this.recipe = recipe;
         this.modifiers = modifiers;
         this.machineCount = machineCount;
-        this.inputGreed = inputGreed;
-        this.outputGreed = outputGreed;
+        this.uncloggingInputs = uncloggingInputs;
+        this.uncloggingOutputs = uncloggingOutputs;
     }
 
     public int getId() {
@@ -91,20 +91,20 @@ public class ProductionStep {
         this.machineCount = machineCount;
     }
 
-    public Set<Item> getInputGreed() {
-        return inputGreed;
+    public Set<Item> getUncloggingInputs() {
+        return uncloggingInputs;
     }
 
-    public void setInputGreed(Set<Item> inputGreed) {
-        this.inputGreed = inputGreed;
+    public void setUncloggingInputs(Set<Item> uncloggingInputs) {
+        this.uncloggingInputs = uncloggingInputs;
     }
 
-    public Set<Item> getOutputGreed() {
-        return outputGreed;
+    public Set<Item> getUncloggingOutputs() {
+        return uncloggingOutputs;
     }
 
-    public void setOutputGreed(Set<Item> outputGreed) {
-        this.outputGreed = outputGreed;
+    public void setUncloggingOutputs(Set<Item> uncloggingOutputs) {
+        this.uncloggingOutputs = uncloggingOutputs;
     }
 
     @Override

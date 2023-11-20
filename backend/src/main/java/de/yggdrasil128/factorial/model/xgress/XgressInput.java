@@ -7,7 +7,7 @@ import java.util.List;
 public class XgressInput {
 
     private String name;
-    private Boolean greedy;
+    private Boolean unclogging;
     private List<ResourceInput> resources;
 
     public String getName() {
@@ -18,12 +18,12 @@ public class XgressInput {
         this.name = name;
     }
 
-    public Boolean isGreedy() {
-        return greedy;
+    public Boolean getUnclogging() {
+        return unclogging;
     }
 
-    public void setGreedy(Boolean greedy) {
-        this.greedy = greedy;
+    public void setUnclogging(Boolean unclogging) {
+        this.unclogging = unclogging;
     }
 
     public List<ResourceInput> getResources() {

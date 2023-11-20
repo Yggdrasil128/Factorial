@@ -17,7 +17,7 @@ public class GameVersionMigration {
     private String iconName;
     private Map<String, IconMigration> icons = emptyMap();
     private Map<String, ItemMigration> items = emptyMap();
-    private Map<String, RecipeMigration> recipies = emptyMap();
+    private Map<String, RecipeMigration> recipes = emptyMap();
     private Map<String, RecipeModifierMigration> recipeModifiers = emptyMap();
     private Map<String, MachineMigration> machines = emptyMap();
 
@@ -61,12 +61,12 @@ public class GameVersionMigration {
         this.items = items;
     }
 
-    public Map<String, RecipeMigration> getRecipies() {
-        return recipies;
+    public Map<String, RecipeMigration> getRecipes() {
+        return recipes;
     }
 
-    public void setRecipies(Map<String, RecipeMigration> recipies) {
-        this.recipies = recipies;
+    public void setRecipes(Map<String, RecipeMigration> recipes) {
+        this.recipes = recipes;
     }
 
     public Map<String, RecipeModifierMigration> getRecipeModifiers() {

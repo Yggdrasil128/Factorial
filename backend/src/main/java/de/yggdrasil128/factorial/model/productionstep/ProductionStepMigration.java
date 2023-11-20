@@ -3,10 +3,8 @@ package de.yggdrasil128.factorial.model.productionstep;
 import de.yggdrasil128.factorial.model.Fraction;
 
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 
 public class ProductionStepMigration {
 
@@ -14,8 +12,8 @@ public class ProductionStepMigration {
     private String recipeName;
     private List<String> modifierNames = emptyList();
     private Fraction machineCount;
-    private Set<String> inputGreedNames = emptySet();
-    private Set<String> outputGreedNames = emptySet();
+    private List<String> uncloggingInputNames = emptyList();
+    private List<String> uncloggingOutputNames = emptyList();
 
     public String getMachineName() {
         return machineName;
@@ -49,20 +47,20 @@ public class ProductionStepMigration {
         this.machineCount = machineCount;
     }
 
-    public Set<String> getInputGreedNames() {
-        return inputGreedNames;
+    public List<String> getUncloggingInputNames() {
+        return uncloggingInputNames;
     }
 
-    public void setInputGreedNames(Set<String> inputGreedNames) {
-        this.inputGreedNames = inputGreedNames;
+    public void setUncloggingInputNames(List<String> uncloggingInputNames) {
+        this.uncloggingInputNames = uncloggingInputNames;
     }
 
-    public Set<String> getOutputGreedNames() {
-        return outputGreedNames;
+    public List<String> getUncloggingOutputNames() {
+        return uncloggingOutputNames;
     }
 
-    public void setOutputGreedNames(Set<String> outputGreedNames) {
-        this.outputGreedNames = outputGreedNames;
+    public void setUncloggingOutputNames(List<String> uncloggingOutputNames) {
+        this.uncloggingOutputNames = uncloggingOutputNames;
     }
 
 }

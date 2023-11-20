@@ -36,30 +36,30 @@ public class FactoryItemList {
         for (Map.Entry<ProductionStep, ProductionStepThroughputs> entry : productionStepTroughputs.entrySet()) {
             for (Map.Entry<Item, QuantityByChangelist> input : entry.getValue().getInput().entrySet()) {
                 if (itemFilter.test(input.getKey())) {
-                    boolean greedy = entry.getKey().getInputGreed().contains(input.getKey());
-                    computeBalances(itemBalances, input.getKey()).recordConsumption(input.getValue(), greedy);
+                    boolean required = !entry.getKey().getUncloggingInputs().contains(input.getKey());
+                    computeBalances(itemBalances, input.getKey()).recordConsumption(input.getValue(), required);
                 }
             }
             for (Map.Entry<Item, QuantityByChangelist> output : entry.getValue().getOutput().entrySet()) {
                 if (itemFilter.test(output.getKey())) {
-                    boolean greedy = entry.getKey().getOutputGreed().contains(output.getKey());
-                    computeBalances(itemBalances, output.getKey()).recordProduction(output.getValue(), greedy);
+                    boolean required = !entry.getKey().getUncloggingOutputs().contains(output.getKey());
+                    computeBalances(itemBalances, output.getKey()).recordProduction(output.getValue(), required);
                 }
             }
         }
         for (Xgress ingress : factory.getIngresses()) {
             for (Resource resource : ingress.getResources()) {
                 if (itemFilter.test(resource.getItem())) {
-                    computeBalances(itemBalances, resource.getItem())
-                            .recordProduction(QuantityByChangelist.allAt(resource.getQuantity()), ingress.isGreedy());
+                    computeBalances(itemBalances, resource.getItem()).recordProduction(
+                            QuantityByChangelist.allAt(resource.getQuantity()), !ingress.isUnclogging());
                 }
             }
         }
         for (Xgress egress : factory.getEgresses()) {
             for (Resource resource : egress.getResources()) {
                 if (itemFilter.test(resource.getItem())) {
-                    computeBalances(itemBalances, resource.getItem())
-                            .recordConsumption(QuantityByChangelist.allAt(resource.getQuantity()), egress.isGreedy());
+                    computeBalances(itemBalances, resource.getItem()).recordConsumption(
+                            QuantityByChangelist.allAt(resource.getQuantity()), !egress.isUnclogging());
                 }
             }
         }

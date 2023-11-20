@@ -26,6 +26,10 @@ public class XgressOutput {
         return delegate.getName();
     }
 
+    public boolean isUnclogging() {
+        return delegate.isUnclogging();
+    }
+
     public List<ResourceOutput> getResources() {
         return resources;
     }

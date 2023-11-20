@@ -1,0 +1,138 @@
+{
+    "game": "Satisfactory",
+    "version": "Update 8",
+    "items": {
+        "Coal": {},
+        "Crude Oil": {},
+        "Empty Canister": {},
+        "Fuel": {},
+        "Heavy Oil Residue": {},
+        "Iron Ore": {},
+        "Iron Ingot": {},
+        "Packaged Fuel": {},
+        "Plastic": {},
+        "Steel Ingot": {},
+        "Water": {}
+    },
+    "recipes": {
+        "Burn Fuel": {
+            "input": {
+                "Fuel": "1"
+            },
+            "duration": "5"
+        },
+        "Crude Oil": {
+            "output": {
+                "Crude Oil": "1"
+            },
+            "duration": "1"
+        },
+        "Coal": {
+            "output": {
+                "Coal": "2"
+            },
+            "duration": "1"
+        },
+        "Empty Canister": {
+            "input": {
+                "Plastic": "2"
+            },
+            "output": {
+                "Empty Canister": "4"
+            },
+            "duration": "4"
+        },
+        "Iron Ore": {
+            "output": {
+                "Iron Ore": "1"
+            },
+            "duration": "1"
+        },
+        "Plastic": {
+            "input": {
+                "Crude Oil": "3"
+            },
+            "output": {
+                "Plastic": "2",
+                "Heavy Oil Residue": "1"
+            },
+            "duration": "6"
+        },
+        "Packaged Fuel": {
+            "input": {
+                "Fuel": "2",
+                "Empty Canister": "2"
+            },
+            "output": {
+                "Packaged Fuel": "2"
+            },
+            "duration": "3"
+        },
+        "Pure Iron Ingot": {
+            "input": {
+                "Iron Ore": "7",
+                "Water": "4"
+            },
+            "output": {
+                "Iron Ingot": "13"
+            },
+            "duration": "12"
+        },
+        "Residual Fuel": {
+            "input": {
+                "Heavy Oil Residue": "6"
+            },
+            "output": {
+                "Fuel": "4"
+            },
+            "duration": "6"
+        },
+        "Solid Steel Ingot": {
+            "input": {
+                "Iron Ingot": "2",
+                "Coal": "2"
+            },
+            "output": {
+                "Steel Ingot": "3"
+            },
+            "duration": "3"
+        },
+        "Water": {
+            "output": {
+                "Water": "2"
+            },
+            "duration": "1"
+        }
+    },
+    "recipeModifiers": {
+        "Impure Node": {
+            "durationMultiplier": "1",
+            "inputQuantityMultiplier": "1",
+            "outputQuantityMultiplier": "1/2"
+        },
+        "Mk. 3": {
+            "durationMultiplier": "1/4",
+            "inputQuantityMultiplier": "1",
+            "outputQuantityMultiplier": "1"
+        },
+        "Pure Node": {
+            "durationMultiplier": "1",
+            "inputQuantityMultiplier": "1",
+            "outputQuantityMultiplier": "2"
+        }
+    },
+    "machines": {
+        "Constructor": {},
+        "Foundry": {},
+        "Fuel Generator": {},
+        "Miner Mk. 3": {
+            "machineModifierNames": [
+                "Mk. 3"
+            ]
+        },
+        "Packager": {},
+        "Oil Extractor": {},
+        "Refinery": {},
+        "Water Extractor": {}
+    }
+}

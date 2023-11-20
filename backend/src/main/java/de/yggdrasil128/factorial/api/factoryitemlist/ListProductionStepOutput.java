@@ -9,6 +9,11 @@ import de.yggdrasil128.factorial.model.recipe.RecipeOutput;
 
 import java.util.List;
 
+/**
+ * @apiNote We want {@link #getMachineCount()} to have a different return value than
+ *          {@link ProductionStepOutput#getMachineCount()}, so we use composition instead of inheritance. Also, we can
+ *          save some bandwidth by omitting the unclogging items.
+ */
 public class ListProductionStepOutput {
 
     private final ProductionStepOutput delegate;

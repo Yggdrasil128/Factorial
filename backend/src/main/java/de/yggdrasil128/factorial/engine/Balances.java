@@ -1,52 +1,32 @@
 package de.yggdrasil128.factorial.engine;
 
-import de.yggdrasil128.factorial.model.Fraction;
-
 public class Balances {
 
-    private QuantityByChangelist productionCapacity = QuantityByChangelist.allAt(Fraction.ZERO);
-    private QuantityByChangelist productionRequired = QuantityByChangelist.allAt(Fraction.ZERO);
-    private QuantityByChangelist consumptionCapacity = QuantityByChangelist.allAt(Fraction.ZERO);
-    private QuantityByChangelist consumptionRequired = QuantityByChangelist.allAt(Fraction.ZERO);
+    private final Balance production = new Balance();
+    private final Balance consumption = new Balance();
     private boolean transportedIn;
     private boolean transportedOut;
 
-    public QuantityByChangelist getProductionCapacity() {
-        return productionCapacity;
+    public Balance getProduction() {
+        return production;
     }
 
-    public QuantityByChangelist getProductionRequired() {
-        return productionRequired;
+    public Balance getConsumption() {
+        return consumption;
     }
 
-    public void recordProduction(QuantityByChangelist production, boolean required) {
-        productionCapacity = productionCapacity.add(production);
+    void recordProduction(QuantityByChangelist quantities, boolean required) {
+        this.production.addTotal(quantities);
         if (required) {
-            productionRequired = productionRequired.add(production);
+            this.consumption.addRequired(quantities);
         }
     }
 
-    public QuantityByChangelist getConsumptionCapacity() {
-        return consumptionCapacity;
-    }
-
-    public QuantityByChangelist getConsumptionRequired() {
-        return consumptionRequired;
-    }
-
-    public void recordConsumption(QuantityByChangelist consumption, boolean required) {
-        consumptionCapacity = consumptionCapacity.add(consumption);
+    void recordConsumption(QuantityByChangelist quantities, boolean required) {
+        this.consumption.addTotal(quantities);
         if (required) {
-            consumptionRequired = consumptionRequired.add(consumption);
+            this.production.addRequired(quantities);
         }
-    }
-
-    public QuantityByChangelist getProductionAvailable() {
-        return productionCapacity.subtract(consumptionRequired);
-    }
-
-    public QuantityByChangelist getConsumptionAvailable() {
-        return consumptionCapacity.subtract(productionRequired);
     }
 
     public boolean isTransportedIn() {

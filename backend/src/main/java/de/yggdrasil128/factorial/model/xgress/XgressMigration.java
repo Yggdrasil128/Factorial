@@ -7,7 +7,7 @@ import java.util.Map;
 public class XgressMigration {
 
     private String name;
-    private boolean greedy;
+    private boolean unclogging;
     private Map<String, Fraction> resources;
 
     public String getName() {
@@ -18,12 +18,12 @@ public class XgressMigration {
         this.name = name;
     }
 
-    public boolean isGreedy() {
-        return greedy;
+    public boolean isUnclogging() {
+        return unclogging;
     }
 
-    public void setGreedy(boolean greedy) {
-        this.greedy = greedy;
+    public void setUnclogging(boolean unclogging) {
+        this.unclogging = unclogging;
     }
 
     public Map<String, Fraction> getResources() {

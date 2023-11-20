@@ -16,14 +16,23 @@ defineProps(["item", "productionSteps", "itemMap"]);
       <div class="itemInfo">
         <div class="itemName">{{ item.name }}</div>
         <div class="itemBalance">
-          Production Capacity:
-          <quantity-display :quantity="item.balances.productionCapacity" color="green" show-unit/>
+          <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                      :content="'the total amount of production'">
+              Total Production:
+          </el-tooltip>
+          <quantity-display :quantity="item.balances.production.total" color="green" show-unit/>
           &emsp;
-          Consumption:
-          <quantity-display :quantity="item.balances.consumptionRequired" color="red" show-unit/>
+          <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                      :content="'the minimum amount of production that is required to avoid unclogging of inputs'">
+              Required Production:
+          </el-tooltip>
+          <quantity-display :quantity="item.balances.production.required" color="red" show-unit/>
           &emsp;
+          <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
+                      :content="'the amonut of production that is available for reallocation'">
           Available Production:
-          <quantity-display :quantity="item.balances.productionAvailable" color="auto" show-unit/>
+          </el-tooltip>
+          <quantity-display :quantity="item.balances.production.available" color="auto" show-unit/>
         </div>
       </div>
     </div>

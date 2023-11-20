@@ -10,7 +10,7 @@ import java.util.*;
 public class TransportLineUsage {
 
     public static Map<Item, Map<Factory, TransportLineUsage>> of(TransportLine transportLine) {
-        // preserve the order of items within the transport line 
+        // preserve the order of items within the transport line
         Map<Item, Map<Factory, TransportLineUsage>> usages = new LinkedHashMap<>();
         // we use this for the various times we will invoke #contains(Item)
         Set<Item> itemCache = new HashSet<>(transportLine.getItems());
@@ -19,7 +19,7 @@ public class TransportLineUsage {
             for (Item item : transportLine.getItems()) {
                 Balances balances = itemList.getItemBalances().get(item);
                 if (null != balances) {
-                    computeUsage(usages, factory, item).addSupply(balances.getProductionAvailable());
+                    computeUsage(usages, factory, item).addSupply(balances.getProduction().getAvailable());
                 }
             }
         }
@@ -28,7 +28,7 @@ public class TransportLineUsage {
             for (Item item : transportLine.getItems()) {
                 Balances balances = itemList.getItemBalances().get(item);
                 if (null != balances) {
-                    computeUsage(usages, factory, item).addDemand(balances.getProductionAvailable());
+                    computeUsage(usages, factory, item).addDemand(balances.getProduction().getAvailable());
                 }
             }
         }

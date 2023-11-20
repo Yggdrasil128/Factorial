@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toCollection;
 
 @Service
 public class MigrationService {
@@ -80,7 +80,7 @@ public class MigrationService {
             game.getGameVersions().add(gameVersion);
             games.save(game);
         } else {
-            gameVersion = importGameVersion(input);
+            gameVersion = importGameVersion(game, input);
             gameVersions.save(gameVersion);
             game.getGameVersions().add(gameVersion);
             games.save(game);
@@ -94,8 +94,7 @@ public class MigrationService {
                 .forEach(gameVersion.getIcons()::add);
         input.getItems().entrySet().stream().map(entry -> importItem(gameVersion, entry.getKey(), entry.getValue()))
                 .forEach(gameVersion.getItems()::add);
-        input.getRecipies().entrySet().stream()
-                .map(entry -> importRecipe(gameVersion, entry.getKey(), entry.getValue()))
+        input.getRecipes().entrySet().stream().map(entry -> importRecipe(gameVersion, entry.getKey(), entry.getValue()))
                 .forEach(gameVersion.getRecipes()::add);
         input.getRecipeModifiers().entrySet().stream()
                 .map(entry -> importRecipeModifier(gameVersion, entry.getKey(), entry.getValue()))
@@ -104,7 +103,7 @@ public class MigrationService {
                 .map(entry -> importMachine(gameVersion, entry.getKey(), entry.getValue()))
                 .forEach(gameVersion.getMachines()::add);
         if (null != input.getIconName()) {
-            gameVersion.setIcon(getDetachedIcon(gameVersion, input.getIconName()));
+            gameVersion.setIcon(getTransientIcon(gameVersion, input.getIconName()));
         }
         return gameVersion;
     }
@@ -114,12 +113,12 @@ public class MigrationService {
     }
 
     private static Item importItem(GameVersion gameVersion, String name, ItemMigration input) {
-        return new Item(gameVersion, name, input.getDescription(), getDetachedIcon(gameVersion, input.getIconName()),
+        return new Item(gameVersion, name, input.getDescription(), getTransientIcon(gameVersion, input.getIconName()),
                 input.getCategory());
     }
 
     private static Recipe importRecipe(GameVersion gameVersion, String name, RecipeMigration input) {
-        Icon icon = getDetachedIcon(gameVersion, input.getIconName());
+        Icon icon = getTransientIcon(gameVersion, input.getIconName());
         List<Resource> inputs = importResources(gameVersion, input.getInput());
         List<Resource> outputs = importResources(gameVersion, input.getOutput());
         return new Recipe(gameVersion, name, icon, inputs, outputs, input.getDuration(), nl(), nl(),
@@ -128,36 +127,36 @@ public class MigrationService {
 
     private static List<Resource> importResources(GameVersion gameVersion, Map<String, Fraction> input) {
         return input.entrySet().stream()
-                .map(entry -> new Resource(getDetachedItem(gameVersion, entry.getKey()), entry.getValue())).toList();
-    }
-
-    private static Item getDetachedItem(GameVersion gameVersion, String name) {
-        return gameVersion.getItems().stream().filter(item -> item.getName().equals(name)).findAny()
-                .orElseThrow(() -> ModelService.report(HttpStatus.BAD_REQUEST,
-                        "nested entity refers to non existent item '" + name + "'"));
+                .map(entry -> new Resource(getTransientItem(gameVersion, entry.getKey()), entry.getValue())).toList();
     }
 
     private static RecipeModifier importRecipeModifier(GameVersion gameVersion, String name,
                                                        RecipeModifierMigration input) {
         return new RecipeModifier(gameVersion, name, input.getDescription(),
-                getDetachedIcon(gameVersion, input.getIconName()), input.getDurationMultiplier(),
+                getTransientIcon(gameVersion, input.getIconName()), input.getDurationMultiplier(),
                 input.getInputQuantityMultiplier(), input.getOutputQuantityMultiplier());
     }
 
     private static Machine importMachine(GameVersion gameVersion, String name, MachineMigration input) {
         List<RecipeModifier> machineModifiers = input.getMachineModifierNames().stream()
-                .map(machineModifierName -> getDetachedRecipeModifier(gameVersion, machineModifierName)).toList();
-        return new Machine(gameVersion, name, getDetachedIcon(gameVersion, input.getIconName()), machineModifiers,
+                .map(machineModifierName -> getTransientRecipeModifier(gameVersion, machineModifierName)).toList();
+        return new Machine(gameVersion, name, getTransientIcon(gameVersion, input.getIconName()), machineModifiers,
                 input.getCategory());
     }
 
-    private static RecipeModifier getDetachedRecipeModifier(GameVersion gameVersion, String name) {
+    private static Item getTransientItem(GameVersion gameVersion, String name) {
+        return gameVersion.getItems().stream().filter(item -> item.getName().equals(name)).findAny()
+                .orElseThrow(() -> ModelService.report(HttpStatus.BAD_REQUEST,
+                        "nested entity refers to non existent item '" + name + "'"));
+    }
+
+    private static RecipeModifier getTransientRecipeModifier(GameVersion gameVersion, String name) {
         return gameVersion.getRecipeModifiers().stream().filter(recipeModifier -> recipeModifier.getName().equals(name))
                 .findAny().orElseThrow(() -> ModelService.report(HttpStatus.BAD_REQUEST,
                         "nested entity refers to non-existent recipe modifier '" + name + "'"));
     }
 
-    private static Icon getDetachedIcon(GameVersion gameVersion, String name) {
+    private static Icon getTransientIcon(GameVersion gameVersion, String name) {
         if (null == name) {
             return null;
         }
@@ -219,24 +218,32 @@ public class MigrationService {
             throw ModelService.report(HttpStatus.CONFLICT,
                     "entity in save refers to at least one non-existent recipe modifier");
         }
-        Set<Item> inputGreed = recipe.getInput().stream().map(Resource::getItem).collect(toSet());
-        Set<Item> outputGreed = recipe.getOutput().size() > 2
-                ? recipe.getOutput().stream().map(Resource::getItem).collect(toSet())
-                : ns();
-        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount(), inputGreed,
-                outputGreed);
+        Set<Item> uncloggingInputs = getRecipeItems(input.getUncloggingInputNames(), recipe.getInput());
+        Set<Item> uncloggingOutputs = getRecipeItems(input.getUncloggingOutputNames(), recipe.getOutput());
+        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount(), uncloggingInputs,
+                uncloggingOutputs);
+    }
+
+    private static Set<Item> getRecipeItems(List<String> names, List<Resource> resources) {
+        return names.stream().map(name -> getRecipeItem(name, resources)).collect(toCollection(HashSet::new));
+    }
+
+    private static Item getRecipeItem(String name, List<Resource> resources) {
+        return resources.stream().map(Resource::getItem).filter(item -> item.getName().equals(name)).findAny()
+                .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
+                        "entity in save refers to non-existent item '" + name + "'"));
     }
 
     private Xgress importXgress(Factory factory, XgressMigration input) {
-        List<Resource> resources = importAttachedResources(factory.getSave().getGameVersion(), input.getResources());
-        return new Xgress(factory, input.getName(), input.isGreedy(), resources);
+        List<Resource> resources = getAttachedResources(factory.getSave().getGameVersion(), input.getResources());
+        return new Xgress(factory, input.getName(), input.isUnclogging(), resources);
     }
 
     private Changelist importChangelist(Save save, ChangelistMigration input) {
         Map<ProductionStep, Fraction> productionStepChanges = new HashMap<>();
         for (Map.Entry<String, List<ProductionStepChangeMigration>> factoryEntry : input.getProductionStepChanges()
                 .entrySet()) {
-            Factory factory = getDetachedFactory(save, factoryEntry.getKey());
+            Factory factory = getTransientFactory(save, factoryEntry.getKey());
             for (ProductionStepChangeMigration productionStepEntry : factoryEntry.getValue()) {
                 productionStepChanges.put(
                         factory.getProductionSteps().get(productionStepEntry.getProductionStepIndex()),
@@ -250,16 +257,16 @@ public class MigrationService {
     private TransportLine importTransportLine(Save save, TransportLineMigration input) {
         Icon icon = getAttachedIcon(save.getGameVersion(), input.getIconName());
         List<Factory> sourceFactories = input.getSourceFactoryNames().stream()
-                .map(factoryName -> getDetachedFactory(save, factoryName)).toList();
+                .map(factoryName -> getTransientFactory(save, factoryName)).toList();
         List<Factory> targetFactories = input.getTargetFactoryNames().stream()
-                .map(factoryName -> getDetachedFactory(save, factoryName)).toList();
+                .map(factoryName -> getTransientFactory(save, factoryName)).toList();
         List<Item> transportedItems = input.getItemNames().stream()
-                .map(itemName -> getDetachedItem(save.getGameVersion(), itemName)).toList();
+                .map(itemName -> getAttachedItem(save.getGameVersion(), itemName)).toList();
         return new TransportLine(save, input.getName(), input.getDescription(), icon, sourceFactories, targetFactories,
                 transportedItems);
     }
 
-    private List<Resource> importAttachedResources(GameVersion gameVersion, Map<String, Fraction> input) {
+    private List<Resource> getAttachedResources(GameVersion gameVersion, Map<String, Fraction> input) {
         return input.entrySet().stream()
                 .map(entry -> new Resource(getAttachedItem(gameVersion, entry.getKey()), entry.getValue())).toList();
     }
@@ -267,12 +274,6 @@ public class MigrationService {
     private Item getAttachedItem(GameVersion gameVersion, String name) {
         return items.findByGameVersionIdAndName(gameVersion.getId(), name).orElseThrow(() -> ModelService
                 .report(HttpStatus.CONFLICT, "entity in save refers to non-existent item '" + name + "'"));
-    }
-
-    private static Factory getDetachedFactory(Save save, String name) {
-        return save.getFactories().stream().filter(factory -> factory.getName().equals(name)).findAny()
-                .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                        "entity in save refers to non-existent factory '" + name + "'"));
     }
 
     private Icon getAttachedIcon(GameVersion gameVersion, String name) {
@@ -283,13 +284,15 @@ public class MigrationService {
                 .report(HttpStatus.CONFLICT, "entity in save refers to non-existent icon '" + name + "'"));
     }
 
+    private static Factory getTransientFactory(Save save, String name) {
+        return save.getFactories().stream().filter(factory -> factory.getName().equals(name)).findAny()
+                .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
+                        "entity in save refers to non-existent factory '" + name + "'"));
+    }
+
     // since we need these so often
     private static <E> List<E> nl() {
         return new ArrayList<>();
-    }
-
-    private static <E> Set<E> ns() {
-        return new HashSet<>();
     }
 
 }

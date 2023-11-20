@@ -17,6 +17,30 @@ import static java.util.stream.Collectors.toSet;
 
 public class OptionalInputField {
 
+    public static <E> OptionalInputField.Generic<E> of(E value) {
+        return new Generic<>(value);
+    }
+
+    public static class Generic<E> {
+
+        private final E value;
+
+        Generic(E value) {
+            this.value = value;
+        }
+
+        public E get() {
+            return value;
+        }
+
+        public void apply(Consumer<? super E> sink) {
+            if (null != value) {
+                sink.accept(get());
+            }
+        }
+
+    }
+
     public static OptionalInputField.OfString of(String value) {
         return new OfString(value);
     }

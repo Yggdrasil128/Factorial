@@ -3,7 +3,6 @@ package de.yggdrasil128.factorial.model.productionstep;
 import de.yggdrasil128.factorial.model.Fraction;
 
 import java.util.List;
-import java.util.Set;
 
 public class ProductionStepInput {
 
@@ -11,8 +10,8 @@ public class ProductionStepInput {
     private int recipeId;
     private List<Integer> modifierIds;
     private Fraction machineCount;
-    private Set<Integer> inputGreedIds;
-    private Set<Integer> outputGreedIds;
+    private List<Integer> uncloggingInputIds;
+    private List<Integer> uncloggingOutputIds;
 
     public int getMachineId() {
         return machineId;
@@ -46,20 +45,20 @@ public class ProductionStepInput {
         this.machineCount = machineCount;
     }
 
-    public Set<Integer> getInputGreedIds() {
-        return inputGreedIds;
+    public List<Integer> getUncloggingInputIds() {
+        return uncloggingInputIds;
     }
 
-    public void setInputGreedIds(Set<Integer> inputGreedIds) {
-        this.inputGreedIds = inputGreedIds;
+    public void setUncloggingInputIds(List<Integer> uncloggingInputIds) {
+        this.uncloggingInputIds = uncloggingInputIds;
     }
 
-    public Set<Integer> getOutputGreedIds() {
-        return outputGreedIds;
+    public List<Integer> getUncloggingOutputIds() {
+        return uncloggingOutputIds;
     }
 
-    public void setOutputGreedIds(Set<Integer> outputGreedIds) {
-        this.outputGreedIds = outputGreedIds;
+    public void setUncloggingOutputIds(List<Integer> uncloggingOutputIds) {
+        this.uncloggingOutputIds = uncloggingOutputIds;
     }
 
 }

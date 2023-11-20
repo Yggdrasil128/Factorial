@@ -32,12 +32,12 @@ public class ProductionStepController {
         return new ProductionStepOutput(productionStep);
     }
 
-    @GetMapping("factory/productionSteps")
+    @GetMapping("/factory/productionSteps")
     public List<ProductionStepOutput> retrieveAll(int factoryId) {
         return factoryService.get(factoryId).getProductionSteps().stream().map(ProductionStepOutput::new).toList();
     }
 
-    @GetMapping("productionStep")
+    @GetMapping("/productionStep")
     public ProductionStepOutput retrieve(int productionStepId) {
         return new ProductionStepOutput(productionStepService.get(productionStepId));
     }

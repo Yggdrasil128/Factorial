@@ -18,9 +18,9 @@ public class ItemListOutput {
     private final List<TransportLineOutput> outgoingTransportLines;
 
     public ItemListOutput(Factory factory, FactoryItemList delegate) {
-        items = delegate
-                .getItemBalances().entrySet().stream().map(entry -> new ListItemOutput(entry.getKey(),
-                        factory.getItemOrder().get(entry.getKey()), entry.getValue()))
+        items = delegate.getItemBalances().entrySet().stream()
+                .map(entry -> new ListItemOutput(entry.getKey(),
+                        factory.getItemOrder().getOrDefault(entry.getKey(), Integer.MAX_VALUE), entry.getValue()))
                 .sorted(Comparator.comparing(ListItemOutput::getOrdinal)).toList();
         productionSteps = delegate.getProductionStepThroughputs().entrySet().stream()
                 .map(entry -> new ListProductionStepOutput(entry.getKey(), entry.getValue())).toList();

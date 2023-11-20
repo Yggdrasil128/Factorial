@@ -42,10 +42,10 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         List<RecipeModifier> modifiers = OptionalInputField.ofIds(input.getModifierIds(), recipeModifiers::get)
                 .asList();
         Fraction machineCount = null == input.getMachineCount() ? Fraction.ONE : input.getMachineCount();
-        Set<Item> inputGreed = OptionalInputField.ofIds(input.getInputGreedIds(), items::get).asSet();
-        Set<Item> outputGreed = OptionalInputField.ofIds(input.getOutputGreedIds(), items::get).asSet();
-        return repository
-                .save(new ProductionStep(factory, machine, recipe, modifiers, machineCount, inputGreed, outputGreed));
+        Set<Item> uncloggingInputs = OptionalInputField.ofIds(input.getUncloggingInputIds(), items::get).asSet();
+        Set<Item> uncloggingOutputs = OptionalInputField.ofIds(input.getUncloggingOutputIds(), items::get).asSet();
+        return repository.save(new ProductionStep(factory, machine, recipe, modifiers, machineCount, uncloggingInputs,
+                uncloggingOutputs));
     }
 
     public ProductionStep update(int id, ProductionStepInput input) {
@@ -56,8 +56,10 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         if (null != input.getMachineCount()) {
             productionStep.setMachineCount(input.getMachineCount());
         }
-        OptionalInputField.ofIds(input.getInputGreedIds(), items::get).applySet(productionStep::setInputGreed);
-        OptionalInputField.ofIds(input.getOutputGreedIds(), items::get).applySet(productionStep::setOutputGreed);
+        OptionalInputField.ofIds(input.getUncloggingInputIds(), items::get)
+                .applySet(productionStep::setUncloggingInputs);
+        OptionalInputField.ofIds(input.getUncloggingOutputIds(), items::get)
+                .applySet(productionStep::setUncloggingOutputs);
         return repository.save(productionStep);
     }
 

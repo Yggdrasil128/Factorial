@@ -15,17 +15,17 @@ public class Xgress {
     @ManyToOne(optional = false)
     private Factory factory;
     private String name;
-    private boolean greedy;
+    private boolean unclogging;
     @ElementCollection
     private List<Resource> resources;
 
     public Xgress() {
     }
 
-    public Xgress(Factory factory, String name, boolean greedy, List<Resource> resources) {
+    public Xgress(Factory factory, String name, boolean unclogging, List<Resource> resources) {
         this.factory = factory;
         this.name = name;
-        this.greedy = greedy;
+        this.unclogging = unclogging;
         this.resources = resources;
     }
 
@@ -53,12 +53,12 @@ public class Xgress {
         return resources;
     }
 
-    public boolean isGreedy() {
-        return greedy;
+    public boolean isUnclogging() {
+        return unclogging;
     }
 
-    public void setGreedy(boolean greedy) {
-        this.greedy = greedy;
+    public void setUnclogging(boolean unclogging) {
+        this.unclogging = unclogging;
     }
 
     public void setResources(List<Resource> resources) {
