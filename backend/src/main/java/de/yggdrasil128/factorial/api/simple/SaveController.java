@@ -24,7 +24,7 @@ public class SaveController {
     }
 
     @PostMapping("/saves")
-    public SaveOutput create(SaveInput input) {
+    public SaveOutput create(@RequestBody SaveInput input) {
         GameVersion gameVersion = gameVersionService.get(input.getGameVersionId());
         return new SaveOutput(saveService.create(gameVersion, input));
     }

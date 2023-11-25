@@ -10,10 +10,27 @@ public class ProductionStepMigration {
 
     private String machineName;
     private String recipeName;
-    private List<String> modifierNames = emptyList();
+    private List<String> modifierNames;
     private Fraction machineCount;
-    private List<String> uncloggingInputNames = emptyList();
-    private List<String> uncloggingOutputNames = emptyList();
+    private List<String> uncloggingInputNames;
+    private List<String> uncloggingOutputNames;
+
+    public ProductionStepMigration() {
+        modifierNames = emptyList();
+        uncloggingInputNames = emptyList();
+        uncloggingOutputNames = emptyList();
+    }
+
+    public ProductionStepMigration(String machineName, String recipeName, List<String> modifierNames,
+                                   Fraction machineCount, List<String> uncloggingInputNames,
+                                   List<String> uncloggingOutputNames) {
+        this.machineName = machineName;
+        this.recipeName = recipeName;
+        this.modifierNames = modifierNames;
+        this.machineCount = machineCount;
+        this.uncloggingInputNames = uncloggingInputNames;
+        this.uncloggingOutputNames = uncloggingOutputNames;
+    }
 
     public String getMachineName() {
         return machineName;

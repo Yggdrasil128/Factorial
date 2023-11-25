@@ -13,9 +13,25 @@ public class SaveMigration {
     private String game;
     private String version;
     private String name;
-    private List<FactoryMigration> factories = emptyList();
-    private List<ChangelistMigration> changelists = emptyList();
-    private List<TransportLineMigration> transportLines = emptyList();
+    private List<FactoryMigration> factories;
+    private List<ChangelistMigration> changelists;
+    private List<TransportLineMigration> transportLines;
+
+    public SaveMigration() {
+        factories = emptyList();
+        changelists = emptyList();
+        transportLines = emptyList();
+    }
+
+    public SaveMigration(String game, String version, String name, List<FactoryMigration> factories,
+                         List<ChangelistMigration> changelists, List<TransportLineMigration> transportLines) {
+        this.game = game;
+        this.version = version;
+        this.name = name;
+        this.factories = factories;
+        this.changelists = changelists;
+        this.transportLines = transportLines;
+    }
 
     public String getGame() {
         return game;

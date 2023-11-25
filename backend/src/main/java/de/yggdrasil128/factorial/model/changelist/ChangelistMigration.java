@@ -12,7 +12,21 @@ public class ChangelistMigration {
     private boolean primary;
     private boolean active;
     private String iconName;
-    private Map<String, List<ProductionStepChangeMigration>> productionStepChanges = emptyMap();
+    private Map<String, List<ProductionStepChangeMigration>> productionStepChanges;
+
+    public ChangelistMigration() {
+        productionStepChanges = emptyMap();
+    }
+
+    public ChangelistMigration(int ordinal, String name, boolean primary, boolean active, String iconName,
+                               Map<String, List<ProductionStepChangeMigration>> productionStepChanges) {
+        this.ordinal = ordinal;
+        this.name = name;
+        this.primary = primary;
+        this.active = active;
+        this.iconName = iconName;
+        this.productionStepChanges = productionStepChanges;
+    }
 
     public int getOrdinal() {
         return ordinal;

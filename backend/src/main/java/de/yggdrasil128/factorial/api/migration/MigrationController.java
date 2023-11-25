@@ -1,32 +1,46 @@
 package de.yggdrasil128.factorial.api.migration;
 
 import de.yggdrasil128.factorial.model.gameversion.GameVersionMigration;
+import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.save.SaveMigration;
+import de.yggdrasil128.factorial.model.save.SaveService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/migration")
 public class MigrationController {
 
-    private final MigrationService service;
+    private final MigrationService migrationService;
+    private final GameVersionService gameVersionService;
+    private final SaveService saveService;
 
     @Autowired
-    public MigrationController(MigrationService service) {
-        this.service = service;
+    public MigrationController(MigrationService migrationService, GameVersionService gameVersionService,
+                               SaveService saveService) {
+        this.migrationService = migrationService;
+        this.gameVersionService = gameVersionService;
+        this.saveService = saveService;
     }
 
     @PostMapping("/gameVersion")
     public void importGameVersion(@RequestBody GameVersionMigration input) {
-        service.importGameVersion(input);
+        migrationService.importGameVersion(input);
     }
 
     @PostMapping("/save")
     public void importSave(@RequestBody SaveMigration input) {
-        service.importSave(input);
+        migrationService.importSave(input);
+    }
+
+    @GetMapping("/gameVersion")
+    public GameVersionMigration exportGameVersion(int gameVersionId) {
+        return migrationService.exportGameVersion(gameVersionService.get(gameVersionId));
+    }
+
+    @GetMapping("/save")
+    public SaveMigration erxportSave(int saveId) {
+        return migrationService.exportSave(saveService.get(saveId));
     }
 
 }

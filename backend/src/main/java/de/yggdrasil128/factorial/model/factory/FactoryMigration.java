@@ -13,10 +13,30 @@ public class FactoryMigration {
     private String name;
     private String description;
     private String iconName;
-    private List<ProductionStepMigration> productionSteps = emptyList();
-    private List<String> itemOrder = emptyList();
-    private List<XgressMigration> ingresses = emptyList();
-    private List<XgressMigration> egresses = emptyList();
+    private List<ProductionStepMigration> productionSteps;
+    private List<String> itemOrder;
+    private List<XgressMigration> ingresses;
+    private List<XgressMigration> egresses;
+
+    public FactoryMigration() {
+        productionSteps = emptyList();
+        itemOrder = emptyList();
+        ingresses = emptyList();
+        egresses = emptyList();
+    }
+
+    public FactoryMigration(int ordinal, String name, String description, String iconName,
+                            List<ProductionStepMigration> productionSteps, List<String> itemOrder,
+                            List<XgressMigration> ingresses, List<XgressMigration> egresses) {
+        this.ordinal = ordinal;
+        this.name = name;
+        this.description = description;
+        this.iconName = iconName;
+        this.productionSteps = productionSteps;
+        this.itemOrder = itemOrder;
+        this.ingresses = ingresses;
+        this.egresses = egresses;
+    }
 
     public int getOrdinal() {
         return ordinal;

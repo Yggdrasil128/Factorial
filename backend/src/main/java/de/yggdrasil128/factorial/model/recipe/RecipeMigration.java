@@ -11,10 +11,25 @@ import static java.util.Collections.emptyMap;
 public class RecipeMigration {
 
     private String iconName;
-    private Map<String, Fraction> input = emptyMap();
-    private Map<String, Fraction> output = emptyMap();
+    private Map<String, Fraction> input;
+    private Map<String, Fraction> output;
     private Fraction duration;
-    private List<String> category = emptyList();
+    private List<String> category;
+
+    public RecipeMigration() {
+        input = emptyMap();
+        output = emptyMap();
+        category = emptyList();
+    }
+
+    public RecipeMigration(String iconName, Map<String, Fraction> input, Map<String, Fraction> output,
+                           Fraction duration, List<String> category) {
+        this.iconName = iconName;
+        this.input = input;
+        this.output = output;
+        this.duration = duration;
+        this.category = category;
+    }
 
     public String getIconName() {
         return iconName;

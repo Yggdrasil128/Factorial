@@ -10,6 +10,18 @@ public class RecipeModifierMigration {
     private Fraction inputQuantityMultiplier;
     private Fraction outputQuantityMultiplier;
 
+    public RecipeModifierMigration() {
+    }
+
+    public RecipeModifierMigration(String description, String iconName, Fraction durationMultiplier,
+                                   Fraction inputQuantityMultiplier, Fraction outputQuantityMultiplier) {
+        this.description = description;
+        this.iconName = iconName;
+        this.durationMultiplier = durationMultiplier;
+        this.inputQuantityMultiplier = inputQuantityMultiplier;
+        this.outputQuantityMultiplier = outputQuantityMultiplier;
+    }
+
     public String getDescription() {
         return description;
     }

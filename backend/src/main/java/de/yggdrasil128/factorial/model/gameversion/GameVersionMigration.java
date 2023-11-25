@@ -15,11 +15,33 @@ public class GameVersionMigration {
     private String game;
     private String version;
     private String iconName;
-    private Map<String, IconMigration> icons = emptyMap();
-    private Map<String, ItemMigration> items = emptyMap();
-    private Map<String, RecipeMigration> recipes = emptyMap();
-    private Map<String, RecipeModifierMigration> recipeModifiers = emptyMap();
-    private Map<String, MachineMigration> machines = emptyMap();
+    private Map<String, IconMigration> icons;
+    private Map<String, ItemMigration> items;
+    private Map<String, RecipeMigration> recipes;
+    private Map<String, RecipeModifierMigration> recipeModifiers;
+    private Map<String, MachineMigration> machines;
+
+    public GameVersionMigration() {
+        icons = emptyMap();
+        items = emptyMap();
+        recipes = emptyMap();
+        recipeModifiers = emptyMap();
+        machines = emptyMap();
+    }
+
+    public GameVersionMigration(String game, String version, String iconName, Map<String, IconMigration> icons,
+                                Map<String, ItemMigration> items, Map<String, RecipeMigration> recipes,
+                                Map<String, RecipeModifierMigration> recipeModifiers,
+                                Map<String, MachineMigration> machines) {
+        this.game = game;
+        this.version = version;
+        this.iconName = iconName;
+        this.icons = icons;
+        this.items = items;
+        this.recipes = recipes;
+        this.recipeModifiers = recipeModifiers;
+        this.machines = machines;
+    }
 
     public String getGame() {
         return game;

@@ -4,11 +4,23 @@ import de.yggdrasil128.factorial.model.Fraction;
 
 import java.util.Map;
 
+import static java.util.Collections.emptyMap;
+
 public class XgressMigration {
 
     private String name;
     private boolean unclogging;
     private Map<String, Fraction> resources;
+
+    public XgressMigration() {
+        resources = emptyMap();
+    }
+
+    public XgressMigration(String name, boolean unclogging, Map<String, Fraction> resources) {
+        this.name = name;
+        this.unclogging = unclogging;
+        this.resources = resources;
+    }
 
     public String getName() {
         return name;

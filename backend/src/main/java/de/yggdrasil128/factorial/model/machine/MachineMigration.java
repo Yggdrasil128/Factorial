@@ -7,8 +7,19 @@ import static java.util.Collections.emptyList;
 public class MachineMigration {
 
     private String iconName;
-    private List<String> machineModifierNames = emptyList();
-    private List<String> category = emptyList();
+    private List<String> machineModifierNames;
+    private List<String> category;
+
+    public MachineMigration() {
+        machineModifierNames = emptyList();
+        category = emptyList();
+    }
+
+    public MachineMigration(String iconName, List<String> machineModifierNames, List<String> category) {
+        this.iconName = iconName;
+        this.machineModifierNames = machineModifierNames;
+        this.category = category;
+    }
 
     public String getIconName() {
         return iconName;

@@ -2,6 +2,8 @@ package de.yggdrasil128.factorial.model.transportline;
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 public class TransportLineMigration {
 
     private String name;
@@ -10,6 +12,22 @@ public class TransportLineMigration {
     private List<String> sourceFactoryNames;
     private List<String> targetFactoryNames;
     private List<String> itemNames;
+
+    public TransportLineMigration() {
+        sourceFactoryNames = emptyList();
+        targetFactoryNames = emptyList();
+        itemNames = emptyList();
+    }
+
+    public TransportLineMigration(String name, String description, String iconName, List<String> sourceFactoryNames,
+                                  List<String> targetFactoryNames, List<String> itemNames) {
+        this.name = name;
+        this.description = description;
+        this.iconName = iconName;
+        this.sourceFactoryNames = sourceFactoryNames;
+        this.targetFactoryNames = targetFactoryNames;
+        this.itemNames = itemNames;
+    }
 
     public String getName() {
         return name;

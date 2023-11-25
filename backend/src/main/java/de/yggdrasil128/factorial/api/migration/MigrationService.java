@@ -43,47 +43,48 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.*;
 
 @Service
 public class MigrationService {
 
-    private final GameRepository games;
-    private final GameVersionRepository gameVersions;
-    private final ItemRepository items;
-    private final RecipeRepository recipes;
-    private final RecipeModifierRepository recipeModifiers;
-    private final MachineRepository machines;
-    private final SaveRepository saves;
-    private final IconRepository icons;
+    private final GameRepository gameRepository;
+    private final GameVersionRepository gameVersionRepository;
+    private final ItemRepository itemRepository;
+    private final RecipeRepository recipeRepository;
+    private final RecipeModifierRepository recipeModifierRepository;
+    private final MachineRepository machineRepository;
+    private final SaveRepository saveRepository;
+    private final IconRepository iconRepository;
 
     @Autowired
-    public MigrationService(GameRepository games, GameVersionRepository gameVersions, ItemRepository items,
-                            RecipeRepository recipes, RecipeModifierRepository recipeModifiers,
-                            MachineRepository machines, SaveRepository saves, IconRepository icons) {
-        this.games = games;
-        this.gameVersions = gameVersions;
-        this.items = items;
-        this.recipes = recipes;
-        this.recipeModifiers = recipeModifiers;
-        this.machines = machines;
-        this.saves = saves;
-        this.icons = icons;
+    public MigrationService(GameRepository gameRepository, GameVersionRepository gameVersionRepository,
+                            ItemRepository itemRepository, RecipeRepository recipeRepository,
+                            RecipeModifierRepository recipeModifierRepository, MachineRepository machineRepository,
+                            SaveRepository saveRepository, IconRepository iconRepository) {
+        this.gameRepository = gameRepository;
+        this.gameVersionRepository = gameVersionRepository;
+        this.itemRepository = itemRepository;
+        this.recipeRepository = recipeRepository;
+        this.recipeModifierRepository = recipeModifierRepository;
+        this.machineRepository = machineRepository;
+        this.saveRepository = saveRepository;
+        this.iconRepository = iconRepository;
     }
 
     public GameVersion importGameVersion(GameVersionMigration input) {
-        Game game = games.findByName(input.getGame()).orElse(null);
+        Game game = gameRepository.findByName(input.getGame()).orElse(null);
         GameVersion gameVersion;
         if (null == game) {
             game = new Game(input.getGame(), nl());
             gameVersion = importGameVersion(game, input);
             game.getGameVersions().add(gameVersion);
-            games.save(game);
+            gameRepository.save(game);
         } else {
             gameVersion = importGameVersion(game, input);
-            gameVersions.save(gameVersion);
+            gameVersionRepository.save(gameVersion);
             game.getGameVersions().add(gameVersion);
-            games.save(game);
+            gameRepository.save(game);
         }
         return gameVersion;
     }
@@ -170,9 +171,9 @@ public class MigrationService {
             throw ModelService.report(HttpStatus.BAD_REQUEST,
                     "save '" + input.getName() + "' must contain exactly one primary change list");
         }
-        Game game = games.findByName(input.getGame()).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                "save requires the game '" + input.getGame() + "' to be installed"));
-        GameVersion gameVersion = gameVersions.findByGameIdAndName(game.getId(), input.getVersion())
+        Game game = gameRepository.findByName(input.getGame()).orElseThrow(() -> ModelService
+                .report(HttpStatus.CONFLICT, "save requires the game '" + input.getGame() + "' to be installed"));
+        GameVersion gameVersion = gameVersionRepository.findByGameIdAndName(game.getId(), input.getVersion())
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                         "save requires the game version '" + input.getVersion() + "' to be installed"));
         Save save = new Save(gameVersion, input.getName(), nl(), nl(), nl());
@@ -180,7 +181,7 @@ public class MigrationService {
         input.getChangelists().stream().map(entry -> importChangelist(save, entry)).forEach(save.getChangelists()::add);
         input.getTransportLines().stream().map(entry -> importTransportLine(save, entry))
                 .forEach(save.getTransportLines()::add);
-        saves.save(save);
+        saveRepository.save(save);
         return save;
     }
 
@@ -206,13 +207,13 @@ public class MigrationService {
 
     private ProductionStep importProductionStep(Factory factory, ProductionStepMigration input) {
         int gameVersionId = factory.getSave().getGameVersion().getId();
-        Machine machine = machines.findByGameVersionIdAndName(gameVersionId, input.getMachineName())
+        Machine machine = machineRepository.findByGameVersionIdAndName(gameVersionId, input.getMachineName())
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                         "entity in save refers to non-existent machine '" + input.getMachineName() + "'"));
-        Recipe recipe = recipes.findByGameVersionIdAndName(gameVersionId, input.getRecipeName())
+        Recipe recipe = recipeRepository.findByGameVersionIdAndName(gameVersionId, input.getRecipeName())
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                         "entity in save refers to non-existent recipe '" + input.getRecipeName() + "'"));
-        List<RecipeModifier> modifiers = recipeModifiers.findAllByGameVersionIdAndNameIn(gameVersionId,
+        List<RecipeModifier> modifiers = recipeModifierRepository.findAllByGameVersionIdAndNameIn(gameVersionId,
                 input.getModifierNames());
         if (modifiers.size() != input.getModifierNames().size()) {
             throw ModelService.report(HttpStatus.CONFLICT,
@@ -272,7 +273,7 @@ public class MigrationService {
     }
 
     private Item getAttachedItem(GameVersion gameVersion, String name) {
-        return items.findByGameVersionIdAndName(gameVersion.getId(), name).orElseThrow(() -> ModelService
+        return itemRepository.findByGameVersionIdAndName(gameVersion.getId(), name).orElseThrow(() -> ModelService
                 .report(HttpStatus.CONFLICT, "entity in save refers to non-existent item '" + name + "'"));
     }
 
@@ -280,7 +281,7 @@ public class MigrationService {
         if (null == name) {
             return null;
         }
-        return icons.findByGameVersionIdAndName(gameVersion.getId(), name).orElseThrow(() -> ModelService
+        return iconRepository.findByGameVersionIdAndName(gameVersion.getId(), name).orElseThrow(() -> ModelService
                 .report(HttpStatus.CONFLICT, "entity in save refers to non-existent icon '" + name + "'"));
     }
 
@@ -293,6 +294,119 @@ public class MigrationService {
     // since we need these so often
     private static <E> List<E> nl() {
         return new ArrayList<>();
+    }
+
+    public GameVersionMigration exportGameVersion(GameVersion gameVersion) {
+        String iconName = null == gameVersion.getIcon() ? null : gameVersion.getIcon().getName();
+        Map<String, IconMigration> icons = gameVersion.getIcons().stream().collect(toMap(Icon::getName,
+                MigrationService::exportIcon, MigrationService::reportDuplicate, LinkedHashMap::new));
+        Map<String, ItemMigration> items = gameVersion.getItems().stream().collect(toMap(Item::getName,
+                MigrationService::exportItem, MigrationService::reportDuplicate, LinkedHashMap::new));
+        Map<String, RecipeMigration> recipes = gameVersion.getRecipes().stream().collect(toMap(Recipe::getName,
+                MigrationService::exportRecipe, MigrationService::reportDuplicate, LinkedHashMap::new));
+        Map<String, RecipeModifierMigration> recipeModifiers = gameVersion.getRecipeModifiers().stream()
+                .collect(toMap(RecipeModifier::getName, MigrationService::exportRecipeModifier,
+                        MigrationService::reportDuplicate, LinkedHashMap::new));
+        Map<String, MachineMigration> machines = gameVersion.getMachines().stream().collect(toMap(Machine::getName,
+                MigrationService::exportMachine, MigrationService::reportDuplicate, LinkedHashMap::new));
+        return new GameVersionMigration(gameVersion.getGame().getName(), gameVersion.getName(), iconName, icons, items,
+                recipes, recipeModifiers, machines);
+    }
+
+    private static IconMigration exportIcon(Icon icon) {
+        return new IconMigration(icon.getImageData(), icon.getMimeType(), icon.getCategory());
+    }
+
+    private static ItemMigration exportItem(Item item) {
+        String iconName = null == item.getIcon() ? null : item.getIcon().getName();
+        return new ItemMigration(item.getDescription(), iconName, item.getCategory());
+    }
+
+    private static RecipeMigration exportRecipe(Recipe recipe) {
+        String iconName = null == recipe.getIcon() ? null : recipe.getIcon().getName();
+        Map<String, Fraction> input = recipe.getInput().stream().collect(toMap(resource -> resource.getItem().getName(),
+                Resource::getQuantity, MigrationService::reportDuplicate, LinkedHashMap::new));
+        Map<String, Fraction> output = recipe.getOutput().stream()
+                .collect(toMap(resource -> resource.getItem().getName(), Resource::getQuantity,
+                        MigrationService::reportDuplicate, LinkedHashMap::new));
+        return new RecipeMigration(iconName, input, output, recipe.getDuration(), recipe.getCategory());
+    }
+
+    private static RecipeModifierMigration exportRecipeModifier(RecipeModifier recipeModifier) {
+        String iconName = null == recipeModifier.getIcon() ? null : recipeModifier.getIcon().getName();
+        return new RecipeModifierMigration(recipeModifier.getDescription(), iconName,
+                recipeModifier.getDurationMultiplier(), recipeModifier.getInputQuantityMultiplier(),
+                recipeModifier.getOutputQuantityMultiplier());
+    }
+
+    private static MachineMigration exportMachine(Machine machine) {
+        String iconName = null == machine.getIcon() ? null : machine.getIcon().getName();
+        List<String> machineModifierNames = machine.getMachineModifiers().stream().map(RecipeModifier::getName)
+                .toList();
+        return new MachineMigration(iconName, machineModifierNames, machine.getCategory());
+    }
+
+    public SaveMigration exportSave(Save save) {
+        List<FactoryMigration> factories = save.getFactories().stream().map(MigrationService::exportFactory).toList();
+        List<ChangelistMigration> changelists = save.getChangelists().stream().map(MigrationService::exportChangelist)
+                .toList();
+        List<TransportLineMigration> transportLines = save.getTransportLines().stream()
+                .map(MigrationService::exportTransportLine).toList();
+        return new SaveMigration(save.getGameVersion().getGame().getName(), save.getGameVersion().getName(),
+                save.getName(), factories, changelists, transportLines);
+    }
+
+    private static FactoryMigration exportFactory(Factory factory) {
+        String iconName = null == factory.getIcon() ? null : factory.getIcon().getName();
+        List<ProductionStepMigration> productionSteps = factory.getProductionSteps().stream()
+                .map(MigrationService::exportProductionStep).toList();
+        List<String> itemOrder = factory.getItemOrder().entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue)).map(entry -> entry.getKey().getName()).toList();
+        List<XgressMigration> ingresses = factory.getIngresses().stream().map(MigrationService::exportXgress).toList();
+        List<XgressMigration> egresses = factory.getEgresses().stream().map(MigrationService::exportXgress).toList();
+        return new FactoryMigration(factory.getOrdinal(), factory.getName(), factory.getDescription(), iconName,
+                productionSteps, itemOrder, ingresses, egresses);
+    }
+
+    private static ProductionStepMigration exportProductionStep(ProductionStep productionStep) {
+        List<String> modifierNames = productionStep.getModifiers().stream().map(RecipeModifier::getName).toList();
+        List<String> uncloggingInputNames = productionStep.getUncloggingInputs().stream().map(Item::getName).toList();
+        List<String> uncloggingOutputNames = productionStep.getUncloggingOutputs().stream().map(Item::getName).toList();
+        return new ProductionStepMigration(productionStep.getMachine().getName(), productionStep.getRecipe().getName(),
+                modifierNames, productionStep.getMachineCount(), uncloggingInputNames, uncloggingOutputNames);
+    }
+
+    private static XgressMigration exportXgress(Xgress xgress) {
+        Map<String, Fraction> resources = xgress.getResources().stream()
+                .collect(toMap(resource -> resource.getItem().getName(), Resource::getQuantity,
+                        MigrationService::reportDuplicate, LinkedHashMap::new));
+        return new XgressMigration(xgress.getName(), xgress.isUnclogging(), resources);
+    }
+
+    private static ChangelistMigration exportChangelist(Changelist changelist) {
+        String iconName = null == changelist.getIcon() ? null : changelist.getIcon().getName();
+        Map<String, List<ProductionStepChangeMigration>> productionStepChanges = changelist.getProductionStepChanges()
+                .entrySet().stream().collect(
+                        groupingBy(
+                                entry -> entry.getKey().getFactory().getName(), mapping(
+                                        entry -> new ProductionStepChangeMigration(entry.getKey().getFactory()
+                                                .getProductionSteps().indexOf(entry.getKey()), entry.getValue()),
+                                        toList())));
+        return new ChangelistMigration(changelist.getOrdinal(), changelist.getName(), changelist.isPrimary(),
+                changelist.isActive(), iconName, productionStepChanges);
+    }
+
+    private static TransportLineMigration exportTransportLine(TransportLine transportLine) {
+        String iconName = null == transportLine.getIcon() ? null : transportLine.getIcon().getName();
+        List<String> sourceFactoryNames = transportLine.getSourceFactories().stream().map(Factory::getName).toList();
+        List<String> targetFactoryNames = transportLine.getTargetFactories().stream().map(Factory::getName).toList();
+        List<String> itemNames = transportLine.getItems().stream().map(Item::getName).toList();
+        return new TransportLineMigration(transportLine.getName(), transportLine.getDescription(), iconName,
+                sourceFactoryNames, targetFactoryNames, itemNames);
+    }
+
+    private static <T> T reportDuplicate(T o1, T o2) {
+        throw ModelService.report(HttpStatus.CONFLICT, "duplicate identifier for values " + o1 + " and " + o2);
     }
 
 }

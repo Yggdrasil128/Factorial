@@ -8,7 +8,17 @@ public class IconMigration {
 
     private byte[] imageData;
     private String mimeType;
-    private List<String> category = emptyList();
+    private List<String> category;
+
+    public IconMigration() {
+        category = emptyList();
+    }
+
+    public IconMigration(byte[] imageData, String mimeType, List<String> category) {
+        this.imageData = imageData;
+        this.mimeType = mimeType;
+        this.category = category;
+    }
 
     public byte[] getImageData() {
         return imageData;
