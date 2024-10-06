@@ -27,7 +27,7 @@ public class GameVersion {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Icon> icons;
     @JoinColumn
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Item> items;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
