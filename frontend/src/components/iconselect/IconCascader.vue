@@ -6,7 +6,7 @@ import _ from 'lodash';
 
 const axios = inject('axios');
 
-const props = defineProps(['modelValue', 'fetchEndpoint', 'entityName']);
+const props = defineProps(['modelValue', 'fetchEndpoint', 'entityName', 'recipeIcons']);
 const emit = defineEmits(['update:modelValue']);
 
 const selectedId = ref();
@@ -221,6 +221,20 @@ function setClickOutsideBackoff(ms) {
   setTimeout(() => clickOutsideBackoff = false, ms);
 }
 
+function getIcon(item) {
+  if (!item) {
+    return null;
+  }
+  if (item.icon) {
+    return item.icon;
+  }
+  // console.log(props.recipeIcons, item.output.length === 1, item.output[0].item.icon);
+  if (props.recipeIcons && item.output.length === 1 && item.output[0].item.icon) {
+    return item.output[0].item.icon;
+  }
+  return null;
+}
+
 </script>
 
 <template>
@@ -231,7 +245,7 @@ function setClickOutsideBackoff(ms) {
               @focus="onInputFocus" @blur="onInputBlur" @clear="onInputClear" @input="onInputInput"
               v-loading="loading" element-loading-background="rgba(65, 65, 65, 0.6)">
       <template #prefix v-if="selectedId">
-        <icon-img :icon="itemMap[selectedId].icon" :size="32"/>
+        <icon-img :icon="getIcon(itemMap[selectedId])" :size="32"/>
       </template>
     </el-input>
     <OnClickOutside @trigger="onClickOutside">
@@ -247,7 +261,7 @@ function setClickOutsideBackoff(ms) {
               <template v-if="node.isLeaf">
                 <div style="height: 36px; display: flex;">
                 <span style="margin-right: 8px;">
-                  <icon-img :icon="data.icon" :size="32"/>
+                  <icon-img :icon="getIcon(data)" :size="32"/>
                 </span>
                   <span>{{ data.label }}</span>
                 </div>

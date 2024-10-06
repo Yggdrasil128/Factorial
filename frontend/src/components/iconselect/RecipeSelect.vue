@@ -7,7 +7,7 @@ const emit = defineEmits(['update:modelValue']);
 
 <template>
   <icon-cascader :model-value="modelValue" @update:model-value="value => emit('update:modelValue', value)"
-                 fetch-endpoint="/api/save/recipes" entity-name="recipe"/>
+                 fetch-endpoint="/api/save/recipes" entity-name="recipe" :recipe-icons="true"/>
 </template>
 
 <style scoped>
