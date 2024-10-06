@@ -3,8 +3,19 @@ import {Delete, Edit,} from '@element-plus/icons-vue';
 import MachineCountInput from "@/components/factories/MachineCountInput.vue";
 import QuantityDisplay from "@/components/factories/QuantityDisplay.vue";
 import IconImg from "@/components/IconImg.vue";
+import {computed} from "vue";
 
-defineProps(["step", "itemMap"]);
+const props = defineProps(["step", "itemMap"]);
+
+const recipeIcon = computed(() => {
+  if (props.step.recipe.icon) {
+    return props.step.recipe.icon;
+  }
+  if (props.step.recipe.output.length === 1 && props.step.recipe.output[0].item.icon) {
+    return props.step.recipe.output[0].item.icon;
+  }
+  return null;
+})
 </script>
 
 <template>
@@ -17,7 +28,7 @@ defineProps(["step", "itemMap"]);
           <quantity-display :quantity="step.machineCount"/>
           &emsp;
         </div>
-        <icon-img :icon="step.recipe.icon" :size="48"/>
+        <icon-img v-if="recipeIcon" :icon="recipeIcon" :size="48"/>
       </div>
       <div class="stepInfo">
         <div class="stepName">Recipe: {{ step.recipe.name }}</div>
@@ -49,7 +60,7 @@ defineProps(["step", "itemMap"]);
         <machine-count-input v-model:quantity="step.machineCount" :production-step-id="step.id"/>
         &ensp;
         <el-button-group>
-          <el-button type="" :icon="Edit"/>
+          <el-button :icon="Edit"/>
           <el-button type="danger" :icon="Delete"/>
         </el-button-group>
       </div>
@@ -97,6 +108,9 @@ defineProps(["step", "itemMap"]);
 .stepThroughput span {
   line-height: 24px;
   vertical-align: top;
+}
+
+.stepThroughput span:not(:first-child) {
   margin-left: 5px;
 }
 

@@ -95,7 +95,7 @@
             ]
         }
     },
-    "recipies": {
+  "recipes": {
         "Water": {
             "iconName": "Water",
             "output": {

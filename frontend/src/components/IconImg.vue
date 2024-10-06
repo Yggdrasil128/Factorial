@@ -12,7 +12,7 @@ const src = computed(() => {
 </script>
 
 <template>
-  <img :src="src" :alt="icon.name" :style="{width: size + 'px', height: size + 'px'}"/>
+  <img v-if="icon" :src="src" :alt="icon.name" :style="{width: size + 'px', height: size + 'px'}"/>
 </template>
 
 <style scoped>

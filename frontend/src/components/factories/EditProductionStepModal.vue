@@ -1,11 +1,11 @@
 <script setup>
-import {inject, reactive, ref} from "vue";
-import {onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter} from "vue-router";
-import {Check, Close} from "@element-plus/icons-vue";
-import _ from 'lodash';
-import {ElMessageBox} from "element-plus";
-import RecipeSelect from "@/components/iconselect/RecipeSelect.vue";
+import {computed, inject, reactive, ref} from "vue";
+import {onBeforeRouteUpdate, useRoute, useRouter} from "vue-router";
+import _ from "lodash";
+import EditModal from "@/components/EditModal.vue";
 import MachineSelect from "@/components/iconselect/MachineSelect.vue";
+import RecipeSelect from "@/components/iconselect/RecipeSelect.vue";
+import {ElNotification} from "element-plus";
 
 const router = useRouter();
 const route = useRoute();
@@ -13,51 +13,30 @@ const route = useRoute();
 const axios = inject('axios');
 const globalEventBus = inject('globalEventBus');
 
-const visible = ref(true);
-const productionStep = ref(emptyProductionStepData());
-const original = ref(productionStep.value);
 const loading = ref(true);
 const saving = ref(false);
+const productionStep = ref(emptyProductionStepData());
+const original = ref(null);
+const editModal = ref();
 
-document.body.classList.add('el-dark-popper');
+const hasChanges = computed(() => !_.isEqual(productionStep.value, original.value));
 
-// handle navigation
-
-onBeforeRouteLeave(async () => {
-  if (visible.value && !(await checkLeave())) {
-    return false;
-  }
-  document.body.classList.remove('el-dark-popper');
+const formRules = reactive({
+  recipeId: [
+    {validator: checkGreaterZero, params: {entityName: 'recipe'}}
+  ],
+  machineId: [
+    {validator: checkGreaterZero, trigger: 'blur', params: {entityName: 'machine'}}
+  ]
 });
 
-async function beforeClose() {
-  if (await checkLeave()) {
-    router.back();
+function checkGreaterZero(rule, value, callback) {
+  if (!value || value <= 0) {
+    return callback(new Error('Please select a ' + rule.params.entityName));
+  } else {
+    callback();
   }
 }
-
-async function checkLeave() {
-  if (saving.value) {
-    return true;
-  }
-  if (!_.isEqual(productionStep.value, original.value)) {
-    const answer = await new Promise(r => ElMessageBox({
-      title: 'Warning',
-      message: 'Do you really want to leave? You have unsaved changes!',
-      confirmButtonText: 'Discard changes',
-      cancelButtonText: 'Cancel',
-      showCancelButton: true,
-      type: 'warning',
-      customClass: 'el-dark'
-    }).then(() => r(true)).catch(() => r(false)));
-    if (!answer) return false;
-  }
-  visible.value = false;
-  await new Promise(r => setTimeout(r, 200));
-  return true;
-}
-
-onBeforeRouteUpdate(loadProductionStepData);
 
 function emptyProductionStepData() {
   return {
@@ -82,31 +61,27 @@ async function loadProductionStepData(route) {
 }
 
 loadProductionStepData(route);
-
-// form validation
-
-const form = ref();
-const rules = reactive({
-  recipeId: [
-    {validator: checkGreaterZero, trigger: 'blur', params: {entityName: 'recipe'}}
-  ]
-});
-
-function checkGreaterZero(rule, value, callback) {
-  if (!value || value <= 0) {
-    return callback(new Error('Please select a ' + rule.params.entityName));
-  }
-}
+onBeforeRouteUpdate(loadProductionStepData);
 
 async function submitForm() {
-  if (!await form.value.validate(() => ({}))) {
+  if (!await editModal.value.validate()) {
+    ElNotification.error({
+      title: 'Validation error',
+      customClass: 'el-dark'
+    });
     return;
   }
+  ElNotification.success({
+    title: 'Validation success',
+    customClass: 'el-dark'
+  });
 
+  // noinspection PointlessBooleanExpressionJS
   if (true) {
     return;
   }
 
+  // noinspection UnreachableCodeJS
   saving.value = true;
 
   if (route.name === 'newProductionStep') {
@@ -117,38 +92,37 @@ async function submitForm() {
         {params: {productionStepId: route.params.editProductionStepId}});
   }
 
-  globalEventBus.emit('updateChangelists');
-
   await router.push({name: 'factories', params: {factoryId: route.params.factoryId}});
 }
 
 </script>
 
 <template>
-  <el-dialog :model-value="visible" :before-close="beforeClose" class="el-dark" width="1000px"
-             :title="route.name === 'newChangelist' ? 'New changelist' : 'Edit changelist'">
-    <p style="margin-top: 0; margin-bottom: 30px;">
+  <edit-modal
+      :title="route.name === 'newProductionStep' ? 'New production step' : 'Edit production step'"
+      form-label-width="120px"
+      :form-model="productionStep"
+      :form-loading="loading"
+      :form-rules="formRules"
+      :has-changes="hasChanges"
+      :is-saving="saving"
+      @submit="submitForm"
+      ref="editModal">
+
+    <template #description>
       Insert production step explanation here...
-    </p>
+    </template>
 
-    <el-form label-width="150px" style="width: 900px; overflow: auto;"
-             v-loading="loading" element-loading-background="rgba(20, 20, 20, 0.8)"
-             :model="productionStep" ref="form" :rules="rules">
-
-      <el-form-item label="Recipe">
+    <template #form>
+      <el-form-item label="Recipe" prop="recipeId" required>
         <recipe-select v-model="productionStep.recipeId"/>
       </el-form-item>
 
-      <el-form-item label="Machine">
+      <el-form-item label="Machine" prop="machineId" required>
         <machine-select v-model="productionStep.machineId"/>
       </el-form-item>
-
-      <div style="margin-top: 10px; float: right;">
-        <el-button :icon="Close" @click="beforeClose">Cancel</el-button>
-        <el-button type="primary" :icon="Check" @click="submitForm()" :loading="saving">Save</el-button>
-      </div>
-    </el-form>
-  </el-dialog>
+    </template>
+  </edit-modal>
 </template>
 
 <style scoped>

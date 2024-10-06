@@ -1,24 +1,58 @@
 <script setup>
 import {inject, ref} from "vue";
-import * as satisfactoryUpdate7 from "./json/SatisfactoryUpdate7.json";
-import * as exampleWithSteelProductionNorth from "./json/ExampleWithSteelProductionNorth.json";
-import {Check} from "@element-plus/icons-vue";
-import MachineSelect from "@/components/iconselect/MachineSelect.vue";
-import IconSelect from "@/components/iconselect/IconSelect.vue";
-import ItemSelect from "@/components/iconselect/ItemSelect.vue";
-import RecipeSelect from "@/components/iconselect/RecipeSelect.vue";
+import {Check, WarnTriangleFilled} from "@element-plus/icons-vue";
 
 const axios = inject('axios');
 
+const wipeDatabaseButtonState = ref(0);
 const setupTestDataButtonState = ref(0);
+const selectedTestDataSetup = ref('');
+
+const availableTestDataSetups = ref({
+  'SatisfactoryUpdate7 + ExampleWithSteelProductionNorth': {
+    gameVersionFile: 'SatisfactoryUpdate7',
+    saveFile: 'ExampleWithSteelProductionNorth'
+  },
+  'SatisfactoryUpdate8_withIcons + ExampleWithSteelProductionNorth': {
+    gameVersionFile: 'SatisfactoryUpdate8_withIcons',
+    saveFile: 'ExampleWithSteelProductionNorthV8'
+  }
+});
+
+async function wipeDatabaseAndRestart() {
+  wipeDatabaseButtonState.value = 1;
+
+  await axios.get('api/devtools/wipeDatabase');
+
+  wipeDatabaseButtonState.value = 2;
+
+  setTimeout(() => {
+    wipeDatabaseButtonState.value = 0
+  }, 2000);
+}
 
 async function setupTestData() {
+  if (!selectedTestDataSetup.value) {
+    return;
+  }
+
   setupTestDataButtonState.value = 1;
 
-  await axios.post('api/migration/gameVersion', satisfactoryUpdate7.default);
-  await axios.post('api/migration/save', exampleWithSteelProductionNorth.default);
+  let setup = availableTestDataSetups.value[selectedTestDataSetup.value];
+
+  await importJsonFile('gameVersion', setup.gameVersionFile);
+  await importJsonFile('save', setup.saveFile);
 
   setupTestDataButtonState.value = 2;
+
+  setTimeout(() => {
+    setupTestDataButtonState.value = 0
+  }, 2000);
+}
+
+async function importJsonFile(kind, filename) {
+  const data = await import("./json/" + filename + ".json");
+  await axios.post('api/migration/' + kind, data.default);
 }
 
 </script>
@@ -26,22 +60,21 @@ async function setupTestData() {
 <template>
   <h1>Dev Tools</h1>
   <p>
-    <el-button :loading="setupTestDataButtonState === 1" :disabled="setupTestDataButtonState > 0"
-               @click="setupTestData" :icon="setupTestDataButtonState === 2 ? Check : null">
-      Setup test data
+    <el-button :loading="wipeDatabaseButtonState === 1" :disabled="wipeDatabaseButtonState > 0" type="danger"
+               @click="wipeDatabaseAndRestart" :icon="wipeDatabaseButtonState === 2 ? Check : WarnTriangleFilled">
+      Wipe database and restart Factorial
     </el-button>
   </p>
   <p>
-    <icon-select :model-value="null" @update:model-value="console.log"/>
-  </p>
-  <p>
-    <item-select :model-value="null" @update:model-value="console.log"/>
-  </p>
-  <p>
-    <machine-select :model-value="null" @update:model-value="console.log"/>
-  </p>
-  <p>
-    <recipe-select :model-value="null" @update:model-value="console.log"/>
+    <el-select v-model="selectedTestDataSetup" placeholder="Select test data file" style="width: 400px;">
+      <el-option v-for="option in Object.keys(availableTestDataSetups)" :value="option" :label="option"></el-option>
+    </el-select>
+    &ensp;
+    <el-button :loading="setupTestDataButtonState === 1"
+               :disabled="setupTestDataButtonState > 0 || !selectedTestDataSetup"
+               @click="setupTestData" :icon="setupTestDataButtonState === 2 ? Check : null">
+      Setup test data
+    </el-button>
   </p>
 </template>
 
