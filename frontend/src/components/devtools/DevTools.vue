@@ -22,7 +22,7 @@ const availableTestDataSetups = ref({
 async function wipeDatabaseAndRestart() {
   wipeDatabaseButtonState.value = 1;
 
-  await axios.get('api/devtools/wipeDatabase');
+  await axios.get('api/devtools/wipeDatabaseAndRestart');
 
   wipeDatabaseButtonState.value = 2;
 
