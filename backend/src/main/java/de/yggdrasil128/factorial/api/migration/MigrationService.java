@@ -33,10 +33,6 @@ import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveMigration;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
-import de.yggdrasil128.factorial.model.transportline.TransportLine;
-import de.yggdrasil128.factorial.model.transportline.TransportLineMigration;
-import de.yggdrasil128.factorial.model.xgress.Xgress;
-import de.yggdrasil128.factorial.model.xgress.XgressMigration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -176,11 +172,9 @@ public class MigrationService {
         GameVersion gameVersion = gameVersionRepository.findByGameIdAndName(game.getId(), input.getVersion())
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                         "save requires the game version '" + input.getVersion() + "' to be installed"));
-        Save save = new Save(gameVersion, input.getName(), nl(), nl(), nl());
+        Save save = new Save(gameVersion, input.getName(), nl(), nl());
         input.getFactories().stream().map(entry -> importFactory(save, entry)).forEach(save.getFactories()::add);
         input.getChangelists().stream().map(entry -> importChangelist(save, entry)).forEach(save.getChangelists()::add);
-        input.getTransportLines().stream().map(entry -> importTransportLine(save, entry))
-                .forEach(save.getTransportLines()::add);
         saveRepository.save(save);
         return save;
     }
@@ -191,7 +185,7 @@ public class MigrationService {
             itemOrder.put(getAttachedItem(save.getGameVersion(), input.getItemOrder().get(i)), i + 1);
         }
         Factory factory = new Factory(save, input.getOrdinal(), input.getName(), input.getDescription(),
-                getAttachedIcon(save.getGameVersion(), input.getIconName()), nl(), nl(), nl(), itemOrder);
+                getAttachedIcon(save.getGameVersion(), input.getIconName()), nl(), itemOrder);
         for (ProductionStepMigration entry : input.getProductionSteps()) {
             ProductionStep productionStep = importProductionStep(factory, entry);
             factory.getProductionSteps().add(productionStep);
@@ -200,8 +194,6 @@ public class MigrationService {
             productionStep.getRecipe().getOutput().forEach(resource -> factory.getItemOrder()
                     .computeIfAbsent(resource.getItem(), item -> itemOrder.get(item)));
         }
-        input.getIngresses().stream().map(entry -> importXgress(factory, entry)).forEach(factory.getIngresses()::add);
-        input.getEgresses().stream().map(entry -> importXgress(factory, entry)).forEach(factory.getEgresses()::add);
         return factory;
     }
 
@@ -219,25 +211,7 @@ public class MigrationService {
             throw ModelService.report(HttpStatus.CONFLICT,
                     "entity in save refers to at least one non-existent recipe modifier");
         }
-        Set<Item> uncloggingInputs = getRecipeItems(input.getUncloggingInputNames(), recipe.getInput());
-        Set<Item> uncloggingOutputs = getRecipeItems(input.getUncloggingOutputNames(), recipe.getOutput());
-        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount(), uncloggingInputs,
-                uncloggingOutputs);
-    }
-
-    private static Set<Item> getRecipeItems(List<String> names, List<Resource> resources) {
-        return names.stream().map(name -> getRecipeItem(name, resources)).collect(toCollection(HashSet::new));
-    }
-
-    private static Item getRecipeItem(String name, List<Resource> resources) {
-        return resources.stream().map(Resource::getItem).filter(item -> item.getName().equals(name)).findAny()
-                .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                        "entity in save refers to non-existent item '" + name + "'"));
-    }
-
-    private Xgress importXgress(Factory factory, XgressMigration input) {
-        List<Resource> resources = getAttachedResources(factory.getSave().getGameVersion(), input.getResources());
-        return new Xgress(factory, input.getName(), input.isUnclogging(), resources);
+        return new ProductionStep(factory, machine, recipe, modifiers, input.getMachineCount());
     }
 
     private Changelist importChangelist(Save save, ChangelistMigration input) {
@@ -253,23 +227,6 @@ public class MigrationService {
         }
         return new Changelist(save, input.getOrdinal(), input.getName(), input.isPrimary(), input.isActive(),
                 getAttachedIcon(save.getGameVersion(), input.getIconName()), productionStepChanges);
-    }
-
-    private TransportLine importTransportLine(Save save, TransportLineMigration input) {
-        Icon icon = getAttachedIcon(save.getGameVersion(), input.getIconName());
-        List<Factory> sourceFactories = input.getSourceFactoryNames().stream()
-                .map(factoryName -> getTransientFactory(save, factoryName)).toList();
-        List<Factory> targetFactories = input.getTargetFactoryNames().stream()
-                .map(factoryName -> getTransientFactory(save, factoryName)).toList();
-        List<Item> transportedItems = input.getItemNames().stream()
-                .map(itemName -> getAttachedItem(save.getGameVersion(), itemName)).toList();
-        return new TransportLine(save, input.getName(), input.getDescription(), icon, sourceFactories, targetFactories,
-                transportedItems);
-    }
-
-    private List<Resource> getAttachedResources(GameVersion gameVersion, Map<String, Fraction> input) {
-        return input.entrySet().stream()
-                .map(entry -> new Resource(getAttachedItem(gameVersion, entry.getKey()), entry.getValue())).toList();
     }
 
     private Item getAttachedItem(GameVersion gameVersion, String name) {
@@ -350,10 +307,8 @@ public class MigrationService {
         List<FactoryMigration> factories = save.getFactories().stream().map(MigrationService::exportFactory).toList();
         List<ChangelistMigration> changelists = save.getChangelists().stream().map(MigrationService::exportChangelist)
                 .toList();
-        List<TransportLineMigration> transportLines = save.getTransportLines().stream()
-                .map(MigrationService::exportTransportLine).toList();
         return new SaveMigration(save.getGameVersion().getGame().getName(), save.getGameVersion().getName(),
-                save.getName(), factories, changelists, transportLines);
+                save.getName(), factories, changelists);
     }
 
     private static FactoryMigration exportFactory(Factory factory) {
@@ -362,25 +317,14 @@ public class MigrationService {
                 .map(MigrationService::exportProductionStep).toList();
         List<String> itemOrder = factory.getItemOrder().entrySet().stream()
                 .sorted(Comparator.comparing(Map.Entry::getValue)).map(entry -> entry.getKey().getName()).toList();
-        List<XgressMigration> ingresses = factory.getIngresses().stream().map(MigrationService::exportXgress).toList();
-        List<XgressMigration> egresses = factory.getEgresses().stream().map(MigrationService::exportXgress).toList();
         return new FactoryMigration(factory.getOrdinal(), factory.getName(), factory.getDescription(), iconName,
-                productionSteps, itemOrder, ingresses, egresses);
+                productionSteps, itemOrder);
     }
 
     private static ProductionStepMigration exportProductionStep(ProductionStep productionStep) {
         List<String> modifierNames = productionStep.getModifiers().stream().map(RecipeModifier::getName).toList();
-        List<String> uncloggingInputNames = productionStep.getUncloggingInputs().stream().map(Item::getName).toList();
-        List<String> uncloggingOutputNames = productionStep.getUncloggingOutputs().stream().map(Item::getName).toList();
         return new ProductionStepMigration(productionStep.getMachine().getName(), productionStep.getRecipe().getName(),
-                modifierNames, productionStep.getMachineCount(), uncloggingInputNames, uncloggingOutputNames);
-    }
-
-    private static XgressMigration exportXgress(Xgress xgress) {
-        Map<String, Fraction> resources = xgress.getResources().stream()
-                .collect(toMap(resource -> resource.getItem().getName(), Resource::getQuantity,
-                        MigrationService::reportDuplicate, LinkedHashMap::new));
-        return new XgressMigration(xgress.getName(), xgress.isUnclogging(), resources);
+                modifierNames, productionStep.getMachineCount());
     }
 
     private static ChangelistMigration exportChangelist(Changelist changelist) {
@@ -394,15 +338,6 @@ public class MigrationService {
                                         toList())));
         return new ChangelistMigration(changelist.getOrdinal(), changelist.getName(), changelist.isPrimary(),
                 changelist.isActive(), iconName, productionStepChanges);
-    }
-
-    private static TransportLineMigration exportTransportLine(TransportLine transportLine) {
-        String iconName = null == transportLine.getIcon() ? null : transportLine.getIcon().getName();
-        List<String> sourceFactoryNames = transportLine.getSourceFactories().stream().map(Factory::getName).toList();
-        List<String> targetFactoryNames = transportLine.getTargetFactories().stream().map(Factory::getName).toList();
-        List<String> itemNames = transportLine.getItems().stream().map(Item::getName).toList();
-        return new TransportLineMigration(transportLine.getName(), transportLine.getDescription(), iconName,
-                sourceFactoryNames, targetFactoryNames, itemNames);
     }
 
     private static <T> T reportDuplicate(T o1, T o2) {

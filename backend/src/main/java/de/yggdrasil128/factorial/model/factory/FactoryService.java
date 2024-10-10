@@ -11,7 +11,6 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
-import de.yggdrasil128.factorial.model.xgress.Xgress;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -44,27 +43,17 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         Map<Item, Integer> itemOrder = toItemOrderMapping(
                 OptionalInputField.ofIds(input.getItemOrder(), items::get).asList());
-        return repository.save(new Factory(save, ordinal, input.getName(), input.getDescription(), icon, emptyList(),
-                emptyList(), emptyList(), itemOrder));
+        return repository.save(
+                new Factory(save, ordinal, input.getName(), input.getDescription(), icon, emptyList(), itemOrder));
     }
 
     public static Factory createSentinel(Save save) {
-        return new Factory(save, 1, "Starter Base", null, null, emptyList(), emptyList(), emptyList(), emptyMap());
+        return new Factory(save, 1, "Starter Base", null, null, emptyList(), emptyMap());
     }
 
     public void addAttachedProductionStep(Factory factory, ProductionStep productionStep) {
         factory.getProductionSteps().add(productionStep);
         initItemOrder(factory, productionStep);
-        repository.save(factory);
-    }
-
-    public void addAttachedIngress(Factory factory, Xgress ingress) {
-        factory.getIngresses().add(ingress);
-        repository.save(factory);
-    }
-
-    public void addAttachedEgress(Factory factory, Xgress egress) {
-        factory.getEgresses().add(egress);
         repository.save(factory);
     }
 

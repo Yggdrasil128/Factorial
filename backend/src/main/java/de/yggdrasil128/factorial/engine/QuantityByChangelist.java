@@ -44,8 +44,8 @@ public class QuantityByChangelist {
 
     @Override
     public String toString() {
-        return "[ current = " + current + ", primary = " + withActiveChangelists + ", active = "
-                + withActiveChangelists + " ]";
+        return "[ current = " + current + ", primary = " + withActiveChangelists + ", active = " + withActiveChangelists
+                + " ]";
     }
 
 }

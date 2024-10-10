@@ -15,7 +15,7 @@ public class DevToolsService {
             return;
         }
 
-        //noinspection ResultOfMethodCallIgnored
+        // noinspection ResultOfMethodCallIgnored
         FactorialApplication.restart(databaseFile::delete);
     }
 }

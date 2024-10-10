@@ -2,7 +2,6 @@ package de.yggdrasil128.factorial.model.save;
 
 import de.yggdrasil128.factorial.model.changelist.ChangelistMigration;
 import de.yggdrasil128.factorial.model.factory.FactoryMigration;
-import de.yggdrasil128.factorial.model.transportline.TransportLineMigration;
 
 import java.util.List;
 
@@ -15,22 +14,19 @@ public class SaveMigration {
     private String name;
     private List<FactoryMigration> factories;
     private List<ChangelistMigration> changelists;
-    private List<TransportLineMigration> transportLines;
 
     public SaveMigration() {
         factories = emptyList();
         changelists = emptyList();
-        transportLines = emptyList();
     }
 
     public SaveMigration(String game, String version, String name, List<FactoryMigration> factories,
-                         List<ChangelistMigration> changelists, List<TransportLineMigration> transportLines) {
+                         List<ChangelistMigration> changelists) {
         this.game = game;
         this.version = version;
         this.name = name;
         this.factories = factories;
         this.changelists = changelists;
-        this.transportLines = transportLines;
     }
 
     public String getGame() {
@@ -71,14 +67,6 @@ public class SaveMigration {
 
     public void setChangelists(List<ChangelistMigration> changelists) {
         this.changelists = changelists;
-    }
-
-    public List<TransportLineMigration> getTransportLines() {
-        return transportLines;
-    }
-
-    public void setTransportLines(List<TransportLineMigration> transportLines) {
-        this.transportLines = transportLines;
     }
 
 }

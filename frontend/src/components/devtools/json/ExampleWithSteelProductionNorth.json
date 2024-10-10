@@ -28,20 +28,12 @@
                 {
                     "machineName": "Refinery",
                     "recipeName": "Pure Iron Ingot",
-                    "machineCount": "312 / 14",
-                    "inputGreed": [
-                        "Iron Ore",
-                        "Water"
-                    ]
+                    "machineCount": "312 / 14"
                 },
                 {
                     "machineName": "Foundry",
                     "recipeName": "Solid Steel Ingot",
-                    "machineCount": "36",
-                    "outputGreed": [
-                        "Iron Ingot",
-                        "Coal"
-                    ]
+                    "machineCount": "36"
                 }
             ],
             "itemOrder": [
@@ -58,7 +50,6 @@
             "egresses": [
                 {
                     "name": "Awesome Sink",
-                    "greedy": false,
                     "resources": {
                         "Steel Ingot": "39"
                     }

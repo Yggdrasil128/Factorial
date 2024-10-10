@@ -3,7 +3,6 @@ package de.yggdrasil128.factorial.model.save;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.transportline.TransportLine;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -23,20 +22,15 @@ public class Save {
     private List<Factory> factories;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<TransportLine> transportLines;
-    @JoinColumn
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Changelist> changelists;
 
     public Save() {
     }
 
-    public Save(GameVersion gameVersion, String name, List<Factory> factories, List<TransportLine> transportLines,
-                List<Changelist> changelists) {
+    public Save(GameVersion gameVersion, String name, List<Factory> factories, List<Changelist> changelists) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.factories = factories;
-        this.transportLines = transportLines;
         this.changelists = changelists;
     }
 
@@ -70,14 +64,6 @@ public class Save {
 
     public void setFactories(List<Factory> factories) {
         this.factories = factories;
-    }
-
-    public List<TransportLine> getTransportLines() {
-        return transportLines;
-    }
-
-    public void setTransportLines(List<TransportLine> transportLines) {
-        this.transportLines = transportLines;
     }
 
     public List<Changelist> getChangelists() {

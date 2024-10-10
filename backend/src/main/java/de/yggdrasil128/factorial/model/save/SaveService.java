@@ -7,13 +7,10 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.transportline.TransportLine;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-
-import static java.util.Collections.emptyList;
 
 @Service
 public class SaveService extends ModelService<Save, SaveRepository> {
@@ -23,7 +20,7 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     }
 
     public Save create(GameVersion gameVersion, SaveInput input) {
-        Save save = new Save(gameVersion, input.getName(), new ArrayList<>(1), emptyList(), new ArrayList<>(1));
+        Save save = new Save(gameVersion, input.getName(), new ArrayList<>(1), new ArrayList<>(1));
         save.getFactories().add(FactoryService.createSentinel(save));
         save.getChangelists().add(ChangelistService.createSentinel(save));
         return repository.save(save);
@@ -36,11 +33,6 @@ public class SaveService extends ModelService<Save, SaveRepository> {
 
     public void addAttachedChangelist(Save save, Changelist changelist) {
         save.getChangelists().add(changelist);
-        repository.save(save);
-    }
-
-    public void addAttachedTransportLine(Save save, TransportLine transportLine) {
-        save.getTransportLines().add(transportLine);
         repository.save(save);
     }
 
