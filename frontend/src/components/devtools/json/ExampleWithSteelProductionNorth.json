@@ -1,7 +1,6 @@
 {
     "name": "Example",
-    "game": "Satisfactory",
-    "version": "Update 7",
+    "gameVersion": "Satisfactory Update 7",
     "factories": [
         {
             "ordinal": 1,
@@ -47,30 +46,7 @@
         {
             "ordinal": 2,
             "name": "Steel Sink",
-            "egresses": [
-                {
-                    "name": "Awesome Sink",
-                    "resources": {
-                        "Steel Ingot": "39"
-                    }
-                }
-            ],
             "itemOrder": [
-                "Steel Ingot"
-            ]
-        }
-    ],
-    "transportLines": [
-        {
-            "name": "Steel Train",
-            "iconName": "Steel Ingot",
-            "sourceFactoryNames": [
-                "Steel Production North"
-            ],
-            "targetFactoryNames": [
-                "Steel Sink"
-            ],
-            "itemNames": [
                 "Steel Ingot"
             ]
         }

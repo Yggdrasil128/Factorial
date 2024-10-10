@@ -7,8 +7,6 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistMigration;
 import de.yggdrasil128.factorial.model.changelist.ProductionStepChangeMigration;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryMigration;
-import de.yggdrasil128.factorial.model.game.Game;
-import de.yggdrasil128.factorial.model.game.GameRepository;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionMigration;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionRepository;
@@ -44,7 +42,6 @@ import static java.util.stream.Collectors.*;
 @Service
 public class MigrationService {
 
-    private final GameRepository gameRepository;
     private final GameVersionRepository gameVersionRepository;
     private final ItemRepository itemRepository;
     private final RecipeRepository recipeRepository;
@@ -54,11 +51,10 @@ public class MigrationService {
     private final IconRepository iconRepository;
 
     @Autowired
-    public MigrationService(GameRepository gameRepository, GameVersionRepository gameVersionRepository,
-                            ItemRepository itemRepository, RecipeRepository recipeRepository,
-                            RecipeModifierRepository recipeModifierRepository, MachineRepository machineRepository,
-                            SaveRepository saveRepository, IconRepository iconRepository) {
-        this.gameRepository = gameRepository;
+    public MigrationService(GameVersionRepository gameVersionRepository, ItemRepository itemRepository,
+                            RecipeRepository recipeRepository, RecipeModifierRepository recipeModifierRepository,
+                            MachineRepository machineRepository, SaveRepository saveRepository,
+                            IconRepository iconRepository) {
         this.gameVersionRepository = gameVersionRepository;
         this.itemRepository = itemRepository;
         this.recipeRepository = recipeRepository;
@@ -69,24 +65,14 @@ public class MigrationService {
     }
 
     public GameVersion importGameVersion(GameVersionMigration input) {
-        Game game = gameRepository.findByName(input.getGame()).orElse(null);
         GameVersion gameVersion;
-        if (null == game) {
-            game = new Game(input.getGame(), nl());
-            gameVersion = importGameVersion(game, input);
-            game.getGameVersions().add(gameVersion);
-            gameRepository.save(game);
-        } else {
-            gameVersion = importGameVersion(game, input);
-            gameVersionRepository.save(gameVersion);
-            game.getGameVersions().add(gameVersion);
-            gameRepository.save(game);
-        }
+        gameVersion = importGameVersion0(input);
+        gameVersionRepository.save(gameVersion);
         return gameVersion;
     }
 
-    private static GameVersion importGameVersion(Game game, GameVersionMigration input) {
-        GameVersion gameVersion = new GameVersion(game, input.getVersion(), null, nl(), nl(), nl(), nl(), nl());
+    private static GameVersion importGameVersion0(GameVersionMigration input) {
+        GameVersion gameVersion = new GameVersion(input.getName(), null, nl(), nl(), nl(), nl(), nl());
         input.getIcons().entrySet().stream().map(entry -> importIcon(gameVersion, entry.getKey(), entry.getValue()))
                 .forEach(gameVersion.getIcons()::add);
         input.getItems().entrySet().stream().map(entry -> importItem(gameVersion, entry.getKey(), entry.getValue()))
@@ -167,11 +153,9 @@ public class MigrationService {
             throw ModelService.report(HttpStatus.BAD_REQUEST,
                     "save '" + input.getName() + "' must contain exactly one primary change list");
         }
-        Game game = gameRepository.findByName(input.getGame()).orElseThrow(() -> ModelService
-                .report(HttpStatus.CONFLICT, "save requires the game '" + input.getGame() + "' to be installed"));
-        GameVersion gameVersion = gameVersionRepository.findByGameIdAndName(game.getId(), input.getVersion())
+        GameVersion gameVersion = gameVersionRepository.findByName(input.getGameVersion())
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                        "save requires the game version '" + input.getVersion() + "' to be installed"));
+                        "save requires the game version '" + input.getGameVersion() + "' to be installed"));
         Save save = new Save(gameVersion, input.getName(), nl(), nl());
         input.getFactories().stream().map(entry -> importFactory(save, entry)).forEach(save.getFactories()::add);
         input.getChangelists().stream().map(entry -> importChangelist(save, entry)).forEach(save.getChangelists()::add);
@@ -266,8 +250,8 @@ public class MigrationService {
                         MigrationService::reportDuplicate, LinkedHashMap::new));
         Map<String, MachineMigration> machines = gameVersion.getMachines().stream().collect(toMap(Machine::getName,
                 MigrationService::exportMachine, MigrationService::reportDuplicate, LinkedHashMap::new));
-        return new GameVersionMigration(gameVersion.getGame().getName(), gameVersion.getName(), iconName, icons, items,
-                recipes, recipeModifiers, machines);
+        return new GameVersionMigration(gameVersion.getName(), iconName, icons, items, recipes, recipeModifiers,
+                machines);
     }
 
     private static IconMigration exportIcon(Icon icon) {
@@ -307,8 +291,7 @@ public class MigrationService {
         List<FactoryMigration> factories = save.getFactories().stream().map(MigrationService::exportFactory).toList();
         List<ChangelistMigration> changelists = save.getChangelists().stream().map(MigrationService::exportChangelist)
                 .toList();
-        return new SaveMigration(save.getGameVersion().getGame().getName(), save.getGameVersion().getName(),
-                save.getName(), factories, changelists);
+        return new SaveMigration(save.getGameVersion().getName(), save.getName(), factories, changelists);
     }
 
     private static FactoryMigration exportFactory(Factory factory) {

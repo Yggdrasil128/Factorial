@@ -12,8 +12,7 @@ import static java.util.Collections.emptyMap;
 
 public class GameVersionMigration {
 
-    private String game;
-    private String version;
+    private String name;
     private String iconName;
     private Map<String, IconMigration> icons;
     private Map<String, ItemMigration> items;
@@ -29,12 +28,11 @@ public class GameVersionMigration {
         machines = emptyMap();
     }
 
-    public GameVersionMigration(String game, String version, String iconName, Map<String, IconMigration> icons,
+    public GameVersionMigration(String name, String iconName, Map<String, IconMigration> icons,
                                 Map<String, ItemMigration> items, Map<String, RecipeMigration> recipes,
                                 Map<String, RecipeModifierMigration> recipeModifiers,
                                 Map<String, MachineMigration> machines) {
-        this.game = game;
-        this.version = version;
+        this.name = name;
         this.iconName = iconName;
         this.icons = icons;
         this.items = items;
@@ -43,20 +41,12 @@ public class GameVersionMigration {
         this.machines = machines;
     }
 
-    public String getGame() {
-        return game;
+    public String getName() {
+        return name;
     }
 
-    public void setGame(String game) {
-        this.game = game;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getIconName() {

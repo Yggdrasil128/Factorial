@@ -9,8 +9,7 @@ import static java.util.Collections.emptyList;
 
 public class SaveMigration {
 
-    private String game;
-    private String version;
+    private String gameVersion;
     private String name;
     private List<FactoryMigration> factories;
     private List<ChangelistMigration> changelists;
@@ -20,29 +19,20 @@ public class SaveMigration {
         changelists = emptyList();
     }
 
-    public SaveMigration(String game, String version, String name, List<FactoryMigration> factories,
+    public SaveMigration(String gameVersion, String name, List<FactoryMigration> factories,
                          List<ChangelistMigration> changelists) {
-        this.game = game;
-        this.version = version;
+        this.gameVersion = gameVersion;
         this.name = name;
         this.factories = factories;
         this.changelists = changelists;
     }
 
-    public String getGame() {
-        return game;
+    public String getGameVersion() {
+        return gameVersion;
     }
 
-    public void setGame(String game) {
-        this.game = game;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
+    public void setGameVersion(String gameVersion) {
+        this.gameVersion = gameVersion;
     }
 
     public String getName() {

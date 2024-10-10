@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.gameversion;
 
-import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.machine.Machine;
@@ -17,8 +16,6 @@ public class GameVersion {
     @Id
     @GeneratedValue
     private int id;
-    @ManyToOne(optional = false)
-    private Game game;
     @Column(nullable = false)
     private String name;
     @ManyToOne
@@ -42,9 +39,8 @@ public class GameVersion {
     public GameVersion() {
     }
 
-    public GameVersion(Game game, String name, Icon icon, List<Item> items, List<Recipe> recipes,
+    public GameVersion(String name, Icon icon, List<Item> items, List<Recipe> recipes,
                        List<RecipeModifier> recipeModifiers, List<Machine> machines, List<Icon> icons) {
-        this.game = game;
         this.name = name;
         this.icon = icon;
         this.items = items;
@@ -56,14 +52,6 @@ public class GameVersion {
 
     public int getId() {
         return id;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
     }
 
     public String getName() {

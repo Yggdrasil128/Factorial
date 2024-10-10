@@ -1,7 +1,6 @@
 {
     "name": "Example",
-    "game": "Satisfactory",
-    "version": "Update 8",
+    "gameVersion": "Satisfactory Update 8",
     "factories": [
         {
             "ordinal": 1,
@@ -38,15 +37,6 @@
                     "machineCount": "2"
                 }
             ],
-            "egresses": [
-                {
-                    "ordinal": 1,
-                    "name": "AWESOME Sink",
-                    "resources": {
-                        "Packaged Fuel": "8"
-                    }
-                }
-            ],
             "itemOrder": [
                 "Crude Oil",
                 "Plastic",
@@ -68,10 +58,7 @@
                 {
                     "machineName": "Refinery",
                     "recipeName": "Plastic",
-                    "machineCount": "10",
-                    "uncloggingOutputsName": [
-                        "Heavy Oil Residue"
-                    ]
+                    "machineCount": "10"
                 },
                 {
                     "machineName": "Constructor",
@@ -81,40 +68,17 @@
                 {
                     "machineName": "Refinery",
                     "recipeName": "Residual Fuel",
-                    "machineCount": "2",
-                    "uncloggingInputNames": [
-                        "Heavy Oil Residue"
-                    ],
-                    "uncloggingOutputNames": [
-                        "Fuel"
-                    ]
+                    "machineCount": "2"
                 },
                 {
                     "machineName": "Packager",
                     "recipeName": "Packaged Fuel",
-                    "machineCount": "1",
-                    "uncloggingInputsName": [
-                        "Fuel"
-                    ],
-                    "uncloggingOutputNames": [
-                        "Packaged Fuel"
-                    ]
+                    "machineCount": "1"
                 },
                 {
                     "machineName": "Fuel Generator",
                     "recipeName": "Burn Fuel",
                     "machineCount": "2"
-                }
-            ],
-            "egresses": [
-                {
-                    "ordinal": 1,
-                    "name": "AWESOME Sink",
-                    "unclogging": true,
-                    "resources": {
-                        "Plastic": "8",
-                        "Packaged Fuel": "8"
-                    }
                 }
             ],
             "itemOrder": [
