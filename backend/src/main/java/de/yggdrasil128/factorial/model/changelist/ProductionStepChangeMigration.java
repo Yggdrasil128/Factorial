@@ -7,6 +7,14 @@ public class ProductionStepChangeMigration {
     private int productionStepIndex;
     private Fraction change;
 
+    public ProductionStepChangeMigration() {
+    }
+
+    public ProductionStepChangeMigration(int productionStepIndex, Fraction change) {
+        this.productionStepIndex = productionStepIndex;
+        this.change = change;
+    }
+
     public int getProductionStepIndex() {
         return productionStepIndex;
     }

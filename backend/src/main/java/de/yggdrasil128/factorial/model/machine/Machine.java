@@ -1,15 +1,17 @@
 package de.yggdrasil128.factorial.model.machine;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
-public class Machine {
+public class Machine implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,6 +30,14 @@ public class Machine {
     public Machine() {
     }
 
+    public Machine(GameVersion gameVersion, MachineStandalone standalone) {
+        this.gameVersion = gameVersion;
+        name = standalone.getName();
+        icon = null;
+        machineModifiers = new ArrayList<>();
+        category = standalone.getCategory();
+    }
+
     public Machine(GameVersion gameVersion, String name, Icon icon, List<RecipeModifier> machineModifiers,
                    List<String> category) {
         this.gameVersion = gameVersion;
@@ -37,6 +47,7 @@ public class Machine {
         this.category = category;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -49,6 +60,7 @@ public class Machine {
         this.gameVersion = gameVersion;
     }
 
+    @Override
     public String getName() {
         return name;
     }

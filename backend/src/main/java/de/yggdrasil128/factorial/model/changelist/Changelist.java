@@ -1,15 +1,17 @@
 package de.yggdrasil128.factorial.model.changelist;
 
 import de.yggdrasil128.factorial.model.Fraction;
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-public class Changelist {
+public class Changelist implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,6 +32,16 @@ public class Changelist {
     public Changelist() {
     }
 
+    public Changelist(Save save, ChangelistStandalone standalone) {
+        this.save = save;
+        ordinal = standalone.getOrdinal();
+        name = standalone.getName();
+        primary = standalone.isPrimary();
+        active = standalone.isActive();
+        icon = null;
+        productionStepChanges = new HashMap<>();
+    }
+
     public Changelist(Save save, int ordinal, String name, boolean primary, boolean active, Icon icon,
                       Map<ProductionStep, Fraction> productionStepChanges) {
         this.save = save;
@@ -41,6 +53,7 @@ public class Changelist {
         this.productionStepChanges = productionStepChanges;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -61,6 +74,7 @@ public class Changelist {
         this.ordinal = ordinal;
     }
 
+    @Override
     public String getName() {
         return name;
     }

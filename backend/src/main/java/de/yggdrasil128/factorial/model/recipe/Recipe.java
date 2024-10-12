@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.recipe;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.machine.Machine;
@@ -9,11 +10,12 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
-public class Recipe {
+public class Recipe implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -41,6 +43,18 @@ public class Recipe {
     public Recipe() {
     }
 
+    public Recipe(GameVersion gameVersion, RecipeStandalone standalone) {
+        this.gameVersion = gameVersion;
+        name = standalone.getName();
+        icon = null;
+        input = new ArrayList<>();
+        output = new ArrayList<>();
+        duration = standalone.getDuration();
+        applicableModifiers = new ArrayList<>();
+        applicableMachines = new ArrayList<>();
+        category = standalone.getCategory();
+    }
+
     public Recipe(GameVersion gameVersion, String name, Icon icon, List<Resource> input, List<Resource> output,
                   Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines,
                   List<String> category) {
@@ -55,6 +69,7 @@ public class Recipe {
         this.category = category;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -67,6 +82,7 @@ public class Recipe {
         this.gameVersion = gameVersion;
     }
 
+    @Override
     public String getName() {
         return name;
     }

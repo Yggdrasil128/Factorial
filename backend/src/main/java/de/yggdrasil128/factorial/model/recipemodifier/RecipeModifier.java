@@ -2,13 +2,14 @@ package de.yggdrasil128.factorial.model.recipemodifier;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_version_id", "name" }))
-public class RecipeModifier {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
+public class RecipeModifier implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,8 +34,19 @@ public class RecipeModifier {
     public RecipeModifier() {
     }
 
+    public RecipeModifier(GameVersion gameVersion, RecipeModifierStandalone standalone) {
+        this.gameVersion = gameVersion;
+        name = standalone.getName();
+        description = standalone.getDescription();
+        icon = null;
+        durationMultiplier = standalone.getDurationMultiplier();
+        inputQuantityMultiplier = standalone.getInputQuantityMultiplier();
+        outputQuantityMultiplier = standalone.getOutputQuantityMultiplier();
+    }
+
     public RecipeModifier(GameVersion gameVersion, String name, String description, Icon icon,
-        Fraction durationMultiplier, Fraction inputQuantityMultiplier, Fraction outputQuantityMultiplier) {
+                          Fraction durationMultiplier, Fraction inputQuantityMultiplier,
+                          Fraction outputQuantityMultiplier) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.description = description;
@@ -44,6 +56,7 @@ public class RecipeModifier {
         this.outputQuantityMultiplier = outputQuantityMultiplier;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -56,6 +69,7 @@ public class RecipeModifier {
         this.gameVersion = gameVersion;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -130,7 +144,7 @@ public class RecipeModifier {
     @Override
     public String toString() {
         return "duration x " + durationMultiplier + " | input x " + inputQuantityMultiplier + " | output x "
-            + outputQuantityMultiplier;
+                + outputQuantityMultiplier;
     }
 
 }

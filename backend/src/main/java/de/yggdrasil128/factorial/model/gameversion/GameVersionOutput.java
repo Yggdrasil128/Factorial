@@ -16,10 +16,6 @@ public class GameVersionOutput {
         return delegate.getId();
     }
 
-    public int getGameId() {
-        return delegate.getGame().getId();
-    }
-
     public String getName() {
         return delegate.getName();
     }

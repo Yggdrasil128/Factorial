@@ -4,12 +4,17 @@ import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.save.Save;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Changelists {
 
+    public static Optional<Changelist> getOptionalPrimary(Save save) {
+        return save.getChangelists().stream().filter(Changelist::isPrimary).findAny();
+    }
+
     public static Changelist getPrimary(Save save) {
-        return save.getChangelists().stream().filter(Changelist::isPrimary).findAny()
+        return getOptionalPrimary(save)
                 .orElseThrow(() -> new IllegalStateException("assertion failed: no primary changelist available"));
     }
 

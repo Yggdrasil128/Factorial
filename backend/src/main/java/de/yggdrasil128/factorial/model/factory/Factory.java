@@ -1,17 +1,19 @@
 package de.yggdrasil128.factorial.model.factory;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
-import de.yggdrasil128.factorial.model.xgress.Xgress;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Entity
-public class Factory {
+public class Factory implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,32 +30,34 @@ public class Factory {
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ProductionStep> productionSteps;
-    @JoinColumn
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<Xgress> ingresses;
-    @JoinColumn
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<Xgress> egresses;
     @ElementCollection
     private Map<Item, Integer> itemOrder;
 
     public Factory() {
     }
 
+    public Factory(Save save, FactoryStandalone standalone) {
+        this.save = save;
+        ordinal = standalone.getOrdinal();
+        name = standalone.getName();
+        description = standalone.getDescription();
+        icon = null;
+        productionSteps = new ArrayList<>();
+        itemOrder = new HashMap<>();
+    }
+
     public Factory(Save save, int ordinal, String name, String description, Icon icon,
-                   List<ProductionStep> productionSteps, List<Xgress> ingresses, List<Xgress> egresses,
-                   Map<Item, Integer> itemOrder) {
+                   List<ProductionStep> productionSteps, Map<Item, Integer> itemOrder) {
         this.save = save;
         this.ordinal = ordinal;
         this.name = name;
         this.description = description;
         this.icon = icon;
         this.productionSteps = productionSteps;
-        this.ingresses = ingresses;
-        this.egresses = egresses;
         this.itemOrder = itemOrder;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -74,6 +78,7 @@ public class Factory {
         this.ordinal = ordinal;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -104,22 +109,6 @@ public class Factory {
 
     public void setProductionSteps(List<ProductionStep> productionSteps) {
         this.productionSteps = productionSteps;
-    }
-
-    public List<Xgress> getIngresses() {
-        return ingresses;
-    }
-
-    public void setIngresses(List<Xgress> ingresses) {
-        this.ingresses = ingresses;
-    }
-
-    public List<Xgress> getEgresses() {
-        return egresses;
-    }
-
-    public void setEgresses(List<Xgress> egresses) {
-        this.egresses = egresses;
     }
 
     public Map<Item, Integer> getItemOrder() {
