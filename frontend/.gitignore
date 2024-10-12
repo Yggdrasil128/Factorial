@@ -29,3 +29,10 @@ coverage
 
 *.tsbuildinfo
 /node/
+
+# eclipse project files
+/.project
+/.classpath
+/.settings/
+
+/target/
