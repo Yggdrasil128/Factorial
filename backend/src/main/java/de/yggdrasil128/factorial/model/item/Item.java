@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.item;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
-public class Item {
+public class Item implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,6 +25,14 @@ public class Item {
     private List<String> category;
 
     public Item() {
+    }
+
+    public Item(GameVersion gameVersion, ItemStandalone standalone) {
+        this.gameVersion = gameVersion;
+        name = standalone.getName();
+        description = standalone.getDescription();
+        icon = null;
+        category = standalone.getCategory();
     }
 
     public Item(GameVersion gameVersion, String name, String description, Icon icon, List<String> category) {

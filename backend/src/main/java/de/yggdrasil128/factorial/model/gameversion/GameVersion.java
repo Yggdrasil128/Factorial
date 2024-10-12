@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.gameversion;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.machine.Machine;
@@ -7,16 +8,17 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_id", "name"}))
-public class GameVersion {
+public class GameVersion implements NamedModel {
 
     @Id
     @GeneratedValue
     private int id;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
     @ManyToOne
     private Icon icon;
@@ -39,6 +41,16 @@ public class GameVersion {
     public GameVersion() {
     }
 
+    public GameVersion(GameVersionStandalone standalone) {
+        name = standalone.getName();
+        icon = null;
+        items = new ArrayList<>();
+        recipes = new ArrayList<>();
+        recipeModifiers = new ArrayList<>();
+        machines = new ArrayList<>();
+        icons = new ArrayList<>();
+    }
+
     public GameVersion(String name, Icon icon, List<Item> items, List<Recipe> recipes,
                        List<RecipeModifier> recipeModifiers, List<Machine> machines, List<Icon> icons) {
         this.name = name;
@@ -50,10 +62,12 @@ public class GameVersion {
         this.icons = icons;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public String getName() {
         return name;
     }

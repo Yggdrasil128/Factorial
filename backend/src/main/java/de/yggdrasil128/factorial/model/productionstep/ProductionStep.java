@@ -8,6 +8,7 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,6 +29,14 @@ public class ProductionStep {
     private Fraction machineCount = Fraction.ONE;
 
     public ProductionStep() {
+    }
+
+    public ProductionStep(Factory factory, ProductionStepStandalone standalone) {
+        this.factory = factory;
+        machine = null;
+        recipe = null;
+        modifiers = new ArrayList<>();
+        machineCount = standalone.getMachineCount();
     }
 
     public ProductionStep(Factory factory, Machine machine, Recipe recipe, List<RecipeModifier> modifiers,

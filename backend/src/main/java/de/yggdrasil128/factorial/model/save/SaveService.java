@@ -19,6 +19,10 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         super(repository);
     }
 
+    public Save create(Save save) {
+        return repository.save(save);
+    }
+
     public Save create(GameVersion gameVersion, SaveInput input) {
         Save save = new Save(gameVersion, input.getName(), new ArrayList<>(1), new ArrayList<>(1));
         save.getFactories().add(FactoryService.createSentinel(save));

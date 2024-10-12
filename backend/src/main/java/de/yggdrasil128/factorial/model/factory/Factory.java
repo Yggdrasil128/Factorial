@@ -1,16 +1,19 @@
 package de.yggdrasil128.factorial.model.factory;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Entity
-public class Factory {
+public class Factory implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,6 +36,16 @@ public class Factory {
     public Factory() {
     }
 
+    public Factory(Save save, FactoryStandalone standalone) {
+        this.save = save;
+        ordinal = standalone.getOrdinal();
+        name = standalone.getName();
+        description = standalone.getDescription();
+        icon = null;
+        productionSteps = new ArrayList<>();
+        itemOrder = new HashMap<>();
+    }
+
     public Factory(Save save, int ordinal, String name, String description, Icon icon,
                    List<ProductionStep> productionSteps, Map<Item, Integer> itemOrder) {
         this.save = save;
@@ -44,6 +57,7 @@ public class Factory {
         this.itemOrder = itemOrder;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -64,6 +78,7 @@ public class Factory {
         this.ordinal = ordinal;
     }
 
+    @Override
     public String getName() {
         return name;
     }

@@ -1,14 +1,16 @@
 package de.yggdrasil128.factorial.model.save;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Save {
+public class Save implements NamedModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,6 +29,13 @@ public class Save {
     public Save() {
     }
 
+    public Save(GameVersion gameVersion, SaveStandalone standalone) {
+        this.gameVersion = gameVersion;
+        name = standalone.getName();
+        factories = new ArrayList<>();
+        changelists = new ArrayList<>();
+    }
+
     public Save(GameVersion gameVersion, String name, List<Factory> factories, List<Changelist> changelists) {
         this.gameVersion = gameVersion;
         this.name = name;
@@ -34,6 +43,7 @@ public class Save {
         this.changelists = changelists;
     }
 
+    @Override
     public int getId() {
         return id;
     }
@@ -50,6 +60,7 @@ public class Save {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }

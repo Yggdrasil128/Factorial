@@ -1,55 +1,50 @@
 {
-    "name": "Example",
-    "gameVersion": "Satisfactory Update 7",
+    "save": {
+        "gameVersion": "Satisfactory Update 7",
+        "name": "Example"
+    },
     "factories": [
         {
             "ordinal": 1,
-            "name": "Steel Production North",
-            "productionSteps": [
-                {
-                    "machineName": "Water Extractor",
-                    "recipeName": "Water",
-                    "machineCount": "4"
-                },
-                {
-                    "machineName": "Miner Mk. 3",
-                    "recipeName": "Iron Ore",
-                    "modifierNames": [
-                        "Pure Node"
-                    ],
-                    "machineCount": "13 / 8"
-                },
-                {
-                    "machineName": "Miner Mk. 3",
-                    "recipeName": "Coal",
-                    "machineCount": "9 / 2"
-                },
-                {
-                    "machineName": "Refinery",
-                    "recipeName": "Pure Iron Ingot",
-                    "machineCount": "312 / 14"
-                },
-                {
-                    "machineName": "Foundry",
-                    "recipeName": "Solid Steel Ingot",
-                    "machineCount": "36"
-                }
-            ],
-            "itemOrder": [
-                "Water",
-                "Iron Ore",
-                "Iron Ingot",
-                "Coal",
-                "Steel Ingot"
-            ]
+            "name": "Steel Production North"
         },
         {
             "ordinal": 2,
-            "name": "Steel Sink",
-            "itemOrder": [
-                "Steel Ingot"
-            ]
+            "name": "Steel Sink"
         }
+    ],
+    "productionSteps": [
+        [
+            {
+                "machine": "Water Extractor",
+                "recipe": "Water",
+                "machineCount": "4"
+            },
+            {
+                "machine": "Miner Mk. 3",
+                "recipe": "Iron Ore",
+                "modifiers": [
+                    "Pure Node"
+                ],
+                "machineCount": "13 / 8"
+            },
+            {
+                "machine": "Miner Mk. 3",
+                "recipe": "Coal",
+                "machineCount": "9 / 2"
+            },
+            {
+                "machine": "Refinery",
+                "recipe": "Pure Iron Ingot",
+                "machineCount": "312 / 14"
+            },
+            {
+                "machine": "Foundry",
+                "recipe": "Solid Steel Ingot",
+                "machineCount": "36"
+            }
+        ],
+        []
     ],
     "changelists": [
         {
@@ -63,14 +58,12 @@
             "name": "Extend Coal Extraction",
             "primary": false,
             "active": true,
-            "productionStepChanges": {
-                "Steel Production North": [
-                    {
-                        "productionStepIndex": 2,
-                        "change": "3 / 2"
-                    }
-                ]
-            }
+            "productionStepChanges": [
+                {
+                    "productionStep": "0.2",
+                    "change": "3 / 2"
+                }
+            ]
         }
     ]
 }

@@ -10,6 +10,8 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import static java.util.Collections.emptyList;
 
 @Service
@@ -22,10 +24,18 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
         this.icons = icons;
     }
 
+    public GameVersion create(GameVersion gameVersion) {
+        return repository.save(gameVersion);
+    }
+
     public GameVersion create(GameVersionInput input) {
         Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
         return repository.save(new GameVersion(input.getName(), icon, emptyList(), emptyList(), emptyList(),
                 emptyList(), emptyList()));
+    }
+
+    public Optional<GameVersion> get(String name) {
+        return repository.findByName(name);
     }
 
     public void addAttachedIcon(GameVersion gameVersion, Icon icon) {
