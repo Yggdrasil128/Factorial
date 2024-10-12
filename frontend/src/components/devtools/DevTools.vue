@@ -1,6 +1,6 @@
-<script setup>
-import {inject, ref} from "vue";
-import {Check, WarnTriangleFilled} from "@element-plus/icons-vue";
+<script setup lang="js">
+import { inject, ref } from 'vue';
+import { Check, WarnTriangleFilled } from '@element-plus/icons-vue';
 
 const axios = inject('axios');
 
@@ -27,7 +27,7 @@ async function wipeDatabaseAndRestart() {
   wipeDatabaseButtonState.value = 2;
 
   setTimeout(() => {
-    wipeDatabaseButtonState.value = 0
+    wipeDatabaseButtonState.value = 0;
   }, 2000);
 }
 
@@ -38,7 +38,7 @@ async function setupTestData() {
 
   setupTestDataButtonState.value = 1;
 
-  let setup = availableTestDataSetups.value[selectedTestDataSetup.value];
+  const setup = availableTestDataSetups.value[selectedTestDataSetup.value];
 
   await importJsonFile('gameVersion', setup.gameVersionFile);
   await importJsonFile('save', setup.saveFile);
@@ -46,38 +46,52 @@ async function setupTestData() {
   setupTestDataButtonState.value = 2;
 
   setTimeout(() => {
-    setupTestDataButtonState.value = 0
+    setupTestDataButtonState.value = 0;
   }, 2000);
 }
 
 async function importJsonFile(kind, filename) {
-  const data = await import("./json/" + filename + ".json");
+  const data = await import('./json/' + filename + '.json');
   await axios.post('api/migration/' + kind, data.default);
 }
-
 </script>
 
 <template>
   <h1>Dev Tools</h1>
   <p>
-    <el-button :loading="wipeDatabaseButtonState === 1" :disabled="wipeDatabaseButtonState > 0" type="danger"
-               @click="wipeDatabaseAndRestart" :icon="wipeDatabaseButtonState === 2 ? Check : WarnTriangleFilled">
+    <el-button
+      :loading="wipeDatabaseButtonState === 1"
+      :disabled="wipeDatabaseButtonState > 0"
+      type="danger"
+      @click="wipeDatabaseAndRestart"
+      :icon="wipeDatabaseButtonState === 2 ? Check : WarnTriangleFilled"
+    >
       Wipe database and restart Factorial
     </el-button>
   </p>
   <p>
-    <el-select v-model="selectedTestDataSetup" placeholder="Select test data file" style="width: 400px;">
-      <el-option v-for="option in Object.keys(availableTestDataSetups)" :value="option" :label="option"></el-option>
+    <el-select
+      v-model="selectedTestDataSetup"
+      placeholder="Select test data file"
+      style="width: 400px"
+    >
+      <el-option
+        v-for="option in Object.keys(availableTestDataSetups)"
+        :key="option"
+        :value="option"
+        :label="option"
+      ></el-option>
     </el-select>
     &ensp;
-    <el-button :loading="setupTestDataButtonState === 1"
-               :disabled="setupTestDataButtonState > 0 || !selectedTestDataSetup"
-               @click="setupTestData" :icon="setupTestDataButtonState === 2 ? Check : null">
+    <el-button
+      :loading="setupTestDataButtonState === 1"
+      :disabled="setupTestDataButtonState > 0 || !selectedTestDataSetup"
+      @click="setupTestData"
+      :icon="setupTestDataButtonState === 2 ? Check : null"
+    >
       Setup test data
     </el-button>
   </p>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

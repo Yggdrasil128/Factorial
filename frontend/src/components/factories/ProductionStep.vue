@@ -1,11 +1,11 @@
-<script setup>
-import {Delete, Edit,} from '@element-plus/icons-vue';
-import MachineCountInput from "@/components/factories/MachineCountInput.vue";
-import QuantityDisplay from "@/components/factories/QuantityDisplay.vue";
-import IconImg from "@/components/IconImg.vue";
-import {computed} from "vue";
+<script setup lang="js">
+import { Delete, Edit } from '@element-plus/icons-vue';
+import MachineCountInput from '@/components/factories/MachineCountInput.vue';
+import QuantityDisplay from '@/components/factories/QuantityDisplay.vue';
+import IconImg from '@/components/IconImg.vue';
+import { computed } from 'vue';
 
-const props = defineProps(["step", "itemMap"]);
+const props = defineProps(['step', 'itemMap']);
 
 const recipeIcon = computed(() => {
   if (props.step.recipe.icon) {
@@ -15,53 +15,51 @@ const recipeIcon = computed(() => {
     return props.step.recipe.output[0].item.icon;
   }
   return null;
-})
+});
 </script>
 
 <template>
   <div class="step">
-    <div style="overflow:auto;">
+    <div style="overflow: auto">
       <div class="stepIcon">
-        <icon-img :icon="step.machine.icon" :size="48"/>
-        <div style="vertical-align: top; display: inline; line-height: 48px;">
+        <icon-img :icon="step.machine.icon" :size="48" />
+        <div style="vertical-align: top; display: inline; line-height: 48px">
           x
-          <quantity-display :quantity="step.machineCount"/>
+          <quantity-display :quantity="step.machineCount" />
           &emsp;
         </div>
-        <icon-img v-if="recipeIcon" :icon="recipeIcon" :size="48"/>
+        <icon-img v-if="recipeIcon" :icon="recipeIcon" :size="48" />
       </div>
       <div class="stepInfo">
         <div class="stepName">Recipe: {{ step.recipe.name }}</div>
         <div class="stepThroughput">
           <div>
-            <div v-for="resource in step.output" style="margin-right: 10px; ">
-              <quantity-display :quantity="resource.quantity"/>
-              <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px;"/>
+            <div v-for="(resource, index) in step.output" :key="index" style="margin-right: 10px">
+              <quantity-display :quantity="resource.quantity" />
+              <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px" />
               <span>{{ itemMap[resource.itemId].name }}</span>
-              <quantity-display :quantity="null" show-unit/>
+              <quantity-display :quantity="null" show-unit />
             </div>
             <div v-if="step.output.length === 0" class="nothing">(nothing)</div>
           </div>
-          <span>
-            &#x27F5;&ensp;
-          </span>
+          <span> &#x27F5;&ensp; </span>
           <div>
-            <div v-for="resource in step.input" style="margin-right: 10px;">
-              <quantity-display :quantity="resource.quantity"/>
-              <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px;"/>
+            <div v-for="(resource, index) in step.input" :key="index" style="margin-right: 10px">
+              <quantity-display :quantity="resource.quantity" />
+              <icon-img :icon="itemMap[resource.itemId].icon" :size="24" style="margin-left: 3px" />
               <span>{{ itemMap[resource.itemId].name }}</span>
-              <quantity-display :quantity="null" show-unit/>
+              <quantity-display :quantity="null" show-unit />
             </div>
             <div v-if="step.input.length === 0" class="nothing">(nothing)</div>
           </div>
         </div>
       </div>
       <div class="stepActions">
-        <machine-count-input v-model:quantity="step.machineCount" :production-step-id="step.id"/>
+        <machine-count-input :quantity="step.machineCount" :production-step-id="step.id" />
         &ensp;
         <el-button-group>
-          <el-button :icon="Edit"/>
-          <el-button type="danger" :icon="Delete"/>
+          <el-button :icon="Edit" />
+          <el-button type="danger" :icon="Delete" />
         </el-button-group>
       </div>
     </div>

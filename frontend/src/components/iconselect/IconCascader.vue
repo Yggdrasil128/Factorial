@@ -1,7 +1,7 @@
-<script setup>
-import {inject, ref, watch} from "vue";
-import {OnClickOutside} from '@vueuse/components';
-import IconImg from "@/components/IconImg.vue";
+<script setup lang="js">
+import { inject, ref, watch } from 'vue';
+import { OnClickOutside } from '@vueuse/components';
+import IconImg from '@/components/IconImg.vue';
 import _ from 'lodash';
 
 const axios = inject('axios');
@@ -20,7 +20,7 @@ const inputString = ref('');
 const cascaderProps = ref({
   emitPath: false,
   value: 'id',
-  expandTrigger: 'hover',
+  expandTrigger: 'hover'
 });
 const cascaderRef = ref();
 const inputRef = ref();
@@ -28,28 +28,28 @@ const inputRef = ref();
 async function loadData() {
   loading.value = true;
 
-  let response = await axios.get(props.fetchEndpoint, {params: {saveId: 1}});
+  const response = await axios.get(props.fetchEndpoint, { params: { saveId: 1 } });
 
-  let items = response.data;
+  const items = response.data;
   if (props.entityName === 'icon') {
-    for (let item of items) {
+    for (const item of items) {
       item.icon = item;
     }
   }
 
-  let options = [];
-  let newItemMap = {};
+  const options = [];
+  const newItemMap = {};
 
   function insert(tree, item) {
     if (item.category.length > 0) {
       const category = item.category.shift();
-      for (let child of tree) {
+      for (const child of tree) {
         if (child.children && child.label === category) {
           insert(child.children, item);
           return;
         }
       }
-      let child = {label: category, children: []};
+      const child = { label: category, children: [] };
       tree.push(child);
       insert(child.children, item);
       return;
@@ -58,16 +58,16 @@ async function loadData() {
     tree.push(item);
   }
 
-  for (let item of items) {
+  for (const item of items) {
     insert(options, item);
     newItemMap[String(item.id)] = item;
   }
 
   function sort(tree) {
     tree.sort((a, b) => a.label.localeCompare(b.label));
-    for (let child of tree) {
+    for (const child of tree) {
       if (child.children) {
-        sort(child.children)
+        sort(child.children);
       }
     }
   }
@@ -90,7 +90,7 @@ function updateFilteredOptions() {
     return;
   }
 
-  let directMatches = [];
+  const directMatches = [];
 
   function filterNode(node) {
     if (node.label.toLowerCase().indexOf(search) >= 0) {
@@ -120,7 +120,7 @@ function getLeafCount(node) {
     return 1;
   }
   let c = 0;
-  for (let child of node.children) {
+  for (const child of node.children) {
     c += getLeafCount(child);
   }
   return c;
@@ -213,12 +213,12 @@ function onClickOutside() {
 
 function setEventBackoff(ms) {
   eventBackoff = true;
-  setTimeout(() => eventBackoff = false, ms);
+  setTimeout(() => (eventBackoff = false), ms);
 }
 
 function setClickOutsideBackoff(ms) {
   clickOutsideBackoff = true;
-  setTimeout(() => clickOutsideBackoff = false, ms);
+  setTimeout(() => (clickOutsideBackoff = false), ms);
 }
 
 function getIcon(item) {
@@ -234,35 +234,48 @@ function getIcon(item) {
   }
   return null;
 }
-
 </script>
 
 <template>
   <div>
-    <el-input v-model="inputString" ref="inputRef"
-              :placeholder="loading ? 'Loading...' : 'Select ' + entityName + '...'"
-              size="large" clearable class="el-dark iconCascaderInput" @keyup.down="onInputArrowDown"
-              @focus="onInputFocus" @blur="onInputBlur" @clear="onInputClear" @input="onInputInput"
-              v-loading="loading" element-loading-background="rgba(65, 65, 65, 0.6)">
+    <el-input
+      v-model="inputString"
+      ref="inputRef"
+      :placeholder="loading ? 'Loading...' : 'Select ' + entityName + '...'"
+      size="large"
+      clearable
+      class="el-dark iconCascaderInput"
+      @keyup.down="onInputArrowDown"
+      @focus="onInputFocus"
+      @blur="onInputBlur"
+      @clear="onInputClear"
+      @input="onInputInput"
+      v-loading="loading"
+      element-loading-background="rgba(65, 65, 65, 0.6)"
+    >
       <template #prefix v-if="selectedId">
-        <icon-img :icon="getIcon(itemMap[selectedId])" :size="32"/>
+        <icon-img :icon="getIcon(itemMap[selectedId])" :size="32" />
       </template>
     </el-input>
     <OnClickOutside @trigger="onClickOutside">
       <el-collapse class="el-dark iconCascaderCollapse" :model-value="expanded ? ['item'] : []">
         <el-collapse-item name="item" disabled>
           <!--suppress VueUnrecognizedSlot -->
-          <template #title>
-          </template>
-          <el-cascader-panel v-model="selectedId" :options="filteredOptions" class="el-dark iconCascader"
-                             :props="cascaderProps"
-                             @close="expanded = false" ref="cascaderRef">
+          <template #title></template>
+          <el-cascader-panel
+            v-model="selectedId"
+            :options="filteredOptions"
+            class="el-dark iconCascader"
+            :props="cascaderProps"
+            @close="expanded = false"
+            ref="cascaderRef"
+          >
             <template #default="{ node, data }">
               <template v-if="node.isLeaf">
-                <div style="height: 36px; display: flex;">
-                <span style="margin-right: 8px;">
-                  <icon-img :icon="getIcon(data)" :size="32"/>
-                </span>
+                <div style="height: 36px; display: flex">
+                  <span style="margin-right: 8px">
+                    <icon-img :icon="getIcon(data)" :size="32" />
+                  </span>
                   <span>{{ data.label }}</span>
                 </div>
               </template>
@@ -298,7 +311,8 @@ function getIcon(item) {
 
 <!--suppress CssUnusedSymbol -->
 <style>
-.iconCascaderCollapse, .iconCascaderCollapse .el-collapse-item__wrap {
+.iconCascaderCollapse,
+.iconCascaderCollapse .el-collapse-item__wrap {
   border: none;
 }
 

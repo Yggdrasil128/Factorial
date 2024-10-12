@@ -1,25 +1,19 @@
-<script setup>
-import {ref} from "vue";
+<script setup lang="ts">
+import { ref } from 'vue';
 
-const versionInfo = ref({version: "1.0-SNAPSHOT"});
+const versionInfo = ref({ version: '1.0-SNAPSHOT' });
 </script>
 
 <template>
   <div id="header">
     <div id="headerLeft">
-      <img alt="Banner" src="/img/banner.png"/>
+      <img alt="Banner" src="/img/banner.png" />
     </div>
 
     <div id="headerRight">
-      <div id="appTitle">
-        Factorial!
-      </div>
-      <div id="madeBy">
-        Made by Izruo and Yggdrasil128
-      </div>
-      <div id="versionInfo">
-        Version: {{ versionInfo.version }}
-      </div>
+      <div id="appTitle">Factorial!</div>
+      <div id="madeBy">Made by Izruo and Yggdrasil128</div>
+      <div id="versionInfo">Version: {{ versionInfo.version }}</div>
     </div>
   </div>
 </template>
@@ -52,7 +46,7 @@ const versionInfo = ref({version: "1.0-SNAPSHOT"});
 }
 
 #madeBy {
-  font-size: 20px
+  font-size: 20px;
 }
 
 #versionInfo {

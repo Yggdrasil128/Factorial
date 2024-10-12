@@ -1,7 +1,7 @@
 {
   "name": "Example",
   "game": "Satisfactory",
-  "version": "Update 7",
+  "version": "Update 8",
   "factories": [
     {
       "ordinal": 1,
@@ -9,11 +9,11 @@
       "productionSteps": [
         {
           "machineName": "Water Extractor",
-          "recipeName": "Water",
+          "recipeName": "Water (Extractor)",
           "machineCount": "4"
         },
         {
-          "machineName": "Miner Mk. 3",
+          "machineName": "Miner Mk.3",
           "recipeName": "Iron Ore",
           "modifierNames": [
             "Pure Node"
@@ -21,7 +21,7 @@
           "machineCount": "13 / 8"
         },
         {
-          "machineName": "Miner Mk. 3",
+          "machineName": "Miner Mk.3",
           "recipeName": "Coal",
           "machineCount": "9 / 2"
         },

@@ -1,11 +1,11 @@
-<script setup>
-import AppHeader from "@/components/AppHeader.vue";
-import Navbar from "@/components/Navbar.vue";
+<script setup lang="ts">
+import AppHeader from '@/components/AppHeader.vue';
+import NavBar from '@/components/NavBar.vue';
 </script>
 
 <template>
   <AppHeader/>
-  <Navbar/>
+  <NavBar />
 
   <div style="margin: 20px;">
     <router-view/>

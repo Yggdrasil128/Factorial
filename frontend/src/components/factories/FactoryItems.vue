@@ -1,11 +1,11 @@
-<script setup>
-import {computed, inject, onMounted, onUnmounted, ref, watch} from "vue";
+<script setup lang="js">
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
-import FactoryItem from "@/components/factories/FactoryItem.vue";
-import {useRoute, useRouter} from "vue-router";
-import {Plus} from "@element-plus/icons-vue";
+import FactoryItem from '@/components/factories/FactoryItem.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Plus } from '@element-plus/icons-vue';
 
-const globalEventBus = inject("globalEventBus");
+const globalEventBus = inject('globalEventBus');
 const axios = inject('axios');
 const route = useRoute();
 const router = useRouter();
@@ -22,9 +22,9 @@ async function reloadFactoryData() {
   }
   loading.value = true;
 
-  let response = await axios.get(
-      'api/factoryItemList',
-      {params: {factoryId: currentFactoryId.value}});
+  const response = await axios.get('api/factoryItemList', {
+    params: { factoryId: currentFactoryId.value }
+  });
   applyFactoryData(response.data);
 
   loading.value = false;
@@ -32,20 +32,20 @@ async function reloadFactoryData() {
 
 function applyFactoryData(data) {
   factory.value = data;
-  let newItemMap = {};
-  for (let item of factory.value.items) {
+  const newItemMap = {};
+  for (const item of factory.value.items) {
     newItemMap[String(item.id)] = item;
   }
   itemMap.value = newItemMap;
 }
 
 onMounted(() => {
-  globalEventBus.on("reloadFactoryData", reloadFactoryData);
-  globalEventBus.on("applyFactoryData", applyFactoryData);
+  globalEventBus.on('reloadFactoryData', reloadFactoryData);
+  globalEventBus.on('applyFactoryData', applyFactoryData);
 });
 onUnmounted(() => {
-  globalEventBus.off("reloadFactoryData", reloadFactoryData);
-  globalEventBus.off("applyFactoryData", applyFactoryData);
+  globalEventBus.off('reloadFactoryData', reloadFactoryData);
+  globalEventBus.off('applyFactoryData', applyFactoryData);
 });
 
 reloadFactoryData();
@@ -54,39 +54,39 @@ watch(currentFactoryId, reloadFactoryData);
 function getRelevantProductionSteps(item) {
   // noinspection JSUnresolvedReference
   return factory.value.productionSteps.filter(
-      step => step.output.filter(
-          output => output.itemId === item.id).length > 0);
+    (step) => step.output.filter((output) => output.itemId === item.id).length > 0
+  );
 }
 
 function newProductionStep() {
-  router.push({name: 'newProductionStep', params: {factoryId: route.params.factoryId}});
+  router.push({ name: 'newProductionStep', params: { factoryId: route.params.factoryId } });
 }
 
 function newTransportLink() {
-
 }
 
 function newIngress() {
-
 }
 
 function newEgress() {
-
 }
-
 </script>
 
 <template>
-  <div v-loading="loading" element-loading-background="rgba(65, 65, 65, 0.6)" style="min-height: 400px;">
+  <div
+    v-loading="loading"
+    element-loading-background="rgba(65, 65, 65, 0.6)"
+    style="min-height: 400px"
+  >
     <template v-if="factory">
-      <div style="overflow: auto;">
-        <div style="float: left;">
+      <div style="overflow: auto">
+        <div style="float: left">
           <h2>Factory name: {{ factory.name }}</h2>
         </div>
-        <div style="float: right; margin-top: 16px;">
+        <div style="float: right; margin-top: 16px">
           <el-dropdown split-button type="primary" @click="newProductionStep">
             <el-icon class="el-icon--left">
-              <plus/>
+              <plus />
             </el-icon>
             New production step
             <template #dropdown>
@@ -103,13 +103,15 @@ function newEgress() {
       <draggable :list="factory.items" item-key="id">
         <!--suppress VueUnrecognizedSlot -->
         <template #item="{ element }">
-          <factory-item :item="element" :production-steps="getRelevantProductionSteps(element)" :item-map="itemMap"/>
+          <factory-item
+            :item="element"
+            :production-steps="getRelevantProductionSteps(element)"
+            :item-map="itemMap"
+          />
         </template>
       </draggable>
     </template>
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

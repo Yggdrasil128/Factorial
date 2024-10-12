@@ -1,6 +1,6 @@
-<script setup>
-import {inject, ref} from "vue";
-import {Check, Minus, Plus} from "@element-plus/icons-vue";
+<script setup lang="js">
+import { inject, ref } from 'vue';
+import { Check, Minus, Plus } from '@element-plus/icons-vue';
 
 const inputDelay = 1000;
 
@@ -9,10 +9,10 @@ const minusButtonLoading = ref(false);
 const checkButtonLoading = ref(false);
 const requestRunning = ref(false);
 
-const props = defineProps(["quantity", "productionStepId"]);
+const props = defineProps(['quantity', 'productionStepId']);
 const inputValue = ref(props.quantity.withPrimaryChangelist);
 
-const eventBus = inject("globalEventBus");
+const eventBus = inject('globalEventBus');
 const axios = inject('axios');
 
 let timeoutHandle = null;
@@ -29,11 +29,10 @@ function onInputUpdate() {
 }
 
 async function submit() {
-  let response = await axios.patch(
-      "api/factoryItemList/reportProductionStepMachineCount",
-      null,
-      {params: {productionStepId: props.productionStepId, machineCount: inputValue.value}});
-  eventBus.emit("applyFactoryData", response.data);
+  const response = await axios.patch('api/factoryItemList/reportProductionStepMachineCount', null, {
+    params: { productionStepId: props.productionStepId, machineCount: inputValue.value }
+  });
+  eventBus.emit('applyFactoryData', response.data);
 }
 
 async function plusOne() {
@@ -51,30 +50,43 @@ async function minusOne() {
 }
 
 function editFraction(fraction, delta) {
-  let i = fraction.indexOf("/");
+  const i = fraction.indexOf('/');
   if (i < 0) {
     return String(Math.max(Number(fraction) + delta, 0));
   } else {
     let n = Number(fraction.substring(0, i));
-    let d = Number(fraction.substring(i + 1));
+    const d = Number(fraction.substring(i + 1));
     n += d * delta;
     if (n <= 0) {
-      return "0";
+      return '0';
     }
-    return String(n) + "/" + String(d);
+    return String(n) + '/' + String(d);
   }
 }
-
 </script>
 
 <template>
-  <el-input v-model="inputValue" style="width: 80px" class="mciInput" @update:model-value="onInputUpdate">
+  <el-input
+    v-model="inputValue"
+    style="width: 80px"
+    class="mciInput"
+    @update:model-value="onInputUpdate"
+  >
   </el-input>
   <el-button-group class="mciButtonGroup">
-    <el-button :icon="Plus" @click="plusOne" :loading="plusButtonLoading" :disabled="requestRunning"/>
-    <el-button :icon="Minus" @click="minusOne" :loading="minusButtonLoading"
-               :disabled="requestRunning || inputValue === '0'"/>
-    <el-button :icon="Check" :loading="checkButtonLoading" :disabled="requestRunning"/>
+    <el-button
+      :icon="Plus"
+      @click="plusOne"
+      :loading="plusButtonLoading"
+      :disabled="requestRunning"
+    />
+    <el-button
+      :icon="Minus"
+      @click="minusOne"
+      :loading="minusButtonLoading"
+      :disabled="requestRunning || inputValue === '0'"
+    />
+    <el-button :icon="Check" :loading="checkButtonLoading" :disabled="requestRunning" />
   </el-button-group>
 </template>
 

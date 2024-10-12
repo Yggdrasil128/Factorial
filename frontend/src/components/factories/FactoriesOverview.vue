@@ -1,20 +1,20 @@
-<script setup>
-import FactoryItems from "@/components/factories/FactoryItems.vue";
-import Factories from "@/components/factories/Factories.vue";
-import Changelists from "@/components/factories/Changelists.vue";
+<script setup lang="js">
+import FactoryItems from '@/components/factories/FactoryItems.vue';
+import Factories from '@/components/factories/FactoriesList.vue';
+import Changelists from '@/components/factories/ChangelistsList.vue';
 </script>
 
 <template>
   <h1>Factories</h1>
   <div class="left">
-    <factories/>
-    <changelists/>
+    <factories />
+    <changelists />
   </div>
   <div class="right">
-    <factory-items/>
+    <factory-items />
   </div>
 
-  <router-view name="modal"/>
+  <router-view name="modal" />
 </template>
 
 <style scoped>

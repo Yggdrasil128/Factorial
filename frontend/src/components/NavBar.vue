@@ -1,7 +1,7 @@
-<script setup>
-import {ref} from "vue";
+<script setup lang="ts">
+import { ref } from 'vue';
 
-const localTime = ref("");
+const localTime = ref('');
 
 function updateLocalTime() {
   const now = new Date();
@@ -10,7 +10,6 @@ function updateLocalTime() {
 
 updateLocalTime();
 setInterval(updateLocalTime, 1000);
-
 </script>
 
 <template>
@@ -18,11 +17,11 @@ setInterval(updateLocalTime, 1000);
     <div id="navList">
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
-      <router-link :to="{name: 'factories'}">Factories</router-link>
+      <router-link :to="{ name: 'factories' }">Factories</router-link>
       <router-link to="/devtools">Dev Tools</router-link>
     </div>
     <div id="navExtra">
-      Local time:<br/><span id="localTime">{{ localTime }}</span>
+      Local time:<br /><span id="localTime">{{ localTime }}</span>
     </div>
   </div>
 </template>

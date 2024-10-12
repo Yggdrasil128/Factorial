@@ -1,9 +1,9 @@
-<script setup>
-import {computed, inject, onMounted, onUnmounted, ref} from "vue";
+<script setup lang="js">
+import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
 import draggable from 'vuedraggable';
-import {Delete, Edit, Plus} from "@element-plus/icons-vue";
-import {useRoute, useRouter} from "vue-router";
-import IconImg from "@/components/IconImg.vue";
+import { Delete, Edit, Plus } from '@element-plus/icons-vue';
+import { useRoute, useRouter } from 'vue-router';
+import IconImg from '@/components/IconImg.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -14,25 +14,26 @@ const factories = ref([]);
 const currentFactoryId = computed(() => route.params.factoryId);
 
 function newFactory() {
-  router.push({name: 'newFactory', params: {factoryId: route.params.factoryId}});
+  router.push({ name: 'newFactory', params: { factoryId: route.params.factoryId } });
 }
 
 function editFactory(editFactoryId) {
-  router.push({name: 'editFactory', params: {factoryId: route.params.factoryId, editFactoryId: editFactoryId}});
+  router.push({
+    name: 'editFactory',
+    params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId }
+  });
 }
 
 async function loadFactories() {
-  let response = await axios.get(
-      "api/save/factories",
-      {params: {saveId: 1}});
+  const response = await axios.get('api/save/factories', { params: { saveId: 1 } });
   factories.value = response.data;
   if (factories.value.length > 0 && !currentFactoryId.value) {
-    await router.replace({name: 'factories', params: {factoryId: factories.value[0].id}});
+    await router.replace({ name: 'factories', params: { factoryId: factories.value[0].id } });
   }
 }
 
 async function deleteFactory(factoryId) {
-  await axios.delete('api/factory', {params: {factoryId: factoryId}});
+  await axios.delete('api/factory', { params: { factoryId: factoryId } });
 
   await loadFactories();
 }
@@ -41,7 +42,7 @@ function viewFactory(id) {
   if (currentFactoryId.value === id) {
     return;
   }
-  router.push({name: 'factories', params: {factoryId: id}});
+  router.push({ name: 'factories', params: { factoryId: id } });
 }
 
 loadFactories();
@@ -51,12 +52,11 @@ function onUpdateFactories() {
 }
 
 onMounted(() => {
-  globalEventBus.on("updateFactories", onUpdateFactories);
+  globalEventBus.on('updateFactories', onUpdateFactories);
 });
 onUnmounted(() => {
-  globalEventBus.off("updateFactories", onUpdateFactories);
+  globalEventBus.off('updateFactories', onUpdateFactories);
 });
-
 </script>
 
 <template>
@@ -65,28 +65,43 @@ onUnmounted(() => {
     <draggable :list="factories" item-key="id">
       <!--suppress VueUnrecognizedSlot -->
       <template #item="{ element }">
-        <div class="list-group-item"
-             :class="{active: String(element.id) === currentFactoryId, hasIcon: !!element.icon}">
+        <div
+          class="list-group-item"
+          :class="{ active: String(element.id) === currentFactoryId, hasIcon: !!element.icon }"
+        >
           <div class="icon" @click="viewFactory(element.id)" v-if="element.icon">
-            <icon-img :icon="element.icon" :size="40"/>
+            <icon-img :icon="element.icon" :size="40" />
           </div>
           <div class="name" @click="viewFactory(element.id)">
             {{ element.name }}
           </div>
           <div class="buttons">
             <el-button-group>
-              <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
-                          content="Edit">
-                <el-button :icon="Edit" @click="editFactory(element.id)"/>
+              <el-tooltip
+                effect="dark"
+                placement="top-start"
+                transition="none"
+                :hide-after="0"
+                content="Edit"
+              >
+                <el-button :icon="Edit" @click="editFactory(element.id)" />
               </el-tooltip>
 
-              <el-popconfirm title="Delete this factory?" width="200px" @confirm="deleteFactory(element.id)">
+              <el-popconfirm
+                title="Delete this factory?"
+                width="200px"
+                @confirm="deleteFactory(element.id)"
+              >
                 <template #reference>
                   <span class="row center tooltipHelperSpan">
-                    <el-tooltip effect="dark" placement="top-start" transition="none" :hide-after="0"
-                                content="Delete">
-                      <el-button type="danger" :icon="Delete"
-                                 :disabled="factories.length === 1"/>
+                    <el-tooltip
+                      effect="dark"
+                      placement="top-start"
+                      transition="none"
+                      :hide-after="0"
+                      content="Delete"
+                    >
+                      <el-button type="danger" :icon="Delete" :disabled="factories.length === 1" />
                     </el-tooltip>
                   </span>
                 </template>
@@ -121,12 +136,14 @@ onUnmounted(() => {
   margin-top: 10px;
 }
 
-.icon, .name {
+.icon,
+.name {
   float: left;
   margin-left: 8px;
 }
 
-.icon, .icon img {
+.icon,
+.icon img {
   width: 40px;
   height: 40px;
   cursor: grab;
