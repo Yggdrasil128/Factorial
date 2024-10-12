@@ -1,11 +1,11 @@
-package de.yggdrasil128.factorial.api.simple;
+package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
-import de.yggdrasil128.factorial.model.changelist.ChangelistInput;
-import de.yggdrasil128.factorial.model.changelist.ChangelistOutput;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
-import de.yggdrasil128.factorial.model.factory.FactoryOutput;
+import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
+import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,27 +18,31 @@ import java.util.List;
 @RequestMapping("/api")
 public class ChangelistController {
 
+    private final IconService iconService;
     private final SaveService saveService;
     private final ChangelistService changelistService;
 
     @Autowired
-    public ChangelistController(SaveService saveService, ChangelistService changelistService) {
+    public ChangelistController(IconService iconService, SaveService saveService, ChangelistService changelistService) {
+        this.iconService = iconService;
         this.saveService = saveService;
         this.changelistService = changelistService;
     }
 
     @PostMapping("/save/changelists")
-    public ChangelistOutput create(int saveId, @RequestBody ChangelistInput input) {
+    public ChangelistStandalone create(int saveId, @RequestBody ChangelistStandalone input) {
         Save save = saveService.get(saveId);
-        Changelist changelist = changelistService.create(save, input);
+        Changelist changelist = new Changelist(save, input);
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
+        changelist = changelistService.create(save, changelist);
         saveService.addAttachedChangelist(save, changelist);
-        return new ChangelistOutput(changelist);
+        return new ChangelistStandalone(changelist);
     }
 
     @GetMapping("/save/changelists")
-    public List<ChangelistOutput> retrieveAll(int saveId) {
-        return saveService.get(saveId).getChangelists().stream().map(ChangelistOutput::new)
-                .sorted(Comparator.comparing(ChangelistOutput::getOrdinal)).toList();
+    public List<ChangelistStandalone> retrieveAll(int saveId) {
+        return saveService.get(saveId).getChangelists().stream().map(ChangelistStandalone::new)
+                .sorted(Comparator.comparing(ChangelistStandalone::getOrdinal)).toList();
     }
 
     @PatchMapping("save/changelists/order")
@@ -47,13 +51,16 @@ public class ChangelistController {
     }
 
     @GetMapping("/changelist")
-    public ChangelistOutput retrieve(int changelistId) {
-        return new ChangelistOutput(changelistService.get(changelistId));
+    public ChangelistStandalone retrieve(int changelistId) {
+        return new ChangelistStandalone(changelistService.get(changelistId));
     }
 
     @PatchMapping("/changelist")
-    public ChangelistOutput update(int changelistId, @RequestBody ChangelistInput input) {
-        return new ChangelistOutput(changelistService.update(changelistId, input));
+    public ChangelistStandalone update(int changelistId, @RequestBody ChangelistStandalone input) {
+        Changelist changelist = changelistService.get(changelistId);
+        OptionalInputField.of(input.getName()).apply(changelist::setName);
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
+        return new ChangelistStandalone(changelistService.update(changelist));
     }
 
     @DeleteMapping("/changelist")
@@ -62,8 +69,8 @@ public class ChangelistController {
     }
 
     @PostMapping("/changelist/apply")
-    public List<FactoryOutput> apply(int changelistId) {
-        return changelistService.apply(changelistId).stream().map(FactoryOutput::new).toList();
+    public void apply(int changelistId) {
+        changelistService.apply(changelistId);
     }
 
     @PatchMapping("/changelist/primary")

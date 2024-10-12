@@ -14,6 +14,10 @@ public class ResourceStandalone {
     public ResourceStandalone() {
     }
 
+    public ResourceStandalone(Resource model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public ResourceStandalone(Resource model, RelationRepresentation resolveStrategy) {
         item = NamedModel.resolve(model.getItem(), resolveStrategy);
         quantity = model.getQuantity();

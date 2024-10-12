@@ -1,7 +1,5 @@
-package de.yggdrasil128.factorial.api.migration;
+package de.yggdrasil128.factorial.model;
 
-import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.changelist.ProductionStepChangeStandalone;

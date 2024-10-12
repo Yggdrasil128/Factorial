@@ -14,6 +14,10 @@ public class SaveStandalone {
     public SaveStandalone() {
     }
 
+    public SaveStandalone(Save model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public SaveStandalone(Save model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         gameVersion = NamedModel.resolve(model.getGameVersion(), resolveStrategy);

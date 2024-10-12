@@ -19,6 +19,10 @@ public class ItemStandalone {
     public ItemStandalone() {
     }
 
+    public ItemStandalone(Item model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public ItemStandalone(Item model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();

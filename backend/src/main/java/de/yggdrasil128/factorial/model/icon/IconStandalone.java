@@ -18,6 +18,10 @@ public class IconStandalone {
     public IconStandalone() {
     }
 
+    public IconStandalone(Icon model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public IconStandalone(Icon model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();

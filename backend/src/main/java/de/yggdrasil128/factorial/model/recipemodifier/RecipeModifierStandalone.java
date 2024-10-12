@@ -20,6 +20,10 @@ public class RecipeModifierStandalone {
     public RecipeModifierStandalone() {
     }
 
+    public RecipeModifierStandalone(RecipeModifier model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public RecipeModifierStandalone(RecipeModifier model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();

@@ -20,6 +20,10 @@ public class ProductionStepStandalone {
     public ProductionStepStandalone() {
     }
 
+    public ProductionStepStandalone(ProductionStep model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public ProductionStepStandalone(ProductionStep model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         factoryId = model.getFactory().getId();

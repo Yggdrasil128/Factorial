@@ -17,6 +17,10 @@ public class FactoryStandalone {
     public FactoryStandalone() {
     }
 
+    public FactoryStandalone(Factory model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public FactoryStandalone(Factory model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         saveId = model.getSave().getId();

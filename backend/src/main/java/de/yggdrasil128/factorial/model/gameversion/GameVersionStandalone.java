@@ -14,6 +14,10 @@ public class GameVersionStandalone {
     public GameVersionStandalone() {
     }
 
+    public GameVersionStandalone(GameVersion model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public GameVersionStandalone(GameVersion model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         name = model.getName();

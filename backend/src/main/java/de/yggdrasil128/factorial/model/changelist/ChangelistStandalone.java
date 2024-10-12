@@ -21,6 +21,10 @@ public class ChangelistStandalone {
     public ChangelistStandalone() {
     }
 
+    public ChangelistStandalone(Changelist model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public ChangelistStandalone(Changelist model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         saveId = model.getSave().getId();

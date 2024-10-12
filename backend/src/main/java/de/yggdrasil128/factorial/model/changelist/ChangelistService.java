@@ -3,11 +3,8 @@ package de.yggdrasil128.factorial.model.changelist;
 import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -22,22 +19,18 @@ import static java.util.stream.Collectors.toMap;
 @Service
 public class ChangelistService extends ModelService<Changelist, ChangelistRepository> {
 
-    private final IconService icons;
     private final ProductionStepService productionSteps;
 
-    public ChangelistService(ChangelistRepository repository, IconService icons,
-                             ProductionStepService productionSteps) {
+    public ChangelistService(ChangelistRepository repository, ProductionStepService productionSteps) {
         super(repository);
-        this.icons = icons;
         this.productionSteps = productionSteps;
     }
 
-    public Changelist create(Save save, ChangelistInput input) {
-        int ordinal = 0 < input.getOrdinal() ? input.getOrdinal()
-                : save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1;
-        Icon icon = OptionalInputField.ofId(input.getIconId(), icons::get).get();
-        Changelist result = repository.save(
-                new Changelist(save, ordinal, input.getName(), input.isPrimary(), input.isActive(), icon, emptyMap()));
+    public Changelist create(Save save, Changelist changelist) {
+        if (0 < changelist.getOrdinal()) {
+            changelist.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
+        }
+        Changelist result = repository.save(changelist);
         if (result.isPrimary()) {
             Changelists.getOptionalPrimary(save).ifPresent(primary -> {
                 primary.setPrimary(false);
@@ -51,10 +44,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         return new Changelist(save, 1, "Default", true, true, null, emptyMap());
     }
 
-    public Changelist update(int id, ChangelistInput input) {
-        Changelist changelist = get(id);
-        OptionalInputField.of(input.getName()).apply(changelist::setName);
-        OptionalInputField.ofId(input.getIconId(), icons::get).apply(changelist::setIcon);
+    public Changelist update(Changelist changelist) {
         return repository.save(changelist);
     }
 

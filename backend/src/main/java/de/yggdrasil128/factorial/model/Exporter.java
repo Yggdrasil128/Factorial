@@ -1,6 +1,5 @@
-package de.yggdrasil128.factorial.api.migration;
+package de.yggdrasil128.factorial.model;
 
-import de.yggdrasil128.factorial.model.RelationRepresentation;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;

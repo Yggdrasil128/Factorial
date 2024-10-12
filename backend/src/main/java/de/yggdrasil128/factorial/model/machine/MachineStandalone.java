@@ -19,6 +19,10 @@ public class MachineStandalone {
     public MachineStandalone() {
     }
 
+    public MachineStandalone(Machine model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public MachineStandalone(Machine model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();
