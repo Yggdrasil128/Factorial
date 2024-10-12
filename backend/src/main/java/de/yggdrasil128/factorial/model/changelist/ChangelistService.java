@@ -39,11 +39,16 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         Changelist result = repository.save(
                 new Changelist(save, ordinal, input.getName(), input.isPrimary(), input.isActive(), icon, emptyMap()));
         if (result.isPrimary()) {
-            Changelist primary = Changelists.getPrimary(save);
-            primary.setPrimary(false);
-            repository.save(primary);
+            Changelists.getOptionalPrimary(save).ifPresent(primary -> {
+                primary.setPrimary(false);
+                repository.save(primary);
+            });
         }
         return result;
+    }
+
+    public static Changelist createSentinel(Save save) {
+        return new Changelist(save, 1, "Default", true, true, null, emptyMap());
     }
 
     public Changelist update(int id, ChangelistInput input) {

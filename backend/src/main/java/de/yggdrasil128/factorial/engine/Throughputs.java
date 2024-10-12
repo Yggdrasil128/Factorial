@@ -25,10 +25,9 @@ public class Throughputs {
                 RecipeModifier::getOutputSpeedMultiplier, effectiveModifiers);
     }
 
-    private static Map<Item, QuantityByChangelist> getThroughputs(ProductionStep productionStep,
-                                                                  List<Resource> resources,
-                                                                  Function<RecipeModifier, Fraction> speedMultiplier,
-                                                                  EffectiveModifiers effectiveModifiers) {
+    private static Map<Item, QuantityByChangelist>
+            getThroughputs(ProductionStep productionStep, List<Resource> resources,
+                           Function<RecipeModifier, Fraction> speedMultiplier, EffectiveModifiers effectiveModifiers) {
         return resources.stream().collect(Collectors.toMap(Resource::getItem, resource -> {
             Fraction baseSpeed = resource.getQuantity().divide(productionStep.getRecipe().getDuration());
             return new QuantityByChangelist(baseSpeed.multiply(speedMultiplier.apply(effectiveModifiers.getCurrent())),

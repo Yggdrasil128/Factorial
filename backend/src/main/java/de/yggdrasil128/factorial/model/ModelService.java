@@ -45,9 +45,7 @@ public class ModelService<E, R extends CrudRepository<E, Integer>> {
     }
 
     public void delete(int id) {
-        System.out.println(repository.count());
         repository.deleteById(id);
-        System.out.println(repository.count());
     }
 
 }

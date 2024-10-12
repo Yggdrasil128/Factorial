@@ -1,8 +1,5 @@
 package de.yggdrasil128.factorial.api.simple;
 
-import de.yggdrasil128.factorial.model.game.Game;
-import de.yggdrasil128.factorial.model.game.GameService;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionInput;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionOutput;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
@@ -15,26 +12,21 @@ import java.util.List;
 @RequestMapping("/api")
 public class GameVersionController {
 
-    private final GameService gameService;
     private final GameVersionService gameVersionService;
 
     @Autowired
-    public GameVersionController(GameService gameService, GameVersionService gameVersionService) {
-        this.gameService = gameService;
+    public GameVersionController(GameVersionService gameVersionService) {
         this.gameVersionService = gameVersionService;
     }
 
-    @PostMapping("/game/gameVersions")
-    public GameVersionOutput create(int gameId, @RequestBody GameVersionInput input) {
-        Game game = gameService.get(gameId);
-        GameVersion gameVersion = gameVersionService.create(game, input);
-        gameService.addAttachedGameVersion(game, gameVersion);
-        return new GameVersionOutput(gameVersion);
+    @PostMapping("/gameVersions")
+    public GameVersionOutput create(@RequestBody GameVersionInput input) {
+        return new GameVersionOutput(gameVersionService.create(input));
     }
 
-    @GetMapping("/game/gameVersions")
-    public List<GameVersionOutput> retrieveAll(int gameId) {
-        return gameService.get(gameId).getGameVersions().stream().map(GameVersionOutput::new).toList();
+    @GetMapping("/gameVersions")
+    public List<GameVersionOutput> retrieveAll() {
+        return gameVersionService.stream().map(GameVersionOutput::new).toList();
     }
 
     @GetMapping("/gameVersion")

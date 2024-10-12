@@ -8,6 +8,6 @@ import java.util.Optional;
 @Repository
 public interface GameVersionRepository extends CrudRepository<GameVersion, Integer> {
 
-    Optional<GameVersion> findByGameIdAndName(int gameId, String name);
+    Optional<GameVersion> findByName(String name);
 
 }

@@ -3,14 +3,13 @@ package de.yggdrasil128.factorial.model.productionstep;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 public class ProductionStep {
@@ -28,23 +27,25 @@ public class ProductionStep {
     private List<RecipeModifier> modifiers;
     @Convert(converter = FractionConverter.class)
     private Fraction machineCount = Fraction.ONE;
-    @ManyToMany
-    private Set<Item> uncloggingInputs;
-    @ManyToMany
-    private Set<Item> uncloggingOutputs;
 
     public ProductionStep() {
     }
 
+    public ProductionStep(Factory factory, ProductionStepStandalone standalone) {
+        this.factory = factory;
+        machine = null;
+        recipe = null;
+        modifiers = new ArrayList<>();
+        machineCount = standalone.getMachineCount();
+    }
+
     public ProductionStep(Factory factory, Machine machine, Recipe recipe, List<RecipeModifier> modifiers,
-                          Fraction machineCount, Set<Item> uncloggingInputs, Set<Item> uncloggingOutputs) {
+                          Fraction machineCount) {
         this.factory = factory;
         this.machine = machine;
         this.recipe = recipe;
         this.modifiers = modifiers;
         this.machineCount = machineCount;
-        this.uncloggingInputs = uncloggingInputs;
-        this.uncloggingOutputs = uncloggingOutputs;
     }
 
     public int getId() {
@@ -89,22 +90,6 @@ public class ProductionStep {
 
     public void setMachineCount(Fraction machineCount) {
         this.machineCount = machineCount;
-    }
-
-    public Set<Item> getUncloggingInputs() {
-        return uncloggingInputs;
-    }
-
-    public void setUncloggingInputs(Set<Item> uncloggingInputs) {
-        this.uncloggingInputs = uncloggingInputs;
-    }
-
-    public Set<Item> getUncloggingOutputs() {
-        return uncloggingOutputs;
-    }
-
-    public void setUncloggingOutputs(Set<Item> uncloggingOutputs) {
-        this.uncloggingOutputs = uncloggingOutputs;
     }
 
     @Override

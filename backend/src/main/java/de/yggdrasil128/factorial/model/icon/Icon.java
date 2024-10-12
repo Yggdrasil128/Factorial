@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.icon;
 
+import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import jakarta.persistence.*;
 
@@ -8,7 +9,8 @@ import java.util.List;
 import static java.util.stream.Collectors.joining;
 
 @Entity
-public class Icon {
+public class Icon implements NamedModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -25,6 +27,14 @@ public class Icon {
     private List<String> category;
 
     public Icon() {
+    }
+
+    public Icon(GameVersion gameVersion, IconStandalone standalone) {
+        this.gameVersion = gameVersion;
+        name = standalone.getName();
+        imageData = standalone.getImageData();
+        mimeType = standalone.getMimeType();
+        category = standalone.getCategory();
     }
 
     public Icon(GameVersion gameVersion, String name, byte[] imageData, String mimeType, List<String> category) {
@@ -103,4 +113,5 @@ public class Icon {
         return name + ": " + imageData.length + " bytes of " + mimeType
                 + category.stream().collect(joining(".", " (", ")"));
     }
+
 }

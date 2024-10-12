@@ -1,11 +1,14 @@
 package de.yggdrasil128.factorial.model.factory;
 
+import java.util.List;
+
 public class FactoryInput {
 
     private int ordinal;
     private String name;
     private String description;
     private int iconId;
+    private List<Integer> itemOrder;
 
     public int getOrdinal() {
         return ordinal;
@@ -37,6 +40,14 @@ public class FactoryInput {
 
     public void setIconId(int iconId) {
         this.iconId = iconId;
+    }
+
+    public List<Integer> getItemOrder() {
+        return itemOrder;
+    }
+
+    public void setItemOrder(List<Integer> itemOrder) {
+        this.itemOrder = itemOrder;
     }
 
 }

@@ -21,6 +21,10 @@ public class RecipeModifierOutput {
         return delegate.getGameVersion().getId();
     }
 
+    public String getName() {
+        return delegate.getName();
+    }
+
     public String getDescription() {
         return delegate.getDescription();
     }

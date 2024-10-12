@@ -32,10 +32,8 @@ public class Fraction extends Number {
         if (index == -1) {
             return new Fraction(Long.parseLong(s));
         }
-        return new Fraction(
-                Long.parseLong(s.substring(0, index).trim()),
-                Long.parseLong(s.substring(index + 1).trim())
-        );
+        return new Fraction(Long.parseLong(s.substring(0, index).trim()),
+                Long.parseLong(s.substring(index + 1).trim()));
     }
 
     private Fraction(long value) {
@@ -76,12 +74,9 @@ public class Fraction extends Number {
 
     public Fraction add(Fraction that) {
         return new Fraction(
-                Math.addExact(
-                        Math.multiplyExact(this.numerator, that.denominator),
-                        Math.multiplyExact(that.numerator, this.denominator)
-                ),
-                Math.multiplyExact(this.denominator, that.denominator)
-        );
+                Math.addExact(Math.multiplyExact(this.numerator, that.denominator),
+                        Math.multiplyExact(that.numerator, this.denominator)),
+                Math.multiplyExact(this.denominator, that.denominator));
     }
 
     public Fraction negative() {
@@ -93,10 +88,8 @@ public class Fraction extends Number {
     }
 
     public Fraction multiply(Fraction that) {
-        return new Fraction(
-                Math.multiplyExact(this.numerator, that.numerator),
-                Math.multiplyExact(this.denominator, that.denominator)
-        );
+        return new Fraction(Math.multiplyExact(this.numerator, that.numerator),
+                Math.multiplyExact(this.denominator, that.denominator));
     }
 
     public Fraction inverse() {
