@@ -106,8 +106,7 @@ defineExpose({ validate });
         <el-button :icon="Close" @click="beforeClose">Cancel</el-button>
         <el-button type="primary" :icon="Check" @click="emit('submit')" :loading="isSaving"
         >Save
-        </el-button
-        >
+        </el-button>
       </div>
     </el-form>
   </el-dialog>

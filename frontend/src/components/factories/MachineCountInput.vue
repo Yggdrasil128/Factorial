@@ -1,6 +1,7 @@
 <script setup lang="js">
 import { inject, ref } from 'vue';
 import { Check, Minus, Plus } from '@element-plus/icons-vue';
+import { ElButton, ElButtonGroup, ElInput } from 'element-plus';
 
 const inputDelay = 1000;
 

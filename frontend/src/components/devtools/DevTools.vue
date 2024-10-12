@@ -1,6 +1,7 @@
 <script setup lang="js">
 import { inject, ref } from 'vue';
 import { Check, WarnTriangleFilled } from '@element-plus/icons-vue';
+import { ElButton, ElOption, ElSelect } from 'element-plus';
 
 const axios = inject('axios');
 

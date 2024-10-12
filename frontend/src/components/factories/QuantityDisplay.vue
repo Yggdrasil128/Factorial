@@ -1,5 +1,6 @@
 <script setup lang="js">
 import { computed } from 'vue';
+import { ElTooltip } from 'element-plus';
 
 const props = defineProps({
   quantity: Object,

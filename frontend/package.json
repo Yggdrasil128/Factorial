@@ -14,14 +14,16 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "@vueuse/components": "^11.1.0",
     "axios": "^1.7.7",
     "element-plus": "^2.8.4",
+    "lodash": "^4.17.21",
     "mitt": "^3.0.1",
     "pinia": "^2.1.7",
     "vue": "^3.4.29",
-    "vue-router": "^4.3.3",
-    "vuedraggable": "^2.24.3"
+    "vue-draggable-next": "^2.2.1",
+    "vue-router": "^4.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",

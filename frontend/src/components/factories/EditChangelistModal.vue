@@ -3,6 +3,8 @@ import { computed, inject, reactive, ref } from 'vue';
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import _ from 'lodash';
 import IconSelect from '@/components/iconselect/IconSelect.vue';
+import { ElFormItem, ElInput, ElSwitch } from 'element-plus';
+import EditModal from '@/components/EditModal.vue';
 
 const router = useRouter();
 const route = useRoute();

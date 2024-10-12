@@ -1,9 +1,9 @@
 <script setup lang="js">
 import { h, inject, onMounted, onUnmounted, ref } from 'vue';
-import draggable from 'vuedraggable';
+import { VueDraggableNext } from 'vue-draggable-next';
 import { Check, Delete, Edit, Plus, Star } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ElMessageBox, ElSwitch } from 'element-plus';
+import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElTooltip } from 'element-plus';
 import IconImg from '@/components/IconImg.vue';
 
 const router = useRouter();
@@ -106,80 +106,80 @@ function editChangelist(changelistId) {
 <template>
   <div class="changelists">
     <h2>Changelists</h2>
-    <draggable :list="changelists" item-key="id">
-      <!--suppress VueUnrecognizedSlot -->
-      <template #item="{ element }">
-        <div
-          class="list-group-item"
-          :class="{ active: element.active, primary: element.primary, hasIcon: !!element.icon }"
-        >
-          <div class="left">
-            <div class="icon" v-if="element.icon">
-              <icon-img :icon="element.icon" :size="80" v-if="element.icon" />
-            </div>
-            <div class="name" v-if="!element.icon">
-              {{ element.name }}
-            </div>
+    <vue-draggable-next :list="changelists">
+      <div
+        v-for="changelist in changelists"
+        :key="changelist.id"
+        class="list-group-item"
+        :class="{ active: changelist.active, primary: changelist.primary, hasIcon: !!changelist.icon }"
+      >
+        <div class="left">
+          <div class="icon" v-if="changelist.icon">
+            <icon-img :icon="changelist.icon" :size="80" v-if="changelist.icon" />
           </div>
-          <div class="right">
-            <div class="name" v-if="element.icon">
-              {{ element.name }}
-            </div>
-            <div class="buttons">
-              <div style="float: right">
+          <div class="name" v-if="!changelist.icon">
+            {{ changelist.name }}
+          </div>
+        </div>
+        <div class="right">
+          <div class="name" v-if="changelist.icon">
+            {{ changelist.name }}
+          </div>
+          <div class="buttons">
+            <div style="float: right;">
+              <el-tooltip
+                effect="dark"
+                placement="top-start"
+                transition="none"
+                :hide-after="0"
+                content="Set active"
+              >
+                <el-switch
+                  v-model="changelist.active"
+                  :disabled="changelist.primary"
+                  style="margin-right: 8px;"
+                  @update:model-value="(val) => setActive(changelist.id, val)"
+                />
+              </el-tooltip>
+
+              <el-button-group>
                 <el-tooltip
                   effect="dark"
                   placement="top-start"
                   transition="none"
                   :hide-after="0"
-                  content="Set active"
+                  content="Set primary"
+                  v-if="!changelist.primary"
                 >
-                  <el-switch
-                    v-model="element.active"
-                    :disabled="element.primary"
-                    style="margin-right: 8px"
-                    @update:model-value="(val) => setActive(element.id, val)"
+                  <el-button :icon="Star" @click="setPrimary(changelist.id)" />
+                </el-tooltip>
+                <el-tooltip
+                  effect="dark"
+                  placement="top-start"
+                  transition="none"
+                  :hide-after="0"
+                  content="Apply all changes"
+                >
+                  <el-button
+                    :icon="Check"
+                    @click="askApplyChangelist(changelist.id, changelist.primary)"
                   />
                 </el-tooltip>
-
-                <el-button-group>
-                  <el-tooltip
-                    effect="dark"
-                    placement="top-start"
-                    transition="none"
-                    :hide-after="0"
-                    content="Set primary"
-                    v-if="!element.primary"
-                  >
-                    <el-button :icon="Star" @click="setPrimary(element.id)" />
-                  </el-tooltip>
-                  <el-tooltip
-                    effect="dark"
-                    placement="top-start"
-                    transition="none"
-                    :hide-after="0"
-                    content="Apply all changes"
-                  >
-                    <el-button
-                      :icon="Check"
-                      @click="askApplyChangelist(element.id, element.primary)"
-                    />
-                  </el-tooltip>
-                  <el-tooltip
-                    effect="dark"
-                    placement="top-start"
-                    transition="none"
-                    :hide-after="0"
-                    content="Edit"
-                  >
-                    <el-button :icon="Edit" @click="editChangelist(element.id)" />
-                  </el-tooltip>
-                  <el-popconfirm
-                    title="Delete this changelist?"
-                    width="200px"
-                    @confirm="deleteChangelist(element.id)"
-                  >
-                    <template #reference>
+                <el-tooltip
+                  effect="dark"
+                  placement="top-start"
+                  transition="none"
+                  :hide-after="0"
+                  content="Edit"
+                >
+                  <el-button :icon="Edit" @click="editChangelist(changelist.id)" />
+                </el-tooltip>
+                <el-popconfirm
+                  title="Delete this changelist?"
+                  width="200px"
+                  @confirm="deleteChangelist(changelist.id)"
+                >
+                  <template #reference>
                       <span class="row center tooltipHelperSpan">
                         <el-tooltip
                           effect="dark"
@@ -191,19 +191,18 @@ function editChangelist(changelistId) {
                           <el-button
                             type="danger"
                             :icon="Delete"
-                            :disabled="changelists.length === 1 || element.primary"
+                            :disabled="changelists.length === 1 || changelist.primary"
                           />
                         </el-tooltip>
                       </span>
-                    </template>
-                  </el-popconfirm>
-                </el-button-group>
-              </div>
+                  </template>
+                </el-popconfirm>
+              </el-button-group>
             </div>
           </div>
         </div>
-      </template>
-    </draggable>
+      </div>
+    </vue-draggable-next>
 
     <div class="createChangelist">
       <el-button type="primary" :icon="Plus" @click="newChangelist()">Create changelist</el-button>

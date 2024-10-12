@@ -1,9 +1,10 @@
 <script setup lang="js">
 import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue';
-import draggable from 'vuedraggable';
+import { VueDraggableNext } from 'vue-draggable-next';
 import FactoryItem from '@/components/factories/FactoryItem.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Plus } from '@element-plus/icons-vue';
+import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus';
 
 const globalEventBus = inject('globalEventBus');
 const axios = inject('axios');
@@ -100,16 +101,15 @@ function newEgress() {
         </div>
       </div>
 
-      <draggable :list="factory.items" item-key="id">
-        <!--suppress VueUnrecognizedSlot -->
-        <template #item="{ element }">
-          <factory-item
-            :item="element"
-            :production-steps="getRelevantProductionSteps(element)"
-            :item-map="itemMap"
-          />
-        </template>
-      </draggable>
+      <vue-draggable-next :list="factory.items">
+        <factory-item
+          v-for="item in factory.items"
+          :key="item.id"
+          :item="item"
+          :production-steps="getRelevantProductionSteps(item)"
+          :item-map="itemMap"
+        />
+      </vue-draggable-next>
     </template>
   </div>
 </template>

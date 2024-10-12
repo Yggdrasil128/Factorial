@@ -4,17 +4,15 @@ import NavBar from '@/components/NavBar.vue';
 </script>
 
 <template>
-  <AppHeader/>
+  <AppHeader />
   <NavBar />
 
-  <div style="margin: 20px;">
-    <router-view/>
+  <div style="margin: 20px">
+    <router-view />
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <!--suppress CssUnusedSymbol -->
 <style>
@@ -34,7 +32,8 @@ body {
   overflow: auto;
 }
 
-.el-dark, body.el-dark-popper .el-popper {
+.el-dark,
+body.el-dark-popper .el-popper {
   color-scheme: dark;
   --el-color-primary: #409eff;
   --el-color-primary-light-3: #3375b9;
@@ -81,26 +80,27 @@ body {
   --el-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.36), 0px 8px 20px rgba(0, 0, 0, 0.72);
   --el-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.72);
   --el-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.72);
-  --el-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.72), 0px 12px 32px #000000, 0px 8px 16px -8px #000000;
+  --el-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.72), 0px 12px 32px #000000,
+  0px 8px 16px -8px #000000;
   --el-bg-color-page: #0a0a0a;
   --el-bg-color: #141414;
   --el-bg-color-overlay: #1d1e1f;
-  --el-text-color-primary: #E5EAF3;
-  --el-text-color-regular: #CFD3DC;
-  --el-text-color-secondary: #A3A6AD;
-  --el-text-color-placeholder: #8D9095;
-  --el-text-color-disabled: #6C6E72;
+  --el-text-color-primary: #e5eaf3;
+  --el-text-color-regular: #cfd3dc;
+  --el-text-color-secondary: #a3a6ad;
+  --el-text-color-placeholder: #8d9095;
+  --el-text-color-disabled: #6c6e72;
   --el-border-color-darker: #636466;
-  --el-border-color-dark: #58585B;
-  --el-border-color: #4C4D4F;
+  --el-border-color-dark: #58585b;
+  --el-border-color: #4c4d4f;
   --el-border-color-light: #414243;
   --el-border-color-lighter: #363637;
-  --el-border-color-extra-light: #2B2B2C;
+  --el-border-color-extra-light: #2b2b2c;
   --el-fill-color-darker: #424243;
-  --el-fill-color-dark: #39393A;
+  --el-fill-color-dark: #39393a;
   --el-fill-color: #303030;
   --el-fill-color-light: #262727;
-  --el-fill-color-lighter: #1D1D1D;
+  --el-fill-color-lighter: #1d1d1d;
   --el-fill-color-extra-light: #191919;
   --el-fill-color-blank: transparent;
   --el-mask-color: rgba(0, 0, 0, 0.8);

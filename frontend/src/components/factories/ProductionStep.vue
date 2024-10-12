@@ -4,6 +4,7 @@ import MachineCountInput from '@/components/factories/MachineCountInput.vue';
 import QuantityDisplay from '@/components/factories/QuantityDisplay.vue';
 import IconImg from '@/components/IconImg.vue';
 import { computed } from 'vue';
+import { ElButton, ElButtonGroup } from 'element-plus';
 
 const props = defineProps(['step', 'itemMap']);
 

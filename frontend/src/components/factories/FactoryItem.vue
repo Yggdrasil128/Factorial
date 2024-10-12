@@ -2,6 +2,7 @@
 import ProductionStep from '@/components/factories/ProductionStep.vue';
 import QuantityDisplay from '@/components/factories/QuantityDisplay.vue';
 import IconImg from '@/components/IconImg.vue';
+import { ElTooltip } from 'element-plus';
 
 defineProps(['item', 'productionSteps', 'itemMap']);
 </script>

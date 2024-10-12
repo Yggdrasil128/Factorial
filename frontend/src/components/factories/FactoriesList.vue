@@ -1,9 +1,10 @@
 <script setup lang="js">
 import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
-import draggable from 'vuedraggable';
+import { VueDraggableNext } from 'vue-draggable-next';
 import { Delete, Edit, Plus } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 import IconImg from '@/components/IconImg.vue';
+import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 
 const router = useRouter();
 const route = useRoute();
@@ -62,37 +63,37 @@ onUnmounted(() => {
 <template>
   <div class="factoryList">
     <h2>Factory list</h2>
-    <draggable :list="factories" item-key="id">
-      <!--suppress VueUnrecognizedSlot -->
-      <template #item="{ element }">
-        <div
-          class="list-group-item"
-          :class="{ active: String(element.id) === currentFactoryId, hasIcon: !!element.icon }"
-        >
-          <div class="icon" @click="viewFactory(element.id)" v-if="element.icon">
-            <icon-img :icon="element.icon" :size="40" />
-          </div>
-          <div class="name" @click="viewFactory(element.id)">
-            {{ element.name }}
-          </div>
-          <div class="buttons">
-            <el-button-group>
-              <el-tooltip
-                effect="dark"
-                placement="top-start"
-                transition="none"
-                :hide-after="0"
-                content="Edit"
-              >
-                <el-button :icon="Edit" @click="editFactory(element.id)" />
-              </el-tooltip>
+    <vue-draggable-next :list="factories">
+      <div
+        v-for="factory in factories"
+        :key="factory.id"
+        class="list-group-item"
+        :class="{ active: String(factory.id) === currentFactoryId, hasIcon: !!factory.icon }"
+      >
+        <div class="icon" @click="viewFactory(factory.id)" v-if="factory.icon">
+          <icon-img :icon="factory.icon" :size="40" />
+        </div>
+        <div class="name" @click="viewFactory(factory.id)">
+          {{ factory.name }}
+        </div>
+        <div class="buttons">
+          <el-button-group>
+            <el-tooltip
+              effect="dark"
+              placement="top-start"
+              transition="none"
+              :hide-after="0"
+              content="Edit"
+            >
+              <el-button :icon="Edit" @click="editFactory(factory.id)" />
+            </el-tooltip>
 
-              <el-popconfirm
-                title="Delete this factory?"
-                width="200px"
-                @confirm="deleteFactory(element.id)"
-              >
-                <template #reference>
+            <el-popconfirm
+              title="Delete this factory?"
+              width="200px"
+              @confirm="deleteFactory(factory.id)"
+            >
+              <template #reference>
                   <span class="row center tooltipHelperSpan">
                     <el-tooltip
                       effect="dark"
@@ -104,13 +105,12 @@ onUnmounted(() => {
                       <el-button type="danger" :icon="Delete" :disabled="factories.length === 1" />
                     </el-tooltip>
                   </span>
-                </template>
-              </el-popconfirm>
-            </el-button-group>
-          </div>
+              </template>
+            </el-popconfirm>
+          </el-button-group>
         </div>
-      </template>
-    </draggable>
+      </div>
+    </vue-draggable-next>
 
     <div class="createFactory">
       <el-button type="primary" :icon="Plus" @click="newFactory()">Create factory</el-button>

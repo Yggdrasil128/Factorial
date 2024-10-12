@@ -4,7 +4,8 @@ import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import _ from 'lodash';
 import MachineSelect from '@/components/iconselect/MachineSelect.vue';
 import RecipeSelect from '@/components/iconselect/RecipeSelect.vue';
-import { ElNotification } from 'element-plus';
+import { ElFormItem, ElNotification } from 'element-plus';
+import EditModal from '@/components/EditModal.vue';
 
 const router = useRouter();
 const route = useRoute();
