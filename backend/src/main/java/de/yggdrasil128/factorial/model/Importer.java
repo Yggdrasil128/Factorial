@@ -12,6 +12,8 @@ import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantityStandalone;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.machine.MachineStandalone;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
@@ -20,8 +22,6 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
-import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
 import de.yggdrasil128.factorial.model.save.SaveSummary;
@@ -145,8 +145,8 @@ public class Importer {
     private Recipe importRecipe(GameVersion gameVersion, RecipeStandalone input) {
         Recipe recipe = new Recipe(gameVersion, input);
         recipe.setIcon(findIcon(input.getIcon()));
-        recipe.setInput(findResources(input.getInput()));
-        recipe.setOutput(findResources(input.getOutput()));
+        recipe.setIngredients(findResources(input.getIngredients()));
+        recipe.setProducts(findResources(input.getProducts()));
         recipe.setApplicableModifiers(findRecipeModifiers(input.getApplicableModifiers()));
         recipe.setApplicableMachines(findMachines(input.getApplicableMachines()));
         return recipe;
@@ -205,10 +205,10 @@ public class Importer {
         return entity;
     }
 
-    private List<Resource> findResources(List<ResourceStandalone> standalones) {
+    private List<ItemQuantity> findResources(List<ItemQuantityStandalone> standalones) {
         return null == standalones ? new ArrayList<>()
                 : standalones.stream()
-                        .map(standalone -> new Resource(findItem(standalone.getItem()), standalone.getQuantity()))
+                        .map(standalone -> new ItemQuantity(findItem(standalone.getItem()), standalone.getQuantity()))
                         .filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
     }
 

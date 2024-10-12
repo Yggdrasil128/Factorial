@@ -5,9 +5,9 @@ import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
-import de.yggdrasil128.factorial.model.resource.Resource;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ public class Recipe implements NamedModel {
     @ManyToOne
     private Icon icon;
     @ElementCollection
-    private List<Resource> input;
+    private List<ItemQuantity> ingredients;
     @ElementCollection
-    private List<Resource> output;
+    private List<ItemQuantity> products;
     @Column(nullable = false)
     @Convert(converter = FractionConverter.class)
     private Fraction duration;
@@ -47,22 +47,22 @@ public class Recipe implements NamedModel {
         this.gameVersion = gameVersion;
         name = standalone.getName();
         icon = null;
-        input = new ArrayList<>();
-        output = new ArrayList<>();
+        ingredients = new ArrayList<>();
+        products = new ArrayList<>();
         duration = standalone.getDuration();
         applicableModifiers = new ArrayList<>();
         applicableMachines = new ArrayList<>();
         category = standalone.getCategory();
     }
 
-    public Recipe(GameVersion gameVersion, String name, Icon icon, List<Resource> input, List<Resource> output,
+    public Recipe(GameVersion gameVersion, String name, Icon icon, List<ItemQuantity> input, List<ItemQuantity> output,
                   Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines,
                   List<String> category) {
         this.gameVersion = gameVersion;
         this.name = name;
         this.icon = icon;
-        this.input = input;
-        this.output = output;
+        this.ingredients = input;
+        this.products = output;
         this.duration = duration;
         this.applicableModifiers = applicableModifiers;
         this.applicableMachines = applicableMachines;
@@ -99,20 +99,20 @@ public class Recipe implements NamedModel {
         this.icon = icon;
     }
 
-    public List<Resource> getInput() {
-        return input;
+    public List<ItemQuantity> getIngredients() {
+        return ingredients;
     }
 
-    public void setInput(List<Resource> input) {
-        this.input = input;
+    public void setIngredients(List<ItemQuantity> ingredients) {
+        this.ingredients = ingredients;
     }
 
-    public List<Resource> getOutput() {
-        return output;
+    public List<ItemQuantity> getProducts() {
+        return products;
     }
 
-    public void setOutput(List<Resource> output) {
-        this.output = output;
+    public void setProducts(List<ItemQuantity> products) {
+        this.products = products;
     }
 
     public Fraction getDuration() {
@@ -164,6 +164,6 @@ public class Recipe implements NamedModel {
 
     @Override
     public String toString() {
-        return input + " to " + output + " in " + duration + " s";
+        return ingredients + " to " + products + " in " + duration + " s";
     }
 }

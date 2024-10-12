@@ -114,7 +114,7 @@
         {
             "name": "Water",
             "icon": "Water",
-            "output": [
+            "products": [
                 {
                     "item": "Water",
                     "quantity": "2"
@@ -125,7 +125,7 @@
         {
             "name": "Iron Ore",
             "icon": "Iron Ore",
-            "output": [
+            "products": [
                 {
                     "item": "Iron Ore",
                     "quantity": "1"
@@ -136,7 +136,7 @@
         {
             "name": "Coal",
             "icon": "Coal",
-            "output": [
+            "products": [
                 {
                     "item": "Coal",
                     "quantity": "1"
@@ -147,7 +147,7 @@
         {
             "name": "Pure Iron Ingot",
             "icon": "Iron Ingot",
-            "input": [
+            "ingredients": [
                 {
                     "item": "Iron Ore",
                     "quantity": "7"
@@ -157,7 +157,7 @@
                     "quantity": "4"
                 }
             ],
-            "output": [
+            "products": [
                 {
                     "item": "Iron Ingot",
                     "quantity": "13"
@@ -168,7 +168,7 @@
         {
             "name": "Solid Steel Ingot",
             "icon": "Steel Ingot",
-            "input": [
+            "ingredients": [
                 {
                     "item": "Iron Ingot",
                     "quantity": "2"
@@ -178,7 +178,7 @@
                     "quantity": "2"
                 }
             ],
-            "output": [
+            "products": [
                 {
                     "item": "Steel Ingot",
                     "quantity": "3"

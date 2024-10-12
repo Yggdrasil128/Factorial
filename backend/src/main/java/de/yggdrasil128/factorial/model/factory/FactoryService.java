@@ -3,8 +3,8 @@ package de.yggdrasil128.factorial.model.factory;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.item.Item;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.springframework.http.HttpStatus;
@@ -46,10 +46,10 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     }
 
     private static void initItemOrder(Factory factory, ProductionStep productionStep) {
-        for (Resource resource : productionStep.getRecipe().getInput()) {
+        for (ItemQuantity resource : productionStep.getRecipe().getIngredients()) {
             factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size() + 1);
         }
-        for (Resource resource : productionStep.getRecipe().getOutput()) {
+        for (ItemQuantity resource : productionStep.getRecipe().getProducts()) {
             factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size() + 1);
         }
     }

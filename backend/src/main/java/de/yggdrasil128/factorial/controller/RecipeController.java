@@ -5,13 +5,13 @@ import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.item.ItemService;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantityStandalone;
 import de.yggdrasil128.factorial.model.machine.MachineService;
 import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipe.RecipeService;
 import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
-import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,8 +45,8 @@ public class RecipeController {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
         Recipe recipe = new Recipe(gameVersion, input);
         OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipe::setIcon);
-        OptionalInputField.of(input.getInput()).map(this::createResoruce).apply(recipe::setInput);
-        OptionalInputField.of(input.getOutput()).map(this::createResoruce).apply(recipe::setOutput);
+        OptionalInputField.of(input.getIngredients()).map(this::createResoruce).apply(recipe::setIngredients);
+        OptionalInputField.of(input.getProducts()).map(this::createResoruce).apply(recipe::setProducts);
         OptionalInputField.ofIds(input.getApplicableModifiers(), recipeModifierService::get)
                 .applyList(recipe::setApplicableModifiers);
         OptionalInputField.ofIds(input.getApplicableMachines(), machineService::get)
@@ -55,8 +55,8 @@ public class RecipeController {
         return new RecipeStandalone(recipe);
     }
 
-    private Resource createResoruce(ResourceStandalone input) {
-        return new Resource(itemService.get((int) input.getItem()), input.getQuantity());
+    private ItemQuantity createResoruce(ItemQuantityStandalone input) {
+        return new ItemQuantity(itemService.get((int) input.getItem()), input.getQuantity());
     }
 
     @GetMapping("/gameVersion/recipes")
@@ -74,8 +74,8 @@ public class RecipeController {
         Recipe recipe = recipeService.get(recipeId);
         OptionalInputField.of(input.getName()).apply(recipe::setName);
         OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipe::setIcon);
-        OptionalInputField.of(input.getInput()).map(this::createResoruce).apply(recipe::setInput);
-        OptionalInputField.of(input.getOutput()).map(this::createResoruce).apply(recipe::setOutput);
+        OptionalInputField.of(input.getIngredients()).map(this::createResoruce).apply(recipe::setIngredients);
+        OptionalInputField.of(input.getProducts()).map(this::createResoruce).apply(recipe::setProducts);
         OptionalInputField.of(input.getDuration()).apply(recipe::setDuration);
         OptionalInputField.ofIds(input.getApplicableModifiers(), recipeModifierService::get)
                 .applyList(recipe::setApplicableModifiers);

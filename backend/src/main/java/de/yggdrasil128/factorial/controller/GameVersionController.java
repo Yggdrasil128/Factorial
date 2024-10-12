@@ -1,9 +1,12 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.RelationRepresentation;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
+import de.yggdrasil128.factorial.model.gameversion.GameVersionSummary;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +41,11 @@ public class GameVersionController {
     @GetMapping("/gameVersion")
     public GameVersionStandalone retrieve(int gameVersionId) {
         return new GameVersionStandalone(gameVersionService.get(gameVersionId));
+    }
+
+    @GetMapping("/gameVersion/summary")
+    public GameVersionSummary retrieveSummary(int gameVersionId) {
+        return Exporter.exportGameVersion(gameVersionService.get(gameVersionId), RelationRepresentation.ID);
     }
 
     @PatchMapping("/gameVersion")

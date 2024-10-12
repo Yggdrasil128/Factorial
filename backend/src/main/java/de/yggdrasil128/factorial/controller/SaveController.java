@@ -1,12 +1,15 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.RelationRepresentation;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
+import de.yggdrasil128.factorial.model.save.SaveSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +44,11 @@ public class SaveController {
     @GetMapping("/save")
     public SaveStandalone retrieve(int saveId) {
         return new SaveStandalone(saveService.get(saveId));
+    }
+
+    @GetMapping("/save/summary")
+    public SaveSummary retrieveSummary(int saveId) {
+        return Exporter.exportSave(saveService.get(saveId), RelationRepresentation.ID);
     }
 
     @PatchMapping("/save")

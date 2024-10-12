@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.resource;
+package de.yggdrasil128.factorial.model.itemQuantity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.Fraction;
@@ -6,19 +6,19 @@ import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public class ResourceStandalone {
+public class ItemQuantityStandalone {
 
     private Object item;
     private Fraction quantity;
 
-    public ResourceStandalone() {
+    public ItemQuantityStandalone() {
     }
 
-    public ResourceStandalone(Resource model) {
+    public ItemQuantityStandalone(ItemQuantity model) {
         this(model, RelationRepresentation.ID);
     }
 
-    public ResourceStandalone(Resource model, RelationRepresentation resolveStrategy) {
+    public ItemQuantityStandalone(ItemQuantity model, RelationRepresentation resolveStrategy) {
         item = NamedModel.resolve(model.getItem(), resolveStrategy);
         quantity = model.getQuantity();
     }

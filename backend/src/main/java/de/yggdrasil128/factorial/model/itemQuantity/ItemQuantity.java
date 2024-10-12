@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.resource;
+package de.yggdrasil128.factorial.model.itemQuantity;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
@@ -9,7 +9,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.ManyToOne;
 
 @Embeddable
-public class Resource {
+public class ItemQuantity {
 
     @ManyToOne(optional = false)
     private Item item;
@@ -17,10 +17,10 @@ public class Resource {
     @Convert(converter = FractionConverter.class)
     private Fraction quantity;
 
-    public Resource() {
+    public ItemQuantity() {
     }
 
-    public Resource(Item item, Fraction quantity) {
+    public ItemQuantity(Item item, Fraction quantity) {
         this.item = item;
         this.quantity = quantity;
     }
