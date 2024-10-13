@@ -1,41 +1,60 @@
 package de.yggdrasil128.factorial.engine;
 
+import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.item.Item;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class ProductionStepThroughputs {
+public class ProductionStepThroughputs implements Production {
 
-    public static ProductionStepThroughputs of(ProductionStep productionStep, Changelists changelists) {
-        QuantityByChangelist machineCounts = MachineCounts.of(productionStep, changelists);
-        EffectiveModifiers effectiveModifiers = EffectiveModifiers.of(productionStep, machineCounts);
-        Map<Item, QuantityByChangelist> input = Throughputs.inputOf(productionStep, effectiveModifiers);
-        Map<Item, QuantityByChangelist> output = Throughputs.outputOf(productionStep, effectiveModifiers);
-        return new ProductionStepThroughputs(input, output, machineCounts);
+    private final ProductionStep delegate;
+    private final EffectiveModifiers effectiveModifiers;
+    private final Map<Item, QuantityByChangelist> inputs;
+    private final Map<Item, QuantityByChangelist> outputs;
+
+    public ProductionStepThroughputs(ProductionStep delegate, Changelists changelists) {
+        this.delegate = delegate;
+        effectiveModifiers = EffectiveModifiers.of(delegate, MachineCounts.of(delegate, changelists));
+        inputs = delegate.getRecipe().getIngredients().stream()
+                .collect(Collectors.toMap(ItemQuantity::getItem, ingredient -> new QuantityByChangelist(
+                        computeInputRate(ingredient.getQuantity(), effectiveModifiers.getCurrent()),
+                        computeInputRate(ingredient.getQuantity(), effectiveModifiers.getWithPrimaryChangelist()),
+                        computeInputRate(ingredient.getQuantity(), effectiveModifiers.getWithActiveChangelists())),
+                        QuantityByChangelist::add, LinkedHashMap::new));
+        outputs = delegate.getRecipe().getProducts().stream().collect(Collectors.toMap(ItemQuantity::getItem,
+                product -> new QuantityByChangelist(
+                        computeOutputRate(product.getQuantity(), effectiveModifiers.getCurrent()),
+                        computeOutputRate(product.getQuantity(), effectiveModifiers.getWithPrimaryChangelist()),
+                        computeOutputRate(product.getQuantity(), effectiveModifiers.getWithActiveChangelists())),
+                QuantityByChangelist::add, LinkedHashMap::new));
     }
 
-    private final Map<Item, QuantityByChangelist> input;
-    private final Map<Item, QuantityByChangelist> output;
-    private final QuantityByChangelist machineCount;
-
-    public ProductionStepThroughputs(Map<Item, QuantityByChangelist> input, Map<Item, QuantityByChangelist> output,
-                                     QuantityByChangelist machineCount) {
-        this.input = input;
-        this.output = output;
-        this.machineCount = machineCount;
+    public ProductionStep getDelegate() {
+        return delegate;
     }
 
-    public Map<Item, QuantityByChangelist> getInput() {
-        return input;
+    private Fraction computeInputRate(Fraction ingredient, EffectiveModifier effectiveModifier) {
+        return ingredient.divide(delegate.getRecipe().getDuration())
+                .multiply(effectiveModifier.getInputSpeedMultiplier());
     }
 
-    public Map<Item, QuantityByChangelist> getOutput() {
-        return output;
+    private Fraction computeOutputRate(Fraction ingredient, EffectiveModifier effectiveModifier) {
+        return ingredient.divide(delegate.getRecipe().getDuration())
+                .multiply(effectiveModifier.getOutputSpeedMultiplier());
     }
 
-    public QuantityByChangelist getMachineCount() {
-        return machineCount;
+    @Override
+    public Map<Item, QuantityByChangelist> getInputs() {
+        return inputs;
+    }
+
+    @Override
+    public Map<Item, QuantityByChangelist> getOutputs() {
+        return outputs;
     }
 
 }

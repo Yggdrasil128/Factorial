@@ -1,12 +1,10 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ChangelistStandalone {
 
     private int id;
@@ -19,6 +17,10 @@ public class ChangelistStandalone {
     private List<ProductionStepChangeStandalone> productionStepChanges;
 
     public ChangelistStandalone() {
+    }
+
+    public ChangelistStandalone(Changelist model) {
+        this(model, RelationRepresentation.ID);
     }
 
     public ChangelistStandalone(Changelist model, RelationRepresentation resolveStrategy) {

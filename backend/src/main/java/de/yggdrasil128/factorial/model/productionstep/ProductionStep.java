@@ -2,10 +2,12 @@ package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
+import de.yggdrasil128.factorial.model.RelationRepresentation;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
+import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -46,6 +48,23 @@ public class ProductionStep {
         this.recipe = recipe;
         this.modifiers = modifiers;
         this.machineCount = machineCount;
+    }
+
+    public static Object resolve(ProductionStep relation, RelationRepresentation strategy) {
+        if (null == relation) {
+            return null;
+        }
+        switch (strategy) {
+        case ID:
+            return relation.getId();
+        case NAME:
+            Factory factory = relation.getFactory();
+            Save save = factory.getSave();
+            return save.getFactories().indexOf(factory) + "." + factory.getProductionSteps().indexOf(relation);
+        default:
+            throw new AssertionError("unexpected enum constant: " + RelationRepresentation.class.getCanonicalName()
+                    + '.' + strategy.name());
+        }
     }
 
     public int getId() {

@@ -1,10 +1,8 @@
 package de.yggdrasil128.factorial.model.gameversion;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class GameVersionStandalone {
 
     private int id;
@@ -12,6 +10,10 @@ public class GameVersionStandalone {
     private Object icon;
 
     public GameVersionStandalone() {
+    }
+
+    public GameVersionStandalone(GameVersion model) {
+        this(model, RelationRepresentation.ID);
     }
 
     public GameVersionStandalone(GameVersion model, RelationRepresentation resolveStrategy) {

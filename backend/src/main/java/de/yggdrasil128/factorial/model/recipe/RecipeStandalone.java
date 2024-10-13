@@ -1,22 +1,20 @@
 package de.yggdrasil128.factorial.model.recipe;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantityStandalone;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class RecipeStandalone {
 
     private int id;
     private int gameVersionId;
     private String name;
     private Object icon;
-    private List<ResourceStandalone> input;
-    private List<ResourceStandalone> output;
+    private List<ItemQuantityStandalone> ingredients;
+    private List<ItemQuantityStandalone> products;
     private Fraction duration;
     private List<Object> applicableModifiers;
     private List<Object> applicableMachines;
@@ -25,13 +23,19 @@ public class RecipeStandalone {
     public RecipeStandalone() {
     }
 
+    public RecipeStandalone(Recipe model) {
+        this(model, RelationRepresentation.ID);
+    }
+
     public RecipeStandalone(Recipe model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();
         name = model.getName();
         icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
-        input = model.getInput().stream().map(resource -> new ResourceStandalone(resource, resolveStrategy)).toList();
-        output = model.getOutput().stream().map(resource -> new ResourceStandalone(resource, resolveStrategy)).toList();
+        ingredients = model.getIngredients().stream()
+                .map(resource -> new ItemQuantityStandalone(resource, resolveStrategy)).toList();
+        products = model.getProducts().stream().map(resource -> new ItemQuantityStandalone(resource, resolveStrategy))
+                .toList();
         duration = model.getDuration();
         applicableModifiers = model.getApplicableModifiers().stream()
                 .map(recipeModifier -> NamedModel.resolve(recipeModifier, resolveStrategy)).toList();
@@ -72,20 +76,20 @@ public class RecipeStandalone {
         this.icon = icon;
     }
 
-    public List<ResourceStandalone> getInput() {
-        return input;
+    public List<ItemQuantityStandalone> getIngredients() {
+        return ingredients;
     }
 
-    public void setInput(List<ResourceStandalone> input) {
-        this.input = input;
+    public void setIngredients(List<ItemQuantityStandalone> ingredients) {
+        this.ingredients = ingredients;
     }
 
-    public List<ResourceStandalone> getOutput() {
-        return output;
+    public List<ItemQuantityStandalone> getProducts() {
+        return products;
     }
 
-    public void setOutput(List<ResourceStandalone> output) {
-        this.output = output;
+    public void setProducts(List<ItemQuantityStandalone> products) {
+        this.products = products;
     }
 
     public Fraction getDuration() {

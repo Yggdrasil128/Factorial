@@ -1,10 +1,14 @@
 package de.yggdrasil128.factorial.model.factory;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yggdrasil128.factorial.engine.ResourceStandalone;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class FactoryStandalone {
 
     private int id;
@@ -13,8 +17,14 @@ public class FactoryStandalone {
     private String name;
     private String description;
     private Object icon;
+    @JsonProperty(access = READ_ONLY)
+    private List<ResourceStandalone> resources;
 
     public FactoryStandalone() {
+    }
+
+    public FactoryStandalone(Factory model) {
+        this(model, RelationRepresentation.ID);
     }
 
     public FactoryStandalone(Factory model, RelationRepresentation resolveStrategy) {
@@ -72,6 +82,14 @@ public class FactoryStandalone {
 
     public void setIcon(Object icon) {
         this.icon = icon;
+    }
+
+    public List<ResourceStandalone> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<ResourceStandalone> resources) {
+        this.resources = resources;
     }
 
 }

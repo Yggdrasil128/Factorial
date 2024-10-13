@@ -2,15 +2,12 @@ package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 public class Factory implements NamedModel {
@@ -30,10 +27,15 @@ public class Factory implements NamedModel {
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ProductionStep> productionSteps;
-    @ElementCollection
-    private Map<Item, Integer> itemOrder;
 
     public Factory() {
+    }
+
+    public Factory(Factory source) {
+        id = source.id;
+        save = source.save;
+        ordinal = source.ordinal;
+        name = source.name;
     }
 
     public Factory(Save save, FactoryStandalone standalone) {
@@ -43,18 +45,16 @@ public class Factory implements NamedModel {
         description = standalone.getDescription();
         icon = null;
         productionSteps = new ArrayList<>();
-        itemOrder = new HashMap<>();
     }
 
     public Factory(Save save, int ordinal, String name, String description, Icon icon,
-                   List<ProductionStep> productionSteps, Map<Item, Integer> itemOrder) {
+                   List<ProductionStep> productionSteps) {
         this.save = save;
         this.ordinal = ordinal;
         this.name = name;
         this.description = description;
         this.icon = icon;
         this.productionSteps = productionSteps;
-        this.itemOrder = itemOrder;
     }
 
     @Override
@@ -109,14 +109,6 @@ public class Factory implements NamedModel {
 
     public void setProductionSteps(List<ProductionStep> productionSteps) {
         this.productionSteps = productionSteps;
-    }
-
-    public Map<Item, Integer> getItemOrder() {
-        return itemOrder;
-    }
-
-    public void setItemOrder(Map<Item, Integer> itemOrder) {
-        this.itemOrder = itemOrder;
     }
 
     @Override

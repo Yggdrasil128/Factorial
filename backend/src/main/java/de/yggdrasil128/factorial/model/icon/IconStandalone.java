@@ -1,11 +1,9 @@
 package de.yggdrasil128.factorial.model.icon;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class IconStandalone {
 
     private int id;
@@ -16,6 +14,10 @@ public class IconStandalone {
     private List<String> category;
 
     public IconStandalone() {
+    }
+
+    public IconStandalone(Icon model) {
+        this(model, RelationRepresentation.ID);
     }
 
     public IconStandalone(Icon model, RelationRepresentation resolveStrategy) {

@@ -147,27 +147,29 @@ public class OptionalInputField {
 
     }
 
-    public static <T> OptionalInputField.OfIds<T> ofIds(Collection<Integer> ids, IntFunction<? extends T> fetcher) {
+    public static <T> OptionalInputField.OfIds<T> ofIds(Collection<?> ids, IntFunction<? extends T> fetcher) {
         return new OfIds<>(ids, fetcher);
     }
 
     public static class OfIds<T> {
 
-        private final Collection<Integer> ids;
+        private final Collection<?> ids;
         private final IntFunction<? extends T> fetcher;
 
-        OfIds(Collection<Integer> ids, IntFunction<? extends T> fetcher) {
+        OfIds(Collection<?> ids, IntFunction<? extends T> fetcher) {
             this.ids = ids;
             this.fetcher = fetcher;
         }
 
         public List<T> asList() {
             // eclipse cannot infer the generic type properly when using Stream#toList()
-            return null == ids ? emptyList() : ids.stream().map(fetcher::apply).collect(toList());
+            return null == ids ? emptyList()
+                    : ids.stream().map(Integer.class::cast).map(fetcher::apply).collect(toList());
         }
 
         public Set<T> asSet() {
-            return null == ids ? emptySet() : ids.stream().map(fetcher::apply).collect(toSet());
+            return null == ids ? emptySet()
+                    : ids.stream().map(Integer.class::cast).map(fetcher::apply).collect(toSet());
         }
 
         public void applyList(Consumer<? super List<T>> sink) {

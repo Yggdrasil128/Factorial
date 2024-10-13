@@ -1,12 +1,10 @@
 package de.yggdrasil128.factorial.model.item;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class ItemStandalone {
 
     private int id;
@@ -17,6 +15,10 @@ public class ItemStandalone {
     private List<String> category;
 
     public ItemStandalone() {
+    }
+
+    public ItemStandalone(Item model) {
+        this(model, RelationRepresentation.ID);
     }
 
     public ItemStandalone(Item model, RelationRepresentation resolveStrategy) {
