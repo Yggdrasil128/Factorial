@@ -44,13 +44,7 @@ public class RecipeController {
     public RecipeStandalone create(int gameVersionId, @RequestBody RecipeStandalone input) {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
         Recipe recipe = new Recipe(gameVersion, input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipe::setIcon);
-        OptionalInputField.of(input.getIngredients()).map(this::createResoruce).apply(recipe::setIngredients);
-        OptionalInputField.of(input.getProducts()).map(this::createResoruce).apply(recipe::setProducts);
-        OptionalInputField.ofIds(input.getApplicableModifiers(), recipeModifierService::get)
-                .applyList(recipe::setApplicableModifiers);
-        OptionalInputField.ofIds(input.getApplicableMachines(), machineService::get)
-                .applyList(recipe::setApplicableMachines);
+        applyRelations(input, recipe);
         recipe = recipeService.create(recipe);
         return new RecipeStandalone(recipe);
     }
@@ -72,17 +66,25 @@ public class RecipeController {
     @PatchMapping("/recipe")
     public RecipeStandalone update(int recipeId, @RequestBody RecipeStandalone input) {
         Recipe recipe = recipeService.get(recipeId);
+        applyBasics(input, recipe);
+        applyRelations(input, recipe);
+        return new RecipeStandalone(recipeService.update(recipe));
+    }
+
+    private static void applyBasics(RecipeStandalone input, Recipe recipe) {
         OptionalInputField.of(input.getName()).apply(recipe::setName);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipe::setIcon);
+        OptionalInputField.of(input.getDuration()).apply(recipe::setDuration);
+        OptionalInputField.of(input.getCategory()).apply(recipe::setCategory);
+    }
+
+    private void applyRelations(RecipeStandalone input, Recipe recipe) {
         OptionalInputField.of(input.getIngredients()).map(this::createResoruce).apply(recipe::setIngredients);
         OptionalInputField.of(input.getProducts()).map(this::createResoruce).apply(recipe::setProducts);
-        OptionalInputField.of(input.getDuration()).apply(recipe::setDuration);
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipe::setIcon);
         OptionalInputField.ofIds(input.getApplicableModifiers(), recipeModifierService::get)
                 .applyList(recipe::setApplicableModifiers);
         OptionalInputField.ofIds(input.getApplicableMachines(), machineService::get)
                 .applyList(recipe::setApplicableMachines);
-        OptionalInputField.of(input.getCategory()).apply(recipe::setCategory);
-        return new RecipeStandalone(recipeService.update(recipe));
     }
 
     @DeleteMapping("/recipe")

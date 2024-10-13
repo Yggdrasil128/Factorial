@@ -34,7 +34,7 @@ public class FactoryController {
     public FactoryStandalone create(int saveId, @RequestBody FactoryStandalone input) {
         Save save = saveService.get(saveId);
         Factory factory = new Factory(save, input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(factory::setIcon);
+        applyRelations(input, factory);
         factory = factoryService.create(factory);
         saveService.addAttachedFactory(save, factory);
         return new FactoryStandalone(factory);
@@ -64,10 +64,18 @@ public class FactoryController {
     @PatchMapping("/factory")
     public FactoryStandalone update(int factoryId, @RequestBody FactoryStandalone input) {
         Factory factory = factoryService.get(factoryId);
+        applyBasics(input, factory);
+        applyRelations(input, factory);
+        return new FactoryStandalone(factoryService.update(factory));
+    }
+
+    private static void applyBasics(FactoryStandalone input, Factory factory) {
         OptionalInputField.of(input.getName()).apply(factory::setName);
         OptionalInputField.of(input.getDescription()).apply(factory::setDescription);
+    }
+
+    private void applyRelations(FactoryStandalone input, Factory factory) {
         OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(factory::setIcon);
-        return new FactoryStandalone(factoryService.update(factory));
     }
 
     @DeleteMapping("/factory")

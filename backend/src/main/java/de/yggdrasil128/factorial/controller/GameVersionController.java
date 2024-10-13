@@ -29,7 +29,7 @@ public class GameVersionController {
     @PostMapping("/gameVersions")
     public GameVersionStandalone create(@RequestBody GameVersionStandalone input) {
         GameVersion gameVersion = new GameVersion(input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(gameVersion::setIcon);
+        applyRelations(input, gameVersion);
         return new GameVersionStandalone(gameVersionService.create(gameVersion));
     }
 
@@ -51,8 +51,17 @@ public class GameVersionController {
     @PatchMapping("/gameVersion")
     public GameVersionStandalone update(int gameVersionId, @RequestBody GameVersionStandalone input) {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(gameVersion::setIcon);
+        applyBasics(input, gameVersion);
+        applyRelations(input, gameVersion);
         return new GameVersionStandalone(gameVersionService.update(gameVersion));
+    }
+
+    private static void applyBasics(GameVersionStandalone input, GameVersion gameVersion) {
+        OptionalInputField.of(input.getName()).apply(gameVersion::setName);
+    }
+
+    private void applyRelations(GameVersionStandalone input, GameVersion gameVersion) {
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(gameVersion::setIcon);
     }
 
     @DeleteMapping("/gameVersion")

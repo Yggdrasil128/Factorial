@@ -33,6 +33,7 @@ public class SaveController {
     public SaveStandalone create(@RequestBody SaveStandalone input) {
         GameVersion gameVersion = gameVersionService.get((int) input.getGameVersion());
         Save save = new Save(gameVersion, input);
+        save.setGameVersion(gameVersion);
         return new SaveStandalone(saveService.create(save));
     }
 
@@ -54,11 +55,15 @@ public class SaveController {
     @PatchMapping("/save")
     public SaveStandalone update(int saveId, @RequestBody SaveStandalone input) {
         Save save = saveService.get(saveId);
-        OptionalInputField.of(input.getName()).apply(save::setName);
+        applyBasics(input, save);
         if (0 != (int) input.getGameVersion()) {
             throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
         }
         return new SaveStandalone(saveService.update(save));
+    }
+
+    private static void applyBasics(SaveStandalone input, Save save) {
+        OptionalInputField.of(input.getName()).apply(save::setName);
     }
 
     @DeleteMapping("/save")

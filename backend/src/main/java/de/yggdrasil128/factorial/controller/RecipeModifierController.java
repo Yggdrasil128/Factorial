@@ -32,7 +32,7 @@ public class RecipeModifierController {
     public RecipeModifierStandalone create(int gameVersionId, @RequestBody RecipeModifierStandalone input) {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
         RecipeModifier recipeModifier = new RecipeModifier(gameVersion, input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipeModifier::setIcon);
+        applyRelations(input, recipeModifier);
         recipeModifier = recipeModifierService.create(recipeModifier);
         gameVersionService.addAttachedRecipeModifier(gameVersion, recipeModifier);
         return new RecipeModifierStandalone(recipeModifier);
@@ -52,13 +52,21 @@ public class RecipeModifierController {
     @PatchMapping("/recipeModifier")
     public RecipeModifierStandalone update(int recipeModifierId, @RequestBody RecipeModifierStandalone input) {
         RecipeModifier recipeModifier = recipeModifierService.get(recipeModifierId);
+        applyBasics(input, recipeModifier);
+        applyRelations(input, recipeModifier);
+        return new RecipeModifierStandalone(recipeModifierService.update(recipeModifier));
+    }
+
+    private static void applyBasics(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
         OptionalInputField.of(input.getName()).apply(recipeModifier::setName);
         OptionalInputField.of(input.getDescription()).apply(recipeModifier::setDescription);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipeModifier::setIcon);
         OptionalInputField.of(input.getDurationMultiplier()).apply(recipeModifier::setDurationMultiplier);
         OptionalInputField.of(input.getInputQuantityMultiplier()).apply(recipeModifier::setInputQuantityMultiplier);
         OptionalInputField.of(input.getOutputQuantityMultiplier()).apply(recipeModifier::setOutputQuantityMultiplier);
-        return new RecipeModifierStandalone(recipeModifierService.update(recipeModifier));
+    }
+
+    private void applyRelations(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipeModifier::setIcon);
     }
 
     @DeleteMapping("/recipeModifier")

@@ -33,7 +33,7 @@ public class ChangelistController {
     public ChangelistStandalone create(int saveId, @RequestBody ChangelistStandalone input) {
         Save save = saveService.get(saveId);
         Changelist changelist = new Changelist(save, input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
+        applyRelations(input, changelist);
         changelist = changelistService.create(changelist);
         saveService.addAttachedChangelist(save, changelist);
         return new ChangelistStandalone(changelist);
@@ -58,9 +58,17 @@ public class ChangelistController {
     @PatchMapping("/changelist")
     public ChangelistStandalone update(int changelistId, @RequestBody ChangelistStandalone input) {
         Changelist changelist = changelistService.get(changelistId);
-        OptionalInputField.of(input.getName()).apply(changelist::setName);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
+        applyBasics(input, changelist);
+        applyRelations(input, changelist);
         return new ChangelistStandalone(changelistService.update(changelist));
+    }
+
+    private static void applyBasics(ChangelistStandalone input, Changelist changelist) {
+        OptionalInputField.of(input.getName()).apply(changelist::setName);
+    }
+
+    private void applyRelations(ChangelistStandalone input, Changelist changelist) {
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
     }
 
     @DeleteMapping("/changelist")

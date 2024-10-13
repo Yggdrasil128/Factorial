@@ -44,10 +44,7 @@ public class ProductionStepController {
     public ProductionStepStandalone create(int factoryId, @RequestBody ProductionStepStandalone input) {
         Factory factory = factoryService.get(factoryId);
         ProductionStep productionStep = new ProductionStep(factory, input);
-        OptionalInputField.ofId((int) input.getMachine(), machineService::get).apply(productionStep::setMachine);
-        OptionalInputField.ofId((int) input.getRecipe(), recipeService::get).apply(productionStep::setRecipe);
-        OptionalInputField.ofIds(input.getModifiers(), recipeModifierService::get)
-                .applyList(productionStep::setModifiers);
+        applyRelations(input, productionStep);
         productionStep = productionStepService.create(productionStep);
         factoryService.addAttachedProductionStep(factory, productionStep);
         return new ProductionStepStandalone(productionStep);
@@ -73,12 +70,20 @@ public class ProductionStepController {
     @PatchMapping("/productionStep")
     public ProductionStepStandalone update(int productionStepId, @RequestBody ProductionStepStandalone input) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
+        applyBasics(input, productionStep);
+        applyRelations(input, productionStep);
+        return new ProductionStepStandalone(productionStepService.update(productionStep));
+    }
+
+    private static void applyBasics(ProductionStepStandalone input, ProductionStep productionStep) {
+        OptionalInputField.of(input.getMachineCount()).apply(productionStep::setMachineCount);
+    }
+
+    private void applyRelations(ProductionStepStandalone input, ProductionStep productionStep) {
         OptionalInputField.ofId((int) input.getMachine(), machineService::get).apply(productionStep::setMachine);
         OptionalInputField.ofId((int) input.getRecipe(), recipeService::get).apply(productionStep::setRecipe);
         OptionalInputField.ofIds(input.getModifiers(), recipeModifierService::get)
                 .applyList(productionStep::setModifiers);
-        OptionalInputField.of(input.getMachineCount()).apply(productionStep::setMachineCount);
-        return new ProductionStepStandalone(productionStepService.update(productionStep));
     }
 
     @DeleteMapping("/productionStep")

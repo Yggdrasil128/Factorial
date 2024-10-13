@@ -57,11 +57,15 @@ public class IconController {
     @PatchMapping("/icon")
     public IconStandalone update(int iconId, @RequestBody IconStandalone input) {
         Icon icon = iconService.get(iconId);
+        applyBasics(input, icon);
+        return new IconStandalone(iconService.update(icon));
+    }
+
+    private static void applyBasics(IconStandalone input, Icon icon) {
         OptionalInputField.of(input.getName()).apply(icon::setName);
         OptionalInputField.of(input.getImageData()).apply(icon::setImageData);
         OptionalInputField.of(input.getMimeType()).apply(icon::setMimeType);
         OptionalInputField.of(input.getCategory()).apply(icon::setCategory);
-        return new IconStandalone(iconService.update(icon));
     }
 
     @DeleteMapping("/icon")

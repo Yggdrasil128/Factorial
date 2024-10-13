@@ -31,7 +31,7 @@ public class ItemController {
     public ItemStandalone create(int gameVersionId, @RequestBody ItemStandalone input) {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
         Item item = new Item(gameVersion, input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(item::setIcon);
+        applyRelations(input, item);
         item = itemService.create(item);
         gameVersionService.addAttachedItem(gameVersion, item);
         return new ItemStandalone(item);
@@ -50,11 +50,19 @@ public class ItemController {
     @PatchMapping("/item")
     public ItemStandalone update(int itemId, @RequestBody ItemStandalone input) {
         Item item = itemService.get(itemId);
+        applyBasics(input, item);
+        applyRelations(input, item);
+        return new ItemStandalone(itemService.update(item));
+    }
+
+    private static void applyBasics(ItemStandalone input, Item item) {
         OptionalInputField.of(input.getName()).apply(item::setName);
         OptionalInputField.of(input.getDescription()).apply(item::setDescription);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(item::setIcon);
         OptionalInputField.of(input.getCategory()).apply(item::setCategory);
-        return new ItemStandalone(itemService.update(item));
+    }
+
+    private void applyRelations(ItemStandalone input, Item item) {
+        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(item::setIcon);
     }
 
     @DeleteMapping("/item")

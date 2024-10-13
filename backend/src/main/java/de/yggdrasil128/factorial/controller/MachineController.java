@@ -37,7 +37,7 @@ public class MachineController {
     public MachineStandalone create(int gameVersionId, @RequestBody MachineStandalone input) {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
         Machine machine = new Machine(gameVersion, input);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(machine::setIcon);
+        applyRelations(input, machine);
         machine = machineService.create(machine);
         gameVersionService.addAttachedMachine(gameVersion, machine);
         return new MachineStandalone(machine);
@@ -65,12 +65,20 @@ public class MachineController {
     @PatchMapping("/machine")
     public MachineStandalone update(int machineId, @RequestBody MachineStandalone input) {
         Machine machine = machineService.get(machineId);
+        applyBasics(input, machine);
+        applyRelations(input, machine);
+        return new MachineStandalone(machineService.update(machine));
+    }
+
+    private static void applyBasics(MachineStandalone input, Machine machine) {
         OptionalInputField.of(input.getName()).apply(machine::setName);
+        OptionalInputField.of(input.getCategory()).apply(machine::setCategory);
+    }
+
+    private void applyRelations(MachineStandalone input, Machine machine) {
         OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(machine::setIcon);
         OptionalInputField.ofIds(input.getMachineModifiers(), recipeModifierService::get)
                 .applyList(machine::setMachineModifiers);
-        OptionalInputField.of(input.getCategory()).apply(machine::setCategory);
-        return new MachineStandalone(machineService.update(machine));
     }
 
     @DeleteMapping("/machine")
