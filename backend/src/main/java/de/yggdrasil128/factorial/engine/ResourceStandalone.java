@@ -13,7 +13,7 @@ public class ResourceStandalone {
     private boolean exported;
     private List<Object> producers;
     private QuantityByChangelist produced;
-    private List<Object> conumsers;
+    private List<Object> consumers;
     private QuantityByChangelist consumed;
 
     public ResourceStandalone() {
@@ -29,7 +29,7 @@ public class ResourceStandalone {
         exported = model.isExported();
         producers = model.getProducers().stream().map(producer -> resolve(producer, resolveStrategy)).toList();
         produced = model.getProduced();
-        conumsers = model.getConsumers().stream().map(consumer -> resolve(consumer, resolveStrategy)).toList();
+        consumers = model.getConsumers().stream().map(consumer -> resolve(consumer, resolveStrategy)).toList();
         consumed = model.getConsumed();
     }
 
@@ -61,8 +61,8 @@ public class ResourceStandalone {
         return produced;
     }
 
-    public List<Object> getConumsers() {
-        return conumsers;
+    public List<Object> getConsumers() {
+        return consumers;
     }
 
     public QuantityByChangelist getConsumed() {
