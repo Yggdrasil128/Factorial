@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.Changelists;
+import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
@@ -9,13 +10,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductionStepService extends ModelService<ProductionStep, ProductionStepRepository> {
 
-
     public ProductionStepService(ProductionStepRepository repository) {
         super(repository);
     }
 
     public ProductionStep create(ProductionStep productionStep) {
         return repository.save(productionStep);
+    }
+
+    public ProductionStepThroughputs computeThroughputs(ProductionStep productionStep, Changelists changelists) {
+        return new ProductionStepThroughputs(productionStep, changelists);
     }
 
     public ProductionStep update(ProductionStep productionStep) {

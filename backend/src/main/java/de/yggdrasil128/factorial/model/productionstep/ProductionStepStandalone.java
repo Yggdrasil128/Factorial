@@ -1,13 +1,15 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yggdrasil128.factorial.engine.ProductionEntryStandalone;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class ProductionStepStandalone {
 
     private int id;
@@ -16,6 +18,10 @@ public class ProductionStepStandalone {
     private Object recipe;
     private List<Object> modifiers;
     private Fraction machineCount;
+    @JsonProperty(access = READ_ONLY)
+    private List<ProductionEntryStandalone> inputs;
+    @JsonProperty(access = READ_ONLY)
+    private List<ProductionEntryStandalone> outputs;
 
     public ProductionStepStandalone() {
     }
@@ -80,6 +86,22 @@ public class ProductionStepStandalone {
 
     public void setMachineCount(Fraction machineCount) {
         this.machineCount = machineCount;
+    }
+
+    public List<ProductionEntryStandalone> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(List<ProductionEntryStandalone> inputs) {
+        this.inputs = inputs;
+    }
+
+    public List<ProductionEntryStandalone> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<ProductionEntryStandalone> outputs) {
+        this.outputs = outputs;
     }
 
 }

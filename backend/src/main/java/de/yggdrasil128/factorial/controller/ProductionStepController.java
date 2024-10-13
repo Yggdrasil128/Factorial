@@ -1,12 +1,17 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.engine.ProductionEntryStandalone;
+import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.machine.MachineService;
-import de.yggdrasil128.factorial.model.productionstep.*;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
 import de.yggdrasil128.factorial.model.recipe.RecipeService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
+import de.yggdrasil128.factorial.model.save.SaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,16 +24,18 @@ public class ProductionStepController {
     private final RecipeService recipeService;
     private final RecipeModifierService recipeModifierService;
     private final MachineService machineService;
+    private final SaveService saveService;
     private final FactoryService factoryService;
     private final ProductionStepService productionStepService;
 
     @Autowired
     public ProductionStepController(RecipeService recipeService, RecipeModifierService recipeModifierService,
-                                    MachineService machineService, FactoryService factoryService,
-                                    ProductionStepService productionStepService) {
+                                    MachineService machineService, SaveService saveService,
+                                    FactoryService factoryService, ProductionStepService productionStepService) {
         this.recipeService = recipeService;
         this.recipeModifierService = recipeModifierService;
         this.machineService = machineService;
+        this.saveService = saveService;
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
     }
@@ -53,7 +60,14 @@ public class ProductionStepController {
 
     @GetMapping("/productionStep")
     public ProductionStepStandalone retrieve(int productionStepId) {
-        return new ProductionStepStandalone(productionStepService.get(productionStepId));
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        ProductionStepStandalone standalone = new ProductionStepStandalone(productionStep);
+        ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
+                saveService.computeChangelists(productionStep.getFactory().getSave()));
+        standalone.setInputs(throughputs.getInputs().entrySet().stream().map(ProductionEntryStandalone::new).toList());
+        standalone
+                .setOutputs(throughputs.getOutputs().entrySet().stream().map(ProductionEntryStandalone::new).toList());
+        return standalone;
     }
 
     @PatchMapping("/productionStep")

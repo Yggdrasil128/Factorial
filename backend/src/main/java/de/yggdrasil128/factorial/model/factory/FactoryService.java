@@ -1,9 +1,11 @@
 package de.yggdrasil128.factorial.model.factory;
 
+import de.yggdrasil128.factorial.engine.Changelists;
+import de.yggdrasil128.factorial.engine.ProductionLineResources;
+import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
+import de.yggdrasil128.factorial.engine.Resource;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
-import de.yggdrasil128.factorial.model.item.Item;
-import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
@@ -13,8 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 
 @Service
@@ -35,23 +35,14 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         return repository.save(factory);
     }
 
-    public static Factory createSentinel(Save save) {
-        return new Factory(save, 1, "Starter Base", null, null, emptyList(), emptyMap());
-    }
-
     public void addAttachedProductionStep(Factory factory, ProductionStep productionStep) {
         factory.getProductionSteps().add(productionStep);
-        initItemOrder(factory, productionStep);
         repository.save(factory);
     }
 
-    private static void initItemOrder(Factory factory, ProductionStep productionStep) {
-        for (ItemQuantity resource : productionStep.getRecipe().getIngredients()) {
-            factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size() + 1);
-        }
-        for (ItemQuantity resource : productionStep.getRecipe().getProducts()) {
-            factory.getItemOrder().computeIfAbsent(resource.getItem(), key -> factory.getItemOrder().size() + 1);
-        }
+    public List<Resource> computeResources(Factory factory, Changelists changelists) {
+        return ProductionLineResources.of(factory.getProductionSteps().stream()
+                .map(productionStep -> new ProductionStepThroughputs(productionStep, changelists)).toList());
     }
 
     public Factory update(Factory factory) {
@@ -67,23 +58,6 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
                 factory.setOrdinal(ordinal.intValue());
                 repository.save(factory);
             }
-        }
-    }
-
-    public void reorderItems(int id, List<ReorderInputEntry> input) {
-        Factory factory = get(id);
-        Map<Integer, Integer> order = input.stream()
-                .collect(toMap(ReorderInputEntry::getId, ReorderInputEntry::getOrdinal));
-        boolean modified = false;
-        for (Map.Entry<Item, Integer> entry : factory.getItemOrder().entrySet()) {
-            Integer ordinal = order.get(entry.getKey().getId());
-            if (null != ordinal) {
-                entry.setValue(ordinal);
-                modified = true;
-            }
-        }
-        if (modified) {
-            repository.save(factory);
         }
     }
 

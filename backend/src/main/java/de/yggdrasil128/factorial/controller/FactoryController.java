@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.engine.ResourceStandalone;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -52,7 +53,12 @@ public class FactoryController {
 
     @GetMapping("/factory")
     public FactoryStandalone retrieve(int factoryId) {
-        return new FactoryStandalone(factoryService.get(factoryId));
+        Factory factory = factoryService.get(factoryId);
+        FactoryStandalone standalone = new FactoryStandalone(factory);
+        standalone.setResources(
+                factoryService.computeResources(factory, saveService.computeChangelists(factory.getSave())).stream()
+                        .map(ResourceStandalone::new).toList());
+        return standalone;
     }
 
     @PatchMapping("/factory")
@@ -67,12 +73,6 @@ public class FactoryController {
     @DeleteMapping("/factory")
     public void delete(int factoryId) {
         factoryService.delete(factoryId);
-    }
-
-    // this does not fit into the item controller, since items do not carry an ordinal themselves
-    @PatchMapping("/factory/items/order")
-    public void reorderItems(int factoryId, @RequestBody List<ReorderInputEntry> input) {
-        factoryService.reorderItems(factoryId, input);
     }
 
 }

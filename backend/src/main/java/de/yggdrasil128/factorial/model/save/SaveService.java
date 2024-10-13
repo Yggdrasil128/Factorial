@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.save;
 
+import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -14,6 +15,10 @@ public class SaveService extends ModelService<Save, SaveRepository> {
 
     public Save create(Save save) {
         return repository.save(save);
+    }
+
+    public Changelists computeChangelists(Save save) {
+        return Changelists.of(save);
     }
 
     public void addAttachedFactory(Save save, Factory factory) {

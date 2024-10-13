@@ -1,11 +1,9 @@
 package de.yggdrasil128.factorial.model.recipemodifier;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class RecipeModifierStandalone {
 
     private int id;

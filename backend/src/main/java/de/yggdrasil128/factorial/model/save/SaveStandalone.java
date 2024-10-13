@@ -1,10 +1,8 @@
 package de.yggdrasil128.factorial.model.save;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class SaveStandalone {
 
     private int id;
