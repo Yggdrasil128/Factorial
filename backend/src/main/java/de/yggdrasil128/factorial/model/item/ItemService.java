@@ -10,12 +10,4 @@ public class ItemService extends ModelService<Item, ItemRepository> {
         super(repository);
     }
 
-    public Item create(Item item) {
-        return repository.save(item);
-    }
-
-    public Item update(Item item) {
-        return repository.save(item);
-    }
-
 }

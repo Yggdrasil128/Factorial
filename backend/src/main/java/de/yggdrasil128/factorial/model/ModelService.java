@@ -18,6 +18,10 @@ public class ModelService<E, R extends CrudRepository<E, Integer>> {
         this.repository = repository;
     }
 
+    public E create(E entity) {
+        return repository.save(entity);
+    }
+
     public Stream<E> stream() {
         return StreamSupport.stream(repository.findAll().spliterator(), false);
     }
@@ -42,6 +46,10 @@ public class ModelService<E, R extends CrudRepository<E, Integer>> {
 
     public List<E> get(List<Integer> ids) {
         return StreamSupport.stream(repository.findAllById(ids).spliterator(), false).toList();
+    }
+
+    public E update(E entity) {
+        return repository.save(entity);
     }
 
     public void delete(int id) {

@@ -13,10 +13,6 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         super(repository);
     }
 
-    public Save create(Save save) {
-        return repository.save(save);
-    }
-
     public Changelists computeChangelists(Save save) {
         return Changelists.of(save);
     }
@@ -29,10 +25,6 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     public void addAttachedChangelist(Save save, Changelist changelist) {
         save.getChangelists().add(changelist);
         repository.save(save);
-    }
-
-    public Save update(Save save) {
-        return repository.save(save);
     }
 
 }

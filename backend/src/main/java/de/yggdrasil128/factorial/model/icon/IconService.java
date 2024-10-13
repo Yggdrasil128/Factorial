@@ -10,12 +10,4 @@ public class IconService extends ModelService<Icon, IconRepository> {
         super(repository);
     }
 
-    public Icon create(Icon icon) {
-        return repository.save(icon);
-    }
-
-    public Icon update(Icon icon) {
-        return repository.save(icon);
-    }
-
 }

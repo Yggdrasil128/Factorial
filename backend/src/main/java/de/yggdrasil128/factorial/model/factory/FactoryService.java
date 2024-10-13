@@ -27,12 +27,13 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         this.saves = saves;
     }
 
+    @Override
     public Factory create(Factory factory) {
         if (0 >= factory.getOrdinal()) {
             factory.setOrdinal(
                     factory.getSave().getFactories().stream().mapToInt(Factory::getOrdinal).max().orElse(0) + 1);
         }
-        return repository.save(factory);
+        return super.create(factory);
     }
 
     public void addAttachedProductionStep(Factory factory, ProductionStep productionStep) {
@@ -43,10 +44,6 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     public List<Resource> computeResources(Factory factory, Changelists changelists) {
         return ProductionLineResources.of(factory.getProductionSteps().stream()
                 .map(productionStep -> new ProductionStepThroughputs(productionStep, changelists)).toList());
-    }
-
-    public Factory update(Factory factory) {
-        return repository.save(factory);
     }
 
     public void reorder(Save save, List<ReorderInputEntry> input) {

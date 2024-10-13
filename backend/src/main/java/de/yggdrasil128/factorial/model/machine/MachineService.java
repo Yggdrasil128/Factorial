@@ -10,12 +10,4 @@ public class MachineService extends ModelService<Machine, MachineRepository> {
         super(repository);
     }
 
-    public Machine create(Machine machine) {
-        return repository.save(machine);
-    }
-
-    public Machine update(Machine machine) {
-        return repository.save(machine);
-    }
-
 }

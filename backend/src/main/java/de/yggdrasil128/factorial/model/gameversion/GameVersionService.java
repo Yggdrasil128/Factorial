@@ -17,10 +17,6 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
         super(repository);
     }
 
-    public GameVersion create(GameVersion gameVersion) {
-        return repository.save(gameVersion);
-    }
-
     public Optional<GameVersion> get(String name) {
         return repository.findByName(name);
     }
@@ -47,10 +43,6 @@ public class GameVersionService extends ModelService<GameVersion, GameVersionRep
     public void addAttachedMachine(GameVersion gameVersion, Machine machine) {
         gameVersion.getMachines().add(machine);
         repository.save(gameVersion);
-    }
-
-    public GameVersion update(GameVersion gameVersion) {
-        return repository.save(gameVersion);
     }
 
 }

@@ -26,11 +26,13 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         this.productionSteps = productionSteps;
     }
 
-    public Changelist create(Save save, Changelist changelist) {
+    @Override
+    public Changelist create(Changelist changelist) {
+        Save save = changelist.getSave();
         if (0 < changelist.getOrdinal()) {
             changelist.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
         }
-        Changelist result = repository.save(changelist);
+        Changelist result = super.create(changelist);
         if (result.isPrimary()) {
             Changelists.getOptionalPrimary(save).ifPresent(primary -> {
                 primary.setPrimary(false);
@@ -42,10 +44,6 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
 
     public static Changelist createSentinel(Save save) {
         return new Changelist(save, 1, "Default", true, true, null, emptyMap());
-    }
-
-    public Changelist update(Changelist changelist) {
-        return repository.save(changelist);
     }
 
     public List<Factory> apply(int id) {

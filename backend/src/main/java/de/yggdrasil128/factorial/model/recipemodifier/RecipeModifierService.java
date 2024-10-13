@@ -10,12 +10,4 @@ public class RecipeModifierService extends ModelService<RecipeModifier, RecipeMo
         super(repository);
     }
 
-    public RecipeModifier create(RecipeModifier recipeModifier) {
-        return repository.save(recipeModifier);
-    }
-
-    public RecipeModifier update(RecipeModifier recipeModifier) {
-        return repository.save(recipeModifier);
-    }
-
 }

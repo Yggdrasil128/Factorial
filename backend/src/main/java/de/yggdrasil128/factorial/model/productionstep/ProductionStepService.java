@@ -14,16 +14,8 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         super(repository);
     }
 
-    public ProductionStep create(ProductionStep productionStep) {
-        return repository.save(productionStep);
-    }
-
     public ProductionStepThroughputs computeThroughputs(ProductionStep productionStep, Changelists changelists) {
         return new ProductionStepThroughputs(productionStep, changelists);
-    }
-
-    public ProductionStep update(ProductionStep productionStep) {
-        return repository.save(productionStep);
     }
 
     public void applyChange(ProductionStep productionStep, Fraction change) {

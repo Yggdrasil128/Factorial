@@ -34,7 +34,7 @@ public class ChangelistController {
         Save save = saveService.get(saveId);
         Changelist changelist = new Changelist(save, input);
         OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
-        changelist = changelistService.create(save, changelist);
+        changelist = changelistService.create(changelist);
         saveService.addAttachedChangelist(save, changelist);
         return new ChangelistStandalone(changelist);
     }
