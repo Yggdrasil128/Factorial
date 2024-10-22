@@ -42,9 +42,13 @@ public class QuantityByChangelist {
                 this.withActiveChangelists.subtract(that.withActiveChangelists));
     }
 
+    public QuantityByChangelist multiplyCurrent(Fraction factor) {
+        return new QuantityByChangelist(current.multiply(factor), withPrimaryChangelist, withActiveChangelists);
+    }
+
     @Override
     public String toString() {
-        return "[ current = " + current + ", primary = " + withActiveChangelists + ", active = " + withActiveChangelists
+        return "[current = " + current + ", primary = " + withActiveChangelists + ", active = " + withActiveChangelists
                 + " ]";
     }
 

@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.joining;
 public class Icon implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne
     private GameVersion gameVersion;
@@ -35,14 +35,6 @@ public class Icon implements NamedModel {
         imageData = standalone.getImageData();
         mimeType = standalone.getMimeType();
         category = standalone.getCategory();
-    }
-
-    public Icon(GameVersion gameVersion, String name, byte[] imageData, String mimeType, List<String> category) {
-        this.gameVersion = gameVersion;
-        this.name = name;
-        this.imageData = imageData;
-        this.mimeType = mimeType;
-        this.category = category;
     }
 
     public int getId() {

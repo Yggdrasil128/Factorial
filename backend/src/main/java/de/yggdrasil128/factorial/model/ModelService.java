@@ -10,7 +10,7 @@ import java.util.stream.StreamSupport;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-public class ModelService<E, R extends CrudRepository<E, Integer>> {
+public abstract class ModelService<E, R extends CrudRepository<E, Integer>> {
 
     protected final R repository;
 
@@ -30,20 +30,6 @@ public class ModelService<E, R extends CrudRepository<E, Integer>> {
         return repository.findById(id).orElseThrow(ModelService::reportNotFound);
     }
 
-    protected static ResponseStatusException reportNotFound() {
-        return report(NOT_FOUND, "");
-    }
-
-    public static ResponseStatusException report(HttpStatus status, String message) {
-        // TODO find out how to report more info
-        // we should establish something custom here, so we can handle proprietary stuff, like model conflicts
-        // transparently
-        ResponseStatusException response = new ResponseStatusException(status, message);
-        response.printStackTrace();
-        return response;
-
-    }
-
     public List<E> get(List<Integer> ids) {
         return StreamSupport.stream(repository.findAllById(ids).spliterator(), false).toList();
     }
@@ -56,4 +42,16 @@ public class ModelService<E, R extends CrudRepository<E, Integer>> {
         repository.deleteById(id);
     }
 
+    protected static ResponseStatusException reportNotFound() {
+        return report(NOT_FOUND, "");
+    }
+
+    public static ResponseStatusException report(HttpStatus status, String message) {
+        // TODO find out how to report more info
+        // we should establish something custom here, so we can handle proprietary stuff, like model conflicts
+        // transparently
+        ResponseStatusException response = new ResponseStatusException(status, message);
+        response.printStackTrace();
+        return response;
+    }
 }

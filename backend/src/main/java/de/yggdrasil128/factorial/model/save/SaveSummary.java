@@ -1,16 +1,14 @@
 package de.yggdrasil128.factorial.model.save;
 
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
-import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
+import de.yggdrasil128.factorial.model.factory.FactorySummary;
 
 import java.util.List;
 
 public class SaveSummary {
 
     private SaveStandalone save;
-    private List<FactoryStandalone> factories;
-    private List<List<ProductionStepStandalone>> productionSteps;
+    private List<FactorySummary> factories;
     private List<ChangelistStandalone> changelists;
 
     public SaveStandalone getSave() {
@@ -21,20 +19,12 @@ public class SaveSummary {
         this.save = save;
     }
 
-    public List<FactoryStandalone> getFactories() {
+    public List<FactorySummary> getFactories() {
         return factories;
     }
 
-    public void setFactories(List<FactoryStandalone> factories) {
+    public void setFactories(List<FactorySummary> factories) {
         this.factories = factories;
-    }
-
-    public List<List<ProductionStepStandalone>> getProductionSteps() {
-        return productionSteps;
-    }
-
-    public void setProductionSteps(List<List<ProductionStepStandalone>> productionSteps) {
-        this.productionSteps = productionSteps;
     }
 
     public List<ChangelistStandalone> getChangelists() {

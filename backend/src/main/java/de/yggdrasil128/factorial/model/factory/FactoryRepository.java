@@ -6,4 +6,6 @@ public interface FactoryRepository extends CrudRepository<Factory, Integer> {
 
     int countBySaveId(int saveId);
 
+    Factory findByResourcesId(int id);
+
 }

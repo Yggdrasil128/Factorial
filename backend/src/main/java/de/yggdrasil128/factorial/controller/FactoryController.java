@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.engine.ResourceStandalone;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -53,12 +52,7 @@ public class FactoryController {
 
     @GetMapping("/factory")
     public FactoryStandalone retrieve(int factoryId) {
-        Factory factory = factoryService.get(factoryId);
-        FactoryStandalone standalone = new FactoryStandalone(factory);
-        standalone.setResources(
-                factoryService.computeResources(factory, saveService.computeChangelists(factory.getSave())).stream()
-                        .map(ResourceStandalone::new).toList());
-        return standalone;
+        return new FactoryStandalone(factoryService.get(factoryId));
     }
 
     @PatchMapping("/factory")

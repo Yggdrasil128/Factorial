@@ -5,46 +5,82 @@
     },
     "factories": [
         {
-            "ordinal": 1,
-            "name": "Steel Production North"
+            "factory": {
+                "ordinal": 1,
+                "name": "Steel Production North"
+            },
+            "productionSteps": [
+                {
+                    "machine": "Water Extractor",
+                    "recipe": "Water",
+                    "machineCount": "4"
+                },
+                {
+                    "machine": "Miner Mk. 3",
+                    "recipe": "Iron Ore",
+                    "modifiers": [
+                        "Pure Node"
+                    ],
+                    "machineCount": "13 / 8"
+                },
+                {
+                    "machine": "Miner Mk. 3",
+                    "recipe": "Coal",
+                    "machineCount": "9 / 2"
+                },
+                {
+                    "machine": "Refinery",
+                    "recipe": "Pure Iron Ingot",
+                    "machineCount": "312 / 14"
+                },
+                {
+                    "machine": "Foundry",
+                    "recipe": "Solid Steel Ingot",
+                    "machineCount": "36"
+                }
+            ],
+            "resources": [
+                {
+                    "item": "Water",
+                    "imported": false,
+                    "exported": false
+                },
+                {
+                    "item": "Iron Ore",
+                    "imported": false,
+                    "exported": false
+                },
+                {
+                    "item": "Coal",
+                    "imported": false,
+                    "exported": false
+                },
+                {
+                    "item": "Iron Ingot",
+                    "imported": false,
+                    "exported": false
+                },
+                {
+                    "item": "Steel Ingot",
+                    "imported": false,
+                    "exported": true
+                }
+            ]
         },
         {
-            "ordinal": 2,
-            "name": "Steel Sink"
+            "factory": {
+                "ordinal": 2,
+                "name": "Steel Sink"
+            },
+            "productionSteps": [],
+            "resources": [
+                {
+                    "item": "Steel Ingot",
+                    "imported": true,
+                    "exported": false
+                }
+            ]
         }
-    ],
-    "productionSteps": [
-        [
-            {
-                "machine": "Water Extractor",
-                "recipe": "Water",
-                "machineCount": "4"
-            },
-            {
-                "machine": "Miner Mk. 3",
-                "recipe": "Iron Ore",
-                "modifiers": [
-                    "Pure Node"
-                ],
-                "machineCount": "13 / 8"
-            },
-            {
-                "machine": "Miner Mk. 3",
-                "recipe": "Coal",
-                "machineCount": "9 / 2"
-            },
-            {
-                "machine": "Refinery",
-                "recipe": "Pure Iron Ingot",
-                "machineCount": "312 / 14"
-            },
-            {
-                "machine": "Foundry",
-                "recipe": "Solid Steel Ingot",
-                "machineCount": "36"
-            }
-        ],
-        []
     ],
     "changelists": [
         {

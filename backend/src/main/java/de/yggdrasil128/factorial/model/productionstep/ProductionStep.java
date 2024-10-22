@@ -17,7 +17,7 @@ import java.util.List;
 public class ProductionStep {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private Factory factory;
@@ -39,15 +39,6 @@ public class ProductionStep {
         recipe = null;
         modifiers = new ArrayList<>();
         machineCount = standalone.getMachineCount();
-    }
-
-    public ProductionStep(Factory factory, Machine machine, Recipe recipe, List<RecipeModifier> modifiers,
-                          Fraction machineCount) {
-        this.factory = factory;
-        this.machine = machine;
-        this.recipe = recipe;
-        this.modifiers = modifiers;
-        this.machineCount = machineCount;
     }
 
     public static Object resolve(ProductionStep relation, RelationRepresentation strategy) {

@@ -14,7 +14,7 @@ import java.util.List;
 public class Machine implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private GameVersion gameVersion;
@@ -36,15 +36,6 @@ public class Machine implements NamedModel {
         icon = null;
         machineModifiers = new ArrayList<>();
         category = standalone.getCategory();
-    }
-
-    public Machine(GameVersion gameVersion, String name, Icon icon, List<RecipeModifier> machineModifiers,
-                   List<String> category) {
-        this.gameVersion = gameVersion;
-        this.name = name;
-        this.icon = icon;
-        this.machineModifiers = machineModifiers;
-        this.category = category;
     }
 
     @Override

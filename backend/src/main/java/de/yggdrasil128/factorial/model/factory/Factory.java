@@ -3,6 +3,7 @@ package de.yggdrasil128.factorial.model.factory;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
@@ -18,7 +19,7 @@ public class Factory implements NamedModel {
     @ManyToOne(optional = false)
     private Save save;
     @Column(nullable = false)
-    private int ordinal = 0;
+    private int ordinal;
     @Column(unique = true, nullable = false)
     private String name;
     private String description;
@@ -27,15 +28,10 @@ public class Factory implements NamedModel {
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ProductionStep> productionSteps;
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<Resource> resources;
 
     public Factory() {
-    }
-
-    public Factory(Factory source) {
-        id = source.id;
-        save = source.save;
-        ordinal = source.ordinal;
-        name = source.name;
     }
 
     public Factory(Save save, FactoryStandalone standalone) {
@@ -45,16 +41,7 @@ public class Factory implements NamedModel {
         description = standalone.getDescription();
         icon = null;
         productionSteps = new ArrayList<>();
-    }
-
-    public Factory(Save save, int ordinal, String name, String description, Icon icon,
-                   List<ProductionStep> productionSteps) {
-        this.save = save;
-        this.ordinal = ordinal;
-        this.name = name;
-        this.description = description;
-        this.icon = icon;
-        this.productionSteps = productionSteps;
+        resources = new ArrayList<>();
     }
 
     @Override
@@ -109,6 +96,14 @@ public class Factory implements NamedModel {
 
     public void setProductionSteps(List<ProductionStep> productionSteps) {
         this.productionSteps = productionSteps;
+    }
+
+    public List<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<Resource> resources) {
+        this.resources = resources;
     }
 
     @Override

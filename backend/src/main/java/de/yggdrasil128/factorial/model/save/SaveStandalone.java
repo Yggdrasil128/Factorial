@@ -1,10 +1,14 @@
 package de.yggdrasil128.factorial.model.save;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class SaveStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
     private Object gameVersion;
     private String name;
@@ -24,10 +28,6 @@ public class SaveStandalone {
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public Object getGameVersion() {

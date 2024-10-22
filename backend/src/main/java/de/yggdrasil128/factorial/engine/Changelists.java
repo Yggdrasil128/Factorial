@@ -5,29 +5,16 @@ import de.yggdrasil128.factorial.model.save.Save;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class Changelists {
 
-    public static Optional<Changelist> getOptionalPrimary(Save save) {
-        return save.getChangelists().stream().filter(Changelist::isPrimary).findAny();
-    }
-
-    public static Changelist getPrimary(Save save) {
-        return getOptionalPrimary(save)
-                .orElseThrow(() -> new IllegalStateException("assertion failed: no primary changelist available"));
-    }
-
-    public static Stream<Changelist> getActive(Save save) {
-        return save.getChangelists().stream().filter(Changelist::isActive);
+    public static Changelists of(Save save) {
+        return new Changelists(save.getChangelists().stream().filter(Changelist::isPrimary).findAny().orElse(null),
+                save.getChangelists().stream().filter(Changelist::isActive).toList());
     }
 
     private final Changelist primary;
     private final List<Changelist> active;
-
-    public static Changelists of(Save save) {
-        return new Changelists(getPrimary(save), getActive(save).toList());
-    }
 
     private Changelists(Changelist primary, List<Changelist> active) {
         this.primary = primary;
@@ -35,11 +22,23 @@ public class Changelists {
     }
 
     public Changelist getPrimary() {
+        if (null == primary) {
+            throw new IllegalStateException("assertion failed: no primary changelist available");
+        }
         return primary;
+    }
+
+    public Optional<Changelist> getOptionalPrimary() {
+        return Optional.ofNullable(primary);
     }
 
     public List<Changelist> getActive() {
         return active;
+    }
+
+    @Override
+    public String toString() {
+        return "Changelists [primary=" + primary + ", active=" + active + "]";
     }
 
 }

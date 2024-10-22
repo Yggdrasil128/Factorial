@@ -1,13 +1,18 @@
 package de.yggdrasil128.factorial.model.item;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class ItemStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
+    @JsonProperty(access = READ_ONLY)
     private int gameVersionId;
     private String name;
     private String description;
@@ -34,16 +39,8 @@ public class ItemStandalone {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getGameVersionId() {
         return gameVersionId;
-    }
-
-    public void setGameVersionId(int gameVersionId) {
-        this.gameVersionId = gameVersionId;
     }
 
     public String getName() {

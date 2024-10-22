@@ -5,6 +5,7 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.changelist.ProductionStepChangeStandalone;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
+import de.yggdrasil128.factorial.model.factory.FactorySummary;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionSummary;
@@ -22,6 +23,8 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
+import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
 import de.yggdrasil128.factorial.model.save.SaveSummary;
@@ -37,7 +40,7 @@ public class Importer {
         GameVersionStandalone input = summary.getGameVersion();
         GameVersion gameVersion = new GameVersion(input);
         /*
-         * Caveat: The order of these loops is meaningful, since the 'importer.import...' calls also populate the
+         * Caveat: The order of these loops is meaningful, because the 'importer.import...' calls also populate the
          * 'importer' instance's mappings, which are then used in the later loops.
          */
         for (IconStandalone icon : summary.getIcons()) {
@@ -64,27 +67,29 @@ public class Importer {
         SaveStandalone input = summary.getSave();
         Save save = new Save(gameVersion, input);
         /**
-         * Caveat: The order of these loops is meaningful, because each one uses the object that were imported in the
-         * previous loops (which is quite obvious at the one for production steps).
+         * Caveat: The order of these loops is meaningful, because each the latter one one uses the objects that were
+         * imported in the first one.
          */
-        for (FactoryStandalone factory : summary.getFactories()) {
-            save.getFactories().add(importer.importFactory(save, factory));
-        }
-        /*
-         * Having production steps in a (nested) separate JSON array instead of within their respective factory may seem
-         * weird, but this way we can stick with the transfer models that are used for the communication between
-         * frontend and backend.
-         */
-        for (int i = 0; i < summary.getProductionSteps().size(); i++) {
-            Factory factory = save.getFactories().get(i);
-            for (ProductionStepStandalone productionStep : summary.getProductionSteps().get(i)) {
-                factory.getProductionSteps().add(importer.importProductionStep(factory, productionStep));
-            }
+        for (FactorySummary factory : summary.getFactories()) {
+            save.getFactories().add(importFactory(save, factory, gameVersion, importer));
         }
         for (ChangelistStandalone changelist : summary.getChangelists()) {
             save.getChangelists().add(importer.importChangelist(save, changelist));
         }
         return save;
+    }
+
+    private static Factory importFactory(Save save, FactorySummary summary, GameVersion gameVersion,
+                                         Importer importer) {
+        Factory factory = importer.importFactory(save, summary.getFactory());
+        save.getFactories().add(factory);
+        for (ProductionStepStandalone productionStep : summary.getProductionSteps()) {
+            factory.getProductionSteps().add(importer.importProductionStep(factory, productionStep));
+        }
+        for (ResourceStandalone resource : summary.getResources()) {
+            factory.getResources().add(importer.importResource(factory, resource));
+        }
+        return factory;
     }
 
     private final Map<String, Icon> icons = new HashMap<>();
@@ -164,6 +169,12 @@ public class Importer {
         productionStep.setRecipe(findRecipe(input.getRecipe()));
         productionStep.setModifiers(findRecipeModifiers(input.getModifiers()));
         return productionStep;
+    }
+
+    private Resource importResource(Factory factory, ResourceStandalone input) {
+        Resource resource = new Resource(factory, input);
+        resource.setItem(findItem(input.getItem()));
+        return resource;
     }
 
     private Changelist importChangelist(Save save, ChangelistStandalone input) {

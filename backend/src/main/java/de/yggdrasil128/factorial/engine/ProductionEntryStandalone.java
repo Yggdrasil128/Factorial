@@ -1,27 +1,18 @@
 package de.yggdrasil128.factorial.engine;
 
-import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
-import de.yggdrasil128.factorial.model.item.Item;
-
 import java.util.Map;
 
 public class ProductionEntryStandalone {
 
-    private Object item;
-    private QuantityByChangelist quantity;
+    private final int item;
+    private final QuantityByChangelist quantity;
 
-    public ProductionEntryStandalone(Map.Entry<Item, QuantityByChangelist> model) {
-        this(model, RelationRepresentation.ID);
-    }
-
-    public ProductionEntryStandalone(Map.Entry<Item, QuantityByChangelist> entry,
-                                     RelationRepresentation resolveStrategy) {
-        item = NamedModel.resolve(entry.getKey(), resolveStrategy);
+    public ProductionEntryStandalone(Map.Entry<Integer, QuantityByChangelist> entry) {
+        item = entry.getKey().intValue();
         quantity = entry.getValue();
     }
 
-    public Object getItem() {
+    public int getItem() {
         return item;
     }
 

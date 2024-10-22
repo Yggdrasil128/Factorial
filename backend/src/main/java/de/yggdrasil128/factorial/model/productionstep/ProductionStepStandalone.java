@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.productionstep;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.engine.ProductionEntryStandalone;
+import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
@@ -12,7 +13,10 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public class ProductionStepStandalone {
 
+
+    @JsonProperty(access = READ_ONLY)
     private int id;
+    @JsonProperty(access = READ_ONLY)
     private int factoryId;
     private Object machine;
     private Object recipe;
@@ -26,8 +30,10 @@ public class ProductionStepStandalone {
     public ProductionStepStandalone() {
     }
 
-    public ProductionStepStandalone(ProductionStep model) {
+    public ProductionStepStandalone(ProductionStep model, ProductionStepThroughputs throughputs) {
         this(model, RelationRepresentation.ID);
+        inputs = throughputs.getInputs().entrySet().stream().map(ProductionEntryStandalone::new).toList();
+        outputs = throughputs.getOutputs().entrySet().stream().map(ProductionEntryStandalone::new).toList();
     }
 
     public ProductionStepStandalone(ProductionStep model, RelationRepresentation resolveStrategy) {
@@ -35,8 +41,7 @@ public class ProductionStepStandalone {
         factoryId = model.getFactory().getId();
         machine = NamedModel.resolve(model.getMachine(), resolveStrategy);
         recipe = NamedModel.resolve(model.getRecipe(), resolveStrategy);
-        modifiers = model.getModifiers().stream()
-                .map(machineModifier -> NamedModel.resolve(machineModifier, resolveStrategy)).toList();
+        modifiers = NamedModel.resolve(model.getModifiers(), resolveStrategy);
         machineCount = model.getMachineCount();
     }
 
@@ -44,16 +49,8 @@ public class ProductionStepStandalone {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getFactoryId() {
         return factoryId;
-    }
-
-    public void setFactoryId(int factoryId) {
-        this.factoryId = factoryId;
     }
 
     public Object getMachine() {
@@ -92,16 +89,8 @@ public class ProductionStepStandalone {
         return inputs;
     }
 
-    public void setInputs(List<ProductionEntryStandalone> inputs) {
-        this.inputs = inputs;
-    }
-
     public List<ProductionEntryStandalone> getOutputs() {
         return outputs;
-    }
-
-    public void setOutputs(List<ProductionEntryStandalone> outputs) {
-        this.outputs = outputs;
     }
 
 }

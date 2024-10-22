@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.recipe;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
@@ -7,9 +8,13 @@ import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantityStandalone;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class RecipeStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
+    @JsonProperty(access = READ_ONLY)
     private int gameVersionId;
     private String name;
     private Object icon;
@@ -37,10 +42,8 @@ public class RecipeStandalone {
         products = model.getProducts().stream().map(resource -> new ItemQuantityStandalone(resource, resolveStrategy))
                 .toList();
         duration = model.getDuration();
-        applicableModifiers = model.getApplicableModifiers().stream()
-                .map(recipeModifier -> NamedModel.resolve(recipeModifier, resolveStrategy)).toList();
-        applicableMachines = model.getApplicableMachines().stream()
-                .map(machine -> NamedModel.resolve(machine, resolveStrategy)).toList();
+        applicableModifiers = NamedModel.resolve(model.getApplicableModifiers(), resolveStrategy);
+        applicableMachines = NamedModel.resolve(model.getApplicableMachines(), resolveStrategy);
         category = model.getCategory();
     }
 
@@ -48,16 +51,8 @@ public class RecipeStandalone {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getGameVersionId() {
         return gameVersionId;
-    }
-
-    public void setGameVersionId(int gameVersionId) {
-        this.gameVersionId = gameVersionId;
     }
 
     public String getName() {

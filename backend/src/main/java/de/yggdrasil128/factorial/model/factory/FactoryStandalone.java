@@ -1,7 +1,6 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.yggdrasil128.factorial.engine.ResourceStandalone;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
@@ -11,14 +10,16 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public class FactoryStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
+    @JsonProperty(access = READ_ONLY)
     private int saveId;
     private int ordinal;
     private String name;
     private String description;
     private Object icon;
-    @JsonProperty(access = READ_ONLY)
-    private List<ResourceStandalone> resources;
+    private List<Object> productionSteps;
+    private List<Object> resources;
 
     public FactoryStandalone() {
     }
@@ -34,22 +35,20 @@ public class FactoryStandalone {
         name = model.getName();
         description = model.getDescription();
         icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        if (RelationRepresentation.ID == resolveStrategy) {
+            productionSteps = NamedModel.resolve(model.getProductionSteps(), resolveStrategy,
+                    (productionStep, strategy) -> productionStep.getId());
+            resources = NamedModel.resolve(model.getResources(), resolveStrategy,
+                    (resource, strategy) -> resource.getId());
+        }
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getSaveId() {
         return saveId;
-    }
-
-    public void setSaveId(int saveId) {
-        this.saveId = saveId;
     }
 
     public int getOrdinal() {
@@ -84,11 +83,19 @@ public class FactoryStandalone {
         this.icon = icon;
     }
 
-    public List<ResourceStandalone> getResources() {
+    public List<Object> getProductionSteps() {
+        return productionSteps;
+    }
+
+    public void setProductionSteps(List<Object> productionSteps) {
+        this.productionSteps = productionSteps;
+    }
+
+    public List<Object> getResources() {
         return resources;
     }
 
-    public void setResources(List<ResourceStandalone> resources) {
+    public void setResources(List<Object> resources) {
         this.resources = resources;
     }
 

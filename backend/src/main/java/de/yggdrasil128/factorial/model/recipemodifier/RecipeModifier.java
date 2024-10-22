@@ -12,7 +12,7 @@ import jakarta.persistence.*;
 public class RecipeModifier implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private GameVersion gameVersion;
@@ -42,18 +42,6 @@ public class RecipeModifier implements NamedModel {
         durationMultiplier = standalone.getDurationMultiplier();
         inputQuantityMultiplier = standalone.getInputQuantityMultiplier();
         outputQuantityMultiplier = standalone.getOutputQuantityMultiplier();
-    }
-
-    public RecipeModifier(GameVersion gameVersion, String name, String description, Icon icon,
-                          Fraction durationMultiplier, Fraction inputQuantityMultiplier,
-                          Fraction outputQuantityMultiplier) {
-        this.gameVersion = gameVersion;
-        this.name = name;
-        this.description = description;
-        this.icon = icon;
-        this.durationMultiplier = durationMultiplier;
-        this.inputQuantityMultiplier = inputQuantityMultiplier;
-        this.outputQuantityMultiplier = outputQuantityMultiplier;
     }
 
     @Override

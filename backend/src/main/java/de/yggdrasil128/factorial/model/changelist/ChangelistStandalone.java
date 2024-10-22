@@ -1,13 +1,18 @@
 package de.yggdrasil128.factorial.model.changelist;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class ChangelistStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
+    @JsonProperty(access = READ_ONLY)
     private int saveId;
     private int ordinal;
     private String name;
@@ -39,16 +44,8 @@ public class ChangelistStandalone {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getSaveId() {
         return saveId;
-    }
-
-    public void setSaveId(int saveId) {
-        this.saveId = saveId;
     }
 
     public int getOrdinal() {

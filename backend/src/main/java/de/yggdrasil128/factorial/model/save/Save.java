@@ -36,13 +36,6 @@ public class Save implements NamedModel {
         changelists = new ArrayList<>();
     }
 
-    public Save(GameVersion gameVersion, String name, List<Factory> factories, List<Changelist> changelists) {
-        this.gameVersion = gameVersion;
-        this.name = name;
-        this.factories = factories;
-        this.changelists = changelists;
-    }
-
     @Override
     public int getId() {
         return id;

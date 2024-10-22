@@ -56,4 +56,10 @@ public class EffectiveModifier {
         return outputQuantityMultiplier.divide(durationMultiplier);
     }
 
+    @Override
+    public String toString() {
+        return "duration x " + durationMultiplier + " | input x " + inputQuantityMultiplier + " | output x "
+                + outputQuantityMultiplier;
+    }
+
 }

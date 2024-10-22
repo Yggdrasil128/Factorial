@@ -1,13 +1,18 @@
 package de.yggdrasil128.factorial.model.machine;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class MachineStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
+    @JsonProperty(access = READ_ONLY)
     private int gameVersionId;
     private String name;
     private Object icon;
@@ -26,8 +31,7 @@ public class MachineStandalone {
         gameVersionId = model.getGameVersion().getId();
         name = model.getName();
         icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
-        machineModifiers = model.getMachineModifiers().stream()
-                .map(machineModifier -> NamedModel.resolve(machineModifier, resolveStrategy)).toList();
+        machineModifiers = NamedModel.resolve(model.getMachineModifiers(), resolveStrategy);
         category = model.getCategory();
     }
 
@@ -35,16 +39,8 @@ public class MachineStandalone {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getGameVersionId() {
         return gameVersionId;
-    }
-
-    public void setGameVersionId(int gameVersionId) {
-        this.gameVersionId = gameVersionId;
     }
 
     public String getName() {

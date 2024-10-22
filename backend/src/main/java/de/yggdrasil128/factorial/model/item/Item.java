@@ -12,7 +12,7 @@ import java.util.List;
 public class Item implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private GameVersion gameVersion;
@@ -33,14 +33,6 @@ public class Item implements NamedModel {
         description = standalone.getDescription();
         icon = null;
         category = standalone.getCategory();
-    }
-
-    public Item(GameVersion gameVersion, String name, String description, Icon icon, List<String> category) {
-        this.gameVersion = gameVersion;
-        this.name = name;
-        this.description = description;
-        this.icon = icon;
-        this.category = category;
     }
 
     public int getId() {

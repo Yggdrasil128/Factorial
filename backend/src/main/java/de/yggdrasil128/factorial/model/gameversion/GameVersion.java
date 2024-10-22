@@ -51,17 +51,6 @@ public class GameVersion implements NamedModel {
         icons = new ArrayList<>();
     }
 
-    public GameVersion(String name, Icon icon, List<Item> items, List<Recipe> recipes,
-                       List<RecipeModifier> recipeModifiers, List<Machine> machines, List<Icon> icons) {
-        this.name = name;
-        this.icon = icon;
-        this.items = items;
-        this.recipes = recipes;
-        this.recipeModifiers = recipeModifiers;
-        this.machines = machines;
-        this.icons = icons;
-    }
-
     @Override
     public int getId() {
         return id;

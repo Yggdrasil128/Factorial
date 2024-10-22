@@ -14,7 +14,7 @@ import java.util.Map;
 public class Changelist implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private Save save;
@@ -40,17 +40,6 @@ public class Changelist implements NamedModel {
         active = standalone.isActive();
         icon = null;
         productionStepChanges = new HashMap<>();
-    }
-
-    public Changelist(Save save, int ordinal, String name, boolean primary, boolean active, Icon icon,
-                      Map<ProductionStep, Fraction> productionStepChanges) {
-        this.save = save;
-        this.ordinal = ordinal;
-        this.name = name;
-        this.primary = primary;
-        this.active = active;
-        this.icon = icon;
-        this.productionStepChanges = productionStepChanges;
     }
 
     @Override

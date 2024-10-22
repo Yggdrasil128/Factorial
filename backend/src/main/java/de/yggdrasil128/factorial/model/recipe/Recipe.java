@@ -18,7 +18,7 @@ import java.util.List;
 public class Recipe implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private GameVersion gameVersion;
@@ -53,20 +53,6 @@ public class Recipe implements NamedModel {
         applicableModifiers = new ArrayList<>();
         applicableMachines = new ArrayList<>();
         category = standalone.getCategory();
-    }
-
-    public Recipe(GameVersion gameVersion, String name, Icon icon, List<ItemQuantity> input, List<ItemQuantity> output,
-                  Fraction duration, List<RecipeModifier> applicableModifiers, List<Machine> applicableMachines,
-                  List<String> category) {
-        this.gameVersion = gameVersion;
-        this.name = name;
-        this.icon = icon;
-        this.ingredients = input;
-        this.products = output;
-        this.duration = duration;
-        this.applicableModifiers = applicableModifiers;
-        this.applicableMachines = applicableMachines;
-        this.category = category;
     }
 
     @Override

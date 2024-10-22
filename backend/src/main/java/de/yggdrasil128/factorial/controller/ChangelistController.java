@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
@@ -9,6 +10,7 @@ import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
@@ -58,6 +60,14 @@ public class ChangelistController {
     @PatchMapping("/changelist")
     public ChangelistStandalone update(int changelistId, @RequestBody ChangelistStandalone input) {
         Changelist changelist = changelistService.get(changelistId);
+        if (changelist.isPrimary() != input.isPrimary()) {
+            throw ModelService.report(HttpStatus.BAD_REQUEST,
+                    "cannot change primary changelist via generic PATH, use '/changelist/primary' instead");
+        }
+        if (changelist.isActive() != input.isActive()) {
+            throw ModelService.report(HttpStatus.BAD_REQUEST,
+                    "cannot update changelist activity via generic PATCH, use '/changelist/active' instead");
+        }
         applyBasics(input, changelist);
         applyRelations(input, changelist);
         return new ChangelistStandalone(changelistService.update(changelist));
@@ -82,13 +92,16 @@ public class ChangelistController {
     }
 
     @PatchMapping("/changelist/primary")
-    public void setPrimary(int changelistId) {
-        changelistService.setPrimary(changelistId);
+    public void makePrimary(int changelistId) {
+        changelistService.makePrimary(changelistId,
+                changelist -> saveService.computeChangelists(changelist.getSave()).getPrimary());
+        // TODO invalidate affected production steps and enclosing factories
     }
 
     @PatchMapping("/changelist/active")
     public void setActive(int changelistId, boolean active) {
         changelistService.setActive(changelistId, active);
+        // TODO invalidate affected production steps and enclosing factories
     }
 
 }

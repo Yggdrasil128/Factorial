@@ -19,26 +19,30 @@ public class EffectiveModifiers {
     }
 
     private final EffectiveModifier current;
-    private final EffectiveModifier withPrimaryChangelist;
-    private final EffectiveModifier withActiveChangelists;
+    private final EffectiveModifier primary;
+    private final EffectiveModifier active;
 
-    private EffectiveModifiers(EffectiveModifier current, EffectiveModifier withPrimaryChangelist,
-                               EffectiveModifier withActiveChangelists) {
+    private EffectiveModifiers(EffectiveModifier current, EffectiveModifier rimary, EffectiveModifier ctive) {
         this.current = current;
-        this.withPrimaryChangelist = withPrimaryChangelist;
-        this.withActiveChangelists = withActiveChangelists;
+        this.primary = rimary;
+        this.active = ctive;
     }
 
     public EffectiveModifier getCurrent() {
         return current;
     }
 
-    public EffectiveModifier getWithPrimaryChangelist() {
-        return withPrimaryChangelist;
+    public EffectiveModifier getPrimary() {
+        return primary;
     }
 
-    public EffectiveModifier getWithActiveChangelists() {
-        return withActiveChangelists;
+    public EffectiveModifier getActive() {
+        return active;
+    }
+
+    @Override
+    public String toString() {
+        return "[current=" + current + ", primary=" + primary + ", active=" + active + "]";
     }
 
 }

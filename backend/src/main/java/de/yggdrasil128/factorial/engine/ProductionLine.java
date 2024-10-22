@@ -4,6 +4,6 @@ import java.util.List;
 
 public interface ProductionLine {
 
-    List<Resource> getResources();
+    List<ResourceContributions> getResources();
 
 }
