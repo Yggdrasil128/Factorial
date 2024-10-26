@@ -2,12 +2,12 @@ package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 
-public class ProductionStepThroughputsChanged extends ProductionStepUpdated {
+public class ProductionStepThroughputsChangedEvent extends ProductionStepUpdatedEvent {
 
     private final ProductionStepThroughputs throughputs;
 
-    public ProductionStepThroughputsChanged(ProductionStep productionStep, ProductionStepThroughputs throughputs,
-                                            boolean recipeChanged) {
+    public ProductionStepThroughputsChangedEvent(ProductionStep productionStep, ProductionStepThroughputs throughputs,
+                                                 boolean recipeChanged) {
         super(productionStep, recipeChanged);
         this.throughputs = throughputs;
     }

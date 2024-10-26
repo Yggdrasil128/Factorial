@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.yggdrasil128.factorial.controller.websocket.messages.*;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
-import de.yggdrasil128.factorial.model.changelist.ChangelistRemoved;
+import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
-import de.yggdrasil128.factorial.model.changelist.ChangelistUpdated;
+import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.productionstep.*;
@@ -111,11 +111,11 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ProductionStepUpdated event) {
+    public void on(ProductionStepUpdatedEvent event) {
         ProductionStep productionStep = event.getProductionStep();
         Save save = productionStep.getFactory().getSave();
-        ProductionStepThroughputs throughputs = event instanceof ProductionStepThroughputsChanged
-                ? ((ProductionStepThroughputsChanged) event).getThroughputs()
+        ProductionStepThroughputs throughputs = event instanceof ProductionStepThroughputsChangedEvent
+                ? ((ProductionStepThroughputsChangedEvent) event).getThroughputs()
                 : productionStepService.computeThroughputs(productionStep,
                 () -> saveService.computeProductionStepChanges(save));
 
@@ -129,7 +129,7 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ProductionStepRemoved event) {
+    public void on(ProductionStepRemovedEvent event) {
         ProductionStepRemovedMessage message = new ProductionStepRemovedMessage(
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
@@ -140,12 +140,12 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ResourceUpdated event) {
+    public void on(ResourceUpdatedEvent event) {
         Resource resource = event.getResource();
         Factory factory = resource.getFactory();
         Save save = factory.getSave();
-        ResourceContributions contributions = event instanceof ResourceContributionsChanged
-                ? ((ResourceContributionsChanged) event).getContributions()
+        ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
+                ? ((ResourceContributionsChangedEvent) event).getContributions()
                 : factoryService.computeResources(factory, () -> saveService.computeProductionStepChanges(save))
                 .getContributions(resource);
 
@@ -159,7 +159,7 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ResourceRemoved event) {
+    public void on(ResourceRemovedEvent event) {
         ResourceRemovedMessage message = new ResourceRemovedMessage(
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
@@ -170,7 +170,7 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ChangelistUpdated event) {
+    public void on(ChangelistUpdatedEvent event) {
         ChangelistUpdatedMessage message = new ChangelistUpdatedMessage(
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
@@ -181,7 +181,7 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ChangelistRemoved event) {
+    public void on(ChangelistRemovedEvent event) {
         ChangelistRemovedMessage message = new ChangelistRemovedMessage(
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),

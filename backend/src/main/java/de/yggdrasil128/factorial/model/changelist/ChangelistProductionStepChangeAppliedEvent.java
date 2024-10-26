@@ -4,14 +4,14 @@ import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 
-public class ChangelistProductionStepChangeApplied {
+public class ChangelistProductionStepChangeAppliedEvent {
 
     private final ProductionStep productionStep;
     private final Fraction change;
     private final ProductionStepChanges changes;
 
-    public ChangelistProductionStepChangeApplied(ProductionStep productionStep, Fraction change,
-                                                 ProductionStepChanges changes) {
+    public ChangelistProductionStepChangeAppliedEvent(ProductionStep productionStep, Fraction change,
+                                                      ProductionStepChanges changes) {
         this.productionStep = productionStep;
         this.change = change;
         this.changes = changes;

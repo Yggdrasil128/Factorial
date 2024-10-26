@@ -1,13 +1,13 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import de.yggdrasil128.factorial.model.ModelChanged;
+import de.yggdrasil128.factorial.model.ModelChangedEvent;
 
-public class ChangelistUpdated implements ModelChanged {
+public class ChangelistUpdatedEvent implements ModelChangedEvent {
 
     private final Changelist changelist;
     private final boolean updateProductionSteps;
 
-    public ChangelistUpdated(Changelist changelist, boolean updateProductionSteps) {
+    public ChangelistUpdatedEvent(Changelist changelist, boolean updateProductionSteps) {
         this.changelist = changelist;
         this.updateProductionSteps = updateProductionSteps;
     }

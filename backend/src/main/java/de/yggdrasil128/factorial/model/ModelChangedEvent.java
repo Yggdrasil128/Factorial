@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.model;
 
-public interface ModelChanged {
+public interface ModelChangedEvent {
 
     int getSaveId();
 

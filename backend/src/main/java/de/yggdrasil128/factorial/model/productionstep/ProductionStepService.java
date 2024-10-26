@@ -5,7 +5,7 @@ import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.changelist.ChangelistProductionStepChangeApplied;
+import de.yggdrasil128.factorial.model.changelist.ChangelistProductionStepChangeAppliedEvent;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -72,11 +72,11 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
             ProductionStepThroughputs throughputs = initThroughputs(productionStep, changes);
             // hard invalidate cache in this case
             cache.put(productionStep.getId(), throughputs);
-            events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, true));
+            events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, true));
         } else {
             ProductionStepThroughputs throughputs = computeThroughputs(productionStep, changes,
                     existing -> existing.update(productionStep));
-            events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, false));
+            events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
         }
         return productionStep;
     }
@@ -86,7 +86,7 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         repository.save(productionStep);
         ProductionStepThroughputs throughputs = computeThroughputs(productionStep, () -> changes,
                 existing -> existing.updateMachineCount(productionStep, productionStep.getMachineCount()));
-        events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, false));
+        events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
     }
 
     public void handleChangelistEntryChanged(ProductionStep productionStep, ProductionStepChanges changes) {
@@ -98,7 +98,7 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
             oldValue.updateMachineCounts(productionStep, machineCountChanges);
             return oldValue;
         });
-        events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, false));
+        events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
     }
 
     @Override
@@ -106,22 +106,22 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         Factory factory = factories.findByResourcesId(id);
         super.delete(id);
         ProductionStepThroughputs throughputs = cache.remove(id);
-        events.publishEvent(new ProductionStepRemoved(factory.getSave().getId(), factory.getId(), id, throughputs));
+        events.publishEvent(new ProductionStepRemovedEvent(factory.getSave().getId(), factory.getId(), id, throughputs));
     }
 
     @EventListener
-    public ProductionStepUpdated on(ProductionStepChangelistEntryChanged event) {
+    public ProductionStepUpdatedEvent on(ProductionStepChangelistEntryChangedEvent event) {
         ProductionStepThroughputs throughputs = cache.get(event.getProductionStepId());
         ProductionStep productionStep = get(event.getProductionStepId());
         if (null == throughputs) {
-            return new ProductionStepUpdated(productionStep, false);
+            return new ProductionStepUpdatedEvent(productionStep, false);
         }
         throughputs.updateMachineCounts(productionStep, event.getChanges());
-        return new ProductionStepThroughputsChanged(productionStep, throughputs, false);
+        return new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false);
     }
 
     @EventListener
-    public void on(ChangelistProductionStepChangeApplied event) {
+    public void on(ChangelistProductionStepChangeAppliedEvent event) {
         setCurrentMachineCount(event.getProductionStep(),
                 event.getProductionStep().getMachineCount().add(event.getChange()), event.getChanges());
     }

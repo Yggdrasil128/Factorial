@@ -52,7 +52,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
     @Override
     public Changelist update(Changelist entity) {
         Changelist changelist = super.update(entity);
-        events.publishEvent(new ChangelistUpdated(changelist, false));
+        events.publishEvent(new ChangelistUpdatedEvent(changelist, false));
         return changelist;
     }
 
@@ -60,16 +60,16 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         changelist.setPrimary(primary);
         changelist.setActive(active);
         repository.save(changelist);
-        events.publishEvent(new ChangelistUpdated(changelist, true));
+        events.publishEvent(new ChangelistUpdatedEvent(changelist, true));
     }
 
     public void apply(Changelist changelist, ProductionStepChanges changes) {
         for (Map.Entry<ProductionStep, Fraction> change : changelist.getProductionStepChanges().entrySet()) {
-            events.publishEvent(new ChangelistProductionStepChangeApplied(change.getKey(), change.getValue(), changes));
+            events.publishEvent(new ChangelistProductionStepChangeAppliedEvent(change.getKey(), change.getValue(), changes));
         }
         changelist.getProductionStepChanges().clear();
         repository.save(changelist);
-        events.publishEvent(new ChangelistUpdated(changelist, false));
+        events.publishEvent(new ChangelistUpdatedEvent(changelist, false));
     }
 
     public void reportMachineCount(int changelistId, ProductionStep productionStep, Fraction change) {
@@ -80,7 +80,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
             changelist.getProductionStepChanges().put(productionStep, change);
         }
         repository.save(changelist);
-        events.publishEvent(new ChangelistUpdated(changelist, false));
+        events.publishEvent(new ChangelistUpdatedEvent(changelist, false));
     }
 
     @Override
@@ -90,7 +90,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
         Save save = saves.findByChangelistsId(id);
         super.delete(id);
-        events.publishEvent(new ChangelistRemoved(save.getId(), id));
+        events.publishEvent(new ChangelistRemovedEvent(save.getId(), id));
     }
 
 }

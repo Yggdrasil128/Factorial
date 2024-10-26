@@ -4,10 +4,10 @@ import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
-import de.yggdrasil128.factorial.model.changelist.ChangelistRemoved;
-import de.yggdrasil128.factorial.model.changelist.ChangelistUpdated;
+import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
+import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
 import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepChangelistEntryChanged;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepChangelistEntryChangedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     public void addAttachedChangelist(Save save, Changelist changelist) {
         save.getChangelists().add(changelist);
         repository.save(save);
-        events.publishEvent(new ChangelistUpdated(changelist, true));
+        events.publishEvent(new ChangelistUpdatedEvent(changelist, true));
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     }
 
     @EventListener
-    public Collection<ProductionStepChangelistEntryChanged> on(ChangelistUpdated event) {
+    public Collection<ProductionStepChangelistEntryChangedEvent> on(ChangelistUpdatedEvent event) {
         ProductionStepChanges changes = computeProductionStepChanges(event.getChangelist().getSave(),
                 existing -> existing.updateChangelist(event.getChangelist()));
         return event.isUpdateProductionSteps()
@@ -78,17 +78,17 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     }
 
     @EventListener
-    public Collection<ProductionStepChangelistEntryChanged> on(ChangelistRemoved event) {
+    public Collection<ProductionStepChangelistEntryChangedEvent> on(ChangelistRemovedEvent event) {
         AtomicReference<Map<Integer, QuantityByChangelist>> ref = new AtomicReference<>();
         computeProductionStepChanges(get(event.getSaveId()),
                 existing -> ref.set(existing.removeChangelist(event.getChangelistId())));
         return propagateProductionStepChanges(ref.get());
     }
 
-    private static Collection<ProductionStepChangelistEntryChanged>
+    private static Collection<ProductionStepChangelistEntryChangedEvent>
             propagateProductionStepChanges(Map<Integer, QuantityByChangelist> affectedProductionSteps) {
         return affectedProductionSteps.entrySet().stream()
-                .map(entry -> new ProductionStepChangelistEntryChanged(entry.getKey(), entry.getValue())).toList();
+                .map(entry -> new ProductionStepChangelistEntryChangedEvent(entry.getKey(), entry.getValue())).toList();
     }
 
 }

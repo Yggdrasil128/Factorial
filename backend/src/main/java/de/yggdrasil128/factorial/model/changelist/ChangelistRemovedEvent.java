@@ -1,13 +1,13 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import de.yggdrasil128.factorial.model.ModelChanged;
+import de.yggdrasil128.factorial.model.ModelChangedEvent;
 
-public class ChangelistRemoved implements ModelChanged {
+public class ChangelistRemovedEvent implements ModelChangedEvent {
 
     private final int saveId;
     private final int changelistId;
 
-    public ChangelistRemoved(int saveId, int changelistId) {
+    public ChangelistRemovedEvent(int saveId, int changelistId) {
         this.saveId = saveId;
         this.changelistId = changelistId;
     }

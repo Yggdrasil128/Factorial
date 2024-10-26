@@ -2,12 +2,12 @@ package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 
-public class ProductionStepChangelistEntryChanged {
+public class ProductionStepChangelistEntryChangedEvent {
 
     private final int productionStepId;
     private final QuantityByChangelist changes;
 
-    public ProductionStepChangelistEntryChanged(int productionStepId, QuantityByChangelist changes) {
+    public ProductionStepChangelistEntryChangedEvent(int productionStepId, QuantityByChangelist changes) {
         this.productionStepId = productionStepId;
         this.changes = changes;
     }

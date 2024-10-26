@@ -9,7 +9,7 @@ import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceContributionsChanged;
+import de.yggdrasil128.factorial.model.resource.ResourceContributionsChangedEvent;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
@@ -60,7 +60,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         factory.getProductionSteps().add(productionStep);
         repository.save(factory);
         ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep, changes);
-        events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, true));
+        events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, true));
     }
 
     public ProductionLineResources computeResources(Factory factory,
@@ -87,7 +87,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     private void fireResourceUpdated(ResourceContributions contributions) {
         events.publishEvent(
-                new ResourceContributionsChanged(resourceService.get(contributions.getResourceId()), contributions));
+                new ResourceContributionsChangedEvent(resourceService.get(contributions.getResourceId()), contributions));
     }
 
     public void reorder(Save save, List<ReorderInputEntry> input) {
@@ -119,10 +119,10 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     }
 
     @EventListener
-    public void on(ProductionStepUpdated event) {
+    public void on(ProductionStepUpdatedEvent event) {
         ProductionLineResources resources = cache.get(event.getProductionStep().getFactory().getId());
         if (null != resources) {
-            if (event instanceof ProductionStepThroughputsChanged throughputEvent) {
+            if (event instanceof ProductionStepThroughputsChangedEvent throughputEvent) {
                 if (event.isRecipeChanged()) {
                     resources.removeContributor(throughputEvent.getThroughputs());
                     resources.addContributor(throughputEvent.getThroughputs());
@@ -138,7 +138,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     }
 
     @EventListener
-    public void on(ProductionStepRemoved event) {
+    public void on(ProductionStepRemovedEvent event) {
         ProductionLineResources resources = cache.get(event.getFactoryId());
         if (null != resources) {
             if (null != event.getThroughputs()) {

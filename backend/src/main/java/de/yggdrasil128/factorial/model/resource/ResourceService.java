@@ -65,7 +65,7 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         Factory factory = factories.findByResourcesId(id);
         super.delete(id);
         cache.remove(id);
-        events.publishEvent(new ResourceRemoved(factory.getSave().getId(), factory.getId(), id));
+        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
     }
 
 }

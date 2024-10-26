@@ -1,13 +1,13 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
-import de.yggdrasil128.factorial.model.ModelChanged;
+import de.yggdrasil128.factorial.model.ModelChangedEvent;
 
-public class ProductionStepUpdated implements ModelChanged {
+public class ProductionStepUpdatedEvent implements ModelChangedEvent {
 
     private final ProductionStep productionStep;
     private final boolean recipeChanged;
 
-    public ProductionStepUpdated(ProductionStep productionStep, boolean recipeChanged) {
+    public ProductionStepUpdatedEvent(ProductionStep productionStep, boolean recipeChanged) {
         this.productionStep = productionStep;
         this.recipeChanged = recipeChanged;
     }

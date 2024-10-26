@@ -1,12 +1,12 @@
 package de.yggdrasil128.factorial.model.resource;
 
-import de.yggdrasil128.factorial.model.ModelChanged;
+import de.yggdrasil128.factorial.model.ModelChangedEvent;
 
-public class ResourceUpdated implements ModelChanged {
+public class ResourceUpdatedEvent implements ModelChangedEvent {
 
     private final Resource resource;
 
-    public ResourceUpdated(Resource resource) {
+    public ResourceUpdatedEvent(Resource resource) {
         this.resource = resource;
     }
 

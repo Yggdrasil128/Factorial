@@ -1,14 +1,14 @@
 package de.yggdrasil128.factorial.model.resource;
 
-import de.yggdrasil128.factorial.model.ModelChanged;
+import de.yggdrasil128.factorial.model.ModelChangedEvent;
 
-public class ResourceRemoved implements ModelChanged {
+public class ResourceRemovedEvent implements ModelChangedEvent {
 
     private final int saveId;
     private final int factoryId;
     private final int resourceId;
 
-    public ResourceRemoved(int saveId, int factoryId, int resourceId) {
+    public ResourceRemovedEvent(int saveId, int factoryId, int resourceId) {
         this.saveId = saveId;
         this.factoryId = factoryId;
         this.resourceId = resourceId;
