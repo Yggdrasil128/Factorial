@@ -2,7 +2,19 @@ package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
+import jakarta.persistence.Entity;
 
+import java.util.Iterator;
+import java.util.stream.Stream;
+
+/**
+ * Represents the combined effect of several {@link RecipeModifier RecipeModifiers}.
+ * <p>
+ * Usually, we compute a single {@code EffectiveModifier} for an {@link Entity} that maintains multiple
+ * {@link RecipeModifier RecipeModifiers}.
+ * <p>
+ * Instances of this class are immutable.
+ */
 public class EffectiveModifier {
 
     public static EffectiveModifier neutral() {
@@ -23,6 +35,19 @@ public class EffectiveModifier {
         this.durationMultiplier = durationMultiplier;
         this.inputQuantityMultiplier = inputQuantityMultiplier;
         this.outputQuantityMultiplier = outputQuantityMultiplier;
+    }
+
+    public static EffectiveModifier multiply(Stream<EffectiveModifier> modifiers) {
+        Fraction durationMultiplier = Fraction.ONE;
+        Fraction inputQuantityMultiplier = Fraction.ONE;
+        Fraction outputQuantityMultiplier = Fraction.ONE;
+        for (Iterator<EffectiveModifier> iterator = modifiers.iterator(); iterator.hasNext();) {
+            EffectiveModifier modifier = iterator.next();
+            durationMultiplier = durationMultiplier.multiply(modifier.getDurationMultiplier());
+            inputQuantityMultiplier = inputQuantityMultiplier.multiply(modifier.getInputQuantityMultiplier());
+            outputQuantityMultiplier = outputQuantityMultiplier.multiply(modifier.getOutputQuantityMultiplier());
+        }
+        return new EffectiveModifier(durationMultiplier, inputQuantityMultiplier, outputQuantityMultiplier);
     }
 
     public EffectiveModifier multiply(RecipeModifier modifier) {

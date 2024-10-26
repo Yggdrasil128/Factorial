@@ -42,7 +42,8 @@ public class WebhookController {
         Save save = productionStep.getFactory().getSave();
         ProductionStepThroughputs throughputs = event instanceof ProductionStepThroughputsChanged
                 ? ((ProductionStepThroughputsChanged) event).getThroughputs()
-                : productionStepService.computeThroughputs(productionStep, () -> saveService.computeChangelists(save));
+                : productionStepService.computeThroughputs(productionStep,
+                        () -> saveService.computeProductionStepChanges(save));
         downstream.productionStepUpdated(event.getSaveId(), productionStep, throughputs);
     }
 
@@ -58,8 +59,8 @@ public class WebhookController {
         Save save = factory.getSave();
         ResourceContributions contributions = event instanceof ResourceContributionsChanged
                 ? ((ResourceContributionsChanged) event).getContributions()
-                : factoryService.computeResources(factory, () -> saveService.computeChangelists(save))
-                        .getContributions().get(resource.getItem().getId());
+                : factoryService.computeResources(factory, () -> saveService.computeProductionStepChanges(save))
+                        .getContributions(resource);
         downstream.resourceUpdated(save.getId(), resource, contributions);
     }
 

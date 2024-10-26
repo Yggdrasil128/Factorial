@@ -1,11 +1,10 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
-import de.yggdrasil128.factorial.engine.Changelists;
+import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistProductionStepChangeApplied;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Service
@@ -32,21 +31,26 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         this.factories = factories;
     }
 
-    @Override
-    public ProductionStep create(ProductionStep entity) {
-        ProductionStep productionStep = super.create(entity);
-        events.publishEvent(new ProductionStepUpdated(productionStep));
-        return productionStep;
+    public ProductionStepThroughputs computeThroughputs(ProductionStep productionStep,
+                                                        Supplier<? extends ProductionStepChanges> changes) {
+        return cache.computeIfAbsent(productionStep.getId(), key -> initThroughputs(productionStep, changes));
     }
 
-    public ProductionStepThroughputs computeThroughputs(ProductionStep productionStep,
-                                                        Supplier<? extends Changelists> changelists) {
-        return cache.computeIfAbsent(productionStep.getId(), key -> initThroughputs(productionStep, changelists));
+    private ProductionStepThroughputs computeThroughputs(ProductionStep productionStep,
+                                                         Supplier<? extends ProductionStepChanges> changes,
+                                                         Consumer<? super ProductionStepThroughputs> update) {
+        return cache.compute(productionStep.getId(), (key, existing) -> {
+            if (null == existing) {
+                return initThroughputs(productionStep, changes);
+            }
+            update.accept(existing);
+            return existing;
+        });
     }
 
     private static ProductionStepThroughputs initThroughputs(ProductionStep productionStep,
-                                                             Supplier<? extends Changelists> changelists) {
-        return new ProductionStepThroughputs(productionStep, changelists.get());
+                                                             Supplier<? extends ProductionStepChanges> changes) {
+        return new ProductionStepThroughputs(productionStep, changes.get().getChanges(productionStep.getId()));
     }
 
     @Override
@@ -55,70 +59,71 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         throw new UnsupportedOperationException("use the class-local overload");
     }
 
+    // TODO reduce this method to only name/icon and make individual methods for recipe, machine and machine count
     public ProductionStep update(ProductionStep entity, ProductionStepStandalone before,
-                                 Supplier<? extends Changelists> changelists) {
+                                 Supplier<? extends ProductionStepChanges> changes) {
         ProductionStep productionStep = super.update(entity);
+        /*
+         * If the recipe has changed, we do a hard invalidate, because ProductionLineResources has to remove and add the
+         * throughputs object anyway. Otherwise we do a soft invalidate, hence we try to keep the same object and update
+         * it if needed.
+         */
         if ((int) before.getRecipe() != productionStep.getRecipe().getId()) {
-            ProductionStepThroughputs throughputs = initThroughputs(productionStep, changelists);
+            ProductionStepThroughputs throughputs = initThroughputs(productionStep, changes);
             // hard invalidate cache in this case
             cache.put(productionStep.getId(), throughputs);
             events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, true));
-        } else if (before.getMachineCount().equals(productionStep.getMachineCount())) {
-            handleCurrentMachineCountChange(productionStep, before.getMachineCount(), productionStep.getMachineCount());
-            // no event (for now), this is handled internally
+        } else {
+            ProductionStepThroughputs throughputs = computeThroughputs(productionStep, changes,
+                    existing -> existing.update(productionStep));
+            events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, false));
         }
-        // TODO handle machine change
         return productionStep;
     }
 
-    public void applyPrimaryChangelist(ProductionStep productionStep, Changelist primary) {
-        setCurrentMachineCount(productionStep,
-                productionStep.getMachineCount().add(primary.getProductionStepChanges().get(productionStep)));
-    }
-
-    public void setCurrentMachineCount(ProductionStep productionStep, Fraction value) {
-        Fraction oldValue = productionStep.getMachineCount();
+    public void setCurrentMachineCount(ProductionStep productionStep, Fraction value, ProductionStepChanges changes) {
         productionStep.setMachineCount(value);
         repository.save(productionStep);
-        handleCurrentMachineCountChange(productionStep, oldValue, value);
+        ProductionStepThroughputs throughputs = computeThroughputs(productionStep, () -> changes,
+                existing -> existing.updateMachineCount(productionStep, productionStep.getMachineCount()));
+        events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, false));
     }
 
-    private void handleCurrentMachineCountChange(ProductionStep productionStep, Fraction oldValue, Fraction newValue) {
-        applyGlobalThroughputsChange(productionStep,
-                amounts -> new QuantityByChangelist(amounts.getCurrent().divide(oldValue).multiply(newValue),
-                        amounts.getWithPrimaryChangelist(), amounts.getWithActiveChangelists()));
-    }
-
-    public void applyChangelistMachineCountChange(ProductionStep productionStep, boolean primary, Fraction oldValue,
-                                                  Fraction newValue) {
-        applyGlobalThroughputsChange(productionStep,
-                amounts -> new QuantityByChangelist(amounts.getCurrent(),
-                        primary ? amounts.getWithPrimaryChangelist().divide(oldValue).multiply(newValue)
-                                : amounts.getWithActiveChangelists(),
-                        amounts.getWithActiveChangelists().divide(oldValue).multiply(newValue)));
-    }
-
-    private void applyGlobalThroughputsChange(ProductionStep productionStep,
-                                              Function<QuantityByChangelist, QuantityByChangelist> change) {
-        ProductionStepThroughputs throughputs = cache.get(productionStep.getId());
-        if (null != throughputs) {
-            throughputs.applyGlobalChange(change);
-        }
-        events.publishEvent(new ProductionStepUpdated(productionStep));
+    public void handleChangelistEntryChanged(ProductionStep productionStep, ProductionStepChanges changes) {
+        QuantityByChangelist machineCountChanges = changes.getChanges(productionStep.getId());
+        ProductionStepThroughputs throughputs = cache.compute(productionStep.getId(), (key, oldValue) -> {
+            if (null == oldValue) {
+                return new ProductionStepThroughputs(productionStep, machineCountChanges);
+            }
+            oldValue.updateMachineCounts(productionStep, machineCountChanges);
+            return oldValue;
+        });
+        events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, false));
     }
 
     @Override
     public void delete(int id) {
         Factory factory = factories.findByResourcesId(id);
         super.delete(id);
-        cache.remove(id);
-        events.publishEvent(new ProductionStepRemoved(factory.getSave().getId(), factory.getId(), id, cache.get(id)));
+        ProductionStepThroughputs throughputs = cache.remove(id);
+        events.publishEvent(new ProductionStepRemoved(factory.getSave().getId(), factory.getId(), id, throughputs));
+    }
+
+    @EventListener
+    public ProductionStepUpdated on(ProductionStepChangelistEntryChanged event) {
+        ProductionStepThroughputs throughputs = cache.get(event.getProductionStepId());
+        ProductionStep productionStep = get(event.getProductionStepId());
+        if (null == throughputs) {
+            return new ProductionStepUpdated(productionStep, false);
+        }
+        throughputs.updateMachineCounts(productionStep, event.getChanges());
+        return new ProductionStepThroughputsChanged(productionStep, throughputs, false);
     }
 
     @EventListener
     public void on(ChangelistProductionStepChangeApplied event) {
         setCurrentMachineCount(event.getProductionStep(),
-                event.getProductionStep().getMachineCount().add(event.getChange()));
+                event.getProductionStep().getMachineCount().add(event.getChange()), event.getChanges());
     }
 
 }

@@ -68,16 +68,8 @@ public class ChangelistStandalone {
         return primary;
     }
 
-    public void setPrimary(boolean primary) {
-        this.primary = primary;
-    }
-
     public boolean isActive() {
         return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public Object getIcon() {
@@ -90,10 +82,6 @@ public class ChangelistStandalone {
 
     public List<ProductionStepChangeStandalone> getProductionStepChanges() {
         return productionStepChanges;
-    }
-
-    public void setProductionStepChanges(List<ProductionStepChangeStandalone> productionStepChanges) {
-        this.productionStepChanges = productionStepChanges;
     }
 
 }

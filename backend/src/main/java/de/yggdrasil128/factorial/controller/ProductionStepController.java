@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
@@ -54,7 +55,7 @@ public class ProductionStepController {
         applyRelations(input, productionStep);
         productionStep = productionStepService.create(productionStep);
         factoryService.addAttachedProductionStep(factory, productionStep,
-                () -> saveService.computeChangelists(factory.getSave()));
+                () -> saveService.computeProductionStepChanges(factory.getSave()));
         return toOutput(productionStep);
     }
 
@@ -76,7 +77,7 @@ public class ProductionStepController {
         applyBasics(input, productionStep);
         applyRelations(input, productionStep);
         productionStep = productionStepService.update(productionStep, before,
-                () -> saveService.computeChangelists(factory.getSave()));
+                () -> saveService.computeProductionStepChanges(factory.getSave()));
         return toOutput(productionStep);
     }
 
@@ -99,20 +100,24 @@ public class ProductionStepController {
     /**
      * Applies the primary {@link Changelist} to the target {@link ProductionStep}.
      * <p>
-     * Other {@link Changelist#getProductionStepChanges() changes} in the {@link Changelist} are unaffected and the
-     * change for the target {@link ProductionStep} will be removed.
+     * In contrast to {@link ChangelistController#apply(int) /changelist/apply}, this only applies the change to the
+     * target production step. Other {@link Changelist#getProductionStepChanges() changes} in the primary
+     * {@link Changelist} are unaffected and the change for the target {@link ProductionStep} will be removed.
+     * 
      * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
      */
     @PatchMapping("/productionStep/applyPrimaryChangelist")
     public void applyPrimaryChangelist(int productionStepId) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
-        Changelist primary = saveService.computeChangelists(productionStep.getFactory().getSave()).getPrimary();
-        if (!primary.getProductionStepChanges().containsKey(productionStep)) {
+        ProductionStepChanges changes = saveService.computeProductionStepChanges(productionStep.getFactory().getSave());
+        if (!changes.contains(productionStep.getId())) {
             throw ModelService.report(HttpStatus.CONFLICT,
                     "production step " + productionStepId + " has no change in the primary changelist");
         }
-        productionStepService.applyPrimaryChangelist(productionStep, primary);
-        changelistService.reportMachineCount(primary, productionStep, Fraction.ZERO);
+        Fraction change = changes.getChanges(productionStep.getId()).getWithPrimaryChangelist();
+        changelistService.reportMachineCount(changes.getPrimaryChangelistId(), productionStep, Fraction.ZERO);
+        productionStepService.setCurrentMachineCount(productionStep, productionStep.getMachineCount().add(change),
+                changes);
     }
 
     /**
@@ -120,23 +125,23 @@ public class ProductionStepController {
      * <p>
      * This will <b>not</b> change the production step's current machine count but rather add a corresponding
      * {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
+     * 
      * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
      * @param machineCount the new machine count
      */
     @PatchMapping("/productionStep/machineCount")
     public void updateMachineCount(int productionStepId, String machineCount) {
-        Fraction change = Fraction.of(machineCount);
+        Fraction newValue = Fraction.of(machineCount);
         ProductionStep productionStep = productionStepService.get(productionStepId);
-        Changelist primary = saveService.computeChangelists(productionStep.getFactory().getSave()).getPrimary();
-        Fraction oldValue = productionStep.getMachineCount()
-                .add(primary.getProductionStepChanges().getOrDefault(productionStep, Fraction.ZERO));
-        productionStepService.applyChangelistMachineCountChange(productionStep, true, oldValue, oldValue.add(change));
-        changelistService.reportMachineCount(primary, productionStep, change);
+        Fraction change = newValue.subtract(productionStep.getMachineCount());
+        ProductionStepChanges changes = saveService.computeProductionStepChanges(productionStep.getFactory().getSave());
+        changelistService.reportMachineCount(changes.getPrimaryChangelistId(), productionStep, change);
+        productionStepService.handleChangelistEntryChanged(productionStep, changes);
     }
 
     private ProductionStepStandalone toOutput(ProductionStep productionStep) {
         return new ProductionStepStandalone(productionStep, productionStepService.computeThroughputs(productionStep,
-                () -> saveService.computeChangelists(productionStep.getFactory().getSave())));
+                () -> saveService.computeProductionStepChanges(productionStep.getFactory().getSave())));
     }
 
 }

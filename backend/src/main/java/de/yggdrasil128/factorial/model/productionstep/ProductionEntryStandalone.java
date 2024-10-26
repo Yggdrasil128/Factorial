@@ -1,4 +1,6 @@
-package de.yggdrasil128.factorial.engine;
+package de.yggdrasil128.factorial.model.productionstep;
+
+import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 
 import java.util.Map;
 

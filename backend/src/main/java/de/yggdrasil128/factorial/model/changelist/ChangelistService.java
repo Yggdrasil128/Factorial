@@ -1,17 +1,18 @@
 package de.yggdrasil128.factorial.model.changelist;
 
+import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
+import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -19,21 +20,21 @@ import static java.util.stream.Collectors.toMap;
 public class ChangelistService extends ModelService<Changelist, ChangelistRepository> {
 
     private final ApplicationEventPublisher events;
+    private final SaveRepository saves;
 
-    public ChangelistService(ChangelistRepository repository, ApplicationEventPublisher events) {
+    public ChangelistService(ChangelistRepository repository, ApplicationEventPublisher events, SaveRepository saves) {
         super(repository);
         this.events = events;
+        this.saves = saves;
     }
 
     @Override
-    public Changelist create(Changelist entity) {
-        Save save = entity.getSave();
-        if (0 < entity.getOrdinal()) {
-            entity.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
+    public Changelist create(Changelist changelist) {
+        Save save = changelist.getSave();
+        if (0 < changelist.getOrdinal()) {
+            changelist.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
         }
-        Changelist changelist = super.create(entity);
-        events.publishEvent(new ChangelistUpdated(changelist, false));
-        return changelist;
+        return super.create(changelist);
     }
 
     public void reorder(Save save, List<ReorderInputEntry> input) {
@@ -48,42 +49,31 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
     }
 
-    public void apply(int id) {
-        Changelist changelist = get(id);
+    @Override
+    public Changelist update(Changelist entity) {
+        Changelist changelist = super.update(entity);
+        events.publishEvent(new ChangelistUpdated(changelist, false));
+        return changelist;
+    }
+
+    public void setPrimaryActive(Changelist changelist, boolean primary, boolean active) {
+        changelist.setPrimary(primary);
+        changelist.setActive(active);
+        repository.save(changelist);
+        events.publishEvent(new ChangelistUpdated(changelist, true));
+    }
+
+    public void apply(Changelist changelist, ProductionStepChanges changes) {
         for (Map.Entry<ProductionStep, Fraction> change : changelist.getProductionStepChanges().entrySet()) {
-            events.publishEvent(new ChangelistProductionStepChangeApplied(change.getKey(), change.getValue()));
+            events.publishEvent(new ChangelistProductionStepChangeApplied(change.getKey(), change.getValue(), changes));
         }
         changelist.getProductionStepChanges().clear();
         repository.save(changelist);
         events.publishEvent(new ChangelistUpdated(changelist, false));
     }
 
-    public void makePrimary(int id, Function<? super Changelist, ? extends Changelist> primary) {
-        Changelist changelist = get(id);
-        if (!changelist.isPrimary()) {
-            Changelist oldPrimary = primary.apply(changelist);
-            changelist.setPrimary(true);
-            changelist.setActive(true);
-            repository.save(changelist);
-            events.publishEvent(new ChangelistUpdated(changelist, true));
-            oldPrimary.setPrimary(false);
-            repository.save(oldPrimary);
-            events.publishEvent(new ChangelistUpdated(oldPrimary, true));
-        }
-    }
-
-    public void setActive(int id, boolean active) {
-        Changelist changelist = get(id);
-        if (!changelist.isPrimary()) {
-            changelist.setActive(active);
-            repository.save(changelist);
-            events.publishEvent(new ChangelistUpdated(changelist, true));
-        } else if (!active) {
-            throw report(HttpStatus.CONFLICT, "cannot set primary changelist to inactive");
-        }
-    }
-
-    public void reportMachineCount(Changelist changelist, ProductionStep productionStep, Fraction change) {
+    public void reportMachineCount(int changelistId, ProductionStep productionStep, Fraction change) {
+        Changelist changelist = get(changelistId);
         if (Fraction.ZERO.equals(change)) {
             changelist.getProductionStepChanges().remove(productionStep);
         } else {
@@ -98,10 +88,9 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         if (repository.existsByIdAndPrimaryIsTrue(id)) {
             throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
         }
-        // TOOD find save id (look into spring projections)
-        int saveId = 0;
+        Save save = saves.findByChangelistsId(id);
         super.delete(id);
-        events.publishEvent(new ChangelistRemoved(saveId, id));
+        events.publishEvent(new ChangelistRemoved(save.getId(), id));
     }
 
 }

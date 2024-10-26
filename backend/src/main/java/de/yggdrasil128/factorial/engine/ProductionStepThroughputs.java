@@ -1,84 +1,94 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.changelist.Changelist;
+import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 public class ProductionStepThroughputs implements Production {
+
+    private record ItemAmount(int itemId, Fraction amount) {
+
+        ItemAmount(ItemQuantity source) {
+            this(source.getItem().getId(), source.getQuantity());
+        }
+
+    }
 
     // we must not keep a reference to the entity here
     private final int productionStepId;
     private final EffectiveModifiers effectiveModifiers;
+
+    // we cache all of these, because if the recipe changes, we will be replaced anyway
+    private final List<ItemAmount> ingredients;
+    private final List<ItemAmount> products;
+    private final Fraction recipeDuration;
+
     // key is Item.id, but we must not keep references to the entities here
-    private final Map<Integer, QuantityByChangelist> inputs;
+    private Map<Integer, QuantityByChangelist> inputs;
     // key is Item.id, but we must not keep references to the entities here
-    private final Map<Integer, QuantityByChangelist> outputs;
+    private Map<Integer, QuantityByChangelist> outputs;
 
-    public ProductionStepThroughputs(ProductionStep delegate, Changelists changelists) {
-        productionStepId = delegate.getId();
-        effectiveModifiers = EffectiveModifiers.of(delegate, machineCounts(delegate, changelists));
-        inputs = delegate.getRecipe().getIngredients().stream()
-                .collect(Collectors.toMap(Iingredient -> Iingredient.getItem().getId(),
-                        ingredient -> new QuantityByChangelist(
-                                computeInputRate(delegate, ingredient.getQuantity(), effectiveModifiers.getCurrent()),
-                                computeInputRate(delegate, ingredient.getQuantity(), effectiveModifiers.getPrimary()),
-                                computeInputRate(delegate, ingredient.getQuantity(), effectiveModifiers.getActive())),
-                        QuantityByChangelist::add, LinkedHashMap::new));
-        outputs = delegate.getRecipe().getProducts().stream()
-                .collect(Collectors.toMap(product -> product.getItem().getId(),
-                        product -> new QuantityByChangelist(
-                                computeOutputRate(delegate, product.getQuantity(), effectiveModifiers.getCurrent()),
-                                computeOutputRate(delegate, product.getQuantity(), effectiveModifiers.getPrimary()),
-                                computeOutputRate(delegate, product.getQuantity(), effectiveModifiers.getActive())),
-                        QuantityByChangelist::add, LinkedHashMap::new));
-    }
-
-    private static QuantityByChangelist machineCounts(ProductionStep productionStep, Changelists changelists) {
-        Fraction active = productionStep.getMachineCount();
-        Fraction primary = active.add(getChangeFor(changelists.getPrimary(), productionStep));
-        for (Changelist changelist : changelists.getActive()) {
-            active = active.add(getChangeFor(changelist, productionStep));
-        }
-        return new QuantityByChangelist(productionStep.getMachineCount(), primary, active);
-    }
-
-    private static Fraction getChangeFor(Changelist changelist, ProductionStep productionStep) {
-        return changelist.getProductionStepChanges().getOrDefault(productionStep, Fraction.ZERO);
-    }
-
-    private static Fraction computeInputRate(ProductionStep delegate, Fraction ingredient,
-                                             EffectiveModifier effectiveModifier) {
-        return ingredient.divide(delegate.getRecipe().getDuration())
-                .multiply(effectiveModifier.getInputSpeedMultiplier());
-    }
-
-    private static Fraction computeOutputRate(ProductionStep delegate, Fraction product,
-                                              EffectiveModifier effectiveModifier) {
-        return product.divide(delegate.getRecipe().getDuration())
-                .multiply(effectiveModifier.getOutputSpeedMultiplier());
+    public ProductionStepThroughputs(ProductionStep productionStep, QuantityByChangelist changes) {
+        productionStepId = productionStep.getId();
+        effectiveModifiers = new EffectiveModifiers(productionStep, machineCounts(productionStep, changes));
+        ingredients = productionStep.getRecipe().getIngredients().stream().map(ItemAmount::new).toList();
+        products = productionStep.getRecipe().getProducts().stream().map(ItemAmount::new).toList();
+        recipeDuration = productionStep.getRecipe().getDuration();
+        recompute();
     }
 
     public int getProductionStepId() {
         return productionStepId;
     }
 
-    public void applyPrimaryMachineCount() {
-        for (Map.Entry<Integer, QuantityByChangelist> input : inputs.entrySet()) {
-            input.setValue(applyPrimaryChangelist(input.getValue()));
-        }
-        for (Map.Entry<Integer, QuantityByChangelist> output : inputs.entrySet()) {
-            output.setValue(applyPrimaryChangelist(output.getValue()));
+    public void update(ProductionStep productionStep) {
+        effectiveModifiers.applyMachine(productionStep.getMachine());
+        effectiveModifiers.applyProductionStep(productionStep);
+        effectiveModifiers.applyMachineCount(productionStep.getMachineCount());
+        recompute();
+    }
+
+    public void updateMachineCount(ProductionStep productionStep, Fraction machineCount) {
+        if (effectiveModifiers.applyMachineCount(machineCount)) {
+            recompute();
         }
     }
 
-    private static QuantityByChangelist applyPrimaryChangelist(QuantityByChangelist current) {
-        return new QuantityByChangelist(current.getWithPrimaryChangelist(), current.getWithPrimaryChangelist(),
-                current.getWithActiveChangelists());
+    public void updateMachineCounts(ProductionStep productionStep, QuantityByChangelist machineCounts) {
+        if (effectiveModifiers.applyMachineCounts(machineCounts(productionStep, machineCounts))) {
+            recompute();
+        }
+    }
+
+    private static QuantityByChangelist machineCounts(ProductionStep productionStep, QuantityByChangelist changes) {
+        return changes.add(productionStep.getMachineCount());
+    }
+
+    private void recompute() {
+        inputs = computeThroughputs(ingredients, EffectiveModifier::getInputSpeedMultiplier);
+        outputs = computeThroughputs(products, EffectiveModifier::getOutputSpeedMultiplier);
+    }
+
+    private Map<Integer, QuantityByChangelist>
+            computeThroughputs(List<ItemAmount> source, Function<? super EffectiveModifier, ? extends Fraction> speed) {
+        return source.stream()
+                .collect(toMap(ItemAmount::itemId,
+                        itemAmonut -> new QuantityByChangelist(
+                                computeRate(itemAmonut.amount(), speed.apply(effectiveModifiers.getCurrent())),
+                                computeRate(itemAmonut.amount(), speed.apply(effectiveModifiers.getPrimary())),
+                                computeRate(itemAmonut.amount(), speed.apply(effectiveModifiers.getActive()))),
+                        QuantityByChangelist::add, LinkedHashMap::new));
+    }
+
+    private Fraction computeRate(Fraction amount, Fraction speed) {
+        return amount.divide(recipeDuration).multiply(speed);
     }
 
     public void applyGlobalChange(Function<? super QuantityByChangelist, ? extends QuantityByChangelist> change) {

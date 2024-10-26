@@ -1,7 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.engine.ProductionLineResources;
+import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
@@ -67,23 +67,23 @@ public class SaveController {
     }
 
     private SaveSummary exportSave(Save save) {
-        Supplier<? extends Changelists> changelists = () -> saveService.computeChangelists(save);
+        Supplier<? extends ProductionStepChanges> changes = () -> saveService.computeProductionStepChanges(save);
         SaveSummary summary = new SaveSummary();
         summary.setSave(new SaveStandalone(save));
-        summary.setFactories(save.getFactories().stream().map(factory -> exportFactory(factory, changelists)).toList());
+        summary.setFactories(save.getFactories().stream().map(factory -> exportFactory(factory, changes)).toList());
         summary.setChangelists(save.getChangelists().stream().map(ChangelistStandalone::new).toList());
         return summary;
     }
 
-    private FactorySummary exportFactory(Factory factory, Supplier<? extends Changelists> changelists) {
+    private FactorySummary exportFactory(Factory factory, Supplier<? extends ProductionStepChanges> changes) {
         FactorySummary summary = new FactorySummary();
         summary.setFactory(new FactoryStandalone(factory));
         summary.setProductionSteps(
                 factory.getProductionSteps().stream().map(productionStep -> new ProductionStepStandalone(productionStep,
-                        productionStepService.computeThroughputs(productionStep, changelists))).toList());
-        ProductionLineResources resources = factoryService.computeResources(factory, changelists);
-        summary.setResources(factory.getResources().stream().map(resource -> new ResourceStandalone(resource,
-                resources.getContributions().get(resource.getItem().getId()))).toList());
+                        productionStepService.computeThroughputs(productionStep, changes))).toList());
+        ProductionLineResources resources = factoryService.computeResources(factory, changes);
+        summary.setResources(factory.getResources().stream()
+                .map(resource -> new ResourceStandalone(resource, resources.getContributions(resource))).toList());
         return summary;
     }
 

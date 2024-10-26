@@ -1,7 +1,6 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.yggdrasil128.factorial.engine.ProductionEntryStandalone;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;

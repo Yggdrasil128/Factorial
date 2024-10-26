@@ -79,14 +79,6 @@ public class Fraction extends Number {
                 Math.multiplyExact(this.denominator, that.denominator));
     }
 
-    public static Fraction add(Fraction... summands) {
-        Fraction result = Fraction.ZERO;
-        for (Fraction summand : summands) {
-            result = result.add(summand);
-        }
-        return result;
-    }
-
     public Fraction negative() {
         return new Fraction(Math.negateExact(this.numerator), this.denominator);
     }
@@ -102,16 +94,6 @@ public class Fraction extends Number {
     public Fraction multiply(Fraction that) {
         return new Fraction(Math.multiplyExact(this.numerator, that.numerator),
                 Math.multiplyExact(this.denominator, that.denominator));
-    }
-
-    public static Fraction multiply(Fraction... factors) {
-        long numerator = 1;
-        long denominator = 1;
-        for (Fraction factor : factors) {
-            numerator = Math.multiplyExact(numerator, factor.numerator);
-            denominator = Math.multiplyExact(denominator, factor.denominator);
-        }
-        return new Fraction(numerator, denominator);
     }
 
     public Fraction inverse() {

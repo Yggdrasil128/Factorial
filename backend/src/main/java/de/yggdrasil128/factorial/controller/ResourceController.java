@@ -33,9 +33,9 @@ public class ResourceController {
     public List<ResourceStandalone> retrieveAll(int factoryId) {
         Factory factory = factoryService.get(factoryId);
         ProductionLineResources resources = factoryService.computeResources(factory,
-                () -> saveService.computeChangelists(factory.getSave()));
-        return factory.getResources().stream().map(resource -> new ResourceStandalone(resource,
-                resources.getContributions().get(resource.getItem().getId()))).toList();
+                () -> saveService.computeProductionStepChanges(factory.getSave()));
+        return factory.getResources().stream()
+                .map(resource -> new ResourceStandalone(resource, resources.getContributions(resource))).toList();
     }
 
     @PatchMapping("/factory/resources/order")

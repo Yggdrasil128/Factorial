@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
@@ -7,6 +8,7 @@ import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +77,7 @@ public class ChangelistController {
 
     private static void applyBasics(ChangelistStandalone input, Changelist changelist) {
         OptionalInputField.of(input.getName()).apply(changelist::setName);
+        // we cannot update primary/active here, see error reports above
     }
 
     private void applyRelations(ChangelistStandalone input, Changelist changelist) {
@@ -86,22 +89,60 @@ public class ChangelistController {
         changelistService.delete(changelistId);
     }
 
+    /**
+     * Applies the target {@link Changelist}.
+     * <p>
+     * This will apply the {@link Changelist#getProductionStepChanges() changes} to the individual {@link ProductionStep
+     * ProductionSteps}, which means that the production step's {@link ProductionStep#getMachineCount() machine count}
+     * will be changed by the respective amount. Additionally, the changelist's changes will be cleared.
+     * 
+     * @param changelistId the {@link Changelist#getId() id} of the target {@link Changelist}
+     */
     @PostMapping("/changelist/apply")
     public void apply(int changelistId) {
-        changelistService.apply(changelistId);
+        Changelist changelist = changelistService.get(changelistId);
+        ProductionStepChanges changes = saveService.computeProductionStepChanges(changelist.getSave());
+        changelistService.apply(changelist, changes);
     }
 
+    /**
+     * Makes the target {@link Changelist} that primary changelist.
+     * <p>
+     * This will change the {@link Changelist#isPrimary() primary} flag of the target {@link Changelist} to {@code true}
+     * and the {@link Changelist#isPrimary() priamry} flag of the current primary changelist to {@code false}.
+     * Additionally, the changes to affected {@link ProductionStep ProductionSteps} will be reflected as well.
+     * 
+     * @param changelistId the {@link Changelist#getId() id} of the target {@link Changelist}
+     */
     @PatchMapping("/changelist/primary")
     public void makePrimary(int changelistId) {
-        changelistService.makePrimary(changelistId,
-                changelist -> saveService.computeChangelists(changelist.getSave()).getPrimary());
-        // TODO invalidate affected production steps and enclosing factories
+        Changelist changelist = changelistService.get(changelistId);
+        if (!changelist.isPrimary()) {
+            Changelist oldPrimary = changelistService
+                    .get(saveService.computeProductionStepChanges(changelist.getSave()).getPrimaryChangelistId());
+            changelistService.setPrimaryActive(changelist, true, true);
+            changelistService.setPrimaryActive(oldPrimary, false, oldPrimary.isActive());
+        }
     }
 
+    /**
+     * Updates the {@link Changelist#isActive()} flag of the target {@link Changelist}.
+     * <p>
+     * This operation is valid only for changelists that are not the {@link Changelist#isPrimary() primary} changelist,
+     * aside from setting the primary changelist to active, which is a no-op. Additionally, the changes to affected
+     * {@link ProductionStep ProductionSteps} will be reflected as well.
+     * 
+     * @param changelistId the {@link Changelist#getId() id} of the target {@link Changelist}
+     * @param active the new value for the active flag
+     */
     @PatchMapping("/changelist/active")
     public void setActive(int changelistId, boolean active) {
-        changelistService.setActive(changelistId, active);
-        // TODO invalidate affected production steps and enclosing factories
+        Changelist changelist = changelistService.get(changelistId);
+        if (!changelist.isPrimary()) {
+            changelistService.setPrimaryActive(changelist, false, active);
+        } else if (!active) {
+            throw ModelService.report(HttpStatus.CONFLICT, "cannot set primary changelist to inactive");
+        }
     }
 
 }

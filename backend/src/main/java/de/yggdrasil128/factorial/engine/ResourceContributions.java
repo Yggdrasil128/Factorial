@@ -6,6 +6,11 @@ import de.yggdrasil128.factorial.model.resource.Resource;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * For a single item, represents how much of it is produced and consumed within a <i>production line</i>.
+ * 
+ * @see ProductionLineResources
+ */
 public class ResourceContributions {
 
     private static QuantityByChangelist ZERO = QuantityByChangelist.allAt(Fraction.ZERO);

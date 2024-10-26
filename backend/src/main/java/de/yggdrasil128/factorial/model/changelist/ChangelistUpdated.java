@@ -5,11 +5,11 @@ import de.yggdrasil128.factorial.model.ModelChanged;
 public class ChangelistUpdated implements ModelChanged {
 
     private final Changelist changelist;
-    private final boolean primaryActiveChanged;
+    private final boolean updateProductionSteps;
 
-    public ChangelistUpdated(Changelist changelist, boolean primaryActiveChanged) {
+    public ChangelistUpdated(Changelist changelist, boolean updateProductionSteps) {
         this.changelist = changelist;
-        this.primaryActiveChanged = primaryActiveChanged;
+        this.updateProductionSteps = updateProductionSteps;
     }
 
     @Override
@@ -21,8 +21,8 @@ public class ChangelistUpdated implements ModelChanged {
         return changelist;
     }
 
-    public boolean isPrimaryActiveChanged() {
-        return primaryActiveChanged;
+    public boolean isUpdateProductionSteps() {
+        return updateProductionSteps;
     }
 
 }

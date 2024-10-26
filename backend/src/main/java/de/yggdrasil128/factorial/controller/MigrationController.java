@@ -46,7 +46,7 @@ public class MigrationController {
     }
 
     @GetMapping("/save")
-    public SaveSummary erxportSave(int saveId) {
+    public SaveSummary exportSave(int saveId) {
         return Exporter.exportSave(saveService.get(saveId), RelationRepresentation.NAME);
     }
 

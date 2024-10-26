@@ -1,37 +1,58 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.resource.Resource;
+import jakarta.persistence.Entity;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 
+/**
+ * Manages the {@link ResourceContributions} in a <i>production line</i>, which is some {@link Entity} for which we
+ * maintain a list of {@link Production Productions}, which we call <i>contributors</i>.
+ * <p>
+ * To be kept up-to-date, this implementation must be notified about changes to contributors, namely
+ * <ul>
+ * <li>{@link #addContributor(Production)}</li>
+ * <li>{@link #updateContributor(Production)}</li>
+ * <li>{@link #removeContributor(Production)}</li>
+ * </ul>
+ */
 public class ProductionLineResources {
 
     // key is Item.id, but we must not keep references to the entities here
     private final Map<Integer, ResourceContributions> contributions = new HashMap<>();
     private final IntFunction<? extends ResourceContributions> resourceFactory;
-    private final BiConsumer<? super Integer, ? super ResourceContributions> resourceNotifier;
+    private final Consumer<? super ResourceContributions> resourceNotifier;
     private final IntConsumer resourceFinalizer;
 
     public ProductionLineResources(IntFunction<? extends ResourceContributions> resourceFactory,
-                                   BiConsumer<? super Integer, ? super ResourceContributions> resourceNotifier,
+                                   Consumer<? super ResourceContributions> resourceNotifier,
                                    IntConsumer resourceFinalizer) {
         this.resourceFactory = resourceFactory;
         this.resourceNotifier = resourceNotifier;
         this.resourceFinalizer = resourceFinalizer;
     }
 
-    public Map<Integer, ResourceContributions> getContributions() {
-        return contributions;
+    public ResourceContributions getContributions(Resource resource) {
+        return contributions.get(resource.getItem().getId());
     }
 
+    /**
+     * Manually adds a {@link Resource} for the production line.
+     * <p>
+     * This method is meant primarily for populating the resources of a production line before any contributors were
+     * added (which is optional). Also, this is (currently) required for resources that have no contributors but are
+     * simply for importing/exporting items to/from a factory.
+     * 
+     * @param resource the {@link Resource} for which to track contributions
+     */
     public void addResource(Resource resource) {
-        contributions.put(resource.getItem().getId(), new ResourceContributions(resource));
+        contributions.putIfAbsent(resource.getItem().getId(), new ResourceContributions(resource));
     }
 
     public void addContributor(Production contributor) {
@@ -41,21 +62,15 @@ public class ProductionLineResources {
          */
         Map<Integer, ResourceContributions> modified = new HashMap<>();
         for (Integer input : contributor.getInputs().keySet()) {
-            ResourceContributions contribution = contributions.compute(input,
-                    (itemId, previous) -> computeIfAbsent(modified, itemId, previous));
-            if (contribution.getConsumers().add(contributor)) {
-                modified.put(input, contribution);
-            }
+            contributions.compute(input, (itemId, previous) -> computeIfAbsent(modified, itemId, previous))
+                    .getConsumers().add(contributor);
         }
         for (Integer output : contributor.getOutputs().keySet()) {
-            ResourceContributions contribution = contributions.compute(output,
-                    (itemId, previous) -> computeIfAbsent(modified, itemId, previous));
-            if (contribution.getProducers().add(contributor)) {
-                modified.put(output, contribution);
-            }
+            contributions.compute(output, (itemId, previous) -> computeIfAbsent(modified, itemId, previous))
+                    .getProducers().add(contributor);
         }
-        for (Map.Entry<Integer, ResourceContributions> entry : modified.entrySet()) {
-            resourceNotifier.accept(entry.getKey(), entry.getValue());
+        for (ResourceContributions contribution : modified.values()) {
+            resourceNotifier.accept(contribution);
         }
     }
 
@@ -68,6 +83,17 @@ public class ProductionLineResources {
         return previous;
     }
 
+    /**
+     * Notifies of an update on a contributor.
+     * <p>
+     * This implementation assumes that the provided object
+     * <ul>
+     * <li>reflects the updated state</li>
+     * <li>is the exact contributor that is currently known to this production line</li>
+     * </ul>
+     * 
+     * @param contributor the contributor that was updated
+     */
     public void updateContributor(Production contributor) {
         /*
          * We don't need to invalidate anything locally, because the ProductionStep updates its throughputs without
@@ -77,7 +103,7 @@ public class ProductionLineResources {
         affected.addAll(contributor.getInputs().keySet());
         affected.addAll(contributor.getOutputs().keySet());
         for (Integer itemId : affected) {
-            resourceNotifier.accept(itemId, contributions.get(itemId));
+            resourceNotifier.accept(contributions.get(itemId));
         }
     }
 
@@ -104,7 +130,7 @@ public class ProductionLineResources {
                 contributions.remove(entry.getKey());
                 resourceFinalizer.accept(entry.getKey());
             } else {
-                resourceNotifier.accept(entry.getKey(), entry.getValue());
+                resourceNotifier.accept(entry.getValue());
             }
         }
     }

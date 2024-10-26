@@ -5,9 +5,11 @@ import de.yggdrasil128.factorial.model.ModelChanged;
 public class ProductionStepUpdated implements ModelChanged {
 
     private final ProductionStep productionStep;
+    private final boolean recipeChanged;
 
-    public ProductionStepUpdated(ProductionStep productionStep) {
+    public ProductionStepUpdated(ProductionStep productionStep, boolean recipeChanged) {
         this.productionStep = productionStep;
+        this.recipeChanged = recipeChanged;
     }
 
     @Override
@@ -17,6 +19,10 @@ public class ProductionStepUpdated implements ModelChanged {
 
     public ProductionStep getProductionStep() {
         return productionStep;
+    }
+
+    public boolean isRecipeChanged() {
+        return recipeChanged;
     }
 
 }

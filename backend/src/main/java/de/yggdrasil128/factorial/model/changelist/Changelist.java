@@ -116,7 +116,7 @@ public class Changelist implements NamedModel {
 
     @Override
     public String toString() {
-        return name;
+        return name + ": " + productionStepChanges;
     }
 
 }

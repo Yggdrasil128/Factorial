@@ -6,4 +6,6 @@ public interface SaveRepository extends CrudRepository<Save, Integer> {
 
     Save findByFactoriesId(int id);
 
+    Save findByChangelistsId(int id);
+
 }

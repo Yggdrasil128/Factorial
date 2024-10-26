@@ -1,7 +1,15 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
+import de.yggdrasil128.factorial.model.changelist.Changelist;
 
+import java.util.Objects;
+
+/**
+ * Bundles three {@link Fraction} values according to primary/active {@link Changelist Changelists}.
+ * <p>
+ * Instances of this class are immutable and value-based.
+ */
 public class QuantityByChangelist {
 
     private final Fraction current;
@@ -36,19 +44,29 @@ public class QuantityByChangelist {
                 this.withActiveChangelists.add(that.withActiveChangelists));
     }
 
-    public QuantityByChangelist subtract(QuantityByChangelist that) {
-        return new QuantityByChangelist(this.current.subtract(that.current),
-                this.withPrimaryChangelist.subtract(that.withPrimaryChangelist),
-                this.withActiveChangelists.subtract(that.withActiveChangelists));
+    public QuantityByChangelist add(Fraction value) {
+        return new QuantityByChangelist(current.add(value), withPrimaryChangelist.add(value),
+                withActiveChangelists.add(value));
     }
 
-    public QuantityByChangelist multiplyCurrent(Fraction factor) {
-        return new QuantityByChangelist(current.multiply(factor), withPrimaryChangelist, withActiveChangelists);
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof QuantityByChangelist)) {
+            return false;
+        }
+        QuantityByChangelist that = (QuantityByChangelist) obj;
+        return this.current.equals(that.current) && this.withPrimaryChangelist.equals(that.withPrimaryChangelist)
+                && this.withActiveChangelists.equals(that.withActiveChangelists);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(current, withPrimaryChangelist, withActiveChangelists);
     }
 
     @Override
     public String toString() {
-        return "[current = " + current + ", primary = " + withActiveChangelists + ", active = " + withActiveChangelists
+        return "[current = " + current + ", primary = " + withPrimaryChangelist + ", active = " + withActiveChangelists
                 + " ]";
     }
 

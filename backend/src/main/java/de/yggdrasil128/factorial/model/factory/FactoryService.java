@@ -1,15 +1,13 @@
 package de.yggdrasil128.factorial.model.factory;
 
-import de.yggdrasil128.factorial.engine.Changelists;
 import de.yggdrasil128.factorial.engine.ProductionLineResources;
+import de.yggdrasil128.factorial.engine.ProductionStepChanges;
+import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.item.ItemService;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepRemoved;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepThroughputsChanged;
+import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.resource.ResourceContributionsChanged;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
@@ -58,28 +56,27 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     }
 
     public void addAttachedProductionStep(Factory factory, ProductionStep productionStep,
-                                          Supplier<? extends Changelists> changelists) {
+                                          Supplier<? extends ProductionStepChanges> changes) {
         factory.getProductionSteps().add(productionStep);
         repository.save(factory);
-        ProductionLineResources resources = cache.get(factory.getId());
-        if (null != resources) {
-            resources.addContributor(productionStepService.computeThroughputs(productionStep, changelists));
-        }
+        ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep, changes);
+        events.publishEvent(new ProductionStepThroughputsChanged(productionStep, throughputs, true));
     }
 
-    public ProductionLineResources computeResources(Factory factory, Supplier<? extends Changelists> changelists) {
-        return cache.computeIfAbsent(factory.getId(), key -> initProductionLineResources(factory, changelists));
+    public ProductionLineResources computeResources(Factory factory,
+                                                    Supplier<? extends ProductionStepChanges> changes) {
+        return cache.computeIfAbsent(factory.getId(), key -> initProductionLineResources(factory, changes));
     }
 
     private ProductionLineResources initProductionLineResources(Factory factory,
-                                                                Supplier<? extends Changelists> changelists) {
+                                                                Supplier<? extends ProductionStepChanges> changes) {
         ProductionLineResources resources = new ProductionLineResources(itemId -> spawnResource(factory, itemId),
                 this::fireResourceUpdated, resourceService::delete);
         for (Resource resource : factory.getResources()) {
             resources.addResource(resource);
         }
         for (ProductionStep productionStep : factory.getProductionSteps()) {
-            resources.addContributor(productionStepService.computeThroughputs(productionStep, changelists));
+            resources.addContributor(productionStepService.computeThroughputs(productionStep, changes));
         }
         return resources;
     }
@@ -88,8 +85,9 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         return resourceService.spawn(factory, itemService.get(itemId));
     }
 
-    private void fireResourceUpdated(int resourceId, ResourceContributions contributions) {
-        events.publishEvent(new ResourceContributionsChanged(resourceService.get(resourceId), contributions));
+    private void fireResourceUpdated(ResourceContributions contributions) {
+        events.publishEvent(
+                new ResourceContributionsChanged(resourceService.get(contributions.getResourceId()), contributions));
     }
 
     public void reorder(Save save, List<ReorderInputEntry> input) {
@@ -121,24 +119,34 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
     }
 
     @EventListener
-    public void on(ProductionStepThroughputsChanged event) {
+    public void on(ProductionStepUpdated event) {
         ProductionLineResources resources = cache.get(event.getProductionStep().getFactory().getId());
         if (null != resources) {
-            if (event.isRecipeChanged()) {
-                resources.removeContributor(event.getThroughputs());
-                resources.addContributor(event.getThroughputs());
+            if (event instanceof ProductionStepThroughputsChanged throughputEvent) {
+                if (event.isRecipeChanged()) {
+                    resources.removeContributor(throughputEvent.getThroughputs());
+                    resources.addContributor(throughputEvent.getThroughputs());
+                } else {
+                    resources.updateContributor(throughputEvent.getThroughputs());
+                }
             } else {
-                resources.updateContributor(event.getThroughputs());
+                // TODO find a better solution
+                // we don't have access to the new throughputs here, so we can only do a full invalidate
+                cache.remove(event.getProductionStep().getFactory().getId());
             }
         }
     }
 
     @EventListener
     public void on(ProductionStepRemoved event) {
-        if (null != event.getThroughputs()) {
-            ProductionLineResources resources = cache.get(event.getFactoryId());
-            if (null != resources) {
+        ProductionLineResources resources = cache.get(event.getFactoryId());
+        if (null != resources) {
+            if (null != event.getThroughputs()) {
                 resources.removeContributor(event.getThroughputs());
+            } else {
+                // TODO find a better solution
+                // we don't have access to the old throughputs here, so we can only do a full invalidate
+                cache.remove(event.getFactoryId());
             }
         }
     }

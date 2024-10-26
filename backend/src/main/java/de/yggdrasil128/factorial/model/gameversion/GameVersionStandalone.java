@@ -1,10 +1,14 @@
 package de.yggdrasil128.factorial.model.gameversion;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
+import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
+
 public class GameVersionStandalone {
 
+    @JsonProperty(access = READ_ONLY)
     private int id;
     private String name;
     private Object icon;
