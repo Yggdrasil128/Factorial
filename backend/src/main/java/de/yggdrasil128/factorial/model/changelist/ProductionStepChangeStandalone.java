@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ProductionStepChangeStandalone {
 
-    private Object productionStep;
+    private Object productionStepId;
     private Fraction change;
 
     public ProductionStepChangeStandalone() {
@@ -16,16 +16,16 @@ public class ProductionStepChangeStandalone {
 
     public ProductionStepChangeStandalone(Map.Entry<ProductionStep, Fraction> model,
                                           RelationRepresentation resolveStrategy) {
-        productionStep = ProductionStep.resolve(model.getKey(), resolveStrategy);
+        productionStepId = ProductionStep.resolve(model.getKey(), resolveStrategy);
         change = model.getValue();
     }
 
-    public Object getProductionStep() {
-        return productionStep;
+    public Object getProductionStepId() {
+        return productionStepId;
     }
 
-    public void setProductionStep(Object productionStep) {
-        this.productionStep = productionStep;
+    public void setProductionStepId(Object productionStep) {
+        this.productionStepId = productionStep;
     }
 
     public Fraction getChange() {

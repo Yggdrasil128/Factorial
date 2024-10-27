@@ -6,16 +6,16 @@ import java.util.Map;
 
 public class ProductionEntryStandalone {
 
-    private final int item;
+    private final int itemId;
     private final QuantityByChangelist quantity;
 
     public ProductionEntryStandalone(Map.Entry<Integer, QuantityByChangelist> entry) {
-        item = entry.getKey().intValue();
+        itemId = entry.getKey().intValue();
         quantity = entry.getValue();
     }
 
-    public int getItem() {
-        return item;
+    public int getItemId() {
+        return itemId;
     }
 
     public QuantityByChangelist getQuantity() {

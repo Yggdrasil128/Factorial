@@ -10,7 +10,7 @@ public class SaveStandalone {
 
     @JsonProperty(access = READ_ONLY)
     private int id;
-    private Object gameVersion;
+    private Object gameVersionId;
     private String name;
 
     public SaveStandalone() {
@@ -22,7 +22,7 @@ public class SaveStandalone {
 
     public SaveStandalone(Save model, RelationRepresentation resolveStrategy) {
         id = model.getId();
-        gameVersion = NamedModel.resolve(model.getGameVersion(), resolveStrategy);
+        gameVersionId = NamedModel.resolve(model.getGameVersion(), resolveStrategy);
         name = model.getName();
     }
 
@@ -30,12 +30,12 @@ public class SaveStandalone {
         return id;
     }
 
-    public Object getGameVersion() {
-        return gameVersion;
+    public Object getGameVersionId() {
+        return gameVersionId;
     }
 
-    public void setGameVersion(Object gameVersion) {
-        this.gameVersion = gameVersion;
+    public void setGameVersionId(Object gameVersionId) {
+        this.gameVersionId = gameVersionId;
     }
 
     public String getName() {

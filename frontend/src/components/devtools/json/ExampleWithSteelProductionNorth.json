@@ -1,6 +1,6 @@
 {
     "save": {
-        "gameVersion": "Satisfactory Update 7",
+        "gameVersionId": "Satisfactory Update 7",
         "name": "Example"
     },
     "factories": [
@@ -11,57 +11,57 @@
             },
             "productionSteps": [
                 {
-                    "machine": "Water Extractor",
-                    "recipe": "Water",
+                    "machineId": "Water Extractor",
+                    "recipeId": "Water",
                     "machineCount": "4"
                 },
                 {
-                    "machine": "Miner Mk. 3",
-                    "recipe": "Iron Ore",
-                    "modifiers": [
+                    "machineId": "Miner Mk. 3",
+                    "recipeId": "Iron Ore",
+                    "modifierIds": [
                         "Pure Node"
                     ],
                     "machineCount": "13 / 8"
                 },
                 {
-                    "machine": "Miner Mk. 3",
-                    "recipe": "Coal",
+                    "machineId": "Miner Mk. 3",
+                    "recipeId": "Coal",
                     "machineCount": "9 / 2"
                 },
                 {
-                    "machine": "Refinery",
-                    "recipe": "Pure Iron Ingot",
+                    "machineId": "Refinery",
+                    "recipeId": "Pure Iron Ingot",
                     "machineCount": "312 / 14"
                 },
                 {
-                    "machine": "Foundry",
-                    "recipe": "Solid Steel Ingot",
+                    "machineId": "Foundry",
+                    "recipeId": "Solid Steel Ingot",
                     "machineCount": "36"
                 }
             ],
             "resources": [
                 {
-                    "item": "Water",
+                    "itemId": "Water",
                     "imported": false,
                     "exported": false
                 },
                 {
-                    "item": "Iron Ore",
+                    "itemId": "Iron Ore",
                     "imported": false,
                     "exported": false
                 },
                 {
-                    "item": "Coal",
+                    "itemId": "Coal",
                     "imported": false,
                     "exported": false
                 },
                 {
-                    "item": "Iron Ingot",
+                    "itemId": "Iron Ingot",
                     "imported": false,
                     "exported": false
                 },
                 {
-                    "item": "Steel Ingot",
+                    "itemId": "Steel Ingot",
                     "imported": false,
                     "exported": true
                 }
@@ -75,7 +75,7 @@
             "productionSteps": [],
             "resources": [
                 {
-                    "item": "Steel Ingot",
+                    "itemId": "Steel Ingot",
                     "imported": true,
                     "exported": false
                 }

@@ -45,7 +45,7 @@ public class SaveController {
 
     @PostMapping("/saves")
     public SaveStandalone create(@RequestBody SaveStandalone input) {
-        GameVersion gameVersion = gameVersionService.get((int) input.getGameVersion());
+        GameVersion gameVersion = gameVersionService.get((int) input.getGameVersionId());
         Save save = new Save(gameVersion, input);
         save.setGameVersion(gameVersion);
         return new SaveStandalone(saveService.create(save));
@@ -91,7 +91,7 @@ public class SaveController {
     public SaveStandalone update(int saveId, @RequestBody SaveStandalone input) {
         Save save = saveService.get(saveId);
         applyBasics(input, save);
-        if (0 != (int) input.getGameVersion()) {
+        if (0 != (int) input.getGameVersionId()) {
             throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
         }
         return new SaveStandalone(saveService.update(save));

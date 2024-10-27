@@ -50,7 +50,7 @@ public class RecipeController {
     }
 
     private ItemQuantity createResoruce(ItemQuantityStandalone input) {
-        return new ItemQuantity(itemService.get((int) input.getItem()), input.getQuantity());
+        return new ItemQuantity(itemService.get((int) input.getItemId()), input.getQuantity());
     }
 
     @GetMapping("/gameVersion/recipes")
@@ -80,10 +80,10 @@ public class RecipeController {
     private void applyRelations(RecipeStandalone input, Recipe recipe) {
         OptionalInputField.of(input.getIngredients()).map(this::createResoruce).apply(recipe::setIngredients);
         OptionalInputField.of(input.getProducts()).map(this::createResoruce).apply(recipe::setProducts);
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipe::setIcon);
-        OptionalInputField.ofIds(input.getApplicableModifiers(), recipeModifierService::get)
+        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(recipe::setIcon);
+        OptionalInputField.ofIds(input.getApplicableModifierIds(), recipeModifierService::get)
                 .applyList(recipe::setApplicableModifiers);
-        OptionalInputField.ofIds(input.getApplicableMachines(), machineService::get)
+        OptionalInputField.ofIds(input.getApplicableMachineIds(), machineService::get)
                 .applyList(recipe::setApplicableMachines);
     }
 

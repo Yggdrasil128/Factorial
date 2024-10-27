@@ -25,7 +25,7 @@ public class Changelist implements NamedModel {
     private boolean primary;
     private boolean active;
     @ManyToOne
-    private Icon icon;
+    private Icon iconId;
     @ElementCollection
     private Map<ProductionStep, Fraction> productionStepChanges;
 
@@ -38,7 +38,7 @@ public class Changelist implements NamedModel {
         name = standalone.getName();
         primary = standalone.isPrimary();
         active = standalone.isActive();
-        icon = null;
+        iconId = null;
         productionStepChanges = new HashMap<>();
     }
 
@@ -88,12 +88,12 @@ public class Changelist implements NamedModel {
         this.active = active;
     }
 
-    public Icon getIcon() {
-        return icon;
+    public Icon getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Icon icon) {
-        this.icon = icon;
+    public void setIconId(Icon iconId) {
+        this.iconId = iconId;
     }
 
     public Map<ProductionStep, Fraction> getProductionStepChanges() {

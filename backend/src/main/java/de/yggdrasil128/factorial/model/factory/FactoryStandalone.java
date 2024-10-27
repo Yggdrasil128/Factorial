@@ -17,9 +17,9 @@ public class FactoryStandalone {
     private int ordinal;
     private String name;
     private String description;
-    private Object icon;
-    private List<Object> productionSteps;
-    private List<Object> resources;
+    private Object iconId;
+    private List<Object> productionStepIds;
+    private List<Object> resourceIds;
 
     public FactoryStandalone() {
     }
@@ -34,11 +34,11 @@ public class FactoryStandalone {
         ordinal = model.getOrdinal();
         name = model.getName();
         description = model.getDescription();
-        icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        iconId = NamedModel.resolve(model.getIcon(), resolveStrategy);
         if (RelationRepresentation.ID == resolveStrategy) {
-            productionSteps = NamedModel.resolve(model.getProductionSteps(), resolveStrategy,
+            productionStepIds = NamedModel.resolve(model.getProductionSteps(), resolveStrategy,
                     (productionStep, strategy) -> productionStep.getId());
-            resources = NamedModel.resolve(model.getResources(), resolveStrategy,
+            resourceIds = NamedModel.resolve(model.getResources(), resolveStrategy,
                     (resource, strategy) -> resource.getId());
         }
     }
@@ -75,28 +75,28 @@ public class FactoryStandalone {
         this.description = description;
     }
 
-    public Object getIcon() {
-        return icon;
+    public Object getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Object icon) {
-        this.icon = icon;
+    public void setIconId(Object iconId) {
+        this.iconId = iconId;
     }
 
-    public List<Object> getProductionSteps() {
-        return productionSteps;
+    public List<Object> getProductionStepIds() {
+        return productionStepIds;
     }
 
-    public void setProductionSteps(List<Object> productionSteps) {
-        this.productionSteps = productionSteps;
+    public void setProductionStepIds(List<Object> productionStepIds) {
+        this.productionStepIds = productionStepIds;
     }
 
-    public List<Object> getResources() {
-        return resources;
+    public List<Object> getResourceIds() {
+        return resourceIds;
     }
 
-    public void setResources(List<Object> resources) {
-        this.resources = resources;
+    public void setResourceIds(List<Object> resourceIds) {
+        this.resourceIds = resourceIds;
     }
 
 }

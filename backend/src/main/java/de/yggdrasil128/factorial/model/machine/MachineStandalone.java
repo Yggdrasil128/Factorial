@@ -15,8 +15,8 @@ public class MachineStandalone {
     @JsonProperty(access = READ_ONLY)
     private int gameVersionId;
     private String name;
-    private Object icon;
-    private List<Object> machineModifiers;
+    private Object iconId;
+    private List<Object> machineModifierIds;
     private List<String> category;
 
     public MachineStandalone() {
@@ -30,8 +30,8 @@ public class MachineStandalone {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();
         name = model.getName();
-        icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
-        machineModifiers = NamedModel.resolve(model.getMachineModifiers(), resolveStrategy);
+        iconId = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        machineModifierIds = NamedModel.resolve(model.getMachineModifiers(), resolveStrategy);
         category = model.getCategory();
     }
 
@@ -51,20 +51,20 @@ public class MachineStandalone {
         this.name = name;
     }
 
-    public Object getIcon() {
-        return icon;
+    public Object getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Object icon) {
-        this.icon = icon;
+    public void setIconId(Object iconId) {
+        this.iconId = iconId;
     }
 
-    public List<Object> getMachineModifiers() {
-        return machineModifiers;
+    public List<Object> getMachineModifierIds() {
+        return machineModifierIds;
     }
 
-    public void setMachineModifiers(List<Object> machineModifiers) {
-        this.machineModifiers = machineModifiers;
+    public void setMachineModifierIds(List<Object> machineModifierIds) {
+        this.machineModifierIds = machineModifierIds;
     }
 
     public List<String> getCategory() {

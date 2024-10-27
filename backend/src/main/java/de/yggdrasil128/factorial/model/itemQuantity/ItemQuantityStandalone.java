@@ -6,7 +6,7 @@ import de.yggdrasil128.factorial.model.RelationRepresentation;
 
 public class ItemQuantityStandalone {
 
-    private Object item;
+    private Object itemId;
     private Fraction quantity;
 
     public ItemQuantityStandalone() {
@@ -17,16 +17,16 @@ public class ItemQuantityStandalone {
     }
 
     public ItemQuantityStandalone(ItemQuantity model, RelationRepresentation resolveStrategy) {
-        item = NamedModel.resolve(model.getItem(), resolveStrategy);
+        itemId = NamedModel.resolve(model.getItem(), resolveStrategy);
         quantity = model.getQuantity();
     }
 
-    public Object getItem() {
-        return item;
+    public Object getItemId() {
+        return itemId;
     }
 
-    public void setItem(Object item) {
-        this.item = item;
+    public void setItemId(Object itemId) {
+        this.itemId = itemId;
     }
 
     public Fraction getQuantity() {

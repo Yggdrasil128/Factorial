@@ -58,7 +58,7 @@ public class Importer {
         for (RecipeStandalone recipe : summary.getRecipes()) {
             gameVersion.getRecipes().add(importer.importRecipe(gameVersion, recipe));
         }
-        gameVersion.setIcon(importer.findIcon(input.getIcon()));
+        gameVersion.setIcon(importer.findIcon(input.getIconId()));
         return gameVersion;
     }
 
@@ -127,59 +127,59 @@ public class Importer {
 
     private Item importItem(GameVersion gameVersion, ItemStandalone input) {
         Item item = new Item(gameVersion, input);
-        item.setIcon(findIcon(input.getIcon()));
+        item.setIcon(findIcon(input.getIconId()));
         items.put(item.getName(), item);
         return item;
     }
 
     private RecipeModifier importRecipeModifier(GameVersion gameVersion, RecipeModifierStandalone input) {
         RecipeModifier recipeModifier = new RecipeModifier(gameVersion, input);
-        recipeModifier.setIcon(findIcon(input.getIcon()));
+        recipeModifier.setIcon(findIcon(input.getIconId()));
         recipeModifiers.put(recipeModifier.getName(), recipeModifier);
         return recipeModifier;
     }
 
     private Machine importMachine(GameVersion gameVersion, MachineStandalone input) {
         Machine machine = new Machine(gameVersion, input);
-        machine.setIcon(findIcon(input.getIcon()));
-        machine.setMachineModifiers(findRecipeModifiers(input.getMachineModifiers()));
+        machine.setIcon(findIcon(input.getIconId()));
+        machine.setMachineModifiers(findRecipeModifiers(input.getMachineModifierIds()));
         machines.put(machine.getName(), machine);
         return machine;
     }
 
     private Recipe importRecipe(GameVersion gameVersion, RecipeStandalone input) {
         Recipe recipe = new Recipe(gameVersion, input);
-        recipe.setIcon(findIcon(input.getIcon()));
+        recipe.setIcon(findIcon(input.getIconId()));
         recipe.setIngredients(findResources(input.getIngredients()));
         recipe.setProducts(findResources(input.getProducts()));
-        recipe.setApplicableModifiers(findRecipeModifiers(input.getApplicableModifiers()));
-        recipe.setApplicableMachines(findMachines(input.getApplicableMachines()));
+        recipe.setApplicableModifiers(findRecipeModifiers(input.getApplicableModifierIds()));
+        recipe.setApplicableMachines(findMachines(input.getApplicableMachineIds()));
         return recipe;
     }
 
     private Factory importFactory(Save save, FactoryStandalone input) {
         Factory factory = new Factory(save, input);
-        factory.setIcon(findIcon(input.getIcon()));
+        factory.setIcon(findIcon(input.getIconId()));
         return factory;
     }
 
     private ProductionStep importProductionStep(Factory factory, ProductionStepStandalone input) {
         ProductionStep productionStep = new ProductionStep(factory, input);
-        productionStep.setMachine(findMachine(input.getMachine()));
-        productionStep.setRecipe(findRecipe(input.getRecipe()));
-        productionStep.setModifiers(findRecipeModifiers(input.getModifiers()));
+        productionStep.setMachine(findMachine(input.getMachineId()));
+        productionStep.setRecipe(findRecipe(input.getRecipeId()));
+        productionStep.setModifiers(findRecipeModifiers(input.getModifierIds()));
         return productionStep;
     }
 
     private Resource importResource(Factory factory, ResourceStandalone input) {
         Resource resource = new Resource(factory, input);
-        resource.setItem(findItem(input.getItem()));
+        resource.setItem(findItem(input.getItemId()));
         return resource;
     }
 
     private Changelist importChangelist(Save save, ChangelistStandalone input) {
         Changelist changelist = new Changelist(save, input);
-        changelist.setIcon(findIcon(input.getIcon()));
+        changelist.setIconId(findIcon(input.getIconId()));
         changelist.setProductionStepChanges(findProductionStepChanges(save, input.getProductionStepChanges()));
         return changelist;
     }
@@ -219,7 +219,7 @@ public class Importer {
     private List<ItemQuantity> findResources(List<ItemQuantityStandalone> standalones) {
         return null == standalones ? new ArrayList<>()
                 : standalones.stream()
-                        .map(standalone -> new ItemQuantity(findItem(standalone.getItem()), standalone.getQuantity()))
+                        .map(standalone -> new ItemQuantity(findItem(standalone.getItemId()), standalone.getQuantity()))
                         .filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -239,7 +239,7 @@ public class Importer {
             findProductionStepChanges(Save save, List<ProductionStepChangeStandalone> standalones) {
         return null == standalones ? new HashMap<>() : standalones.stream().collect(Collectors.toMap(standalone -> {
             // TODO error handling
-            String[] parts = ((String) standalone.getProductionStep()).split("\\.");
+            String[] parts = ((String) standalone.getProductionStepId()).split("\\.");
             return save.getFactories().get(Integer.parseInt(parts[0])).getProductionSteps()
                     .get(Integer.parseInt(parts[1]));
         }, ProductionStepChangeStandalone::getChange));
