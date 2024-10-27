@@ -29,7 +29,10 @@ public class IconStandalone {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();
         name = model.getName();
-        imageData = model.getImageData();
+        // TODO I guess we are starting to need something slightly more sophisticated
+        if (RelationRepresentation.NAME == resolveStrategy) {
+            imageData = model.getImageData();
+        }
         mimeType = model.getMimeType();
         category = model.getCategory();
     }
