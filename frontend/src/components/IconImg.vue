@@ -1,21 +1,47 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { Icon } from '@/types/model/standalone';
+import { useIconStore } from '@/stores/model/iconStore';
 
-const props = defineProps(['icon', 'size']);
+export interface IconImgProps {
+  icon?: Icon;
+  iconId?: number;
+  size: number;
+}
+
+const props: IconImgProps = defineProps<IconImgProps>();
+
+const iconStore = useIconStore();
 
 const src = computed(() => {
-  if (props.icon.url.startsWith('http')) {
-    return props.icon.url;
+  if (props.icon) {
+    return 'http://localhost:8080/api/icons?id=' + props.icon.id;
   }
-  return 'http://localhost:8080' + props.icon.url;
+  if (props.iconId) {
+    return 'http://localhost:8080/api/icons?id=' + props.iconId;
+  }
+  return '';
+});
+
+const alt = computed(() => {
+  if (props.icon) {
+    return props.icon.name;
+  }
+  if (props.iconId) {
+    const icon = iconStore.map.get(props.iconId);
+    if (icon) {
+      return icon.name;
+    }
+  }
+  return '';
 });
 </script>
 
 <template>
   <img
-    v-if="icon"
+    v-if="src"
     :src="src"
-    :alt="icon.name"
+    :alt="alt"
     :style="{ width: size + 'px', height: size + 'px' }"
   />
 </template>
