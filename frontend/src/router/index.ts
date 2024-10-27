@@ -3,15 +3,15 @@ import { createRouter } from 'vue-router';
 
 import HomePage from '@/components/HomePage.vue';
 import AboutPage from '@/components/AboutPage.vue';
-// @ts-ignore TS7016
+// @ts-expect-error TS7016
 import FactoriesOverview from '@/components/factories/FactoriesOverview.vue';
-// @ts-ignore TS7016
+// @ts-expect-error TS7016
 import DevTools from '@/components/devtools/DevTools.vue';
-// @ts-ignore TS7016
+// @ts-expect-error TS7016
 import EditFactoryModal from '@/components/factories/EditFactoryModal.vue';
-// @ts-ignore TS7016
+// @ts-expect-error TS7016
 import EditChangelistModal from '@/components/factories/EditChangelistModal.vue';
-// @ts-ignore TS7016
+// @ts-expect-error TS7016
 import EditProductionStepModal from '@/components/factories/EditProductionStepModal.vue';
 
 const router = createRouter({

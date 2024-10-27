@@ -2,6 +2,7 @@
 import { inject, ref } from 'vue';
 import { Check, WarnTriangleFilled } from '@element-plus/icons-vue';
 import { ElButton, ElOption, ElSelect } from 'element-plus';
+import ModelStoresDisplay from '@/components/devtools/ModelStoresDisplay.vue';
 
 const axios = inject('axios');
 
@@ -92,6 +93,9 @@ async function importJsonFile(kind, filename) {
     >
       Setup test data
     </el-button>
+  </p>
+  <p>
+    <ModelStoresDisplay />
   </p>
 </template>
 

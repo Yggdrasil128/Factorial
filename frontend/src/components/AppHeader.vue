@@ -43,6 +43,7 @@ const versionInfo = ref({ version: '1.0-SNAPSHOT' });
 
 #appTitle {
   font-size: 30px;
+  font-style: italic;
 }
 
 #madeBy {
