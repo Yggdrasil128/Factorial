@@ -81,7 +81,7 @@ public class ChangelistController {
     }
 
     private void applyRelations(ChangelistStandalone input, Changelist changelist) {
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(changelist::setIcon);
+        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(changelist::setIconId);
     }
 
     @DeleteMapping("/changelist")

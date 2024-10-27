@@ -82,29 +82,29 @@
     "items": [
         {
             "name": "Water",
-            "icon": "Water"
+            "iconId": "Water"
         },
         {
             "name": "Iron Ore",
-            "icon": "Iron Ore",
+            "iconId": "Iron Ore",
             "category": [
                 "Ores"
             ]
         },
         {
             "name": "Iron Ingot",
-            "icon": "Iron Ingot",
+            "iconId": "Iron Ingot",
             "category": [
                 "Ingots"
             ]
         },
         {
             "name": "Coal",
-            "icon": "Coal"
+            "iconId": "Coal"
         },
         {
             "name": "Steel Ingot",
-            "icon": "Steel Ingot",
+            "iconId": "Steel Ingot",
             "category": [
                 "Ingots"
             ]
@@ -113,10 +113,10 @@
     "recipes": [
         {
             "name": "Water",
-            "icon": "Water",
+            "iconId": "Water",
             "products": [
                 {
-                    "item": "Water",
+                    "itemId": "Water",
                     "quantity": "2"
                 }
             ],
@@ -124,10 +124,10 @@
         },
         {
             "name": "Iron Ore",
-            "icon": "Iron Ore",
+            "iconId": "Iron Ore",
             "products": [
                 {
-                    "item": "Iron Ore",
+                    "itemId": "Iron Ore",
                     "quantity": "1"
                 }
             ],
@@ -135,10 +135,10 @@
         },
         {
             "name": "Coal",
-            "icon": "Coal",
+            "iconId": "Coal",
             "products": [
                 {
-                    "item": "Coal",
+                    "itemId": "Coal",
                     "quantity": "1"
                 }
             ],
@@ -146,20 +146,20 @@
         },
         {
             "name": "Pure Iron Ingot",
-            "icon": "Iron Ingot",
+            "iconId": "Iron Ingot",
             "ingredients": [
                 {
-                    "item": "Iron Ore",
+                    "itemId": "Iron Ore",
                     "quantity": "7"
                 },
                 {
-                    "item": "Water",
+                    "itemId": "Water",
                     "quantity": "4"
                 }
             ],
             "products": [
                 {
-                    "item": "Iron Ingot",
+                    "itemId": "Iron Ingot",
                     "quantity": "13"
                 }
             ],
@@ -167,20 +167,20 @@
         },
         {
             "name": "Solid Steel Ingot",
-            "icon": "Steel Ingot",
+            "iconId": "Steel Ingot",
             "ingredients": [
                 {
-                    "item": "Iron Ingot",
+                    "itemId": "Iron Ingot",
                     "quantity": "2"
                 },
                 {
-                    "item": "Coal",
+                    "itemId": "Coal",
                     "quantity": "2"
                 }
             ],
             "products": [
                 {
-                    "item": "Steel Ingot",
+                    "itemId": "Steel Ingot",
                     "quantity": "3"
                 }
             ],
@@ -204,22 +204,22 @@
     "machines": [
         {
             "name": "Water Extractor",
-            "icon": "Water Extractor"
+            "iconId": "Water Extractor"
         },
         {
             "name": "Miner Mk. 3",
-            "icon": "Miner Mk. 3",
-            "machineModifiers": [
+            "iconId": "Miner Mk. 3",
+            "machineModifierIds": [
                 "Mk. 3"
             ]
         },
         {
             "name": "Refinery",
-            "icon": "Refinery"
+            "iconId": "Refinery"
         },
         {
             "name": "Foundry",
-            "icon": "Foundry"
+            "iconId": "Foundry"
         }
     ]
 }

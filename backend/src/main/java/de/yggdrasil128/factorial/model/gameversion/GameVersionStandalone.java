@@ -11,7 +11,7 @@ public class GameVersionStandalone {
     @JsonProperty(access = READ_ONLY)
     private int id;
     private String name;
-    private Object icon;
+    private Object iconId;
 
     public GameVersionStandalone() {
     }
@@ -23,7 +23,7 @@ public class GameVersionStandalone {
     public GameVersionStandalone(GameVersion model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         name = model.getName();
-        icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        iconId = NamedModel.resolve(model.getIcon(), resolveStrategy);
     }
 
     public int getId() {
@@ -42,12 +42,12 @@ public class GameVersionStandalone {
         this.name = name;
     }
 
-    public Object getIcon() {
-        return icon;
+    public Object getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Object icon) {
-        this.icon = icon;
+    public void setIconId(Object iconId) {
+        this.iconId = iconId;
     }
 
 }

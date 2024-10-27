@@ -19,15 +19,15 @@ public class ResourceStandalone {
     @JsonProperty(access = READ_ONLY)
     private int factoryId;
     private int ordinal;
-    private Object item;
+    private Object itemId;
     private boolean imported;
     private boolean exported;
     @JsonProperty(access = READ_ONLY)
-    private List<Object> producers;
+    private List<Object> producerIds;
     @JsonProperty(access = READ_ONLY)
     private QuantityByChangelist produced;
     @JsonProperty(access = READ_ONLY)
-    private List<Object> consumers;
+    private List<Object> consumerIds;
     @JsonProperty(access = READ_ONLY)
     private QuantityByChangelist consumed;
 
@@ -36,9 +36,9 @@ public class ResourceStandalone {
 
     public ResourceStandalone(Resource model, ResourceContributions contributions) {
         this(model, RelationRepresentation.ID);
-        producers = contributions.getProducers().stream().map(producer -> resolve(producer)).toList();
+        producerIds = contributions.getProducers().stream().map(producer -> resolve(producer)).toList();
         produced = contributions.getProduced();
-        consumers = contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList();
+        consumerIds = contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList();
         consumed = contributions.getConsumed();
     }
 
@@ -54,7 +54,7 @@ public class ResourceStandalone {
         id = model.getId();
         factoryId = model.getFactory().getId();
         ordinal = model.getOrdinal();
-        item = NamedModel.resolve(model.getItem(), resolveStrategy);
+        itemId = NamedModel.resolve(model.getItem(), resolveStrategy);
         imported = model.isImported();
         exported = model.isExported();
     }
@@ -75,12 +75,12 @@ public class ResourceStandalone {
         this.ordinal = ordinal;
     }
 
-    public Object getItem() {
-        return item;
+    public Object getItemId() {
+        return itemId;
     }
 
-    public void setItem(Object item) {
-        this.item = item;
+    public void setItemId(Object itemId) {
+        this.itemId = itemId;
     }
 
     public boolean isImported() {
@@ -99,16 +99,16 @@ public class ResourceStandalone {
         this.exported = exported;
     }
 
-    public List<Object> getProducers() {
-        return producers;
+    public List<Object> getProducerIds() {
+        return producerIds;
     }
 
     public QuantityByChangelist getProduced() {
         return produced;
     }
 
-    public List<Object> getConsumers() {
-        return consumers;
+    public List<Object> getConsumerIds() {
+        return consumerIds;
     }
 
     public QuantityByChangelist getConsumed() {

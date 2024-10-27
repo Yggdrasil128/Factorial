@@ -16,7 +16,7 @@ public class ItemStandalone {
     private int gameVersionId;
     private String name;
     private String description;
-    private Object icon;
+    private Object iconId;
     private List<String> category;
 
     public ItemStandalone() {
@@ -31,7 +31,7 @@ public class ItemStandalone {
         gameVersionId = model.getGameVersion().getId();
         name = model.getName();
         description = model.getDescription();
-        icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        iconId = NamedModel.resolve(model.getIcon(), resolveStrategy);
         category = model.getCategory();
     }
 
@@ -59,12 +59,12 @@ public class ItemStandalone {
         this.description = description;
     }
 
-    public Object getIcon() {
-        return icon;
+    public Object getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Object icon) {
-        this.icon = icon;
+    public void setIconId(Object iconId) {
+        this.iconId = iconId;
     }
 
     public List<String> getCategory() {

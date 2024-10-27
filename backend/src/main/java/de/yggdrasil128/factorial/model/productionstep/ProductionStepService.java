@@ -68,7 +68,7 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
          * throughputs object anyway. Otherwise we do a soft invalidate, hence we try to keep the same object and update
          * it if needed.
          */
-        if ((int) before.getRecipe() != productionStep.getRecipe().getId()) {
+        if ((int) before.getRecipeId() != productionStep.getRecipe().getId()) {
             ProductionStepThroughputs throughputs = initThroughputs(productionStep, changes);
             // hard invalidate cache in this case
             cache.put(productionStep.getId(), throughputs);

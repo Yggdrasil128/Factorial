@@ -17,12 +17,12 @@ public class RecipeStandalone {
     @JsonProperty(access = READ_ONLY)
     private int gameVersionId;
     private String name;
-    private Object icon;
+    private Object iconId;
     private List<ItemQuantityStandalone> ingredients;
     private List<ItemQuantityStandalone> products;
     private Fraction duration;
-    private List<Object> applicableModifiers;
-    private List<Object> applicableMachines;
+    private List<Object> applicableModifierIds;
+    private List<Object> applicableMachineIds;
     private List<String> category;
 
     public RecipeStandalone() {
@@ -36,14 +36,14 @@ public class RecipeStandalone {
         id = model.getId();
         gameVersionId = model.getGameVersion().getId();
         name = model.getName();
-        icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        iconId = NamedModel.resolve(model.getIcon(), resolveStrategy);
         ingredients = model.getIngredients().stream()
                 .map(resource -> new ItemQuantityStandalone(resource, resolveStrategy)).toList();
         products = model.getProducts().stream().map(resource -> new ItemQuantityStandalone(resource, resolveStrategy))
                 .toList();
         duration = model.getDuration();
-        applicableModifiers = NamedModel.resolve(model.getApplicableModifiers(), resolveStrategy);
-        applicableMachines = NamedModel.resolve(model.getApplicableMachines(), resolveStrategy);
+        applicableModifierIds = NamedModel.resolve(model.getApplicableModifiers(), resolveStrategy);
+        applicableMachineIds = NamedModel.resolve(model.getApplicableMachines(), resolveStrategy);
         category = model.getCategory();
     }
 
@@ -63,12 +63,12 @@ public class RecipeStandalone {
         this.name = name;
     }
 
-    public Object getIcon() {
-        return icon;
+    public Object getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Object icon) {
-        this.icon = icon;
+    public void setIconId(Object iconId) {
+        this.iconId = iconId;
     }
 
     public List<ItemQuantityStandalone> getIngredients() {
@@ -95,20 +95,20 @@ public class RecipeStandalone {
         this.duration = duration;
     }
 
-    public List<Object> getApplicableModifiers() {
-        return applicableModifiers;
+    public List<Object> getApplicableModifierIds() {
+        return applicableModifierIds;
     }
 
-    public void setApplicableModifiers(List<Object> applicableModifiers) {
-        this.applicableModifiers = applicableModifiers;
+    public void setApplicableModifierIds(List<Object> applicableModifierIds) {
+        this.applicableModifierIds = applicableModifierIds;
     }
 
-    public List<Object> getApplicableMachines() {
-        return applicableMachines;
+    public List<Object> getApplicableMachineIds() {
+        return applicableMachineIds;
     }
 
-    public void setApplicableMachines(List<Object> applicableMachines) {
-        this.applicableMachines = applicableMachines;
+    public void setApplicableMachineIds(List<Object> applicableMachineIds) {
+        this.applicableMachineIds = applicableMachineIds;
     }
 
     public List<String> getCategory() {

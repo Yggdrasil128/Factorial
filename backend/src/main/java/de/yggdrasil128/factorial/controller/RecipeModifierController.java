@@ -66,7 +66,7 @@ public class RecipeModifierController {
     }
 
     private void applyRelations(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
-        OptionalInputField.ofId((int) input.getIcon(), iconService::get).apply(recipeModifier::setIcon);
+        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(recipeModifier::setIcon);
     }
 
     @DeleteMapping("/recipeModifier")

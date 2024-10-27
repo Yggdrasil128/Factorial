@@ -12,14 +12,13 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public class ProductionStepStandalone {
 
-
     @JsonProperty(access = READ_ONLY)
     private int id;
     @JsonProperty(access = READ_ONLY)
     private int factoryId;
-    private Object machine;
-    private Object recipe;
-    private List<Object> modifiers;
+    private Object machineId;
+    private Object recipeId;
+    private List<Object> modifierIds;
     private Fraction machineCount;
     @JsonProperty(access = READ_ONLY)
     private List<ProductionEntryStandalone> inputs;
@@ -38,9 +37,9 @@ public class ProductionStepStandalone {
     public ProductionStepStandalone(ProductionStep model, RelationRepresentation resolveStrategy) {
         id = model.getId();
         factoryId = model.getFactory().getId();
-        machine = NamedModel.resolve(model.getMachine(), resolveStrategy);
-        recipe = NamedModel.resolve(model.getRecipe(), resolveStrategy);
-        modifiers = NamedModel.resolve(model.getModifiers(), resolveStrategy);
+        machineId = NamedModel.resolve(model.getMachine(), resolveStrategy);
+        recipeId = NamedModel.resolve(model.getRecipe(), resolveStrategy);
+        modifierIds = NamedModel.resolve(model.getModifiers(), resolveStrategy);
         machineCount = model.getMachineCount();
     }
 
@@ -52,28 +51,28 @@ public class ProductionStepStandalone {
         return factoryId;
     }
 
-    public Object getMachine() {
-        return machine;
+    public Object getMachineId() {
+        return machineId;
     }
 
-    public void setMachine(Object machine) {
-        this.machine = machine;
+    public void setMachineId(Object machineId) {
+        this.machineId = machineId;
     }
 
-    public Object getRecipe() {
-        return recipe;
+    public Object getRecipeId() {
+        return recipeId;
     }
 
-    public void setRecipe(Object recipe) {
-        this.recipe = recipe;
+    public void setRecipeId(Object recipeId) {
+        this.recipeId = recipeId;
     }
 
-    public List<Object> getModifiers() {
-        return modifiers;
+    public List<Object> getModifierIds() {
+        return modifierIds;
     }
 
-    public void setModifiers(List<Object> modifiers) {
-        this.modifiers = modifiers;
+    public void setModifierIds(List<Object> modifierIds) {
+        this.modifierIds = modifierIds;
     }
 
     public Fraction getMachineCount() {

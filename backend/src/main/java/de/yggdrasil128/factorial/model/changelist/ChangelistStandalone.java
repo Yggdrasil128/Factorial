@@ -18,7 +18,7 @@ public class ChangelistStandalone {
     private String name;
     private boolean primary;
     private boolean active;
-    private Object icon;
+    private Object iconId;
     private List<ProductionStepChangeStandalone> productionStepChanges;
 
     public ChangelistStandalone() {
@@ -35,7 +35,7 @@ public class ChangelistStandalone {
         name = model.getName();
         primary = model.isPrimary();
         active = model.isActive();
-        icon = NamedModel.resolve(model.getIcon(), resolveStrategy);
+        iconId = NamedModel.resolve(model.getIconId(), resolveStrategy);
         productionStepChanges = model.getProductionStepChanges().entrySet().stream()
                 .map(entry -> new ProductionStepChangeStandalone(entry, resolveStrategy)).toList();
     }
@@ -72,12 +72,12 @@ public class ChangelistStandalone {
         return active;
     }
 
-    public Object getIcon() {
-        return icon;
+    public Object getIconId() {
+        return iconId;
     }
 
-    public void setIcon(Object icon) {
-        this.icon = icon;
+    public void setIconId(Object iconId) {
+        this.iconId = iconId;
     }
 
     public List<ProductionStepChangeStandalone> getProductionStepChanges() {
