@@ -28,7 +28,7 @@ const inputRef = ref();
 async function loadData() {
   loading.value = true;
 
-  const response = await axios.get(props.fetchEndpoint, { params: { saveId: 1 } });
+  const response = await axios.get(props.fetchEndpoint, { params: { gameVersionId: 1 } });
 
   const items = response.data;
   if (props.entityName === 'icon') {

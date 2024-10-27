@@ -12,7 +12,7 @@ import type {
   Save
 } from '@/types/model/standalone';
 
-export type Summary = {
+export type SaveSummary = {
   save: Save;
   factories: FactorySummary[];
   changelists: Changelist[];

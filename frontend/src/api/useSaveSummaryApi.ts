@@ -1,15 +1,15 @@
-import type { Summary } from '@/types/model/summary';
+import type { SaveSummary } from '@/types/model/summary';
 import { inject } from 'vue';
 import type { AxiosInstance } from 'axios';
 
 export interface SaveSummaryApi {
-  retrieveSummary: (saveId: number) => Promise<Summary>;
+  retrieveSummary: (saveId: number) => Promise<SaveSummary>;
 }
 
 export function useSaveSummaryApi(): SaveSummaryApi {
   const axios: AxiosInstance = inject('axios') as AxiosInstance;
 
-  async function retrieveSummary(saveId: number): Promise<Summary> {
+  async function retrieveSummary(saveId: number): Promise<SaveSummary> {
     const response = await axios.get('/api/save/summary', {
       params: {
         saveId: saveId

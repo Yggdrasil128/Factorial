@@ -1,6 +1,6 @@
 import { type ModelStoresUpdateService, useModelStoresUpdateService } from '@/services/model/modelStoresUpdateService';
 import { useSaveSummaryApi } from '@/api/useSaveSummaryApi';
-import type { Summary } from '@/types/model/summary';
+import type { GameVersionSummary, SaveSummary } from '@/types/model/summary';
 import { useCurrentSaveStore } from '@/stores/currentSaveStore';
 import { type ModelSyncWebsocket, useModelSyncWebsocket } from '@/api/useModelSyncWebsocket';
 import {
@@ -13,6 +13,7 @@ import {
   isResourceUpdatedMessage,
   type WebsocketMessage
 } from '@/types/websocketMessages/modelChangedEvents';
+import { useGameVersionSummaryApi } from '@/api/useGameVersionSummaryApi';
 
 export interface ModelSyncService {
   setSaveIdAndReload: (saveId: number) => void;
@@ -22,17 +23,26 @@ export interface ModelSyncService {
 function useModelSyncService(): ModelSyncService {
   const modelStoresUpdateService: ModelStoresUpdateService = useModelStoresUpdateService();
   const currentSaveStore = useCurrentSaveStore();
+
   const saveSummaryApi = useSaveSummaryApi();
+  const gameVersionSummaryApi = useGameVersionSummaryApi();
+
   const modelSyncWebsocket: ModelSyncWebsocket = useModelSyncWebsocket(onWebsocketMessage, reload);
 
   function setSaveIdAndReload(saveId: number) {
-    saveSummaryApi.retrieveSummary(saveId).then((saveSummary: Summary) => {
-      const isInitialLoad: boolean = !currentSaveStore.save;
-      modelStoresUpdateService.applySaveSummary(saveSummary);
-      if (isInitialLoad) {
-        modelSyncWebsocket.connect();
-      }
-    });
+    saveSummaryApi.retrieveSummary(saveId)
+      .then((saveSummary: SaveSummary) => {
+        const isInitialLoad: boolean = !currentSaveStore.save;
+        modelStoresUpdateService.applySaveSummary(saveSummary);
+        if (isInitialLoad) {
+          modelSyncWebsocket.connect();
+        }
+
+        gameVersionSummaryApi.retrieveSummary(saveSummary.save.gameVersionId)
+          .then((gameVersionSummary: GameVersionSummary) => {
+            modelStoresUpdateService.applyGameVersionSummary(gameVersionSummary);
+          });
+      });
   }
 
   function reload() {
