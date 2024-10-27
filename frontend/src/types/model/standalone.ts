@@ -2,7 +2,7 @@ import type { Fraction, QuantityByChangelist } from '@/types/model/basic';
 
 export type Save = {
   id: number;
-  gameVersion: number;
+  gameVersionId: number;
   name: string;
 }
 
@@ -12,17 +12,17 @@ export type Factory = {
   ordinal: number;
   name: string;
   description: string;
-  icon: number | null;
-  productionSteps: number[];
-  resources: number[];
+  iconId: number | null;
+  productionStepIds: number[];
+  resourceIds: number[];
 }
 
 export type ProductionStep = {
   id: number;
   factoryId: number;
-  machine: number;
-  recipe: number;
-  modifiers: number[];
+  machineId: number;
+  recipeId: number;
+  modifierIds: number[];
   machineCount: Fraction;
   inputs: ProductionEntry[];
   outputs: ProductionEntry[];
@@ -35,17 +35,17 @@ export type Changelist = {
   name: string;
   primary: boolean;
   active: boolean;
-  icon: number | null;
+  iconId: number | null;
   productionStepChanges: ProductionStepChange[];
 }
 
 export type ProductionStepChange = {
-  productionStep: number;
+  productionStepId: number;
   change: Fraction;
 }
 
 export type ProductionEntry = {
-  item: number;
+  itemId: number;
   quantity: QuantityByChangelist;
 }
 
@@ -53,17 +53,78 @@ export type Resource = {
   id: number;
   factoryId: number;
   ordinal: number;
-  item: number;
+  itemId: number;
   imported: boolean;
   exported: boolean;
   /**
    * ProductionStep IDs
    */
-  producers: number[];
+  producerIds: number[];
   produced: QuantityByChangelist;
   /**
    * ProductionStep IDs
    */
-  consumers: number[];
+  consumerIds: number[];
   consumed: QuantityByChangelist;
+}
+
+export type GameVersion = {
+  id: number;
+  name: string;
+  iconId: number;
+}
+
+export type Icon = {
+  id: number;
+  gameVersionId: number;
+  name: string;
+  mimeType: string;
+  category: string[];
+}
+
+export type Item = {
+  id: number;
+  gameVersionId: number;
+  name: string;
+  description: string;
+  iconId: number;
+  category: string[];
+}
+
+export type Recipe = {
+  id: number;
+  gameVersionId: number;
+  name: string;
+  iconId: number;
+  ingredients: ItemQuantity[];
+  products: ItemQuantity[];
+  duration: Fraction;
+  applicableModifierIds: number[];
+  applicableMachineIds: number[];
+  category: string[];
+}
+
+export type RecipeModifier = {
+  id: number;
+  gameVersionId: number;
+  name: string;
+  description: string;
+  iconId: number;
+  durationMultiplier: Fraction;
+  inputQuantityMultiplier: Fraction;
+  outputQuantityMultiplier: Fraction;
+}
+
+export type Machine = {
+  id: number;
+  gameVersionId: number;
+  name: string;
+  iconId: number;
+  machineModifierId: number[];
+  category: string[];
+}
+
+export type ItemQuantity = {
+  itemId: number;
+  quantity: Fraction;
 }
