@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.engine.ProductionLineResources;
+import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
@@ -77,13 +77,13 @@ public class SaveController {
 
     private FactorySummary exportFactory(Factory factory, Supplier<? extends ProductionStepChanges> changes) {
         FactorySummary summary = new FactorySummary();
-        summary.setFactory(new FactoryStandalone(factory));
         summary.setProductionSteps(
                 factory.getProductionSteps().stream().map(productionStep -> new ProductionStepStandalone(productionStep,
                         productionStepService.computeThroughputs(productionStep, changes))).toList());
-        ProductionLineResources resources = factoryService.computeResources(factory, changes);
+        ProductionLine productionLine = factoryService.computeProductionLine(factory, changes);
         summary.setResources(factory.getResources().stream()
-                .map(resource -> new ResourceStandalone(resource, resources.getContributions(resource))).toList());
+                .map(resource -> new ResourceStandalone(resource, productionLine.getContributions(resource))).toList());
+        summary.setFactory(new FactoryStandalone(factory, productionLine));
         return summary;
     }
 

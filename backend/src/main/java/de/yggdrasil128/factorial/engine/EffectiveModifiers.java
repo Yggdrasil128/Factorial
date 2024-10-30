@@ -8,7 +8,7 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import java.util.stream.Stream;
 
 /**
- * Represents a set of {@link EffectiveModifier} effective modifiers for a {@link ProductionStep} depending on primary
+ * Represents a set of {@link EffectiveModifier effective modifiers} for a {@link ProductionStep} depending on primary
  * and active {@link Changelist Changelists}.
  */
 public class EffectiveModifiers {

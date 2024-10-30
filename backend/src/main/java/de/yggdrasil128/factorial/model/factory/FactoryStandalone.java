@@ -1,8 +1,10 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.productionstep.ProductionEntryStandalone;
 
 import java.util.List;
 
@@ -20,12 +22,18 @@ public class FactoryStandalone {
     private Object iconId;
     private List<Object> productionStepIds;
     private List<Object> resourceIds;
+    @JsonProperty(access = READ_ONLY)
+    private List<ProductionEntryStandalone> inputs;
+    @JsonProperty(access = READ_ONLY)
+    private List<ProductionEntryStandalone> outputs;
 
     public FactoryStandalone() {
     }
 
-    public FactoryStandalone(Factory model) {
+    public FactoryStandalone(Factory model, ProductionLine productionLine) {
         this(model, RelationRepresentation.ID);
+        inputs = productionLine.getInputs().entrySet().stream().map(ProductionEntryStandalone::new).toList();
+        outputs = productionLine.getOutputs().entrySet().stream().map(ProductionEntryStandalone::new).toList();
     }
 
     public FactoryStandalone(Factory model, RelationRepresentation resolveStrategy) {
@@ -97,6 +105,14 @@ public class FactoryStandalone {
 
     public void setResourceIds(List<Object> resourceIds) {
         this.resourceIds = resourceIds;
+    }
+
+    public List<ProductionEntryStandalone> getInputs() {
+        return inputs;
+    }
+
+    public List<ProductionEntryStandalone> getOutputs() {
+        return outputs;
     }
 
 }

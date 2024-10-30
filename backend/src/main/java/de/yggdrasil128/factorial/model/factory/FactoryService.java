@@ -1,10 +1,11 @@
 package de.yggdrasil128.factorial.model.factory;
 
-import de.yggdrasil128.factorial.engine.ProductionLineResources;
+import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.ProductionLineService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.productionstep.*;
@@ -26,14 +27,14 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class FactoryService extends ModelService<Factory, FactoryRepository> {
+public class FactoryService extends ModelService<Factory, FactoryRepository> implements ProductionLineService {
 
     private final ApplicationEventPublisher events;
     private final SaveRepository saves;
     private final ItemService itemService;
     private final ProductionStepService productionStepService;
     private final ResourceService resourceService;
-    private final Map<Integer, ProductionLineResources> cache = new HashMap<>();
+    private final Map<Integer, ProductionLine> cache = new HashMap<>();
 
     public FactoryService(FactoryRepository repository, ApplicationEventPublisher events, SaveRepository saves,
                           ItemService itemService, ProductionStepService productionStepService,
@@ -63,31 +64,44 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
         events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, true));
     }
 
-    public ProductionLineResources computeResources(Factory factory,
-                                                    Supplier<? extends ProductionStepChanges> changes) {
-        return cache.computeIfAbsent(factory.getId(), key -> initProductionLineResources(factory, changes));
+    public ProductionLine computeProductionLine(Factory factory, Supplier<? extends ProductionStepChanges> changes) {
+        return cache.computeIfAbsent(factory.getId(), key -> initProductionLine(factory, changes));
     }
 
-    private ProductionLineResources initProductionLineResources(Factory factory,
-                                                                Supplier<? extends ProductionStepChanges> changes) {
-        ProductionLineResources resources = new ProductionLineResources(itemId -> spawnResource(factory, itemId),
-                this::fireResourceUpdated, resourceService::delete);
+    private ProductionLine initProductionLine(Factory factory, Supplier<? extends ProductionStepChanges> changes) {
+        ProductionLine productionLine = new ProductionLine(factory.getId(), this);
         for (Resource resource : factory.getResources()) {
-            resources.addResource(resource);
+            productionLine.addResource(resource);
         }
         for (ProductionStep productionStep : factory.getProductionSteps()) {
-            resources.addContributor(productionStepService.computeThroughputs(productionStep, changes));
+            productionLine.addContributor(productionStepService.computeThroughputs(productionStep, changes));
         }
-        return resources;
+        if (productionLine.hasAlteredResources()) {
+            repository.save(factory);
+        }
+        return productionLine;
     }
 
-    private ResourceContributions spawnResource(Factory factory, int itemId) {
-        return resourceService.spawn(factory, itemService.get(itemId));
+    @Override
+    public ResourceContributions spawnResource(int id, int itemId) {
+        Factory factory = get(id);
+        Resource resource = new Resource();
+        resource.setFactory(factory);
+        resource.setItem(itemService.get(itemId));
+        resource = resourceService.create(resource);
+        factory.getResources().add(resource);
+        return resourceService.computeContributions(resource);
     }
 
-    private void fireResourceUpdated(ResourceContributions contributions) {
-        events.publishEvent(
-                new ResourceContributionsChangedEvent(resourceService.get(contributions.getResourceId()), contributions));
+    @Override
+    public void notifyResourceUpdate(int id, ResourceContributions contributions) {
+        events.publishEvent(new ResourceContributionsChangedEvent(resourceService.get(contributions.getResourceId()),
+                contributions));
+    }
+
+    @Override
+    public void destroyResource(int id, int resourceId) {
+        resourceService.delete(resourceId);
     }
 
     public void reorder(Save save, List<ReorderInputEntry> input) {
@@ -120,14 +134,16 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     @EventListener
     public void on(ProductionStepUpdatedEvent event) {
-        ProductionLineResources resources = cache.get(event.getProductionStep().getFactory().getId());
-        if (null != resources) {
+        ProductionLine productionLine = cache.get(event.getProductionStep().getFactory().getId());
+        if (null != productionLine) {
             if (event instanceof ProductionStepThroughputsChangedEvent throughputEvent) {
                 if (event.isRecipeChanged()) {
-                    resources.removeContributor(throughputEvent.getThroughputs());
-                    resources.addContributor(throughputEvent.getThroughputs());
+                    productionLine.updateContribution(throughputEvent.getThroughputs());
+                    if (productionLine.hasAlteredResources()) {
+                        repository.save(event.getProductionStep().getFactory());
+                    }
                 } else {
-                    resources.updateContributor(throughputEvent.getThroughputs());
+                    productionLine.updateContributor(throughputEvent.getThroughputs());
                 }
             } else {
                 // TODO find a better solution
@@ -139,10 +155,11 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> {
 
     @EventListener
     public void on(ProductionStepRemovedEvent event) {
-        ProductionLineResources resources = cache.get(event.getFactoryId());
-        if (null != resources) {
+        ProductionLine productionLine = cache.get(event.getFactoryId());
+        if (null != productionLine) {
             if (null != event.getThroughputs()) {
-                resources.removeContributor(event.getThroughputs());
+                productionLine.removeContributor(event.getThroughputs());
+                // TODO do we need to save the factory if a resource gets removed?
             } else {
                 // TODO find a better solution
                 // we don't have access to the old throughputs here, so we can only do a full invalidate

@@ -14,7 +14,7 @@ import java.util.List;
 public class Factory implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private Save save;

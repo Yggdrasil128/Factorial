@@ -9,6 +9,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Computes the changes of the primary and active {@link Changelist Changelists} to production step machine counts.
+ * <p>
+ * To be kept up-to-date, this implementation must be notified about changes to changelists, namely
+ * <ul>
+ * <li>{@link #updateChangelist(Changelist)}</li>
+ * <li>{@link #removeChangelist(int)}</li>
+ * </ul>
+ */
 public class ProductionStepChanges {
 
     private record ChangelistInfo(boolean primary, boolean active, Map<Integer, Fraction> changes) {
@@ -40,6 +49,11 @@ public class ProductionStepChanges {
                 .mapToInt(entry -> entry.getKey().intValue()).toArray();
     }
 
+    /**
+     * Notifies of an update on a changelist or the addition of a new changelist.
+     * 
+     * @param changelist the changelist that was updated or added
+     */
     public void updateChangelist(Changelist changelist) {
         changelists.put(changelist.getId(), new ChangelistInfo(changelist));
     }
@@ -54,6 +68,13 @@ public class ProductionStepChanges {
                 .anyMatch(i -> i == productionStepId);
     }
 
+    /**
+     * Returns the all changes (including the primary and all active changelists) for the production steps affected by
+     * the changelist identified by the specified id.
+     * 
+     * @param changelistId the id of the changelist
+     * @return all changes (including the primary and all active changelists)
+     */
     public Map<Integer, QuantityByChangelist> getChangesAffectedBy(int changelistId) {
         return getChangesAffectedBy(changelists.get(changelistId));
     }

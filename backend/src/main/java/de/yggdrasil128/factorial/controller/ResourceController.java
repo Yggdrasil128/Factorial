@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.engine.ProductionLineResources;
+import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Manages {@link Resource Resources}.
+ * <p>
+ * In contrast to most other entities, resources cannot be created or deleted explicitly. Instead, they are spawned
+ * and/or destroyed when computing a {@link ProductionLine}.
+ */
 @RestController
 @RequestMapping("/api")
 public class ResourceController {
@@ -32,10 +38,10 @@ public class ResourceController {
     @GetMapping("/factory/resources")
     public List<ResourceStandalone> retrieveAll(int factoryId) {
         Factory factory = factoryService.get(factoryId);
-        ProductionLineResources resources = factoryService.computeResources(factory,
+        ProductionLine productionLine = factoryService.computeProductionLine(factory,
                 () -> saveService.computeProductionStepChanges(factory.getSave()));
         return factory.getResources().stream()
-                .map(resource -> new ResourceStandalone(resource, resources.getContributions(resource))).toList();
+                .map(resource -> new ResourceStandalone(resource, productionLine.getContributions(resource))).toList();
     }
 
     @PatchMapping("/factory/resources/order")

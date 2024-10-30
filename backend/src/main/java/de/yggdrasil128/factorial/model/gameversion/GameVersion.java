@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_id", "name"}))
 public class GameVersion implements NamedModel {
 
     @Id

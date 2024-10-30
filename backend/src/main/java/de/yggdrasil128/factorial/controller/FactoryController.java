@@ -36,12 +36,12 @@ public class FactoryController {
         applyRelations(input, factory);
         factory = factoryService.create(factory);
         saveService.addAttachedFactory(save, factory);
-        return new FactoryStandalone(factory);
+        return toOutput(factory);
     }
 
     @GetMapping("/save/factories")
     public List<FactoryStandalone> retrieveAll(int saveId) {
-        return saveService.get(saveId).getFactories().stream().map(FactoryStandalone::new)
+        return saveService.get(saveId).getFactories().stream().map(this::toOutput)
                 .sorted(Comparator.comparing(FactoryStandalone::getOrdinal)).toList();
     }
 
@@ -52,7 +52,7 @@ public class FactoryController {
 
     @GetMapping("/factory")
     public FactoryStandalone retrieve(int factoryId) {
-        return new FactoryStandalone(factoryService.get(factoryId));
+        return toOutput(factoryService.get(factoryId));
     }
 
     @PatchMapping("/factory")
@@ -60,7 +60,7 @@ public class FactoryController {
         Factory factory = factoryService.get(factoryId);
         applyBasics(input, factory);
         applyRelations(input, factory);
-        return new FactoryStandalone(factoryService.update(factory));
+        return toOutput(factoryService.update(factory));
     }
 
     private static void applyBasics(FactoryStandalone input, Factory factory) {
@@ -75,6 +75,11 @@ public class FactoryController {
     @DeleteMapping("/factory")
     public void delete(int factoryId) {
         factoryService.delete(factoryId);
+    }
+
+    private FactoryStandalone toOutput(Factory factory) {
+        return new FactoryStandalone(factory, factoryService.computeProductionLine(factory,
+                () -> saveService.computeProductionStepChanges(factory.getSave())));
     }
 
 }

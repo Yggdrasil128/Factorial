@@ -15,6 +15,11 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * Provides a fluent API to obtain optional input fields from <i>standalone</i> objects.
+ * <p>
+ * Essentially, this is similar to {@link java.util.Optional}, but more aware of our specific model.
+ */
 public class OptionalInputField {
 
     public static <E> OptionalInputField.Generic<E> of(E value) {

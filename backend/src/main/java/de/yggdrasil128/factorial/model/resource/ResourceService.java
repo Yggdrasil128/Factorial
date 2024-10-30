@@ -5,8 +5,8 @@ import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
-import de.yggdrasil128.factorial.model.item.Item;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -38,14 +38,8 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         return super.create(entity);
     }
 
-    public ResourceContributions spawn(Factory factory, Item item) {
-        Resource resource = new Resource();
-        resource.setFactory(factory);
-        resource.setItem(item);
-        resource = create(resource);
-        ResourceContributions contributions = new ResourceContributions(resource);
-        cache.put(resource.getId(), contributions);
-        return contributions;
+    public ResourceContributions computeContributions(Resource resource) {
+        return cache.computeIfAbsent(resource.getId(), key -> new ResourceContributions(resource));
     }
 
     public void reorder(Factory factory, List<ReorderInputEntry> input) {
@@ -66,6 +60,14 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         super.delete(id);
         cache.remove(id);
         events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
+    }
+    
+    @EventListener
+    public void on(ResourceUpdatedEvent event) {
+        ResourceContributions contributions = cache.get(event.getResource().getId());
+        if(null != contributions) {
+            contributions.update(event.getResource());
+        }
     }
 
 }

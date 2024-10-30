@@ -13,7 +13,7 @@ import java.util.List;
 public class Save implements NamedModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
     private GameVersion gameVersion;

@@ -146,7 +146,7 @@ public class WebsocketService extends TextWebSocketHandler {
         Save save = factory.getSave();
         ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
                 ? ((ResourceContributionsChangedEvent) event).getContributions()
-                : factoryService.computeResources(factory, () -> saveService.computeProductionStepChanges(save))
+                : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save))
                 .getContributions(resource);
 
         ResourceUpdatedMessage message = new ResourceUpdatedMessage(
@@ -174,7 +174,7 @@ public class WebsocketService extends TextWebSocketHandler {
         ChangelistUpdatedMessage message = new ChangelistUpdatedMessage(
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
-                event.getSaveId(),
+                event.getChangelist().getSave().getId(),
                 new ChangelistStandalone(event.getChangelist())
         );
         broadcast(message);

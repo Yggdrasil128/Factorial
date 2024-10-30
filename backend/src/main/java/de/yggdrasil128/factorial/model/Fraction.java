@@ -87,10 +87,6 @@ public class Fraction extends Number {
         return add(that.negative());
     }
 
-    public static Fraction subtract(Fraction minuend, Fraction subtrahend) {
-        return minuend.subtract(subtrahend);
-    }
-
     public Fraction multiply(Fraction that) {
         return new Fraction(Math.multiplyExact(this.numerator, that.numerator),
                 Math.multiplyExact(this.denominator, that.denominator));
@@ -102,10 +98,6 @@ public class Fraction extends Number {
 
     public Fraction divide(Fraction that) {
         return multiply(that.inverse());
-    }
-
-    public static Fraction divide(Fraction divident, Fraction divisor) {
-        return divident.divide(divisor);
     }
 
     @Override

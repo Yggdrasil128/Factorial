@@ -4,6 +4,7 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 
 import java.util.Objects;
+import java.util.function.BinaryOperator;
 
 /**
  * Bundles three {@link Fraction} values according to primary/active {@link Changelist Changelists}.
@@ -15,6 +16,8 @@ public class QuantityByChangelist {
     private final Fraction current;
     private final Fraction withPrimaryChangelist;
     private final Fraction withActiveChangelists;
+
+    public static QuantityByChangelist ZERO = QuantityByChangelist.allAt(Fraction.ZERO);
 
     public static QuantityByChangelist allAt(Fraction initial) {
         return new QuantityByChangelist(initial, initial, initial);
@@ -39,14 +42,22 @@ public class QuantityByChangelist {
     }
 
     public QuantityByChangelist add(QuantityByChangelist that) {
-        return new QuantityByChangelist(this.current.add(that.current),
-                this.withPrimaryChangelist.add(that.withPrimaryChangelist),
-                this.withActiveChangelists.add(that.withActiveChangelists));
+        return compute(that, Fraction::add);
     }
 
     public QuantityByChangelist add(Fraction value) {
         return new QuantityByChangelist(current.add(value), withPrimaryChangelist.add(value),
                 withActiveChangelists.add(value));
+    }
+
+    public QuantityByChangelist subtract(QuantityByChangelist consumed) {
+        return compute(consumed, Fraction::subtract);
+    }
+
+    private QuantityByChangelist compute(QuantityByChangelist that, BinaryOperator<Fraction> arithmeticOperation) {
+        return new QuantityByChangelist(arithmeticOperation.apply(this.current, that.current),
+                arithmeticOperation.apply(this.withPrimaryChangelist, that.withPrimaryChangelist),
+                arithmeticOperation.apply(this.withActiveChangelists, that.withActiveChangelists));
     }
 
     @Override

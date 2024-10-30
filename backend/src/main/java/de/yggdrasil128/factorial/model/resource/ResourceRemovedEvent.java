@@ -1,8 +1,6 @@
 package de.yggdrasil128.factorial.model.resource;
 
-import de.yggdrasil128.factorial.model.ModelChangedEvent;
-
-public class ResourceRemovedEvent implements ModelChangedEvent {
+public class ResourceRemovedEvent {
 
     private final int saveId;
     private final int factoryId;
@@ -14,7 +12,6 @@ public class ResourceRemovedEvent implements ModelChangedEvent {
         this.resourceId = resourceId;
     }
 
-    @Override
     public int getSaveId() {
         return saveId;
     }

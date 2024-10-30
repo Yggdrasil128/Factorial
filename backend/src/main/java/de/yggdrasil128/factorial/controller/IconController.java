@@ -45,8 +45,13 @@ public class IconController {
         return new IconStandalone(iconService.get(iconId));
     }
 
-    // Exception: the raw data of the icon
-    @GetMapping("/icons")
+    /**
+     * Retrieves the raw bytes for an {@link Icon}.
+     * 
+     * @param id the {@link Icon#getId() id} of the {@link Icon}
+     * @return the raw image data in bytes
+     */
+    @GetMapping("/icon/raw")
     public ResponseEntity<byte[]> getRawIcon(int id) {
         Icon icon = iconService.get(id);
         HttpHeaders responseHeaders = new HttpHeaders();

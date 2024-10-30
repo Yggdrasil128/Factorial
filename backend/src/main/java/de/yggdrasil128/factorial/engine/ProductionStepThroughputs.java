@@ -11,6 +11,18 @@ import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * Computes the inputs and outputs of a {@link ProductionStep}, e.g. its {@link Production}.
+ * <p>
+ * To be kept up-to-date, this implementation must be notified about meaningful changes to the production step, namely
+ * <ul>
+ * <li>{@link #update(ProductionStep)} for checking everything at once</li>
+ * <li>{@link #updateMachineCount(ProductionStep, Fraction)} for its local machine count</li>
+ * <li>{@link #updateMachineCounts(ProductionStep, QuantityByChangelist)} for changes to a changelist entry for it</li>
+ * </ul
+ * <p>
+ * The resulting inputs and outputs are cached, hence invoking {@link #getInputs()} or {@link #getOutputs()} is cheap.
+ */
 public class ProductionStepThroughputs implements Production {
 
     private record ItemAmount(int itemId, Fraction amount) {

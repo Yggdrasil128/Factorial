@@ -1,8 +1,6 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import de.yggdrasil128.factorial.model.ModelChangedEvent;
-
-public class ChangelistRemovedEvent implements ModelChangedEvent {
+public class ChangelistRemovedEvent {
 
     private final int saveId;
     private final int changelistId;
@@ -12,7 +10,6 @@ public class ChangelistRemovedEvent implements ModelChangedEvent {
         this.changelistId = changelistId;
     }
 
-    @Override
     public int getSaveId() {
         return saveId;
     }

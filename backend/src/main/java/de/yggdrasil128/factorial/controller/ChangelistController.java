@@ -59,6 +59,16 @@ public class ChangelistController {
         return new ChangelistStandalone(changelistService.get(changelistId));
     }
 
+    /**
+     * Updates the the target {@link Changelist} to represent the specified input.
+     * <p>
+     * This endpoint cannot be used to update the primary or update flag of the changelist. For that use
+     * {@link #makePrimary(int) /changelist/primary} or {@link #setActive(int, boolean) /changelist/active} instead.
+     * 
+     * @param changelistId changelistId the {@link Changelist#getId() id} of the target {@link Changelist}
+     * @param input the new values for the target {@link Changelist}
+     * @return the target {@link Changelist} after the update was applied
+     */
     @PatchMapping("/changelist")
     public ChangelistStandalone update(int changelistId, @RequestBody ChangelistStandalone input) {
         Changelist changelist = changelistService.get(changelistId);

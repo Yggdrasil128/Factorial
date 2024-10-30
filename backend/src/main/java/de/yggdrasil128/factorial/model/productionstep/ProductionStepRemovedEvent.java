@@ -1,9 +1,8 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
-import de.yggdrasil128.factorial.model.ModelChangedEvent;
 
-public class ProductionStepRemovedEvent implements ModelChangedEvent {
+public class ProductionStepRemovedEvent {
 
     private final int saveId;
     private final int factoryId;
@@ -18,7 +17,6 @@ public class ProductionStepRemovedEvent implements ModelChangedEvent {
         this.throughputs = throughputs;
     }
 
-    @Override
     public int getSaveId() {
         return saveId;
     }
