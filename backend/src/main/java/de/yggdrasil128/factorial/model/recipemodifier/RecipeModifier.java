@@ -36,12 +36,12 @@ public class RecipeModifier implements NamedModel {
 
     public RecipeModifier(GameVersion gameVersion, RecipeModifierStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.getName();
-        description = standalone.getDescription();
+        name = standalone.name();
+        description = standalone.description();
         icon = null;
-        durationMultiplier = standalone.getDurationMultiplier();
-        inputQuantityMultiplier = standalone.getInputQuantityMultiplier();
-        outputQuantityMultiplier = standalone.getOutputQuantityMultiplier();
+        durationMultiplier = standalone.durationMultiplier();
+        inputQuantityMultiplier = standalone.inputQuantityMultiplier();
+        outputQuantityMultiplier = standalone.outputQuantityMultiplier();
     }
 
     @Override

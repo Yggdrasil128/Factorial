@@ -31,7 +31,7 @@ public class Save implements NamedModel {
 
     public Save(GameVersion gameVersion, SaveStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.getName();
+        name = standalone.name();
         factories = new ArrayList<>();
         changelists = new ArrayList<>();
     }

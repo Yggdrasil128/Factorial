@@ -71,13 +71,13 @@ public class MachineController {
     }
 
     private static void applyBasics(MachineStandalone input, Machine machine) {
-        OptionalInputField.of(input.getName()).apply(machine::setName);
-        OptionalInputField.of(input.getCategory()).apply(machine::setCategory);
+        OptionalInputField.of(input.name()).apply(machine::setName);
+        OptionalInputField.of(input.category()).apply(machine::setCategory);
     }
 
     private void applyRelations(MachineStandalone input, Machine machine) {
-        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(machine::setIcon);
-        OptionalInputField.ofIds(input.getMachineModifierIds(), recipeModifierService::get)
+        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(machine::setIcon);
+        OptionalInputField.ofIds(input.machineModifierIds(), recipeModifierService::get)
                 .applyList(machine::setMachineModifiers);
     }
 

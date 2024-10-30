@@ -5,7 +5,6 @@ import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
@@ -45,14 +44,14 @@ public class Recipe implements NamedModel {
 
     public Recipe(GameVersion gameVersion, RecipeStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.getName();
+        name = standalone.name();
         icon = null;
         ingredients = new ArrayList<>();
         products = new ArrayList<>();
-        duration = standalone.getDuration();
+        duration = standalone.duration();
         applicableModifiers = new ArrayList<>();
         applicableMachines = new ArrayList<>();
-        category = standalone.getCategory();
+        category = standalone.category();
     }
 
     @Override

@@ -32,17 +32,17 @@ public class IconController {
         Icon icon = new Icon(gameVersion, input);
         icon = iconService.create(icon);
         gameVersionService.addAttachedIcon(gameVersion, icon);
-        return new IconStandalone(icon);
+        return IconStandalone.of(icon);
     }
 
     @GetMapping("/gameVersion/icons")
     public List<IconStandalone> retrieveAll(int gameVersionId) {
-        return gameVersionService.get(gameVersionId).getIcons().stream().map(IconStandalone::new).toList();
+        return gameVersionService.get(gameVersionId).getIcons().stream().map(IconStandalone::of).toList();
     }
 
     @GetMapping("/icon")
     public IconStandalone retrieve(int iconId) {
-        return new IconStandalone(iconService.get(iconId));
+        return IconStandalone.of(iconService.get(iconId));
     }
 
     /**
@@ -63,14 +63,14 @@ public class IconController {
     public IconStandalone update(int iconId, @RequestBody IconStandalone input) {
         Icon icon = iconService.get(iconId);
         applyBasics(input, icon);
-        return new IconStandalone(iconService.update(icon));
+        return IconStandalone.of(iconService.update(icon));
     }
 
     private static void applyBasics(IconStandalone input, Icon icon) {
-        OptionalInputField.of(input.getName()).apply(icon::setName);
-        OptionalInputField.of(input.getImageData()).apply(icon::setImageData);
-        OptionalInputField.of(input.getMimeType()).apply(icon::setMimeType);
-        OptionalInputField.of(input.getCategory()).apply(icon::setCategory);
+        OptionalInputField.of(input.name()).apply(icon::setName);
+        OptionalInputField.of(input.imageData()).apply(icon::setImageData);
+        OptionalInputField.of(input.mimeType()).apply(icon::setMimeType);
+        OptionalInputField.of(input.category()).apply(icon::setCategory);
     }
 
     @DeleteMapping("/icon")

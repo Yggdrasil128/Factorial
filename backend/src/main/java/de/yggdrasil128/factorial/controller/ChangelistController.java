@@ -40,13 +40,13 @@ public class ChangelistController {
         applyRelations(input, changelist);
         changelist = changelistService.create(changelist);
         saveService.addAttachedChangelist(save, changelist);
-        return new ChangelistStandalone(changelist);
+        return ChangelistStandalone.of(changelist);
     }
 
     @GetMapping("/save/changelists")
     public List<ChangelistStandalone> retrieveAll(int saveId) {
-        return saveService.get(saveId).getChangelists().stream().map(ChangelistStandalone::new)
-                .sorted(Comparator.comparing(ChangelistStandalone::getOrdinal)).toList();
+        return saveService.get(saveId).getChangelists().stream().map(ChangelistStandalone::of)
+                .sorted(Comparator.comparing(ChangelistStandalone::ordinal)).toList();
     }
 
     @PatchMapping("save/changelists/order")
@@ -56,7 +56,7 @@ public class ChangelistController {
 
     @GetMapping("/changelist")
     public ChangelistStandalone retrieve(int changelistId) {
-        return new ChangelistStandalone(changelistService.get(changelistId));
+        return ChangelistStandalone.of(changelistService.get(changelistId));
     }
 
     /**
@@ -72,26 +72,26 @@ public class ChangelistController {
     @PatchMapping("/changelist")
     public ChangelistStandalone update(int changelistId, @RequestBody ChangelistStandalone input) {
         Changelist changelist = changelistService.get(changelistId);
-        if (changelist.isPrimary() != input.isPrimary()) {
+        if (changelist.isPrimary() != input.primary()) {
             throw ModelService.report(HttpStatus.BAD_REQUEST,
                     "cannot change primary changelist via generic PATH, use '/changelist/primary' instead");
         }
-        if (changelist.isActive() != input.isActive()) {
+        if (changelist.isActive() != input.active()) {
             throw ModelService.report(HttpStatus.BAD_REQUEST,
                     "cannot update changelist activity via generic PATCH, use '/changelist/active' instead");
         }
         applyBasics(input, changelist);
         applyRelations(input, changelist);
-        return new ChangelistStandalone(changelistService.update(changelist));
+        return ChangelistStandalone.of(changelistService.update(changelist));
     }
 
     private static void applyBasics(ChangelistStandalone input, Changelist changelist) {
-        OptionalInputField.of(input.getName()).apply(changelist::setName);
+        OptionalInputField.of(input.name()).apply(changelist::setName);
         // we cannot update primary/active here, see error reports above
     }
 
     private void applyRelations(ChangelistStandalone input, Changelist changelist) {
-        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(changelist::setIconId);
+        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(changelist::setIconId);
     }
 
     @DeleteMapping("/changelist")

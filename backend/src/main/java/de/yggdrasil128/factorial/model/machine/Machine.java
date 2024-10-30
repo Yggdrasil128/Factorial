@@ -32,10 +32,10 @@ public class Machine implements NamedModel {
 
     public Machine(GameVersion gameVersion, MachineStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.getName();
+        name = standalone.name();
         icon = null;
         machineModifiers = new ArrayList<>();
-        category = standalone.getCategory();
+        category = standalone.category();
     }
 
     @Override

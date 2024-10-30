@@ -5,12 +5,8 @@ import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.item.ItemService;
-import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
-import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantityStandalone;
 import de.yggdrasil128.factorial.model.machine.MachineService;
-import de.yggdrasil128.factorial.model.recipe.Recipe;
-import de.yggdrasil128.factorial.model.recipe.RecipeService;
-import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
+import de.yggdrasil128.factorial.model.recipe.*;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +46,7 @@ public class RecipeController {
     }
 
     private ItemQuantity createResoruce(ItemQuantityStandalone input) {
-        return new ItemQuantity(itemService.get((int) input.getItemId()), input.getQuantity());
+        return new ItemQuantity(itemService.get((int) input.itemId()), input.quantity());
     }
 
     @GetMapping("/gameVersion/recipes")
@@ -72,18 +68,18 @@ public class RecipeController {
     }
 
     private static void applyBasics(RecipeStandalone input, Recipe recipe) {
-        OptionalInputField.of(input.getName()).apply(recipe::setName);
-        OptionalInputField.of(input.getDuration()).apply(recipe::setDuration);
-        OptionalInputField.of(input.getCategory()).apply(recipe::setCategory);
+        OptionalInputField.of(input.name()).apply(recipe::setName);
+        OptionalInputField.of(input.duration()).apply(recipe::setDuration);
+        OptionalInputField.of(input.category()).apply(recipe::setCategory);
     }
 
     private void applyRelations(RecipeStandalone input, Recipe recipe) {
-        OptionalInputField.of(input.getIngredients()).map(this::createResoruce).apply(recipe::setIngredients);
-        OptionalInputField.of(input.getProducts()).map(this::createResoruce).apply(recipe::setProducts);
-        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(recipe::setIcon);
-        OptionalInputField.ofIds(input.getApplicableModifierIds(), recipeModifierService::get)
+        OptionalInputField.of(input.ingredients()).map(this::createResoruce).apply(recipe::setIngredients);
+        OptionalInputField.of(input.products()).map(this::createResoruce).apply(recipe::setProducts);
+        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(recipe::setIcon);
+        OptionalInputField.ofIds(input.applicableModifierIds(), recipeModifierService::get)
                 .applyList(recipe::setApplicableModifiers);
-        OptionalInputField.ofIds(input.getApplicableMachineIds(), machineService::get)
+        OptionalInputField.ofIds(input.applicableMachineIds(), machineService::get)
                 .applyList(recipe::setApplicableMachines);
     }
 

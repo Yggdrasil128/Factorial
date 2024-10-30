@@ -30,17 +30,17 @@ public class GameVersionController {
     public GameVersionStandalone create(@RequestBody GameVersionStandalone input) {
         GameVersion gameVersion = new GameVersion(input);
         applyRelations(input, gameVersion);
-        return new GameVersionStandalone(gameVersionService.create(gameVersion));
+        return GameVersionStandalone.of(gameVersionService.create(gameVersion));
     }
 
     @GetMapping("/gameVersions")
     public List<GameVersionStandalone> retrieveAll() {
-        return gameVersionService.stream().map(GameVersionStandalone::new).toList();
+        return gameVersionService.stream().map(GameVersionStandalone::of).toList();
     }
 
     @GetMapping("/gameVersion")
     public GameVersionStandalone retrieve(int gameVersionId) {
-        return new GameVersionStandalone(gameVersionService.get(gameVersionId));
+        return GameVersionStandalone.of(gameVersionService.get(gameVersionId));
     }
 
     @GetMapping("/gameVersion/summary")
@@ -53,15 +53,15 @@ public class GameVersionController {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
         applyBasics(input, gameVersion);
         applyRelations(input, gameVersion);
-        return new GameVersionStandalone(gameVersionService.update(gameVersion));
+        return GameVersionStandalone.of(gameVersionService.update(gameVersion));
     }
 
     private static void applyBasics(GameVersionStandalone input, GameVersion gameVersion) {
-        OptionalInputField.of(input.getName()).apply(gameVersion::setName);
+        OptionalInputField.of(input.name()).apply(gameVersion::setName);
     }
 
     private void applyRelations(GameVersionStandalone input, GameVersion gameVersion) {
-        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(gameVersion::setIcon);
+        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(gameVersion::setIcon);
     }
 
     @DeleteMapping("/gameVersion")

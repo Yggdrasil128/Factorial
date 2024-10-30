@@ -33,7 +33,7 @@ public class MigrationController {
 
     @PostMapping("/save")
     public void importSave(@RequestBody SaveSummary input) {
-        String gameVersionName = (String) input.getSave().getGameVersionId();
+        String gameVersionName = (String) input.getSave().gameVersionId();
         GameVersion gameVersion = gameVersionService.get(gameVersionName)
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                         "save requires the game version '" + gameVersionName + "' to be installed"));

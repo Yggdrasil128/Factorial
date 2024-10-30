@@ -73,7 +73,7 @@ public class ProductionStepController {
     public ProductionStepStandalone update(int productionStepId, @RequestBody ProductionStepStandalone input) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
         Factory factory = productionStep.getFactory();
-        ProductionStepStandalone before = new ProductionStepStandalone(productionStep, RelationRepresentation.ID);
+        ProductionStepStandalone before = ProductionStepStandalone.of(productionStep, RelationRepresentation.ID);
         applyBasics(input, productionStep);
         applyRelations(input, productionStep);
         productionStep = productionStepService.update(productionStep, before,
@@ -82,13 +82,13 @@ public class ProductionStepController {
     }
 
     private static void applyBasics(ProductionStepStandalone input, ProductionStep productionStep) {
-        OptionalInputField.of(input.getMachineCount()).apply(productionStep::setMachineCount);
+        OptionalInputField.of(input.machineCount()).apply(productionStep::setMachineCount);
     }
 
     private void applyRelations(ProductionStepStandalone input, ProductionStep productionStep) {
-        OptionalInputField.ofId((int) input.getMachineId(), machineService::get).apply(productionStep::setMachine);
-        OptionalInputField.ofId((int) input.getRecipeId(), recipeService::get).apply(productionStep::setRecipe);
-        OptionalInputField.ofIds(input.getModifierIds(), recipeModifierService::get)
+        OptionalInputField.ofId((int) input.machineId(), machineService::get).apply(productionStep::setMachine);
+        OptionalInputField.ofId((int) input.recipeId(), recipeService::get).apply(productionStep::setRecipe);
+        OptionalInputField.ofIds(input.modifierIds(), recipeModifierService::get)
                 .applyList(productionStep::setModifiers);
     }
 
@@ -140,7 +140,7 @@ public class ProductionStepController {
     }
 
     private ProductionStepStandalone toOutput(ProductionStep productionStep) {
-        return new ProductionStepStandalone(productionStep, productionStepService.computeThroughputs(productionStep,
+        return ProductionStepStandalone.of(productionStep, productionStepService.computeThroughputs(productionStep,
                 () -> saveService.computeProductionStepChanges(productionStep.getFactory().getSave())));
     }
 

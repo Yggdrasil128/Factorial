@@ -45,20 +45,20 @@ public class SaveController {
 
     @PostMapping("/saves")
     public SaveStandalone create(@RequestBody SaveStandalone input) {
-        GameVersion gameVersion = gameVersionService.get((int) input.getGameVersionId());
+        GameVersion gameVersion = gameVersionService.get((int) input.gameVersionId());
         Save save = new Save(gameVersion, input);
         save.setGameVersion(gameVersion);
-        return new SaveStandalone(saveService.create(save));
+        return SaveStandalone.of(saveService.create(save));
     }
 
     @GetMapping("/saves")
     public List<SaveStandalone> retrieveAll() {
-        return saveService.stream().map(SaveStandalone::new).toList();
+        return saveService.stream().map(SaveStandalone::of).toList();
     }
 
     @GetMapping("/save")
     public SaveStandalone retrieve(int saveId) {
-        return new SaveStandalone(saveService.get(saveId));
+        return SaveStandalone.of(saveService.get(saveId));
     }
 
     @GetMapping("/save/summary")
@@ -69,21 +69,20 @@ public class SaveController {
     private SaveSummary exportSave(Save save) {
         Supplier<? extends ProductionStepChanges> changes = () -> saveService.computeProductionStepChanges(save);
         SaveSummary summary = new SaveSummary();
-        summary.setSave(new SaveStandalone(save));
+        summary.setSave(SaveStandalone.of(save));
         summary.setFactories(save.getFactories().stream().map(factory -> exportFactory(factory, changes)).toList());
-        summary.setChangelists(save.getChangelists().stream().map(ChangelistStandalone::new).toList());
+        summary.setChangelists(save.getChangelists().stream().map(ChangelistStandalone::of).toList());
         return summary;
     }
 
     private FactorySummary exportFactory(Factory factory, Supplier<? extends ProductionStepChanges> changes) {
         FactorySummary summary = new FactorySummary();
-        summary.setProductionSteps(
-                factory.getProductionSteps().stream().map(productionStep -> new ProductionStepStandalone(productionStep,
-                        productionStepService.computeThroughputs(productionStep, changes))).toList());
+        summary.setProductionSteps(factory.getProductionSteps().stream().map(productionStep -> ProductionStepStandalone
+                .of(productionStep, productionStepService.computeThroughputs(productionStep, changes))).toList());
         ProductionLine productionLine = factoryService.computeProductionLine(factory, changes);
         summary.setResources(factory.getResources().stream()
-                .map(resource -> new ResourceStandalone(resource, productionLine.getContributions(resource))).toList());
-        summary.setFactory(new FactoryStandalone(factory, productionLine));
+                .map(resource -> ResourceStandalone.of(resource, productionLine.getContributions(resource))).toList());
+        summary.setFactory(FactoryStandalone.of(factory, productionLine));
         return summary;
     }
 
@@ -91,14 +90,14 @@ public class SaveController {
     public SaveStandalone update(int saveId, @RequestBody SaveStandalone input) {
         Save save = saveService.get(saveId);
         applyBasics(input, save);
-        if (0 != (int) input.getGameVersionId()) {
+        if (0 != (int) input.gameVersionId()) {
             throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
         }
-        return new SaveStandalone(saveService.update(save));
+        return SaveStandalone.of(saveService.update(save));
     }
 
     private static void applyBasics(SaveStandalone input, Save save) {
-        OptionalInputField.of(input.getName()).apply(save::setName);
+        OptionalInputField.of(input.name()).apply(save::setName);
     }
 
     @DeleteMapping("/save")

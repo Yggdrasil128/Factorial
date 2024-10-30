@@ -8,38 +8,28 @@ import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.RelationRepresentation;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
-public class ResourceStandalone {
+public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
+                                 @JsonProperty(access = READ_ONLY) int factoryId,
+                                 int ordinal,
+                                 Object itemId,
+                                 boolean imported,
+                                 boolean exported,
+                                 @JsonProperty(access = READ_ONLY) List<Object> producerIds,
+                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist produced,
+                                 @JsonProperty(access = READ_ONLY) List<Object> consumerIds,
+                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed) {
 
-    @JsonProperty(access = READ_ONLY)
-    private int id;
-    @JsonProperty(access = READ_ONLY)
-    private int factoryId;
-    private int ordinal;
-    private Object itemId;
-    private boolean imported;
-    private boolean exported;
-    @JsonProperty(access = READ_ONLY)
-    private List<Object> producerIds;
-    @JsonProperty(access = READ_ONLY)
-    private QuantityByChangelist produced;
-    @JsonProperty(access = READ_ONLY)
-    private List<Object> consumerIds;
-    @JsonProperty(access = READ_ONLY)
-    private QuantityByChangelist consumed;
-
-    public ResourceStandalone() {
-    }
-
-    public ResourceStandalone(Resource model, ResourceContributions contributions) {
-        this(model, RelationRepresentation.ID);
-        producerIds = contributions.getProducers().stream().map(producer -> resolve(producer)).toList();
-        produced = contributions.getProduced();
-        consumerIds = contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList();
-        consumed = contributions.getConsumed();
+    public static ResourceStandalone of(Resource model, ResourceContributions contributions) {
+        return of(model, RelationRepresentation.ID,
+                contributions.getProducers().stream().map(producer -> resolve(producer)).toList(),
+                contributions.getProduced(),
+                contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList(),
+                contributions.getConsumed());
     }
 
     private static Object resolve(Production production) {
@@ -50,69 +40,16 @@ public class ResourceStandalone {
                 + production.getClass().getCanonicalName());
     }
 
-    public ResourceStandalone(Resource model, RelationRepresentation resolveStrategy) {
-        id = model.getId();
-        factoryId = model.getFactory().getId();
-        ordinal = model.getOrdinal();
-        itemId = NamedModel.resolve(model.getItem(), resolveStrategy);
-        imported = model.isImported();
-        exported = model.isExported();
+    public static ResourceStandalone of(Resource model, RelationRepresentation resolveStrategy) {
+        return of(model, resolveStrategy, Collections.emptyList(), null, Collections.emptyList(), null);
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public int getFactoryId() {
-        return factoryId;
-    }
-
-    public int getOrdinal() {
-        return ordinal;
-    }
-
-    public void setOrdinal(int ordinal) {
-        this.ordinal = ordinal;
-    }
-
-    public Object getItemId() {
-        return itemId;
-    }
-
-    public void setItemId(Object itemId) {
-        this.itemId = itemId;
-    }
-
-    public boolean isImported() {
-        return imported;
-    }
-
-    public void setImported(boolean imported) {
-        this.imported = imported;
-    }
-
-    public boolean isExported() {
-        return exported;
-    }
-
-    public void setExported(boolean exported) {
-        this.exported = exported;
-    }
-
-    public List<Object> getProducerIds() {
-        return producerIds;
-    }
-
-    public QuantityByChangelist getProduced() {
-        return produced;
-    }
-
-    public List<Object> getConsumerIds() {
-        return consumerIds;
-    }
-
-    public QuantityByChangelist getConsumed() {
-        return consumed;
+    private static ResourceStandalone of(Resource model, RelationRepresentation resolveStrategy,
+                                         List<Object> producerIds, QuantityByChangelist produced,
+                                         List<Object> consumerIds, QuantityByChangelist consumed) {
+        return new ResourceStandalone(model.getId(), model.getFactory().getId(), model.getOrdinal(),
+                NamedModel.resolve(model.getItem(), resolveStrategy), model.isImported(), model.isExported(),
+                producerIds, produced, consumerIds, consumed);
     }
 
 }

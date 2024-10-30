@@ -41,7 +41,7 @@ public class GameVersion implements NamedModel {
     }
 
     public GameVersion(GameVersionStandalone standalone) {
-        name = standalone.getName();
+        name = standalone.name();
         icon = null;
         items = new ArrayList<>();
         recipes = new ArrayList<>();

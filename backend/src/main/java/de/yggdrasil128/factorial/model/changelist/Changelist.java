@@ -34,10 +34,10 @@ public class Changelist implements NamedModel {
 
     public Changelist(Save save, ChangelistStandalone standalone) {
         this.save = save;
-        ordinal = standalone.getOrdinal();
-        name = standalone.getName();
-        primary = standalone.isPrimary();
-        active = standalone.isActive();
+        ordinal = standalone.ordinal();
+        name = standalone.name();
+        primary = standalone.primary();
+        active = standalone.active();
         iconId = null;
         productionStepChanges = new HashMap<>();
     }

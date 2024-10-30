@@ -38,7 +38,7 @@ public class ProductionStep {
         machine = null;
         recipe = null;
         modifiers = new ArrayList<>();
-        machineCount = standalone.getMachineCount();
+        machineCount = standalone.machineCount();
     }
 
     public static Object resolve(ProductionStep relation, RelationRepresentation strategy) {

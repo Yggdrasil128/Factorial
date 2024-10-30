@@ -29,10 +29,10 @@ public class Item implements NamedModel {
 
     public Item(GameVersion gameVersion, ItemStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.getName();
-        description = standalone.getDescription();
+        name = standalone.name();
+        description = standalone.description();
         icon = null;
-        category = standalone.getCategory();
+        category = standalone.category();
     }
 
     public int getId() {

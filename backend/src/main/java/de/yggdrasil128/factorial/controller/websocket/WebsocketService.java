@@ -123,7 +123,7 @@ public class WebsocketService extends TextWebSocketHandler {
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
                 save.getId(),
-                new ProductionStepStandalone(productionStep, throughputs)
+                ProductionStepStandalone.of(productionStep, throughputs)
         );
         broadcast(message);
     }
@@ -153,7 +153,7 @@ public class WebsocketService extends TextWebSocketHandler {
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
                 save.getId(),
-                new ResourceStandalone(resource, contributions)
+                ResourceStandalone.of(resource, contributions)
         );
         broadcast(message);
     }
@@ -175,7 +175,7 @@ public class WebsocketService extends TextWebSocketHandler {
                 runtimeId,
                 lastMessageIdCounter.incrementAndGet(),
                 event.getChangelist().getSave().getId(),
-                new ChangelistStandalone(event.getChangelist())
+                ChangelistStandalone.of(event.getChangelist())
         );
         broadcast(message);
     }

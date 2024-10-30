@@ -26,10 +26,10 @@ public class Resource {
 
     public Resource(Factory factory, ResourceStandalone standalone) {
         this.factory = factory;
-        ordinal = standalone.getOrdinal();
+        ordinal = standalone.ordinal();
         item = null;
-        imported = standalone.isImported();
-        exported = standalone.isExported();
+        imported = standalone.imported();
+        exported = standalone.exported();
     }
 
     public int getId() {

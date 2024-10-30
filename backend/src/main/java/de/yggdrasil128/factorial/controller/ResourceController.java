@@ -41,7 +41,7 @@ public class ResourceController {
         ProductionLine productionLine = factoryService.computeProductionLine(factory,
                 () -> saveService.computeProductionStepChanges(factory.getSave()));
         return factory.getResources().stream()
-                .map(resource -> new ResourceStandalone(resource, productionLine.getContributions(resource))).toList();
+                .map(resource -> ResourceStandalone.of(resource, productionLine.getContributions(resource))).toList();
     }
 
     @PatchMapping("/factory/resources/order")
@@ -53,12 +53,12 @@ public class ResourceController {
     public ResourceStandalone update(int resourceId, ResourceStandalone input) {
         Resource resource = resourceService.get(resourceId);
         applyBasics(input, resource);
-        return new ResourceStandalone(resource, RelationRepresentation.ID);
+        return ResourceStandalone.of(resource, RelationRepresentation.ID);
     }
 
     private static void applyBasics(ResourceStandalone input, Resource resource) {
-        resource.setImported(input.isImported());
-        resource.setExported(input.isExported());
+        resource.setImported(input.imported());
+        resource.setExported(input.exported());
     }
 
 }

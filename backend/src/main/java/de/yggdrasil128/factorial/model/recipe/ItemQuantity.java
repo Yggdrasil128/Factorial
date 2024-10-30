@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.itemQuantity;
+package de.yggdrasil128.factorial.model.recipe;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;

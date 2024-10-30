@@ -35,18 +35,18 @@ public class RecipeModifierController {
         applyRelations(input, recipeModifier);
         recipeModifier = recipeModifierService.create(recipeModifier);
         gameVersionService.addAttachedRecipeModifier(gameVersion, recipeModifier);
-        return new RecipeModifierStandalone(recipeModifier);
+        return RecipeModifierStandalone.of(recipeModifier);
     }
 
     @GetMapping("/gameVersion/recipeModifiers")
     public List<RecipeModifierStandalone> retrieveAll(int gameVersionId) {
-        return gameVersionService.get(gameVersionId).getRecipeModifiers().stream().map(RecipeModifierStandalone::new)
+        return gameVersionService.get(gameVersionId).getRecipeModifiers().stream().map(RecipeModifierStandalone::of)
                 .toList();
     }
 
     @GetMapping("/recipeModifier")
     public RecipeModifierStandalone retrieve(int recipeModifierId) {
-        return new RecipeModifierStandalone(recipeModifierService.get(recipeModifierId));
+        return RecipeModifierStandalone.of(recipeModifierService.get(recipeModifierId));
     }
 
     @PatchMapping("/recipeModifier")
@@ -54,19 +54,19 @@ public class RecipeModifierController {
         RecipeModifier recipeModifier = recipeModifierService.get(recipeModifierId);
         applyBasics(input, recipeModifier);
         applyRelations(input, recipeModifier);
-        return new RecipeModifierStandalone(recipeModifierService.update(recipeModifier));
+        return RecipeModifierStandalone.of(recipeModifierService.update(recipeModifier));
     }
 
     private static void applyBasics(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
-        OptionalInputField.of(input.getName()).apply(recipeModifier::setName);
-        OptionalInputField.of(input.getDescription()).apply(recipeModifier::setDescription);
-        OptionalInputField.of(input.getDurationMultiplier()).apply(recipeModifier::setDurationMultiplier);
-        OptionalInputField.of(input.getInputQuantityMultiplier()).apply(recipeModifier::setInputQuantityMultiplier);
-        OptionalInputField.of(input.getOutputQuantityMultiplier()).apply(recipeModifier::setOutputQuantityMultiplier);
+        OptionalInputField.of(input.name()).apply(recipeModifier::setName);
+        OptionalInputField.of(input.description()).apply(recipeModifier::setDescription);
+        OptionalInputField.of(input.durationMultiplier()).apply(recipeModifier::setDurationMultiplier);
+        OptionalInputField.of(input.inputQuantityMultiplier()).apply(recipeModifier::setInputQuantityMultiplier);
+        OptionalInputField.of(input.outputQuantityMultiplier()).apply(recipeModifier::setOutputQuantityMultiplier);
     }
 
     private void applyRelations(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
-        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(recipeModifier::setIcon);
+        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(recipeModifier::setIcon);
     }
 
     @DeleteMapping("/recipeModifier")

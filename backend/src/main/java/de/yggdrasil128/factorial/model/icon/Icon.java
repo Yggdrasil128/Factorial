@@ -31,10 +31,10 @@ public class Icon implements NamedModel {
 
     public Icon(GameVersion gameVersion, IconStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.getName();
-        imageData = standalone.getImageData();
-        mimeType = standalone.getMimeType();
-        category = standalone.getCategory();
+        name = standalone.name();
+        imageData = standalone.imageData();
+        mimeType = standalone.mimeType();
+        category = standalone.category();
     }
 
     public int getId() {

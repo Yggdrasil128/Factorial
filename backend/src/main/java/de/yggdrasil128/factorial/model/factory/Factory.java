@@ -36,9 +36,9 @@ public class Factory implements NamedModel {
 
     public Factory(Save save, FactoryStandalone standalone) {
         this.save = save;
-        ordinal = standalone.getOrdinal();
-        name = standalone.getName();
-        description = standalone.getDescription();
+        ordinal = standalone.ordinal();
+        name = standalone.name();
+        description = standalone.description();
         icon = null;
         productionSteps = new ArrayList<>();
         resources = new ArrayList<>();

@@ -1,8 +1,8 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.itemQuantity.ItemQuantity;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import de.yggdrasil128.factorial.model.recipe.ItemQuantity;
 
 import java.util.LinkedHashMap;
 import java.util.List;

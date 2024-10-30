@@ -34,17 +34,17 @@ public class ItemController {
         applyRelations(input, item);
         item = itemService.create(item);
         gameVersionService.addAttachedItem(gameVersion, item);
-        return new ItemStandalone(item);
+        return ItemStandalone.of(item);
     }
 
     @GetMapping("/gameVersion/items")
     public List<ItemStandalone> retrieveAll(int gameVersionId) {
-        return gameVersionService.get(gameVersionId).getItems().stream().map(ItemStandalone::new).toList();
+        return gameVersionService.get(gameVersionId).getItems().stream().map(ItemStandalone::of).toList();
     }
 
     @GetMapping("/item")
     public ItemStandalone retrieve(int itemId) {
-        return new ItemStandalone(itemService.get(itemId));
+        return ItemStandalone.of(itemService.get(itemId));
     }
 
     @PatchMapping("/item")
@@ -52,17 +52,17 @@ public class ItemController {
         Item item = itemService.get(itemId);
         applyBasics(input, item);
         applyRelations(input, item);
-        return new ItemStandalone(itemService.update(item));
+        return ItemStandalone.of(itemService.update(item));
     }
 
     private static void applyBasics(ItemStandalone input, Item item) {
-        OptionalInputField.of(input.getName()).apply(item::setName);
-        OptionalInputField.of(input.getDescription()).apply(item::setDescription);
-        OptionalInputField.of(input.getCategory()).apply(item::setCategory);
+        OptionalInputField.of(input.name()).apply(item::setName);
+        OptionalInputField.of(input.description()).apply(item::setDescription);
+        OptionalInputField.of(input.category()).apply(item::setCategory);
     }
 
     private void applyRelations(ItemStandalone input, Item item) {
-        OptionalInputField.ofId((int) input.getIconId(), iconService::get).apply(item::setIcon);
+        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(item::setIcon);
     }
 
     @DeleteMapping("/item")
