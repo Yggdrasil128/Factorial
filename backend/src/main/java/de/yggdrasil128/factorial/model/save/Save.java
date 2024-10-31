@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.save;
 
 import de.yggdrasil128.factorial.model.NamedModel;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
@@ -18,7 +19,7 @@ public class Save implements NamedModel {
     @ManyToOne(optional = false)
     private GameVersion gameVersion;
     @Column(nullable = false)
-    private String name;
+    private String name = "";
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Factory> factories;
@@ -31,9 +32,13 @@ public class Save implements NamedModel {
 
     public Save(GameVersion gameVersion, SaveStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.name();
         factories = new ArrayList<>();
         changelists = new ArrayList<>();
+        applyBasics(standalone);
+    }
+
+    public void applyBasics(SaveStandalone standalone) {
+        OptionalInputField.of(standalone.name()).apply(this::setName);
     }
 
     @Override

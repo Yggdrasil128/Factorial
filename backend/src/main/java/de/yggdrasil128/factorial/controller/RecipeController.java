@@ -62,15 +62,9 @@ public class RecipeController {
     @PatchMapping("/recipe")
     public RecipeStandalone update(int recipeId, @RequestBody RecipeStandalone input) {
         Recipe recipe = recipeService.get(recipeId);
-        applyBasics(input, recipe);
+        recipe.applyBasics(input);
         applyRelations(input, recipe);
         return new RecipeStandalone(recipeService.update(recipe));
-    }
-
-    private static void applyBasics(RecipeStandalone input, Recipe recipe) {
-        OptionalInputField.of(input.name()).apply(recipe::setName);
-        OptionalInputField.of(input.duration()).apply(recipe::setDuration);
-        OptionalInputField.of(input.category()).apply(recipe::setCategory);
     }
 
     private void applyRelations(RecipeStandalone input, Recipe recipe) {

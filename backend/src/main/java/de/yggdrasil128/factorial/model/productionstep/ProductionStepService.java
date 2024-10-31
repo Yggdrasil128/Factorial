@@ -55,11 +55,9 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
 
     @Override
     public ProductionStep update(ProductionStep entity) {
-        // TODO revise class hierarchy
         throw new UnsupportedOperationException("use the class-local overload");
     }
 
-    // TODO reduce this method to only name/icon and make individual methods for recipe, machine and machine count
     public ProductionStep update(ProductionStep entity, ProductionStepStandalone before,
                                  Supplier<? extends ProductionStepChanges> changes) {
         ProductionStep productionStep = super.update(entity);

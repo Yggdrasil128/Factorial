@@ -1,17 +1,15 @@
 package de.yggdrasil128.factorial.model;
 
 import de.yggdrasil128.factorial.util.BooleanConsumer;
-import de.yggdrasil128.factorial.util.OptionalBoolean;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -22,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
  */
 public class OptionalInputField {
 
-    public static <E> OptionalInputField.Generic<E> of(E value) {
+    public static <E> Generic<E> of(E value) {
         return new Generic<>(value);
     }
 
@@ -34,42 +32,55 @@ public class OptionalInputField {
             this.value = value;
         }
 
-        public E get() {
-            return value;
-        }
-
         public void apply(Consumer<? super E> sink) {
             if (null != value) {
-                sink.accept(get());
+                sink.accept(value);
             }
         }
 
     }
 
-    public static OptionalInputField.OfString of(String value) {
+    public static OfInteger of(Integer value) {
+        return new OfInteger(value);
+    }
+
+    public static class OfInteger {
+
+        private final Integer value;
+
+        OfInteger(Integer value) {
+            this.value = value;
+        }
+
+        public void apply(IntConsumer sink) {
+            if (null != value) {
+                sink.accept(value.intValue());
+            }
+        }
+
+    }
+
+    public static OfString of(String value) {
         return new OfString(value);
     }
 
     public static class OfString {
+
         private final String value;
 
         OfString(String value) {
             this.value = value;
         }
 
-        public String get() {
-            return value.isEmpty() ? null : value;
-        }
-
         public void apply(Consumer<? super String> sink) {
             if (null != value) {
-                sink.accept(get());
+                sink.accept(value);
             }
         }
 
     }
 
-    public static OptionalInputField.OfBoolean of(Boolean value) {
+    public static OfBoolean of(Boolean value) {
         return new OfBoolean(value);
     }
 
@@ -81,10 +92,6 @@ public class OptionalInputField {
             this.value = value;
         }
 
-        public OptionalBoolean get() {
-            return OptionalBoolean.ofNullable(value);
-        }
-
         public void apply(BooleanConsumer sink) {
             if (null != value) {
                 sink.accept(value.booleanValue());
@@ -93,33 +100,30 @@ public class OptionalInputField {
 
     }
 
-    public static <T> OptionalInputField.OfId<T> ofId(int id, IntFunction<? extends T> fetcher) {
+    public static <T> OfId<T> ofId(Object id, IntFunction<? extends T> fetcher) {
         return new OfId<>(id, fetcher);
     }
 
     public static class OfId<T> {
 
-        private final int id;
+        private final Object id;
         private final IntFunction<? extends T> fetcher;
 
-        OfId(int id, IntFunction<? extends T> fetcher) {
+        OfId(Object id, IntFunction<? extends T> fetcher) {
             this.id = id;
             this.fetcher = fetcher;
         }
 
-        public T get() {
-            return 0 < id ? fetcher.apply(id) : null;
-        }
-
         public void apply(Consumer<? super T> sink) {
-            if (0 <= id) {
-                sink.accept(get());
+            if (null != id) {
+                int intValue = ((Integer) id).intValue();
+                sink.accept(0 >= intValue ? fetcher.apply(intValue) : null);
             }
         }
 
     }
 
-    public static <T> OptionalInputField.OfList<T> of(List<T> values) {
+    public static <T> OfList<T> of(List<T> values) {
         return new OfList<>(values);
     }
 
@@ -140,10 +144,6 @@ public class OptionalInputField {
             return new OptionalInputField.OfList<>(values.stream().map(mapper).collect(toList()));
         }
 
-        public List<T> get() {
-            return null == values ? emptyList() : values;
-        }
-
         public void apply(Consumer<? super List<T>> sink) {
             if (null != values) {
                 sink.accept(values);
@@ -152,7 +152,7 @@ public class OptionalInputField {
 
     }
 
-    public static <T> OptionalInputField.OfIds<T> ofIds(Collection<?> ids, IntFunction<? extends T> fetcher) {
+    public static <T> OfIds<T> ofIds(Collection<?> ids, IntFunction<? extends T> fetcher) {
         return new OfIds<>(ids, fetcher);
     }
 
@@ -166,26 +166,16 @@ public class OptionalInputField {
             this.fetcher = fetcher;
         }
 
-        public List<T> asList() {
-            // eclipse cannot infer the generic type properly when using Stream#toList()
-            return null == ids ? emptyList()
-                    : ids.stream().map(Integer.class::cast).map(fetcher::apply).collect(toList());
-        }
-
-        public Set<T> asSet() {
-            return null == ids ? emptySet()
-                    : ids.stream().map(Integer.class::cast).map(fetcher::apply).collect(toSet());
-        }
-
         public void applyList(Consumer<? super List<T>> sink) {
             if (null != ids) {
-                sink.accept(asList());
+                // eclipse cannot infer the generic type properly when using Stream#toList()
+                sink.accept(ids.stream().map(Integer.class::cast).map(fetcher::apply).collect(toList()));
             }
         }
 
         public void applySet(Consumer<? super Set<T>> sink) {
             if (null != ids) {
-                sink.accept(asSet());
+                sink.accept(ids.stream().map(Integer.class::cast).map(fetcher::apply).collect(toSet()));
             }
         }
 

@@ -21,7 +21,7 @@ import de.yggdrasil128.factorial.model.save.SaveSummary;
 public class Exporter {
 
     public static GameVersionSummary exportGameVersion(GameVersion gameVersion,
-                                                       RelationRepresentation resolveStrategy) {
+                                                       External resolveStrategy) {
         GameVersionSummary summary = new GameVersionSummary();
         summary.setGameVersion(GameVersionStandalone.of(gameVersion, resolveStrategy));
         summary.setIcons(
@@ -37,7 +37,7 @@ public class Exporter {
         return summary;
     }
 
-    public static SaveSummary exportSave(Save save, RelationRepresentation resolveStrategy) {
+    public static SaveSummary exportSave(Save save, External resolveStrategy) {
         SaveSummary summary = new SaveSummary();
         summary.setSave(SaveStandalone.of(save, resolveStrategy));
         summary.setFactories(
@@ -47,7 +47,7 @@ public class Exporter {
         return summary;
     }
 
-    private static FactorySummary exportFactory(Factory factory, RelationRepresentation resolveStrategy) {
+    private static FactorySummary exportFactory(Factory factory, External resolveStrategy) {
         FactorySummary summary = new FactorySummary();
         summary.setFactory(FactoryStandalone.of(factory, resolveStrategy));
         summary.setProductionSteps(factory.getProductionSteps().stream()

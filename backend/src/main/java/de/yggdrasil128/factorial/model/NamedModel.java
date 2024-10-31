@@ -7,28 +7,40 @@ import java.util.function.BiFunction;
 
 public interface NamedModel {
 
-    static List<Object> resolve(Collection<? extends NamedModel> relations, RelationRepresentation strategy) {
-        return resolve(relations, strategy, NamedModel::resolve);
+    static List<Object> resolve(Collection<? extends NamedModel> relations, External destination) {
+        return resolve(relations, destination, NamedModel::resolve);
     }
 
-    static <T> List<Object> resolve(Collection<? extends T> relations, RelationRepresentation strategy,
-                                    BiFunction<? super T, ? super RelationRepresentation, Object> downstream) {
-        return relations.stream().map(relation -> downstream.apply(relation, strategy)).filter(Objects::nonNull)
+    static <T> List<Object> resolve(Collection<? extends T> relations, External destination,
+                                    BiFunction<? super T, ? super External, Object> downstream) {
+        return relations.stream().map(relation -> downstream.apply(relation, destination)).filter(Objects::nonNull)
                 .toList();
     }
 
-    static Object resolve(NamedModel relation, RelationRepresentation strategy) {
+    static Object resolve(NamedModel relation, External destination) {
         if (null == relation) {
-            return null;
+            return resolveNull(destination);
         }
-        switch (strategy) {
-        case ID:
+        switch (destination) {
+        case FRONTEND:
             return relation.getId();
-        case NAME:
+        case SAVE_FILE:
             return relation.getName();
         default:
-            throw new AssertionError("unexpected enum constant: " + RelationRepresentation.class.getCanonicalName()
-                    + '.' + strategy.name());
+            throw new AssertionError(
+                    "unexpected enum constant: " + External.class.getCanonicalName() + '.' + destination.name());
+        }
+    }
+
+    static Object resolveNull(External destination) {
+        switch (destination) {
+        case FRONTEND:
+            return 0;
+        case SAVE_FILE:
+            return null;
+        default:
+            throw new AssertionError(
+                    "unexpected enum constant: " + External.class.getCanonicalName() + '.' + destination.name());
         }
     }
 

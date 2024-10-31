@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.gameversion;
 
 import de.yggdrasil128.factorial.model.NamedModel;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.machine.Machine;
@@ -18,7 +19,7 @@ public class GameVersion implements NamedModel {
     @GeneratedValue
     private int id;
     @Column(nullable = false, unique = true)
-    private String name;
+    private String name = "";
     @ManyToOne
     private Icon icon;
     @JoinColumn
@@ -41,13 +42,16 @@ public class GameVersion implements NamedModel {
     }
 
     public GameVersion(GameVersionStandalone standalone) {
-        name = standalone.name();
-        icon = null;
         items = new ArrayList<>();
         recipes = new ArrayList<>();
         recipeModifiers = new ArrayList<>();
         machines = new ArrayList<>();
         icons = new ArrayList<>();
+        applyBasics(standalone);
+    }
+
+    public void applyBasics(GameVersionStandalone standalone) {
+        OptionalInputField.of(standalone.name()).apply(this::setName);
     }
 
     @Override

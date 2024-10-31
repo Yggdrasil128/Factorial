@@ -1,7 +1,7 @@
 package de.yggdrasil128.factorial.model.icon;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 
 import java.util.List;
 
@@ -15,12 +15,12 @@ public record IconStandalone(@JsonProperty(access = READ_ONLY) int id,
                              List<String> category) {
 
     public static IconStandalone of(Icon model) {
-        return of(model, RelationRepresentation.ID);
+        return of(model, External.FRONTEND);
     }
 
-    public static IconStandalone of(Icon model, RelationRepresentation resolveStrategy) {
+    public static IconStandalone of(Icon model, External destination) {
         return new IconStandalone(model.getId(), model.getGameVersion().getId(), model.getName(),
-                RelationRepresentation.NAME == resolveStrategy ? model.getImageData() : null, model.getMimeType(),
+                External.SAVE_FILE == destination ? model.getImageData() : null, model.getMimeType(),
                 model.getCategory());
     }
 

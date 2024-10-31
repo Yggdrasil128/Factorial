@@ -3,7 +3,7 @@ package de.yggdrasil128.factorial.model.recipe;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 
 public record ItemQuantityStandalone(Object itemId, Fraction quantity) {
 
@@ -13,11 +13,11 @@ public record ItemQuantityStandalone(Object itemId, Fraction quantity) {
     }
 
     public ItemQuantityStandalone(ItemQuantity model) {
-        this(model, RelationRepresentation.ID);
+        this(model, External.FRONTEND);
     }
 
-    public ItemQuantityStandalone(ItemQuantity model, RelationRepresentation resolveStrategy) {
-        this(NamedModel.resolve(model.getItem(), resolveStrategy), model.getQuantity());
+    public ItemQuantityStandalone(ItemQuantity model, External destination) {
+        this(NamedModel.resolve(model.getItem(), destination), model.getQuantity());
     }
 
 }

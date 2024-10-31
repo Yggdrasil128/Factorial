@@ -58,14 +58,9 @@ public class FactoryController {
     @PatchMapping("/factory")
     public FactoryStandalone update(int factoryId, @RequestBody FactoryStandalone input) {
         Factory factory = factoryService.get(factoryId);
-        applyBasics(input, factory);
+        factory.applyBasics(input);
         applyRelations(input, factory);
         return toOutput(factoryService.update(factory));
-    }
-
-    private static void applyBasics(FactoryStandalone input, Factory factory) {
-        OptionalInputField.of(input.name()).apply(factory::setName);
-        OptionalInputField.of(input.description()).apply(factory::setDescription);
     }
 
     private void applyRelations(FactoryStandalone input, Factory factory) {

@@ -179,7 +179,7 @@ public class Importer {
 
     private Changelist importChangelist(Save save, ChangelistStandalone input) {
         Changelist changelist = new Changelist(save, input);
-        changelist.setIconId(findIcon(input.iconId()));
+        changelist.setIcon(findIcon(input.iconId()));
         changelist.setProductionStepChanges(findProductionStepChanges(save, input.productionStepChanges()));
         return changelist;
     }

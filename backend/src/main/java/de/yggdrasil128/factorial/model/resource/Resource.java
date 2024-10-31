@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.resource;
 
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.item.Item;
 import jakarta.persistence.*;
@@ -26,10 +27,13 @@ public class Resource {
 
     public Resource(Factory factory, ResourceStandalone standalone) {
         this.factory = factory;
-        ordinal = standalone.ordinal();
-        item = null;
-        imported = standalone.imported();
-        exported = standalone.exported();
+        applyBasics(standalone);
+    }
+
+    public void applyBasics(ResourceStandalone standalone) {
+        OptionalInputField.of(standalone.ordinal()).apply(this::setOrdinal);
+        OptionalInputField.of(standalone.imported()).apply(this::setImported);
+        OptionalInputField.of(standalone.exported()).apply(this::setExported);
     }
 
     public int getId() {

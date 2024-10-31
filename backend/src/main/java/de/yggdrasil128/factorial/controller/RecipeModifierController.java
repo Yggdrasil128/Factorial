@@ -52,17 +52,9 @@ public class RecipeModifierController {
     @PatchMapping("/recipeModifier")
     public RecipeModifierStandalone update(int recipeModifierId, @RequestBody RecipeModifierStandalone input) {
         RecipeModifier recipeModifier = recipeModifierService.get(recipeModifierId);
-        applyBasics(input, recipeModifier);
+        recipeModifier.applyBasics(input);
         applyRelations(input, recipeModifier);
         return RecipeModifierStandalone.of(recipeModifierService.update(recipeModifier));
-    }
-
-    private static void applyBasics(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
-        OptionalInputField.of(input.name()).apply(recipeModifier::setName);
-        OptionalInputField.of(input.description()).apply(recipeModifier::setDescription);
-        OptionalInputField.of(input.durationMultiplier()).apply(recipeModifier::setDurationMultiplier);
-        OptionalInputField.of(input.inputQuantityMultiplier()).apply(recipeModifier::setInputQuantityMultiplier);
-        OptionalInputField.of(input.outputQuantityMultiplier()).apply(recipeModifier::setOutputQuantityMultiplier);
     }
 
     private void applyRelations(RecipeModifierStandalone input, RecipeModifier recipeModifier) {

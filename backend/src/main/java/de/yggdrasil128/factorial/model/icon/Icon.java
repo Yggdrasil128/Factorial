@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.icon;
 
 import de.yggdrasil128.factorial.model.NamedModel;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import jakarta.persistence.*;
 
@@ -17,12 +18,12 @@ public class Icon implements NamedModel {
     @ManyToOne
     private GameVersion gameVersion;
     @Column(nullable = false)
-    private String name;
+    private String name = "";
     @Lob
     @Column(nullable = false)
     private byte[] imageData;
     @Column(nullable = false)
-    private String mimeType;
+    private String mimeType = "";
     @ElementCollection
     private List<String> category;
 
@@ -31,10 +32,14 @@ public class Icon implements NamedModel {
 
     public Icon(GameVersion gameVersion, IconStandalone standalone) {
         this.gameVersion = gameVersion;
-        name = standalone.name();
-        imageData = standalone.imageData();
-        mimeType = standalone.mimeType();
-        category = standalone.category();
+        applyBasics(standalone);
+    }
+
+    public void applyBasics(IconStandalone standalone) {
+        OptionalInputField.of(standalone.name()).apply(this::setName);
+        OptionalInputField.of(standalone.imageData()).apply(this::setImageData);
+        OptionalInputField.of(standalone.mimeType()).apply(this::setMimeType);
+        OptionalInputField.of(standalone.category()).apply(this::setCategory);
     }
 
     public int getId() {

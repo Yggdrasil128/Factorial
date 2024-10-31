@@ -3,7 +3,7 @@ package de.yggdrasil128.factorial.controller;
 import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.Importer;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionSummary;
@@ -42,12 +42,12 @@ public class MigrationController {
 
     @GetMapping("/gameVersion")
     public GameVersionSummary exportGameVersion(int gameVersionId) {
-        return Exporter.exportGameVersion(gameVersionService.get(gameVersionId), RelationRepresentation.NAME);
+        return Exporter.exportGameVersion(gameVersionService.get(gameVersionId), External.SAVE_FILE);
     }
 
     @GetMapping("/save")
     public SaveSummary exportSave(int saveId) {
-        return Exporter.exportSave(saveService.get(saveId), RelationRepresentation.NAME);
+        return Exporter.exportSave(saveService.get(saveId), External.SAVE_FILE);
     }
 
 }

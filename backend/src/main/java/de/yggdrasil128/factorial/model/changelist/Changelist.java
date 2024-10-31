@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.changelist;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -20,12 +21,12 @@ public class Changelist implements NamedModel {
     private Save save;
     @Column(nullable = false)
     private int ordinal;
-    private String name;
+    private String name = "";
     @Column(name = "is_primary")
     private boolean primary;
     private boolean active;
     @ManyToOne
-    private Icon iconId;
+    private Icon icon;
     @ElementCollection
     private Map<ProductionStep, Fraction> productionStepChanges;
 
@@ -34,12 +35,15 @@ public class Changelist implements NamedModel {
 
     public Changelist(Save save, ChangelistStandalone standalone) {
         this.save = save;
-        ordinal = standalone.ordinal();
-        name = standalone.name();
-        primary = standalone.primary();
-        active = standalone.active();
-        iconId = null;
         productionStepChanges = new HashMap<>();
+        applyBasics(standalone);
+    }
+
+    public void applyBasics(ChangelistStandalone standalone) {
+        OptionalInputField.of(standalone.ordinal()).apply(this::setOrdinal);
+        OptionalInputField.of(standalone.name()).apply(this::setName);
+        OptionalInputField.of(standalone.primary()).apply(this::setPrimary);
+        OptionalInputField.of(standalone.active()).apply(this::setActive);
     }
 
     @Override
@@ -88,12 +92,12 @@ public class Changelist implements NamedModel {
         this.active = active;
     }
 
-    public Icon getIconId() {
-        return iconId;
+    public Icon getIcon() {
+        return icon;
     }
 
-    public void setIconId(Icon iconId) {
-        this.iconId = iconId;
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     public Map<ProductionStep, Fraction> getProductionStepChanges() {

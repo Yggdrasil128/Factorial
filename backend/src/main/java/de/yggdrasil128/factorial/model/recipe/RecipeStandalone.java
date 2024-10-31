@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 
 import java.util.List;
 
@@ -31,18 +31,18 @@ public record RecipeStandalone(@JsonProperty(access = READ_ONLY) int id,
     }
 
     public RecipeStandalone(Recipe model) {
-        this(model, RelationRepresentation.ID);
+        this(model, External.FRONTEND);
     }
 
-    public RecipeStandalone(Recipe model, RelationRepresentation resolveStrategy) {
+    public RecipeStandalone(Recipe model, External destination) {
         this(model.getId(), model.getGameVersion().getId(), model.getName(),
-                NamedModel.resolve(model.getIcon(), resolveStrategy),
-                model.getIngredients().stream().map(resource -> new ItemQuantityStandalone(resource, resolveStrategy))
+                NamedModel.resolve(model.getIcon(), destination),
+                model.getIngredients().stream().map(resource -> new ItemQuantityStandalone(resource, destination))
                         .toList(),
-                model.getProducts().stream().map(resource -> new ItemQuantityStandalone(resource, resolveStrategy))
+                model.getProducts().stream().map(resource -> new ItemQuantityStandalone(resource, destination))
                         .toList(),
-                model.getDuration(), NamedModel.resolve(model.getApplicableModifiers(), resolveStrategy),
-                NamedModel.resolve(model.getApplicableMachines(), resolveStrategy), model.getCategory());
+                model.getDuration(), NamedModel.resolve(model.getApplicableModifiers(), destination),
+                NamedModel.resolve(model.getApplicableMachines(), destination), model.getCategory());
     }
 
 }

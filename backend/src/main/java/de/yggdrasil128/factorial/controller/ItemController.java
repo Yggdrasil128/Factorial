@@ -50,15 +50,9 @@ public class ItemController {
     @PatchMapping("/item")
     public ItemStandalone update(int itemId, @RequestBody ItemStandalone input) {
         Item item = itemService.get(itemId);
-        applyBasics(input, item);
+        item.applyBasics(input);
         applyRelations(input, item);
         return ItemStandalone.of(itemService.update(item));
-    }
-
-    private static void applyBasics(ItemStandalone input, Item item) {
-        OptionalInputField.of(input.name()).apply(item::setName);
-        OptionalInputField.of(input.description()).apply(item::setDescription);
-        OptionalInputField.of(input.category()).apply(item::setCategory);
     }
 
     private void applyRelations(ItemStandalone input, Item item) {

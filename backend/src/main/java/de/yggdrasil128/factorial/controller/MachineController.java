@@ -65,14 +65,9 @@ public class MachineController {
     @PatchMapping("/machine")
     public MachineStandalone update(int machineId, @RequestBody MachineStandalone input) {
         Machine machine = machineService.get(machineId);
-        applyBasics(input, machine);
+        machine.applyBaics(input);
         applyRelations(input, machine);
         return new MachineStandalone(machineService.update(machine));
-    }
-
-    private static void applyBasics(MachineStandalone input, Machine machine) {
-        OptionalInputField.of(input.name()).apply(machine::setName);
-        OptionalInputField.of(input.category()).apply(machine::setCategory);
     }
 
     private void applyRelations(MachineStandalone input, Machine machine) {

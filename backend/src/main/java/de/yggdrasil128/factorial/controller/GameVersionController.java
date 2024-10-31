@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
@@ -45,19 +45,15 @@ public class GameVersionController {
 
     @GetMapping("/gameVersion/summary")
     public GameVersionSummary retrieveSummary(int gameVersionId) {
-        return Exporter.exportGameVersion(gameVersionService.get(gameVersionId), RelationRepresentation.ID);
+        return Exporter.exportGameVersion(gameVersionService.get(gameVersionId), External.FRONTEND);
     }
 
     @PatchMapping("/gameVersion")
     public GameVersionStandalone update(int gameVersionId, @RequestBody GameVersionStandalone input) {
         GameVersion gameVersion = gameVersionService.get(gameVersionId);
-        applyBasics(input, gameVersion);
+        gameVersion.applyBasics(input);
         applyRelations(input, gameVersion);
         return GameVersionStandalone.of(gameVersionService.update(gameVersion));
-    }
-
-    private static void applyBasics(GameVersionStandalone input, GameVersion gameVersion) {
-        OptionalInputField.of(input.name()).apply(gameVersion::setName);
     }
 
     private void applyRelations(GameVersionStandalone input, GameVersion gameVersion) {

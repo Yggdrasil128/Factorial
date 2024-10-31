@@ -5,7 +5,7 @@ import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.ProductionEntryStandalone;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,22 +22,21 @@ public record ProductionStepStandalone(@JsonProperty(access = READ_ONLY) int id,
                                        @JsonProperty(access = READ_ONLY) List<ProductionEntryStandalone> outputs) {
 
     public static ProductionStepStandalone of(ProductionStep model, ProductionStepThroughputs throughputs) {
-        return of(model, RelationRepresentation.ID,
+        return of(model, External.FRONTEND,
                 throughputs.getInputs().entrySet().stream().map(ProductionEntryStandalone::of).toList(),
                 throughputs.getOutputs().entrySet().stream().map(ProductionEntryStandalone::of).toList());
     }
 
-    public static ProductionStepStandalone of(ProductionStep model, RelationRepresentation resolveStrategy) {
-        return of(model, resolveStrategy, Collections.emptyList(), Collections.emptyList());
+    public static ProductionStepStandalone of(ProductionStep model, External destination) {
+        return of(model, destination, Collections.emptyList(), Collections.emptyList());
     }
 
-    private static ProductionStepStandalone of(ProductionStep model, RelationRepresentation resolveStrategy,
+    private static ProductionStepStandalone of(ProductionStep model, External destination,
                                                List<ProductionEntryStandalone> inputs,
                                                List<ProductionEntryStandalone> outputs) {
         return new ProductionStepStandalone(model.getId(), model.getFactory().getId(),
-                NamedModel.resolve(model.getMachine(), resolveStrategy),
-                NamedModel.resolve(model.getRecipe(), resolveStrategy),
-                NamedModel.resolve(model.getModifiers(), resolveStrategy), model.getMachineCount(), inputs, outputs);
+                NamedModel.resolve(model.getMachine(), destination), NamedModel.resolve(model.getRecipe(), destination),
+                NamedModel.resolve(model.getModifiers(), destination), model.getMachineCount(), inputs, outputs);
     }
 
 }

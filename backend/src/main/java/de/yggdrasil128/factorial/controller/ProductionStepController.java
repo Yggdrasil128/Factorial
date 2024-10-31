@@ -4,7 +4,7 @@ import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -73,16 +73,12 @@ public class ProductionStepController {
     public ProductionStepStandalone update(int productionStepId, @RequestBody ProductionStepStandalone input) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
         Factory factory = productionStep.getFactory();
-        ProductionStepStandalone before = ProductionStepStandalone.of(productionStep, RelationRepresentation.ID);
-        applyBasics(input, productionStep);
+        ProductionStepStandalone before = ProductionStepStandalone.of(productionStep, External.FRONTEND);
+        productionStep.applyBasics(input);
         applyRelations(input, productionStep);
         productionStep = productionStepService.update(productionStep, before,
                 () -> saveService.computeProductionStepChanges(factory.getSave()));
         return toOutput(productionStep);
-    }
-
-    private static void applyBasics(ProductionStepStandalone input, ProductionStep productionStep) {
-        OptionalInputField.of(input.machineCount()).apply(productionStep::setMachineCount);
     }
 
     private void applyRelations(ProductionStepStandalone input, ProductionStep productionStep) {

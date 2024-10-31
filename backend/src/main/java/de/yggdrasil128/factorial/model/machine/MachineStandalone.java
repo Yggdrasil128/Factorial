@@ -3,7 +3,7 @@ package de.yggdrasil128.factorial.model.machine;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 
 import java.util.List;
 
@@ -23,13 +23,13 @@ public record MachineStandalone(@JsonProperty(access = READ_ONLY) int id,
     }
 
     public MachineStandalone(Machine model) {
-        this(model, RelationRepresentation.ID);
+        this(model, External.FRONTEND);
     }
 
-    public MachineStandalone(Machine model, RelationRepresentation resolveStrategy) {
+    public MachineStandalone(Machine model, External destination) {
         this(model.getId(), model.getGameVersion().getId(), model.getName(),
-                NamedModel.resolve(model.getIcon(), resolveStrategy),
-                NamedModel.resolve(model.getMachineModifiers(), resolveStrategy), model.getCategory());
+                NamedModel.resolve(model.getIcon(), destination),
+                NamedModel.resolve(model.getMachineModifiers(), destination), model.getCategory());
     }
 
 }

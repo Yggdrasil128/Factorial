@@ -3,7 +3,6 @@ package de.yggdrasil128.factorial.controller;
 import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
@@ -47,7 +46,6 @@ public class SaveController {
     public SaveStandalone create(@RequestBody SaveStandalone input) {
         GameVersion gameVersion = gameVersionService.get((int) input.gameVersionId());
         Save save = new Save(gameVersion, input);
-        save.setGameVersion(gameVersion);
         return SaveStandalone.of(saveService.create(save));
     }
 
@@ -89,15 +87,11 @@ public class SaveController {
     @PatchMapping("/save")
     public SaveStandalone update(int saveId, @RequestBody SaveStandalone input) {
         Save save = saveService.get(saveId);
-        applyBasics(input, save);
-        if (0 != (int) input.gameVersionId()) {
+        if (null != input.gameVersionId()) {
             throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
         }
+        save.applyBasics(input);
         return SaveStandalone.of(saveService.update(save));
-    }
-
-    private static void applyBasics(SaveStandalone input, Save save) {
-        OptionalInputField.of(input.name()).apply(save::setName);
     }
 
     @DeleteMapping("/save")

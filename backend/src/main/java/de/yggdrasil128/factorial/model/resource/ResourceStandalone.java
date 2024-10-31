@@ -6,7 +6,7 @@ import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +25,7 @@ public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
                                  @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed) {
 
     public static ResourceStandalone of(Resource model, ResourceContributions contributions) {
-        return of(model, RelationRepresentation.ID,
+        return of(model, External.FRONTEND,
                 contributions.getProducers().stream().map(producer -> resolve(producer)).toList(),
                 contributions.getProduced(),
                 contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList(),
@@ -40,16 +40,16 @@ public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
                 + production.getClass().getCanonicalName());
     }
 
-    public static ResourceStandalone of(Resource model, RelationRepresentation resolveStrategy) {
-        return of(model, resolveStrategy, Collections.emptyList(), null, Collections.emptyList(), null);
+    public static ResourceStandalone of(Resource model, External destination) {
+        return of(model, destination, Collections.emptyList(), null, Collections.emptyList(), null);
     }
 
-    private static ResourceStandalone of(Resource model, RelationRepresentation resolveStrategy,
-                                         List<Object> producerIds, QuantityByChangelist produced,
-                                         List<Object> consumerIds, QuantityByChangelist consumed) {
+    private static ResourceStandalone of(Resource model, External destination, List<Object> producerIds,
+                                         QuantityByChangelist produced, List<Object> consumerIds,
+                                         QuantityByChangelist consumed) {
         return new ResourceStandalone(model.getId(), model.getFactory().getId(), model.getOrdinal(),
-                NamedModel.resolve(model.getItem(), resolveStrategy), model.isImported(), model.isExported(),
-                producerIds, produced, consumerIds, consumed);
+                NamedModel.resolve(model.getItem(), destination), model.isImported(), model.isExported(), producerIds,
+                produced, consumerIds, consumed);
     }
 
 }

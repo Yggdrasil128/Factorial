@@ -2,7 +2,8 @@ package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipe.Recipe;
@@ -35,26 +36,28 @@ public class ProductionStep {
 
     public ProductionStep(Factory factory, ProductionStepStandalone standalone) {
         this.factory = factory;
-        machine = null;
-        recipe = null;
         modifiers = new ArrayList<>();
-        machineCount = standalone.machineCount();
+        applyBasics(standalone);
     }
 
-    public static Object resolve(ProductionStep relation, RelationRepresentation strategy) {
+    public void applyBasics(ProductionStepStandalone standalone) {
+        OptionalInputField.of(standalone.machineCount()).apply(this::setMachineCount);
+    }
+
+    public static Object resolve(ProductionStep relation, External destination) {
         if (null == relation) {
             return null;
         }
-        switch (strategy) {
-        case ID:
+        switch (destination) {
+        case FRONTEND:
             return relation.getId();
-        case NAME:
+        case SAVE_FILE:
             Factory factory = relation.getFactory();
             Save save = factory.getSave();
             return save.getFactories().indexOf(factory) + "." + factory.getProductionSteps().indexOf(relation);
         default:
-            throw new AssertionError("unexpected enum constant: " + RelationRepresentation.class.getCanonicalName()
-                    + '.' + strategy.name());
+            throw new AssertionError(
+                    "unexpected enum constant: " + External.class.getCanonicalName() + '.' + destination.name());
         }
     }
 

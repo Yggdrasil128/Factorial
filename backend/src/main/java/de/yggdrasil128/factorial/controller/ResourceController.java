@@ -1,7 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.engine.ProductionLine;
-import de.yggdrasil128.factorial.model.RelationRepresentation;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
@@ -52,13 +52,8 @@ public class ResourceController {
     @PatchMapping("/resource")
     public ResourceStandalone update(int resourceId, ResourceStandalone input) {
         Resource resource = resourceService.get(resourceId);
-        applyBasics(input, resource);
-        return ResourceStandalone.of(resource, RelationRepresentation.ID);
-    }
-
-    private static void applyBasics(ResourceStandalone input, Resource resource) {
-        resource.setImported(input.imported());
-        resource.setExported(input.exported());
+        resource.applyBasics(input);
+        return ResourceStandalone.of(resource, External.FRONTEND);
     }
 
 }

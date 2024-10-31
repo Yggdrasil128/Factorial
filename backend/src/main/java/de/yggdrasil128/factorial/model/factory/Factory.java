@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.model.NamedModel;
+import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.resource.Resource;
@@ -21,8 +22,8 @@ public class Factory implements NamedModel {
     @Column(nullable = false)
     private int ordinal;
     @Column(unique = true, nullable = false)
-    private String name;
-    private String description;
+    private String name = "";
+    private String description = "";
     @ManyToOne
     private Icon icon;
     @JoinColumn
@@ -36,12 +37,15 @@ public class Factory implements NamedModel {
 
     public Factory(Save save, FactoryStandalone standalone) {
         this.save = save;
-        ordinal = standalone.ordinal();
-        name = standalone.name();
-        description = standalone.description();
-        icon = null;
         productionSteps = new ArrayList<>();
         resources = new ArrayList<>();
+        applyBasics(standalone);
+    }
+
+    public void applyBasics(FactoryStandalone standalone) {
+        OptionalInputField.of(standalone.ordinal()).apply(this::setOrdinal);
+        OptionalInputField.of(standalone.name()).apply(this::setName);
+        OptionalInputField.of(standalone.description()).apply(this::setDescription);
     }
 
     @Override
