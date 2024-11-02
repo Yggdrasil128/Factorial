@@ -36,6 +36,10 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
                     entity.getFactory().getResources().stream().mapToInt(Resource::getOrdinal).max().orElse(0) + 1);
         }
         return super.create(entity);
+        /*
+         * We are called exclusively from ProductionLineService#spawn(), which will then take care of further
+         * propagating the consequences of a resource being created. Therefore, we do not publish an event here.
+         */
     }
 
     public ResourceContributions computeContributions(Resource resource) {
@@ -56,6 +60,13 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
 
     public void updateContributions(int id, ResourceContributions contributions) {
         events.publishEvent(new ResourceContributionsChangedEvent(get(id), contributions));
+    }
+
+    @Override
+    public Resource update(Resource entity) {
+        Resource resource = super.update(entity);
+        events.publishEvent(new ResourceUpdatedEvent(resource));
+        return resource;
     }
 
     @Override

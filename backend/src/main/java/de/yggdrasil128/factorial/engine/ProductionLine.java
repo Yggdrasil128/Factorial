@@ -102,6 +102,11 @@ public class ProductionLine implements Production {
         contributions.putIfAbsent(resource.getItem().getId(), new ResourceContributions(resource));
     }
 
+    public void updateResource(Resource resource) {
+        contributions.computeIfAbsent(resource.getItem().getId(), key -> new ResourceContributions(resource))
+                .update(resource);
+    }
+
     /**
      * Notifies of an addition of a contributor. This generally necessitates a recalculation of contributions.
      * 

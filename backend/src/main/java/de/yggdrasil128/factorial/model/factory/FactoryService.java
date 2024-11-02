@@ -14,6 +14,7 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepThroughputsChangedEvent;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
+import de.yggdrasil128.factorial.model.resource.ResourceUpdatedEvent;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -143,7 +144,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
     public FactoryProductionLineChangedEvent on(ProductionStepThroughputsChangedEvent event) {
         ProductionLine productionLine = cache.get(event.getProductionStep().getFactory().getId());
         if (null == productionLine) {
-            // TODO guarantee that a production line is computed
+            // TODO guarantee that a production line is computed?
             return null;
         }
         boolean itemsChanged = false;
@@ -177,6 +178,16 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         }
     }
 
-    // TODO listen for ResourceUpdatedEvent and produce a FactoryProductionLineChangeEvent
+    @EventListener
+    public FactoryProductionLineChangedEvent on(ResourceUpdatedEvent event) {
+        ProductionLine productionLine = cache.get(event.getResource().getFactory().getId());
+        if (null == productionLine) {
+            // TODO guarantee that a production line is computed?
+            return null;
+        }
+        productionLine.updateResource(event.getResource());
+        // TODO we might want to distinguish between the ProductionLine and the Production
+        return new FactoryProductionLineChangedEvent(event.getResource().getFactory(), productionLine, false);
+    }
 
 }
