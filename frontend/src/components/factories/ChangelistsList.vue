@@ -1,51 +1,51 @@
-<script setup lang="js">
-import { h, inject, onMounted, onUnmounted, ref } from 'vue';
-import { VueDraggableNext } from 'vue-draggable-next';
-import { Check, Delete, Edit, Plus, Star } from '@element-plus/icons-vue';
+<script setup lang="ts">
+import { useCurrentSaveStore } from '@/stores/currentSaveStore';
+import { useChangelistStore } from '@/stores/model/changelistStore';
+import { useChangelistApi } from '@/api/useChangelistApi';
 import { useRoute, useRouter } from 'vue-router';
-import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElTooltip } from 'element-plus';
+import { computed, type ComputedRef, h, type Ref, ref } from 'vue';
+import type { Changelist } from '@/types/model/standalone';
+import { Check, Delete, Edit, Plus, Star } from '@element-plus/icons-vue';
 import IconImg from '@/components/IconImg.vue';
+import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElTooltip } from 'element-plus';
+import { VueDraggableNext } from 'vue-draggable-next';
+
+const currentSaveStore = useCurrentSaveStore();
+const changelistStore = useChangelistStore();
+const changelistApi = useChangelistApi();
 
 const router = useRouter();
 const route = useRoute();
 
-const axios = inject('axios');
-const globalEventBus = inject('globalEventBus');
+const changelists: ComputedRef<Changelist[]> = computed(() => {
+  return [...changelistStore.map.values()].filter(changelist => changelist.saveId === currentSaveStore.save?.id);
+});
 
-const changelists = ref([]);
-
-async function loadChangelists() {
-  const response = await axios.get('api/save/changelists', { params: { saveId: 1 } });
-  changelists.value = response.data;
+function newChangelist(): void {
+  router.push({ name: 'newChangelist', params: { factoryId: route.params.factoryId } });
 }
 
-loadChangelists();
-
-async function setPrimary(changelistId) {
-  await axios.patch('/api/changelist/primary', null, { params: { changelistId: changelistId } });
-
-  for (const changelist of changelists.value) {
-    if (changelist.id === changelistId) {
-      changelist.primary = true;
-      changelist.active = true;
-    } else {
-      changelist.primary = false;
-    }
-  }
-
-  globalEventBus.emit('reloadFactoryData');
-}
-
-async function setActive(changelistId, active) {
-  await axios.patch('/api/changelist/active', null, {
-    params: { changelistId: changelistId, active: active }
+function editChangelist(changelistId: number): void {
+  router.push({
+    name: 'editChangelist',
+    params: { factoryId: route.params.factoryId, editChangelistId: changelistId }
   });
-
-  globalEventBus.emit('reloadFactoryData');
 }
 
-async function askApplyChangelist(changelistId, primary) {
-  const checked = ref(!primary);
+function deleteChangelist(changelistId: number): void {
+  changelistApi.deleteChangelist(changelistId);
+}
+
+function setPrimary(changelistId: number): void {
+  changelistApi.setPrimary(changelistId);
+}
+
+function setActive(changelistId: number, active: boolean): void {
+  changelistApi.setActive(changelistId, active);
+}
+
+async function askApplyChangelist(changelistId: number, isPrimary: boolean): Promise<void> {
+  const checked: Ref<boolean> = ref(!isPrimary);
   const confirm = await new Promise((r) =>
     ElMessageBox({
       title: 'Apply all changes from this changelist?',
@@ -56,9 +56,9 @@ async function askApplyChangelist(changelistId, primary) {
       message: () =>
         h('div', null, [
           h(ElSwitch, {
-            disabled: primary,
+            disabled: isPrimary,
             modelValue: checked.value,
-            'onUpdate:modelValue': (val) => (checked.value = val)
+            'onUpdate:modelValue': (val) => (checked.value = Boolean(val))
           }),
           h('span', { style: 'margin-left: 10px;' }, 'Delete changelist afterwards')
         ])
@@ -69,37 +69,10 @@ async function askApplyChangelist(changelistId, primary) {
   if (!confirm) {
     return;
   }
-  console.log('applyChangelist', checked.value, changelistId);
-}
-
-async function deleteChangelist(changelistId) {
-  await axios.delete('/api/changelist', { params: { changelistId: changelistId } });
-
-  globalEventBus.emit('reloadFactoryData');
-
-  await loadChangelists();
-}
-
-function onUpdateChangelists() {
-  loadChangelists();
-}
-
-onMounted(() => {
-  globalEventBus.on('updateChangelists', onUpdateChangelists);
-});
-onUnmounted(() => {
-  globalEventBus.off('updateChangelists', onUpdateChangelists);
-});
-
-function newChangelist() {
-  router.push({ name: 'newChangelist', params: { factoryId: route.params.factoryId } });
-}
-
-function editChangelist(changelistId) {
-  router.push({
-    name: 'editChangelist',
-    params: { factoryId: route.params.factoryId, editChangelistId: changelistId }
-  });
+  await changelistApi.apply(changelistId);
+  if (!isPrimary && checked.value) {
+    await changelistApi.deleteChangelist(changelistId);
+  }
 }
 </script>
 
@@ -111,18 +84,18 @@ function editChangelist(changelistId) {
         v-for="changelist in changelists"
         :key="changelist.id"
         class="list-group-item"
-        :class="{ active: changelist.active, primary: changelist.primary, hasIcon: !!changelist.icon }"
+        :class="{ active: changelist.active, primary: changelist.primary, hasIcon: !!changelist.iconId }"
       >
         <div class="left">
-          <div class="icon" v-if="changelist.icon">
-            <icon-img :icon="changelist.icon" :size="80" v-if="changelist.icon" />
+          <div class="icon" v-if="changelist.iconId">
+            <icon-img :icon="changelist.iconId" :size="80" v-if="changelist.iconId" />
           </div>
-          <div class="name" v-if="!changelist.icon">
+          <div class="name" v-if="!changelist.iconId">
             {{ changelist.name }}
           </div>
         </div>
         <div class="right">
-          <div class="name" v-if="changelist.icon">
+          <div class="name" v-if="changelist.iconId">
             {{ changelist.name }}
           </div>
           <div class="buttons">
@@ -138,7 +111,7 @@ function editChangelist(changelistId) {
                   v-model="changelist.active"
                   :disabled="changelist.primary"
                   style="margin-right: 8px;"
-                  @update:model-value="(val) => setActive(changelist.id, val)"
+                  @update:model-value="(val) => setActive(changelist.id, Boolean(val))"
                 />
               </el-tooltip>
 

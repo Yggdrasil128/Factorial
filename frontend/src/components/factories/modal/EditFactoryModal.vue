@@ -32,7 +32,7 @@ const formRules = reactive({
 });
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
-  if (route.name === 'newFactory2') {
+  if (route.name === 'newFactory') {
     factory.value = {
       saveId: currentSaveStore.save?.id,
       name: '',
@@ -44,7 +44,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
     const currentFactory: Factory | undefined = factoryStore.map.get(factoryId);
     if (!currentFactory) {
       console.error('Factory with id ' + factoryId + ' not found');
-      router.push({ name: 'factories2', params: { factoryId: route.params.factoryId } });
+      router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
       return;
     }
     factory.value = {
@@ -73,19 +73,19 @@ async function submitForm(): Promise<void> {
 
   isSaving.value = true;
 
-  if (route.name === 'newFactory2') {
+  if (route.name === 'newFactory') {
     await factoryApi.createFactory(factory.value);
   } else {
     await factoryApi.editFactory(factory.value);
   }
 
-  await router.push({ name: 'factories2', params: { factoryId: route.params.factoryId } });
+  await router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
 }
 </script>
 
 <template>
   <edit-modal
-    :title="route.name === 'newFactory2' ? 'New factory' : 'Edit factory'"
+    :title="route.name === 'newFactory' ? 'New factory' : 'Edit factory'"
     form-label-width="120px"
     :form-model="factory"
     :form-rules="formRules"

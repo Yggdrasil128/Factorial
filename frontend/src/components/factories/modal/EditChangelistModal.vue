@@ -33,7 +33,7 @@ const formRules = reactive({
 });
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
-  if (route.name === 'newChangelist2') {
+  if (route.name === 'newChangelist') {
     changelist.value = {
       saveId: currentSaveStore.save?.id,
       name: '',
@@ -47,7 +47,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
     const currentChangelist: Changelist | undefined = changelistStore.map.get(changelistId);
     if (!currentChangelist) {
       console.error('Changelist with id ' + changelistId + ' not found');
-      router.push({ name: 'factories2', params: { factoryId: route.params.factoryId } });
+      router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
       return;
     }
     changelist.value = {
@@ -78,19 +78,19 @@ async function submitForm(): Promise<void> {
 
   isSaving.value = true;
 
-  if (route.name === 'newChangelist2') {
+  if (route.name === 'newChangelist') {
     await changelistApi.createChangelist(changelist.value);
   } else {
     await changelistApi.editChangelist(changelist.value);
   }
 
-  await router.push({ name: 'factories2', params: { factoryId: route.params.factoryId } });
+  await router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
 }
 </script>
 
 <template>
   <edit-modal
-    :title="route.name === 'newChangelist2' ? 'New changelist' : 'Edit changelist'"
+    :title="route.name === 'newChangelist' ? 'New changelist' : 'Edit changelist'"
     form-label-width="150px"
     :form-model="changelist"
     :form-rules="formRules"

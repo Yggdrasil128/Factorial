@@ -7,7 +7,7 @@ import { useResourceStore } from '@/stores/model/resourceStore';
 import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import { Plus } from '@element-plus/icons-vue';
-import FactoryResource from '@/components/factories2/resources/FactoryResource.vue';
+import FactoryResource from '@/components/factories/resources/FactoryResource.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -28,7 +28,7 @@ const resources: ComputedRef<Resource[]> = computed(() =>
 );
 
 function newProductionStep() {
-  router.push({ name: 'newProductionStep2', params: { factoryId: route.params.factoryId } });
+  router.push({ name: 'newProductionStep', params: { factoryId: route.params.factoryId } });
 }
 
 function newTransportLink() {

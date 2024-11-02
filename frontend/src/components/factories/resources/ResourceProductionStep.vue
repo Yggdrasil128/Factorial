@@ -7,9 +7,9 @@ import { useMachineStore } from '@/stores/model/machineStore';
 import { Delete, Edit } from '@element-plus/icons-vue';
 import IconImg from '@/components/IconImg.vue';
 import { ElButton, ElButtonGroup } from 'element-plus';
-import QuantityDisplay from '@/components/factories2/resources/QuantityDisplay.vue';
-import MachineCountInput from '@/components/factories2/resources/MachineCountInput.vue';
-import ResourceProductionEntry from '@/components/factories2/resources/ResourceProductionEntry.vue';
+import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
+import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
+import ResourceProductionEntry from '@/components/factories/resources/ResourceProductionEntry.vue';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;

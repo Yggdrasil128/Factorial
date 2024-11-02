@@ -4,10 +4,10 @@ import { ElTooltip } from 'element-plus';
 import IconImg from '@/components/IconImg.vue';
 import { useItemStore } from '@/stores/model/itemStore';
 import { computed, type ComputedRef } from 'vue';
-import QuantityDisplay from '@/components/factories2/resources/QuantityDisplay.vue';
+import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import _ from 'lodash';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import ResourceProductionStep from '@/components/factories2/resources/ResourceProductionStep.vue';
+import ResourceProductionStep from '@/components/factories/resources/ResourceProductionStep.vue';
 
 export interface FactoryResourceProps {
   resource: Resource;

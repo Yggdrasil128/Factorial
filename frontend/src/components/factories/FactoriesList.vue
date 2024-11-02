@@ -1,63 +1,60 @@
-<script setup lang="js">
-import { computed, inject, onMounted, onUnmounted, ref } from 'vue';
-import { VueDraggableNext } from 'vue-draggable-next';
+<script setup lang="ts">
+import { useFactoryStore } from '@/stores/model/factoryStore';
+import { useCurrentSaveStore } from '@/stores/currentSaveStore';
+import { computed, type ComputedRef, watch } from 'vue';
+import { type RouteLocationAsRelativeGeneric, useRoute, useRouter } from 'vue-router';
+import type { Factory } from '@/types/model/standalone';
 import { Delete, Edit, Plus } from '@element-plus/icons-vue';
-import { useRoute, useRouter } from 'vue-router';
-import IconImg from '@/components/IconImg.vue';
 import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
+import { VueDraggableNext } from 'vue-draggable-next';
+import IconImg from '@/components/IconImg.vue';
+import { type FactoryApi, useFactoryApi } from '@/api/useFactoryApi';
+
+const currentSaveStore = useCurrentSaveStore();
+const factoryStore = useFactoryStore();
+const factoryApi: FactoryApi = useFactoryApi();
 
 const router = useRouter();
 const route = useRoute();
-const axios = inject('axios');
-const globalEventBus = inject('globalEventBus');
 
-const factories = ref([]);
-const currentFactoryId = computed(() => route.params.factoryId);
+const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
+  route.params.factoryId ? Number(route.params.factoryId) : undefined
+);
 
-function newFactory() {
-  router.push({ name: 'newFactory', params: { factoryId: route.params.factoryId } });
-}
+const factories: ComputedRef<Factory[]> = computed(() => {
+  return [...factoryStore.map.values()].filter(factory => factory.saveId === currentSaveStore.save?.id);
+});
 
-function editFactory(editFactoryId) {
-  router.push({
-    name: 'editFactory',
-    params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId }
-  });
-}
+const routerMethods = {
+  newFactory(): void {
+    router.push({ name: 'newFactory', params: { factoryId: route.params.factoryId } });
+  },
+  editFactory(editFactoryId: number): void {
+    router.push({
+      name: 'editFactory',
+      params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId }
+    });
+  },
+  viewFactory(factoryId: number, replace?: boolean): void {
+    if (currentFactoryId.value === factoryId) {
+      return;
+    }
+    const toRoute: RouteLocationAsRelativeGeneric =
+      { name: 'factories', params: { factoryId: factoryId } };
 
-async function loadFactories() {
-  const response = await axios.get('api/save/factories', { params: { saveId: 1 } });
-  factories.value = response.data;
+    replace ? router.replace(toRoute) : router.push(toRoute);
+  }
+};
+
+watch(computed(() => factories.value.length), () => {
   if (factories.value.length > 0 && !currentFactoryId.value) {
-    await router.replace({ name: 'factories', params: { factoryId: factories.value[0].id } });
+    routerMethods.viewFactory(factories.value[0].id, true);
   }
+}, { immediate: true });
+
+function deleteFactory(factoryId: number) {
+  factoryApi.deleteFactory(factoryId);
 }
-
-async function deleteFactory(factoryId) {
-  await axios.delete('api/factory', { params: { factoryId: factoryId } });
-
-  await loadFactories();
-}
-
-function viewFactory(id) {
-  if (currentFactoryId.value === id) {
-    return;
-  }
-  router.push({ name: 'factories', params: { factoryId: id } });
-}
-
-loadFactories();
-
-function onUpdateFactories() {
-  loadFactories();
-}
-
-onMounted(() => {
-  globalEventBus.on('updateFactories', onUpdateFactories);
-});
-onUnmounted(() => {
-  globalEventBus.off('updateFactories', onUpdateFactories);
-});
 </script>
 
 <template>
@@ -68,12 +65,12 @@ onUnmounted(() => {
         v-for="factory in factories"
         :key="factory.id"
         class="list-group-item"
-        :class="{ active: String(factory.id) === currentFactoryId, hasIcon: !!factory.icon }"
+        :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
       >
-        <div class="icon" @click="viewFactory(factory.id)" v-if="factory.icon">
-          <icon-img :icon="factory.icon" :size="40" />
+        <div class="icon" @click="routerMethods.viewFactory(factory.id)" v-if="factory.iconId">
+          <icon-img :icon="factory.iconId" :size="40" />
         </div>
-        <div class="name" @click="viewFactory(factory.id)">
+        <div class="name" @click="routerMethods.viewFactory(factory.id)">
           {{ factory.name }}
         </div>
         <div class="buttons">
@@ -85,7 +82,7 @@ onUnmounted(() => {
               :hide-after="0"
               content="Edit"
             >
-              <el-button :icon="Edit" @click="editFactory(factory.id)" />
+              <el-button :icon="Edit" @click="routerMethods.editFactory(factory.id)" />
             </el-tooltip>
 
             <el-popconfirm
@@ -113,7 +110,7 @@ onUnmounted(() => {
     </vue-draggable-next>
 
     <div class="createFactory">
-      <el-button type="primary" :icon="Plus" @click="newFactory()">Create factory</el-button>
+      <el-button type="primary" :icon="Plus" @click="routerMethods.newFactory()">Create factory</el-button>
     </div>
   </div>
 </template>
