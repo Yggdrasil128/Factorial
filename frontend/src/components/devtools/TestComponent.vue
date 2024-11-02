@@ -4,10 +4,13 @@ import { useIconStore } from '@/stores/model/iconStore';
 import { type Ref, ref } from 'vue';
 import IconImg from '@/components/IconImg.vue';
 import IconCascaderSelect from '@/components/CascaderSelect.vue';
+import { useItemStore } from '@/stores/model/itemStore';
 
 const iconStore = useIconStore();
+const itemStore = useItemStore();
 
-const selected: Ref<number | undefined> = ref(4);
+const selectedIcon: Ref<number> = ref(4);
+const selectedItem: Ref<number> = ref(0);
 
 </script>
 
@@ -17,8 +20,11 @@ const selected: Ref<number | undefined> = ref(4);
 
   <!--  <pre>{{ JSON.stringify(convertToTreeByCategory([...iconStore.map.values()]), null, 2) }}</pre>-->
 
-  <IconCascaderSelect v-model="selected" :options="[...iconStore.map.values()]" clearable />
-  {{ selected }}
+  <IconCascaderSelect v-model="selectedIcon" :options="[...iconStore.map.values()]" is-icon-entity clearable />
+  {{ selectedIcon }}
+
+  <IconCascaderSelect v-model="selectedItem" :options="[...itemStore.map.values()]" clearable />
+  {{ selectedItem }}
 </template>
 
 <style scoped>

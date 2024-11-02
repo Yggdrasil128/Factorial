@@ -1,5 +1,4 @@
 import { type ModelStoresUpdateService, useModelStoresUpdateService } from '@/services/model/modelStoresUpdateService';
-import { useSaveSummaryApi } from '@/api/useSaveSummaryApi';
 import type { GameVersionSummary, SaveSummary } from '@/types/model/summary';
 import { useCurrentSaveStore } from '@/stores/currentSaveStore';
 import { type ModelSyncWebsocket, useModelSyncWebsocket } from '@/api/useModelSyncWebsocket';
@@ -13,7 +12,7 @@ import {
   isResourceUpdatedMessage,
   type WebsocketMessage
 } from '@/types/websocketMessages/modelChangedEvents';
-import { useGameVersionSummaryApi } from '@/api/useGameVersionSummaryApi';
+import { useSummaryApi } from '@/api/useSummaryApi';
 
 export interface ModelSyncService {
   setSaveIdAndReload: (saveId: number) => void;
@@ -24,13 +23,12 @@ function useModelSyncService(): ModelSyncService {
   const modelStoresUpdateService: ModelStoresUpdateService = useModelStoresUpdateService();
   const currentSaveStore = useCurrentSaveStore();
 
-  const saveSummaryApi = useSaveSummaryApi();
-  const gameVersionSummaryApi = useGameVersionSummaryApi();
+  const summaryApi = useSummaryApi();
 
   const modelSyncWebsocket: ModelSyncWebsocket = useModelSyncWebsocket(onWebsocketMessage, reload);
 
   function setSaveIdAndReload(saveId: number) {
-    saveSummaryApi.retrieveSummary(saveId)
+    summaryApi.getSaveSummary(saveId)
       .then((saveSummary: SaveSummary) => {
         const isInitialLoad: boolean = !currentSaveStore.save;
         modelStoresUpdateService.applySaveSummary(saveSummary);
@@ -38,7 +36,7 @@ function useModelSyncService(): ModelSyncService {
           modelSyncWebsocket.connect();
         }
 
-        gameVersionSummaryApi.retrieveSummary(saveSummary.save.gameVersionId)
+        summaryApi.getGameVersionSummary(saveSummary.save.gameVersionId)
           .then((gameVersionSummary: GameVersionSummary) => {
             modelStoresUpdateService.applyGameVersionSummary(gameVersionSummary);
           });

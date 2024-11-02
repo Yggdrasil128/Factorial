@@ -1,17 +1,23 @@
-<script setup lang="js">
+<script setup lang="ts">
 import { inject, ref } from 'vue';
 import { Check, WarnTriangleFilled } from '@element-plus/icons-vue';
 import { ElButton, ElOption, ElSelect } from 'element-plus';
 import ModelStoresDisplay from '@/components/devtools/ModelStoresDisplay.vue';
 import TestComponent from '@/components/devtools/TestComponent.vue';
+import type { AxiosInstance } from 'axios';
 
-const axios = inject('axios');
+const axios: AxiosInstance = inject('axios')!;
 
 const wipeDatabaseButtonState = ref(0);
 const setupTestDataButtonState = ref(0);
 const selectedTestDataSetup = ref('');
 
-const availableTestDataSetups = ref({
+const availableTestDataSetups: {
+  [key: string]: {
+    gameVersionFile: string;
+    saveFile: string;
+  }
+} = {
   'SatisfactoryUpdate7 + ExampleWithSteelProductionNorth': {
     gameVersionFile: 'SatisfactoryUpdate7',
     saveFile: 'ExampleWithSteelProductionNorth'
@@ -20,7 +26,7 @@ const availableTestDataSetups = ref({
     gameVersionFile: 'SatisfactoryUpdate8_withIcons',
     saveFile: 'ExampleWithSteelProductionNorthV8'
   }
-});
+};
 
 async function wipeDatabaseAndRestart() {
   wipeDatabaseButtonState.value = 1;
@@ -41,7 +47,10 @@ async function setupTestData() {
 
   setupTestDataButtonState.value = 1;
 
-  const setup = availableTestDataSetups.value[selectedTestDataSetup.value];
+  const setup = availableTestDataSetups[selectedTestDataSetup.value] as {
+    gameVersionFile: string;
+    saveFile: string;
+  };
 
   await importJsonFile('gameVersion', setup.gameVersionFile);
   await importJsonFile('save', setup.saveFile);
@@ -53,8 +62,8 @@ async function setupTestData() {
   }, 2000);
 }
 
-async function importJsonFile(kind, filename) {
-  const data = await import('./json/' + filename + '.json');
+async function importJsonFile(kind: string, filename: string): Promise<void> {
+  const data = await import(/* @vite-ignore */ './json/' + filename + '.json');
   await axios.post('api/migration/' + kind, data.default);
 }
 </script>
@@ -90,7 +99,7 @@ async function importJsonFile(kind, filename) {
       :loading="setupTestDataButtonState === 1"
       :disabled="setupTestDataButtonState > 0 || !selectedTestDataSetup"
       @click="setupTestData"
-      :icon="setupTestDataButtonState === 2 ? Check : null"
+      :icon="setupTestDataButtonState === 2 ? Check : undefined"
     >
       Setup test data
     </el-button>

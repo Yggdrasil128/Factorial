@@ -4,8 +4,7 @@ import type { Icon } from '@/types/model/standalone';
 import { useIconStore } from '@/stores/model/iconStore';
 
 export interface IconImgProps {
-  icon?: Icon;
-  iconId?: number;
+  icon?: Icon | number;
   size: number;
 }
 
@@ -14,26 +13,24 @@ const props: IconImgProps = defineProps<IconImgProps>();
 const iconStore = useIconStore();
 
 const src = computed(() => {
-  if (props.icon) {
-    return 'http://localhost:8080/api/icons?id=' + props.icon.id;
+  if (!props.icon) {
+    return '';
   }
-  if (props.iconId) {
-    return 'http://localhost:8080/api/icons?id=' + props.iconId;
+  if (typeof props.icon === 'number') {
+    return 'http://localhost:8080/api/icon/raw?id=' + props.icon;
   }
-  return '';
+  return 'http://localhost:8080/api/icon/raw?id=' + props.icon.id;
 });
 
 const alt = computed(() => {
-  if (props.icon) {
-    return props.icon.name;
+  if (!props.icon) {
+    return '';
   }
-  if (props.iconId) {
-    const icon = iconStore.map.get(props.iconId);
-    if (icon) {
-      return icon.name;
-    }
+  if (typeof props.icon === 'number') {
+    const icon = iconStore.map.get(props.icon);
+    return icon ? icon.name : '';
   }
-  return '';
+  return props.icon.name;
 });
 </script>
 

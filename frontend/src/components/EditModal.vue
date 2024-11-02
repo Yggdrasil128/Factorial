@@ -1,24 +1,25 @@
-<script setup lang="js">
-import { onMounted, onUnmounted, ref } from 'vue';
+<script setup lang="ts">
+import { onMounted, onUnmounted, type Ref, ref } from 'vue';
 import { onBeforeRouteLeave, useRouter } from 'vue-router';
-import { ElMessageBox } from 'element-plus';
+import { ElMessageBox, type FormRules } from 'element-plus';
 import { Check, Close } from '@element-plus/icons-vue';
 
-const emit = defineEmits(['submit']);
+export interface EditModalProps {
+  title: string;
+  formLabelWidth?: string;
+  formModel: any;
+  formLoading?: boolean;
+  formRules: FormRules;
+  hasChanges: boolean;
+  isSaving: boolean;
+}
 
-const props = defineProps([
-  'title',
-  'formLabelWidth',
-  'formModel',
-  'formLoading',
-  'formRules',
-  'hasChanges',
-  'isSaving'
-]);
+const props: EditModalProps = defineProps<EditModalProps>();
+const emit = defineEmits(['submit']);
 
 const router = useRouter();
 
-const visible = ref(true);
+const visible: Ref<boolean> = ref(true);
 
 onMounted(() => {
   document.body.classList.add('el-dark-popper');
@@ -86,14 +87,13 @@ defineExpose({ validate });
     width="1000px"
     :title="title"
   >
-    <p style="margin-top: 0; margin-bottom: 30px">
-      <slot name="description"> Insert description here...</slot>
-      New version! Hello from EditModal.vue
+    <p style="margin-top: 0; margin-bottom: 30px;">
+      <slot name="description">Insert description here...</slot>
     </p>
 
     <el-form
       :label-width="formLabelWidth ?? '120px'"
-      style="width: 900px; overflow: auto"
+      style="width: 900px; overflow: auto;"
       v-loading="formLoading"
       element-loading-background="rgba(20, 20, 20, 0.8)"
       :model="formModel"
@@ -102,7 +102,7 @@ defineExpose({ validate });
     >
       <slot name="form" />
 
-      <div style="margin-top: 10px; float: right">
+      <div style="margin-top: 10px; float: right;">
         <el-button :icon="Close" @click="beforeClose">Cancel</el-button>
         <el-button type="primary" :icon="Check" @click="emit('submit')" :loading="isSaving"
         >Save

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { getModelSyncService, type ModelSyncService } from '@/services/model/modelSyncService';
 
 const localTime = ref('');
 
@@ -10,6 +11,8 @@ function updateLocalTime() {
 
 updateLocalTime();
 setInterval(updateLocalTime, 1000);
+
+const modelSyncService: ModelSyncService = getModelSyncService();
 </script>
 
 <template>
@@ -18,10 +21,22 @@ setInterval(updateLocalTime, 1000);
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
       <router-link :to="{ name: 'factories' }">Factories</router-link>
+      <router-link :to="{ name: 'factories2' }">Factories 2</router-link>
       <router-link to="/devtools">Dev Tools</router-link>
     </div>
     <div id="navExtra">
-      Local time:<br /><span id="localTime">{{ localTime }}</span>
+      <div style="display: flex; gap: 10px; margin-right: 10px;">
+        <div>
+          <button style="margin-top: 7px;"
+                  @click="modelSyncService.reload()">
+            Reload model
+          </button>
+        </div>
+        <div>
+          Local time:<br /><span id="localTime">{{ localTime }}</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -31,19 +46,21 @@ setInterval(updateLocalTime, 1000);
 #navbar {
   border-top: 2px solid black;
   border-bottom: 2px solid black;
-  height: 48px;
+  padding: 4px 0;
+  height: 40px;
   width: 100%;
+  display: flex;
 }
 
 #navList {
-  padding-top: 8px;
+  padding-top: 6px;
   float: left;
-  width: calc(100% - 128px);
+  flex-grow: 1;
 }
 
 #navExtra {
   float: right;
-  width: 128px;
+  flex-grow: 0;
   text-align: center;
   padding-top: 3px;
 }

@@ -3,17 +3,18 @@ import { computed, type ComputedRef, type Ref } from 'vue';
 import { useVModel } from '@vueuse/core';
 import IconImg from '@/components/IconImg.vue';
 
+export interface CascaderSelectProps {
+  modelValue: number;
+  options: EntityWithCategory[];
+  clearable?: boolean;
+  isIconEntity?: boolean;
+}
+
 export interface EntityWithCategory {
   id: number;
   name: string;
   iconId?: number;
   category: string[];
-}
-
-export interface IconCascaderSelectProps {
-  modelValue: number | undefined;
-  options: EntityWithCategory[];
-  clearable?: boolean;
 }
 
 type TreeNode = {
@@ -24,18 +25,29 @@ type TreeNode = {
   value?: number;
 }
 
-const props: IconCascaderSelectProps = defineProps<IconCascaderSelectProps>();
+const props: CascaderSelectProps = defineProps<CascaderSelectProps>();
 const emit = defineEmits(['update:modelValue']);
-const model: Ref<number | undefined> = useVModel(props, 'modelValue', emit);
+const model: Ref<number> = useVModel(props, 'modelValue', emit);
+const modelEntity: Ref<EntityWithCategory | undefined> = computed({
+  get: () => {
+    if (!model.value) {
+      return undefined;
+    }
+    return props.options.filter(element => element.id === model.value)[0];
+  },
+  set(value: EntityWithCategory | undefined) {
+    model.value = value ? value.id : 0;
+  }
+});
 
 const cascaderModel: Ref<any> = computed({
   get: () => model.value,
   set(value: any) {
     if (!value) {
-      model.value = undefined;
+      model.value = 0;
     } else {
       const array = value as (number | undefined)[];
-      model.value = array[array.length - 1];
+      model.value = array[array.length - 1] ?? 0;
     }
   }
 });
@@ -105,7 +117,7 @@ function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): T
 
 <template>
   <div style="display: flex;">
-    <IconImg :icon-id="model" :size="32" style="margin-right: 8px;" />
+    <IconImg :icon-id="isIconEntity ? model : modelEntity?.iconId" :size="32" style="margin-right: 8px;" />
 
     <el-cascader
       v-model="cascaderModel"
@@ -119,7 +131,7 @@ function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): T
         <template v-if="node.isLeaf">
           <div style="height: 36px; display: flex;">
         <span style="margin-right: 8px;">
-          <IconImg :icon-id="data.id" :size="32" />
+          <IconImg :icon="isIconEntity ? data.id : data.iconId" :size="32" />
         </span>
             <span>{{ data.label }}</span>
           </div>

@@ -29,12 +29,11 @@ const machineStore = useMachineStore();
   <h2>Model Stores:</h2>
 
   <h3>Current save</h3>
-  <span v-if="!currentSaveStore.save">(none)</span>
-  <pre v-else>{{ JSON.stringify(currentSaveStore.save, null, 2) }}</pre>
+  <pre v-if="currentSaveStore.save">{{ JSON.stringify(currentSaveStore.save, null, 2) }}</pre>
 
   <h3>Current game version</h3>
-  <span v-if="!currentGameVersionStore.gameVersion">(none)</span>
-  <pre v-else>{{ JSON.stringify(currentGameVersionStore.gameVersion, null, 2) }}</pre>
+  <pre v-if="currentGameVersionStore.gameVersion">{{ JSON.stringify(currentGameVersionStore.gameVersion, null, 2)
+    }}</pre>
 
   <h3>Changelists</h3>
   <pre v-for="changelist in changelistStore.map.values()" :key="changelist.id">{{

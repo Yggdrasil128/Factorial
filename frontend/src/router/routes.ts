@@ -3,9 +3,7 @@ import { createRouter } from 'vue-router';
 
 import HomePage from '@/components/HomePage.vue';
 import AboutPage from '@/components/AboutPage.vue';
-// @ts-expect-error TS7016
 import FactoriesOverview from '@/components/factories/FactoriesOverview.vue';
-// @ts-expect-error TS7016
 import DevTools from '@/components/devtools/DevTools.vue';
 // @ts-expect-error TS7016
 import EditFactoryModal from '@/components/factories/EditFactoryModal.vue';
@@ -13,6 +11,10 @@ import EditFactoryModal from '@/components/factories/EditFactoryModal.vue';
 import EditChangelistModal from '@/components/factories/EditChangelistModal.vue';
 // @ts-expect-error TS7016
 import EditProductionStepModal from '@/components/factories/EditProductionStepModal.vue';
+
+import FactoriesOverview2 from '@/components/factories2/FactoriesOverview.vue';
+import EditFactoryModal2 from '@/components/factories2/EditFactoryModal.vue';
+import EditChangelistModal2 from '@/components/factories2/EditChangelistModal.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -53,6 +55,33 @@ const router = createRouter({
           path: 'editProductionStep/:editProductionStepId',
           name: 'editProductionStep',
           components: { modal: EditProductionStepModal }
+        }
+      ]
+    },
+    {
+      path: '/factories2/:factoryId?',
+      name: 'factories2',
+      component: FactoriesOverview2,
+      children: [
+        {
+          path: 'new',
+          name: 'newFactory2',
+          components: { modal: EditFactoryModal2 }
+        },
+        {
+          path: 'edit/:editFactoryId',
+          name: 'editFactory2',
+          components: { modal: EditFactoryModal2 }
+        },
+        {
+          path: 'newChangelist',
+          name: 'newChangelist2',
+          components: { modal: EditChangelistModal2 }
+        },
+        {
+          path: 'editChangelist/:editChangelistId',
+          name: 'editChangelist2',
+          components: { modal: EditChangelistModal2 }
         }
       ]
     },

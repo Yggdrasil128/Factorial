@@ -1,41 +1,43 @@
 import type { Fraction, QuantityByChangelist } from '@/types/model/basic';
 
 export type Save = {
-  id: number;
+  readonly id: number;
   gameVersionId: number;
   name: string;
 }
 
 export type Factory = {
-  id: number;
-  saveId: number;
+  readonly id: number;
+  readonly saveId: number;
   ordinal: number;
   name: string;
   description: string;
-  iconId: number | null;
-  productionStepIds: number[];
-  resourceIds: number[];
+  iconId: number;
+  readonly productionStepIds: number[];
+  readonly resourceIds: number[];
+  readonly inputs: ProductionEntry[];
+  readonly outputs: ProductionEntry[];
 }
 
 export type ProductionStep = {
-  id: number;
-  factoryId: number;
+  readonly id: number;
+  readonly factoryId: number;
   machineId: number;
   recipeId: number;
   modifierIds: number[];
   machineCount: Fraction;
-  inputs: ProductionEntry[];
-  outputs: ProductionEntry[];
+  readonly inputs: ProductionEntry[];
+  readonly outputs: ProductionEntry[];
 }
 
 export type Changelist = {
-  id: number;
-  saveId: number;
+  readonly id: number;
+  readonly saveId: number;
   ordinal: number;
   name: string;
   primary: boolean;
   active: boolean;
-  iconId: number | null;
+  iconId: number;
   productionStepChanges: ProductionStepChange[];
 }
 
@@ -50,41 +52,41 @@ export type ProductionEntry = {
 }
 
 export type Resource = {
-  id: number;
-  factoryId: number;
+  readonly id: number;
+  readonly factoryId: number;
   ordinal: number;
-  itemId: number;
+  readonly itemId: number;
   imported: boolean;
   exported: boolean;
   /**
    * ProductionStep IDs
    */
-  producerIds: number[];
-  produced: QuantityByChangelist;
+  readonly producerIds: number[];
+  readonly produced: QuantityByChangelist;
   /**
    * ProductionStep IDs
    */
-  consumerIds: number[];
-  consumed: QuantityByChangelist;
+  readonly consumerIds: number[];
+  readonly consumed: QuantityByChangelist;
 }
 
 export type GameVersion = {
-  id: number;
+  readonly id: number;
   name: string;
   iconId: number;
 }
 
 export type Icon = {
-  id: number;
-  gameVersionId: number;
+  readonly id: number;
+  readonly gameVersionId: number;
   name: string;
   mimeType: string;
   category: string[];
 }
 
 export type Item = {
-  id: number;
-  gameVersionId: number;
+  readonly id: number;
+  readonly gameVersionId: number;
   name: string;
   description: string;
   iconId: number;
@@ -92,8 +94,8 @@ export type Item = {
 }
 
 export type Recipe = {
-  id: number;
-  gameVersionId: number;
+  readonly id: number;
+  readonly gameVersionId: number;
   name: string;
   iconId: number;
   ingredients: ItemQuantity[];
@@ -105,8 +107,8 @@ export type Recipe = {
 }
 
 export type RecipeModifier = {
-  id: number;
-  gameVersionId: number;
+  readonly id: number;
+  readonly gameVersionId: number;
   name: string;
   description: string;
   iconId: number;
@@ -116,8 +118,8 @@ export type RecipeModifier = {
 }
 
 export type Machine = {
-  id: number;
-  gameVersionId: number;
+  readonly id: number;
+  readonly gameVersionId: number;
   name: string;
   iconId: number;
   machineModifierId: number[];

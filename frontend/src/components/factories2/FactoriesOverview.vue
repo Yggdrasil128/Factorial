@@ -1,10 +1,6 @@
 <script setup lang="ts">
-// @ts-expect-error TS7016
-import FactoryItems from '@/components/factories/FactoryItems.vue';
-// @ts-expect-error TS7016
-import FactoriesList from '@/components/factories/FactoriesList.vue';
-// @ts-expect-error TS7016
-import ChangelistsList from '@/components/factories/ChangelistsList.vue';
+import FactoriesList from '@/components/factories2/FactoriesList.vue';
+import ChangelistsList from '@/components/factories2/ChangelistsList.vue';
 </script>
 
 <template>
@@ -14,7 +10,7 @@ import ChangelistsList from '@/components/factories/ChangelistsList.vue';
     <changelists-list />
   </div>
   <div class="right">
-    <factory-items />
+
   </div>
 
   <router-view name="modal" />
