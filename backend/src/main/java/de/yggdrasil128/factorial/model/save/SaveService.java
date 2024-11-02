@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.save;
 
+import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.ModelService;
@@ -7,8 +8,9 @@ import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
 import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
 import de.yggdrasil128.factorial.model.factory.Factory;
+import de.yggdrasil128.factorial.model.factory.FactoryProductionLineChangedEvent;
+import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepChangelistEntryChangedEvent;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -24,12 +26,13 @@ import java.util.function.Consumer;
 public class SaveService extends ModelService<Save, SaveRepository> {
 
     private final ApplicationEventPublisher events;
+    private final FactoryService factoryService;
     private final Map<Integer, ProductionStepChanges> cache = new HashMap<>();
 
-    public SaveService(SaveRepository repository, ApplicationEventPublisher events,
-                       ProductionStepService productionStepService) {
+    public SaveService(SaveRepository repository, ApplicationEventPublisher events, FactoryService factoryService) {
         super(repository);
         this.events = events;
+        this.factoryService = factoryService;
     }
 
     public ProductionStepChanges computeProductionStepChanges(Save save) {
@@ -50,6 +53,9 @@ public class SaveService extends ModelService<Save, SaveRepository> {
     public void addAttachedFactory(Save save, Factory factory) {
         save.getFactories().add(factory);
         repository.save(save);
+        ProductionLine productionLine = factoryService.computeProductionLine(factory,
+                () -> computeProductionStepChanges(save));
+        events.publishEvent(new FactoryProductionLineChangedEvent(factory, productionLine, true));
     }
 
     public void addAttachedChangelist(Save save, Changelist changelist) {
