@@ -3,13 +3,13 @@ package de.yggdrasil128.factorial.controller.websocket;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.yggdrasil128.factorial.controller.websocket.messages.*;
+import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
-import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.factory.FactoryService;
+import de.yggdrasil128.factorial.model.factory.*;
 import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.*;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -44,7 +44,8 @@ public class WebsocketService extends TextWebSocketHandler {
     private final AtomicInteger lastMessageIdCounter;
     private final String runtimeId;
 
-    public WebsocketService(SaveService saveService, FactoryService factoryService, ProductionStepService productionStepService) {
+    public WebsocketService(SaveService saveService, FactoryService factoryService,
+                            ProductionStepService productionStepService) {
         this.saveService = saveService;
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
@@ -57,14 +58,16 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        LOG.info("Established new websocket connection, ID: {}, remote address: {}", session.getId(), session.getRemoteAddress());
+        LOG.info("Established new websocket connection, ID: {}, remote address: {}", session.getId(),
+                session.getRemoteAddress());
 
         InitialMessage message = new InitialMessage(runtimeId, lastMessageIdCounter.get());
         TextMessage textMessage = convertMessage(message);
         try {
             session.sendMessage(textMessage);
         } catch (IOException e) {
-            LOG.warn("IOException while sending message to websocket, ID: {}, remote address: {}", session.getId(), session.getRemoteAddress(), e);
+            LOG.warn("IOException while sending message to websocket, ID: {}, remote address: {}", session.getId(),
+                    session.getRemoteAddress(), e);
         }
 
         sessions.add(session);
@@ -72,17 +75,20 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
-        LOG.info("Received message from websocket, ID: {}, remote address: {}, message: {}", session.getId(), session.getRemoteAddress(), message);
+        LOG.info("Received message from websocket, ID: {}, remote address: {}, message: {}", session.getId(),
+                session.getRemoteAddress(), message);
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        LOG.info("Encountered a transport error, ID: {}, remote address: {}", session.getId(), session.getRemoteAddress(), exception);
+        LOG.info("Encountered a transport error, ID: {}, remote address: {}", session.getId(),
+                session.getRemoteAddress(), exception);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        LOG.info("Websocket connection closed, ID: {}, remote address: {}", session.getId(), session.getRemoteAddress());
+        LOG.info("Websocket connection closed, ID: {}, remote address: {}", session.getId(),
+                session.getRemoteAddress());
         sessions.remove(session);
     }
 
@@ -105,9 +111,30 @@ public class WebsocketService extends TextWebSocketHandler {
             try {
                 session.sendMessage(message);
             } catch (IOException e) {
-                LOG.warn("IOException while sending message to websocket, ID: {}, remote address: {}", session.getId(), session.getRemoteAddress(), e);
+                LOG.warn("IOException while sending message to websocket, ID: {}, remote address: {}", session.getId(),
+                        session.getRemoteAddress(), e);
             }
         }
+    }
+
+    @EventListener
+    public void on(FactoryUpdatedEvent event) {
+        Factory factory = event.getFactory();
+        Save save = factory.getSave();
+        ProductionLine productionLine = event instanceof FactoryProductionLineChangedEvent
+                ? ((FactoryProductionLineChangedEvent) event).getProductionLine()
+                : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save));
+
+        FactoryUpdatedMessage message = new FactoryUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                FactoryStandalone.of(factory, productionLine));
+        broadcast(message);
+    }
+
+    @EventListener
+    public void on(FactoryRemovedEvent event) {
+        FactoryRemovedMessage mesage = new FactoryRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
+                event.getFactoryId());
+        broadcast(mesage);
     }
 
     @EventListener
@@ -117,25 +144,17 @@ public class WebsocketService extends TextWebSocketHandler {
         ProductionStepThroughputs throughputs = event instanceof ProductionStepThroughputsChangedEvent
                 ? ((ProductionStepThroughputsChangedEvent) event).getThroughputs()
                 : productionStepService.computeThroughputs(productionStep,
-                () -> saveService.computeProductionStepChanges(save));
+                        () -> saveService.computeProductionStepChanges(save));
 
-        ProductionStepUpdatedMessage message = new ProductionStepUpdatedMessage(
-                runtimeId,
-                lastMessageIdCounter.incrementAndGet(),
-                save.getId(),
-                ProductionStepStandalone.of(productionStep, throughputs)
-        );
+        ProductionStepUpdatedMessage message = new ProductionStepUpdatedMessage(runtimeId, nextMessageId(),
+                save.getId(), ProductionStepStandalone.of(productionStep, throughputs));
         broadcast(message);
     }
 
     @EventListener
     public void on(ProductionStepRemovedEvent event) {
-        ProductionStepRemovedMessage message = new ProductionStepRemovedMessage(
-                runtimeId,
-                lastMessageIdCounter.incrementAndGet(),
-                event.getSaveId(),
-                event.getProductionStepId()
-        );
+        ProductionStepRemovedMessage message = new ProductionStepRemovedMessage(runtimeId, nextMessageId(),
+                event.getSaveId(), event.getProductionStepId());
         broadcast(message);
     }
 
@@ -147,47 +166,35 @@ public class WebsocketService extends TextWebSocketHandler {
         ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
                 ? ((ResourceContributionsChangedEvent) event).getContributions()
                 : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save))
-                .getContributions(resource);
+                        .getContributions(resource);
 
-        ResourceUpdatedMessage message = new ResourceUpdatedMessage(
-                runtimeId,
-                lastMessageIdCounter.incrementAndGet(),
-                save.getId(),
-                ResourceStandalone.of(resource, contributions)
-        );
+        ResourceUpdatedMessage message = new ResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                ResourceStandalone.of(resource, contributions));
         broadcast(message);
     }
 
     @EventListener
     public void on(ResourceRemovedEvent event) {
-        ResourceRemovedMessage message = new ResourceRemovedMessage(
-                runtimeId,
-                lastMessageIdCounter.incrementAndGet(),
-                event.getSaveId(),
-                event.getResourceId()
-        );
+        ResourceRemovedMessage message = new ResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
+                event.getResourceId());
         broadcast(message);
     }
 
     @EventListener
     public void on(ChangelistUpdatedEvent event) {
-        ChangelistUpdatedMessage message = new ChangelistUpdatedMessage(
-                runtimeId,
-                lastMessageIdCounter.incrementAndGet(),
-                event.getChangelist().getSave().getId(),
-                ChangelistStandalone.of(event.getChangelist())
-        );
+        ChangelistUpdatedMessage message = new ChangelistUpdatedMessage(runtimeId, nextMessageId(),
+                event.getChangelist().getSave().getId(), ChangelistStandalone.of(event.getChangelist()));
         broadcast(message);
     }
 
     @EventListener
     public void on(ChangelistRemovedEvent event) {
-        ChangelistRemovedMessage message = new ChangelistRemovedMessage(
-                runtimeId,
-                lastMessageIdCounter.incrementAndGet(),
-                event.getSaveId(),
-                event.getChangelistId()
-        );
+        ChangelistRemovedMessage message = new ChangelistRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
+                event.getChangelistId());
         broadcast(message);
+    }
+
+    private int nextMessageId() {
+        return lastMessageIdCounter.incrementAndGet();
     }
 }

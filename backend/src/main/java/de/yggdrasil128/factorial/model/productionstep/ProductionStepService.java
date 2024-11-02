@@ -89,12 +89,12 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
 
     public void handleChangelistEntryChanged(ProductionStep productionStep, ProductionStepChanges changes) {
         QuantityByChangelist machineCountChanges = changes.getChanges(productionStep.getId());
-        ProductionStepThroughputs throughputs = cache.compute(productionStep.getId(), (key, oldValue) -> {
-            if (null == oldValue) {
+        ProductionStepThroughputs throughputs = cache.compute(productionStep.getId(), (key, existing) -> {
+            if (null == existing) {
                 return new ProductionStepThroughputs(productionStep, machineCountChanges);
             }
-            oldValue.updateMachineCounts(productionStep, machineCountChanges);
-            return oldValue;
+            existing.updateMachineCounts(productionStep, machineCountChanges);
+            return existing;
         });
         events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
     }
@@ -104,17 +104,18 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         Factory factory = factories.findByResourcesId(id);
         super.delete(id);
         ProductionStepThroughputs throughputs = cache.remove(id);
-        events.publishEvent(new ProductionStepRemovedEvent(factory.getSave().getId(), factory.getId(), id, throughputs));
+        if (null != factory) {
+            events.publishEvent(
+                    new ProductionStepRemovedEvent(factory.getSave().getId(), factory.getId(), id, throughputs));
+        }
     }
 
     @EventListener
-    public ProductionStepUpdatedEvent on(ProductionStepChangelistEntryChangedEvent event) {
-        ProductionStepThroughputs throughputs = cache.get(event.getProductionStepId());
+    public ProductionStepThroughputsChangedEvent on(ProductionStepChangelistEntryChangedEvent event) {
         ProductionStep productionStep = get(event.getProductionStepId());
-        if (null == throughputs) {
-            return new ProductionStepUpdatedEvent(productionStep, false);
-        }
-        throughputs.updateMachineCounts(productionStep, event.getChanges());
+        ProductionStepThroughputs throughputs = computeThroughputs(productionStep,
+                () -> event.getProductionStepChanges(),
+                existing -> existing.updateMachineCounts(productionStep, event.getChanges()));
         return new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false);
     }
 

@@ -68,7 +68,8 @@ public class ProductionLine implements Production {
     @Override
     public QuantityByChangelist getInput(int itemId) {
         ResourceContributions contribution = contributions.get(itemId);
-        return contribution.isImported() ? contribution.getOverConsumed() : QuantityByChangelist.ZERO;
+        return null != contribution && contribution.isImported() ? contribution.getOverConsumed()
+                : QuantityByChangelist.ZERO;
     }
 
     @Override
@@ -80,7 +81,8 @@ public class ProductionLine implements Production {
     @Override
     public QuantityByChangelist getOutput(int itemId) {
         ResourceContributions contribution = contributions.get(itemId);
-        return contribution.isExported() ? contribution.getOverProduced() : QuantityByChangelist.ZERO;
+        return null != contribution && contribution.isExported() ? contribution.getOverProduced()
+                : QuantityByChangelist.ZERO;
     }
 
     /**

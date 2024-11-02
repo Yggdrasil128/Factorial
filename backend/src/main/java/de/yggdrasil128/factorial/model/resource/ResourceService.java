@@ -54,18 +54,24 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         }
     }
 
+    public void updateContributions(int id, ResourceContributions contributions) {
+        events.publishEvent(new ResourceContributionsChangedEvent(get(id), contributions));
+    }
+
     @Override
     public void delete(int id) {
         Factory factory = factories.findByResourcesId(id);
         super.delete(id);
         cache.remove(id);
-        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
+        if (null != factory) {
+            events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
+        }
     }
-    
+
     @EventListener
     public void on(ResourceUpdatedEvent event) {
         ResourceContributions contributions = cache.get(event.getResource().getId());
-        if(null != contributions) {
+        if (null != contributions) {
             contributions.update(event.getResource());
         }
     }

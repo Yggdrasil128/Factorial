@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = InitialMessage.class, name = "initial"),
 
+        @JsonSubTypes.Type(value = FactoryUpdatedMessage.class, name = "factoryUpdated"),
+        @JsonSubTypes.Type(value = FactoryRemovedMessage.class, name = "factoryRemoved"),
         @JsonSubTypes.Type(value = ChangelistUpdatedMessage.class, name = "changelistUpdated"),
         @JsonSubTypes.Type(value = ChangelistRemovedMessage.class, name = "changelistRemoved"),
         @JsonSubTypes.Type(value = ProductionStepUpdatedMessage.class, name = "productionStepUpdated"),

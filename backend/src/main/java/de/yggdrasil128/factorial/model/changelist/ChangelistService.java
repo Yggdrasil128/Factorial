@@ -84,7 +84,9 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
         Save save = saves.findByChangelistsId(id);
         super.delete(id);
-        events.publishEvent(new ChangelistRemovedEvent(save.getId(), id));
+        if (null != save) {
+            events.publishEvent(new ChangelistRemovedEvent(save.getId(), id));
+        }
     }
 
 }

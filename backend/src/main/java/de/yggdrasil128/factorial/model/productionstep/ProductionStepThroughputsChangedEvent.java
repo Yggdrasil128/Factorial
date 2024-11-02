@@ -7,8 +7,8 @@ public class ProductionStepThroughputsChangedEvent extends ProductionStepUpdated
     private final ProductionStepThroughputs throughputs;
 
     public ProductionStepThroughputsChangedEvent(ProductionStep productionStep, ProductionStepThroughputs throughputs,
-                                                 boolean recipeChanged) {
-        super(productionStep, recipeChanged);
+                                                 boolean itemsChanged) {
+        super(productionStep, itemsChanged);
         this.throughputs = throughputs;
     }
 

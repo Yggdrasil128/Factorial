@@ -8,9 +8,11 @@ import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ProductionLineService;
 import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.item.ItemService;
-import de.yggdrasil128.factorial.model.productionstep.*;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepRemovedEvent;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStepThroughputsChangedEvent;
 import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceContributionsChangedEvent;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
@@ -79,6 +81,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         if (productionLine.hasAlteredResources()) {
             repository.save(factory);
         }
+        events.publishEvent(new FactoryProductionLineChangedEvent(factory, productionLine, true));
         return productionLine;
     }
 
@@ -95,8 +98,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
 
     @Override
     public void notifyResourceUpdate(int id, ResourceContributions contributions) {
-        events.publishEvent(new ResourceContributionsChangedEvent(resourceService.get(contributions.getResourceId()),
-                contributions));
+        resourceService.updateContributions(id, contributions);
     }
 
     @Override
@@ -119,7 +121,9 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
     @Override
     public Factory update(Factory entity) {
         // no need to invalidate resources, since we don't change anything related
-        return super.update(entity);
+        Factory factory = super.update(entity);
+        events.publishEvent(new FactoryUpdatedEvent(factory));
+        return factory;
     }
 
     @Override
@@ -129,28 +133,31 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
             throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
         }
         super.delete(id);
-        cache.remove(id);
+        ProductionLine productionLine = cache.remove(id);
+        if (null != save) {
+            events.publishEvent(new FactoryRemovedEvent(save.getId(), id, productionLine));
+        }
     }
 
     @EventListener
-    public void on(ProductionStepUpdatedEvent event) {
+    public FactoryProductionLineChangedEvent on(ProductionStepThroughputsChangedEvent event) {
         ProductionLine productionLine = cache.get(event.getProductionStep().getFactory().getId());
-        if (null != productionLine) {
-            if (event instanceof ProductionStepThroughputsChangedEvent throughputEvent) {
-                if (event.isRecipeChanged()) {
-                    productionLine.updateContribution(throughputEvent.getThroughputs());
-                    if (productionLine.hasAlteredResources()) {
-                        repository.save(event.getProductionStep().getFactory());
-                    }
-                } else {
-                    productionLine.updateContributor(throughputEvent.getThroughputs());
-                }
-            } else {
-                // TODO find a better solution
-                // we don't have access to the new throughputs here, so we can only do a full invalidate
-                cache.remove(event.getProductionStep().getFactory().getId());
-            }
+        if (null == productionLine) {
+            // TODO guarantee that a production line is computed
+            return null;
         }
+        boolean itemsChanged = false;
+        if (event.isItemsChanged()) {
+            productionLine.updateContribution(event.getThroughputs());
+            itemsChanged = productionLine.hasAlteredResources();
+            if (itemsChanged) {
+                repository.save(event.getProductionStep().getFactory());
+            }
+        } else {
+            productionLine.updateContributor(event.getThroughputs());
+        }
+        return new FactoryProductionLineChangedEvent(event.getProductionStep().getFactory(), productionLine,
+                itemsChanged);
     }
 
     @EventListener
@@ -158,8 +165,10 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         ProductionLine productionLine = cache.get(event.getFactoryId());
         if (null != productionLine) {
             if (null != event.getThroughputs()) {
-                productionLine.removeContributor(event.getThroughputs());
                 // TODO do we need to save the factory if a resource gets removed?
+                productionLine.removeContributor(event.getThroughputs());
+                events.publishEvent(
+                        new FactoryProductionLineChangedEvent(get(event.getFactoryId()), productionLine, true));
             } else {
                 // TODO find a better solution
                 // we don't have access to the old throughputs here, so we can only do a full invalidate
@@ -167,5 +176,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
             }
         }
     }
+
+    // TODO listen for ResourceUpdatedEvent and produce a FactoryProductionLineChangeEvent
 
 }

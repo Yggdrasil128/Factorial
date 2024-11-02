@@ -18,6 +18,14 @@ public interface Production {
      */
     Map<Integer, QuantityByChangelist> getInputs();
 
+    /**
+     * Returns the production input for the target item.
+     * <p>
+     * This method is provided as default method so that classes can override it with a more efficient implementation.
+     * 
+     * @param itemId the {@link Item#getId() id} of the target item
+     * @return the production input for the target item
+     */
     default QuantityByChangelist getInput(int itemId) {
         return getInputs().get(itemId);
     }
@@ -31,6 +39,14 @@ public interface Production {
      */
     Map<Integer, QuantityByChangelist> getOutputs();
 
+    /**
+     * Returns the production output for the target item.
+     * <p>
+     * This method is provided as default method so that classes can override it with a more efficient implementation.
+     * 
+     * @param itemId the {@link Item#getId() id} of the target item
+     * @return the production output for the target item
+     */
     default QuantityByChangelist getOutput(int itemId) {
         return getOutputs().get(itemId);
     }

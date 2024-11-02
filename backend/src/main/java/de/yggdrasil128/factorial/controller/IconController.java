@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.gameversion.GameVersion;
 import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
 import de.yggdrasil128.factorial.model.icon.Icon;

@@ -3,19 +3,19 @@ package de.yggdrasil128.factorial.model.productionstep;
 public class ProductionStepUpdatedEvent {
 
     private final ProductionStep productionStep;
-    private final boolean recipeChanged;
+    private final boolean itemsChanged;
 
-    public ProductionStepUpdatedEvent(ProductionStep productionStep, boolean recipeChanged) {
+    public ProductionStepUpdatedEvent(ProductionStep productionStep, boolean itemsChanged) {
         this.productionStep = productionStep;
-        this.recipeChanged = recipeChanged;
+        this.itemsChanged = itemsChanged;
     }
 
     public ProductionStep getProductionStep() {
         return productionStep;
     }
 
-    public boolean isRecipeChanged() {
-        return recipeChanged;
+    public boolean isItemsChanged() {
+        return itemsChanged;
     }
 
 }
