@@ -117,7 +117,7 @@ public class OptionalInputField {
         public void apply(Consumer<? super T> sink) {
             if (null != id) {
                 int intValue = ((Integer) id).intValue();
-                sink.accept(0 >= intValue ? fetcher.apply(intValue) : null);
+                sink.accept(0 < intValue ? fetcher.apply(intValue) : null);
             }
         }
 
