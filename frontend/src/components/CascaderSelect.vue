@@ -89,7 +89,7 @@ function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): T
     nodes.push(node);
   }
 
-  for (let element of elements) {
+  for (const element of elements) {
     insert(tree, element, [...element.category]);
   }
 

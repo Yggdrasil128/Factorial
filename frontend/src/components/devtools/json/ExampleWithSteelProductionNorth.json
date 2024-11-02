@@ -96,7 +96,7 @@
             "active": true,
             "productionStepChanges": [
                 {
-                    "productionStep": "0.2",
+                    "productionStepId": "0.2",
                     "change": "3 / 2"
                 }
             ]

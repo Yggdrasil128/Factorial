@@ -104,7 +104,7 @@ async function submitForm(): Promise<void> {
       </el-form-item>
 
       <el-form-item label="Icon">
-        <CascaderSelect v-model="factory.iconId" :options="[...iconStore.map.values()]" is-icon-entity clearable />
+        <CascaderSelect v-model="factory.iconId!" :options="[...iconStore.map.values()]" is-icon-entity clearable />
       </el-form-item>
     </template>
   </edit-modal>

@@ -1,4 +1,4 @@
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse, Method } from 'axios';
 import { inject } from 'vue';
 import { ElMessage } from 'element-plus';
 
@@ -16,7 +16,7 @@ export interface RequestParams {
 export function useApi(): Api {
   const axios: AxiosInstance = inject('axios') as AxiosInstance;
 
-  async function request<T>(method: axios.Method,
+  async function request<T>(method: Method,
                             url: string,
                             payload?: any,
                             params?: RequestParams): Promise<T> {
@@ -36,19 +36,19 @@ export function useApi(): Api {
     });
   }
 
-  async function get(url: string, params: RequestParams): Promise<T> {
+  async function get<T>(url: string, params: RequestParams): Promise<T> {
     return request('GET', url, undefined, params);
   }
 
-  async function post(url: string, payload: any, params: RequestParams): Promise<T> {
+  async function post<T>(url: string, payload: any, params: RequestParams): Promise<T> {
     return request('POST', url, payload, params);
   }
 
-  async function patch(url: string, payload: any, params: RequestParams): Promise<T> {
+  async function patch<T>(url: string, payload: any, params: RequestParams): Promise<T> {
     return request('PATCH', url, payload, params);
   }
 
-  async function delete_(url: string, params: RequestParams): Promise<T> {
+  async function delete_<T>(url: string, params: RequestParams): Promise<T> {
     return request('DELETE', url, undefined, params);
   }
 

@@ -21,7 +21,7 @@ export function useFactoryApi(): FactoryApi {
   }
 
   async function deleteFactory(factoryId: number): Promise<void> {
-    return api.delete('/api/factory', factory, { factoryId: factoryId });
+    return api.delete('/api/factory', { factoryId: factoryId });
   }
 
   return {
