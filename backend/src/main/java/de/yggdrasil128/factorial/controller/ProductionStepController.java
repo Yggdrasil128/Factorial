@@ -82,8 +82,8 @@ public class ProductionStepController {
     }
 
     private void applyRelations(ProductionStepStandalone input, ProductionStep productionStep) {
-        OptionalInputField.ofId((int) input.machineId(), machineService::get).apply(productionStep::setMachine);
-        OptionalInputField.ofId((int) input.recipeId(), recipeService::get).apply(productionStep::setRecipe);
+        OptionalInputField.ofId(input.machineId(), machineService::get).apply(productionStep::setMachine);
+        OptionalInputField.ofId(input.recipeId(), recipeService::get).apply(productionStep::setRecipe);
         OptionalInputField.ofIds(input.modifierIds(), recipeModifierService::get)
                 .applyList(productionStep::setModifiers);
     }

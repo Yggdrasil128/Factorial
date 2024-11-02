@@ -71,6 +71,10 @@ public class EffectiveModifiers {
         active = base.multiplyQuantity(machineCounts.getWithActiveChangelists());
     }
 
+    public QuantityByChangelist getMachineCounts() {
+        return machineCounts;
+    }
+
     public EffectiveModifier getCurrent() {
         return current;
     }

@@ -56,7 +56,7 @@ public class ItemController {
     }
 
     private void applyRelations(ItemStandalone input, Item item) {
-        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(item::setIcon);
+        OptionalInputField.ofId(input.iconId(), iconService::get).apply(item::setIcon);
     }
 
     @DeleteMapping("/item")

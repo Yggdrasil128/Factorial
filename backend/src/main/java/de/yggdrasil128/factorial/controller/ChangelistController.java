@@ -110,7 +110,7 @@ public class ChangelistController {
     }
 
     private void applyRelations(ChangelistStandalone input, Changelist changelist) {
-        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(changelist::setIcon);
+        OptionalInputField.ofId(input.iconId(), iconService::get).apply(changelist::setIcon);
         OptionalInputField.of(input.productionStepChanges())
                 .apply(list -> changelist.setProductionStepChanges(list.stream()
                         .collect(toMap(change -> productionStepService.get((int) change.productionStepId()),

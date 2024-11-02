@@ -64,7 +64,7 @@ public class FactoryController {
     }
 
     private void applyRelations(FactoryStandalone input, Factory factory) {
-        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(factory::setIcon);
+        OptionalInputField.ofId(input.iconId(), iconService::get).apply(factory::setIcon);
     }
 
     @DeleteMapping("/factory")

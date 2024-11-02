@@ -70,7 +70,7 @@ public class RecipeController {
     private void applyRelations(RecipeStandalone input, Recipe recipe) {
         OptionalInputField.of(input.ingredients()).map(this::createResoruce).apply(recipe::setIngredients);
         OptionalInputField.of(input.products()).map(this::createResoruce).apply(recipe::setProducts);
-        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(recipe::setIcon);
+        OptionalInputField.ofId(input.iconId(), iconService::get).apply(recipe::setIcon);
         OptionalInputField.ofIds(input.applicableModifierIds(), recipeModifierService::get)
                 .applyList(recipe::setApplicableModifiers);
         OptionalInputField.ofIds(input.applicableMachineIds(), machineService::get)

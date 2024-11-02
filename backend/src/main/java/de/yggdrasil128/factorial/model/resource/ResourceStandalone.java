@@ -22,14 +22,15 @@ public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
                                  @JsonProperty(access = READ_ONLY) List<Object> producerIds,
                                  @JsonProperty(access = READ_ONLY) QuantityByChangelist produced,
                                  @JsonProperty(access = READ_ONLY) List<Object> consumerIds,
-                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed) {
+                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed,
+                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist overProduced) {
 
     public static ResourceStandalone of(Resource model, ResourceContributions contributions) {
         return of(model, External.FRONTEND,
                 contributions.getProducers().stream().map(producer -> resolve(producer)).toList(),
                 contributions.getProduced(),
                 contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList(),
-                contributions.getConsumed());
+                contributions.getConsumed(), contributions.getOverProduced());
     }
 
     private static Object resolve(Production production) {
@@ -41,15 +42,15 @@ public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
     }
 
     public static ResourceStandalone of(Resource model, External destination) {
-        return of(model, destination, Collections.emptyList(), null, Collections.emptyList(), null);
+        return of(model, destination, Collections.emptyList(), null, Collections.emptyList(), null, null);
     }
 
     private static ResourceStandalone of(Resource model, External destination, List<Object> producerIds,
                                          QuantityByChangelist produced, List<Object> consumerIds,
-                                         QuantityByChangelist consumed) {
+                                         QuantityByChangelist consumed, QuantityByChangelist overProduced) {
         return new ResourceStandalone(model.getId(), model.getFactory().getId(), model.getOrdinal(),
                 NamedModel.resolve(model.getItem(), destination), model.isImported(), model.isExported(), producerIds,
-                produced, consumerIds, consumed);
+                produced, consumerIds, consumed, overProduced);
     }
 
 }

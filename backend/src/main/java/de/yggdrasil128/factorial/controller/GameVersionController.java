@@ -57,7 +57,7 @@ public class GameVersionController {
     }
 
     private void applyRelations(GameVersionStandalone input, GameVersion gameVersion) {
-        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(gameVersion::setIcon);
+        OptionalInputField.ofId(input.iconId(), iconService::get).apply(gameVersion::setIcon);
     }
 
     @DeleteMapping("/gameVersion")

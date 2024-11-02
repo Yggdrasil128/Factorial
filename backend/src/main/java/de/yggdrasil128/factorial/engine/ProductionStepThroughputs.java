@@ -117,6 +117,10 @@ public class ProductionStepThroughputs implements Production {
         entry.setValue(change.apply(entry.getValue()));
     }
 
+    public QuantityByChangelist getMachineCounts() {
+        return effectiveModifiers.getMachineCounts();
+    }
+
     @Override
     public Map<Integer, QuantityByChangelist> getInputs() {
         return inputs;

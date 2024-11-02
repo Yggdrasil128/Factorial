@@ -71,7 +71,7 @@ public class MachineController {
     }
 
     private void applyRelations(MachineStandalone input, Machine machine) {
-        OptionalInputField.ofId((int) input.iconId(), iconService::get).apply(machine::setIcon);
+        OptionalInputField.ofId(input.iconId(), iconService::get).apply(machine::setIcon);
         OptionalInputField.ofIds(input.machineModifierIds(), recipeModifierService::get)
                 .applyList(machine::setMachineModifiers);
     }
