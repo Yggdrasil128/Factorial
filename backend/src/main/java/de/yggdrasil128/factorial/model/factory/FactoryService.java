@@ -99,7 +99,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
 
     @Override
     public void notifyResourceUpdate(int id, ResourceContributions contributions) {
-        resourceService.updateContributions(id, contributions);
+        resourceService.updateContributions(contributions);
     }
 
     @Override

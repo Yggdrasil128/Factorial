@@ -58,8 +58,8 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         }
     }
 
-    public void updateContributions(int id, ResourceContributions contributions) {
-        events.publishEvent(new ResourceContributionsChangedEvent(get(id), contributions));
+    public void updateContributions(ResourceContributions contributions) {
+        events.publishEvent(new ResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
     }
 
     @Override
