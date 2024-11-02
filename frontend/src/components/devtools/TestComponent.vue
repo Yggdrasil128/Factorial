@@ -16,7 +16,7 @@ const selectedItem: Ref<number> = ref(0);
 
 <template>
   <icon-img :icon="iconStore.map.get(1)" :size="64" />
-  <icon-img :icon-id="2" :size="64" />
+  <icon-img :icon="2" :size="64" />
 
   <!--  <pre>{{ JSON.stringify(convertToTreeByCategory([...iconStore.map.values()]), null, 2) }}</pre>-->
 

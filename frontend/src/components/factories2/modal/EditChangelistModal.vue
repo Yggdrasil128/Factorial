@@ -38,7 +38,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
       saveId: currentSaveStore.save?.id,
       name: '',
       iconId: 0,
-      primary: true,
+      primary: false,
       active: true
     };
     isEditingPrimaryChangelist.value = false;

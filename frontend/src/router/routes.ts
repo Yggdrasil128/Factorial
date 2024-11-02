@@ -13,8 +13,8 @@ import EditChangelistModal from '@/components/factories/EditChangelistModal.vue'
 import EditProductionStepModal from '@/components/factories/EditProductionStepModal.vue';
 
 import FactoriesOverview2 from '@/components/factories2/FactoriesOverview.vue';
-import EditFactoryModal2 from '@/components/factories2/EditFactoryModal.vue';
-import EditChangelistModal2 from '@/components/factories2/EditChangelistModal.vue';
+import EditFactoryModal2 from '@/components/factories2/modal/EditFactoryModal.vue';
+import EditChangelistModal2 from '@/components/factories2/modal/EditChangelistModal.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
