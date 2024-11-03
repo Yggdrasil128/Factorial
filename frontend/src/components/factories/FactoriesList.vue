@@ -50,7 +50,11 @@ const routerMethods = {
     const toRoute: RouteLocationAsRelativeGeneric =
       { name: 'factories', params: { factoryId: factoryId } };
 
-    replace ? router.replace(toRoute) : router.push(toRoute);
+    if (replace) {
+      router.replace(toRoute);
+    } else {
+      router.push(toRoute);
+    }
   }
 };
 

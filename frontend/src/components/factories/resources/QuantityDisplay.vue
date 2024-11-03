@@ -53,11 +53,11 @@ function formatNumber(value: number): string {
         <span
           :class="{
             number: true,
-            positive: parsedQuantity?.current > 0,
-            negative: parsedQuantity?.current < 0
+            positive: parsedQuantity?.current! > 0,
+            negative: parsedQuantity?.current! < 0
           }"
         >
-          {{ formatNumber(parsedQuantity.current) }}
+          {{ formatNumber(parsedQuantity?.current!) }}
         </span>
       </el-tooltip>
       <span
@@ -76,11 +76,11 @@ function formatNumber(value: number): string {
           <span
             :class="{
               number: true,
-              positive: parsedQuantity?.withPrimaryChangelist > 0,
-              negative: parsedQuantity?.withPrimaryChangelist < 0
+              positive: parsedQuantity?.withPrimaryChangelist! > 0,
+              negative: parsedQuantity?.withPrimaryChangelist! < 0
             }"
           >
-            {{ formatNumber(parsedQuantity.withPrimaryChangelist) }}
+            {{ formatNumber(parsedQuantity?.withPrimaryChangelist!) }}
           </span>
         </el-tooltip>
       </span>
@@ -97,11 +97,11 @@ function formatNumber(value: number): string {
           <span
             :class="{
               number: true,
-              positive: parsedQuantity?.withActiveChangelists > 0,
-              negative: parsedQuantity?.withActiveChangelists < 0
+              positive: parsedQuantity?.withActiveChangelists! > 0,
+              negative: parsedQuantity?.withActiveChangelists! < 0
             }"
           >
-            {{ formatNumber(parsedQuantity.withActiveChangelists) }}
+            {{ formatNumber(parsedQuantity?.withActiveChangelists!) }}
           </span>
         </el-tooltip>
       </span>

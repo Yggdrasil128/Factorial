@@ -6,7 +6,7 @@ import pluginVue from 'eslint-plugin-vue';
 
 export default [
   { files: ['**/*.{js,mjs,cjs,ts,vue}'] },
-  { languageOptions: { globals: globals.browser } },
+  { languageOptions: { globals: { ...globals.browser, 'NodeJS': true } } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/essential'],
@@ -14,7 +14,8 @@ export default [
   {
     rules: {
       semi: 'error',
-      'prefer-const': 'error'
+      'prefer-const': 'error',
+      '@typescript-eslint/no-explicit-any': 'off'
     }
   }
 ];

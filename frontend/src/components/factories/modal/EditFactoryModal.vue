@@ -7,6 +7,7 @@ import { useFactoryStore } from '@/stores/model/factoryStore';
 import _ from 'lodash';
 import { useFactoryApi } from '@/api/useFactoryApi';
 import { ElFormItem, ElInput } from 'element-plus';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/EditModal.vue';
 import { useIconStore } from '@/stores/model/iconStore';
 import CascaderSelect from '@/components/CascaderSelect.vue';
