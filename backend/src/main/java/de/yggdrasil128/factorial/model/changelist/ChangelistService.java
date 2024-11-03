@@ -31,7 +31,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
     @Override
     public Changelist create(Changelist changelist) {
         Save save = changelist.getSave();
-        if (0 < changelist.getOrdinal()) {
+        if (0 >= changelist.getOrdinal()) {
             changelist.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
         }
         return super.create(changelist);
