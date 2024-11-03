@@ -1,9 +1,9 @@
 package de.yggdrasil128.factorial.model.changelist;
 
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -37,16 +39,18 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         return super.create(changelist);
     }
 
-    public void reorder(Save save, List<ReorderInputEntry> input) {
-        Map<Integer, Integer> order = input.stream()
-                .collect(toMap(ReorderInputEntry::getId, ReorderInputEntry::getOrdinal));
+    public void reorder(Save save, List<EntityPosition> input) {
+        Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        Collection<Changelist> changelists = new ArrayList<>();
         for (Changelist changelist : save.getChangelists()) {
             Integer ordinal = order.get(changelist.getId());
             if (null != ordinal) {
                 changelist.setOrdinal(ordinal.intValue());
+                changelists.add(changelist);
                 repository.save(changelist);
             }
         }
+        events.publishEvent(new ChangelistsReorderedEvent(save.getId(), changelists));
     }
 
     @Override

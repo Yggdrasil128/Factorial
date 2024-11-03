@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.model.External;
-import de.yggdrasil128.factorial.model.ReorderInputEntry;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.resource.Resource;
@@ -45,7 +45,7 @@ public class ResourceController {
     }
 
     @PatchMapping("/factory/resources/order")
-    public void reorder(int factoryId, @RequestBody List<ReorderInputEntry> input) {
+    public void order(int factoryId, @RequestBody List<EntityPosition> input) {
         resourceService.reorder(factoryService.get(factoryId), input);
     }
 

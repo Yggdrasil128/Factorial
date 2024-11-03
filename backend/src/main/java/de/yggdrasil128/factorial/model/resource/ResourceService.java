@@ -1,17 +1,15 @@
 package de.yggdrasil128.factorial.model.resource;
 
 import de.yggdrasil128.factorial.engine.ResourceContributions;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -46,16 +44,18 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         return cache.computeIfAbsent(resource.getId(), key -> new ResourceContributions(resource));
     }
 
-    public void reorder(Factory factory, List<ReorderInputEntry> input) {
-        Map<Integer, Integer> order = input.stream()
-                .collect(toMap(ReorderInputEntry::getId, ReorderInputEntry::getOrdinal));
+    public void reorder(Factory factory, List<EntityPosition> input) {
+        Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        Collection<Resource> resources = new ArrayList<>();
         for (Resource resource : factory.getResources()) {
             Integer ordinal = order.get(resource.getId());
             if (null != ordinal) {
                 resource.setOrdinal(ordinal.intValue());
+                resources.add(resource);
                 repository.save(resource);
             }
         }
+        events.publishEvent(new ResourcesReorderedEvent(factory.getSave().getId(), resources));
     }
 
     public void updateContributions(ResourceContributions contributions) {

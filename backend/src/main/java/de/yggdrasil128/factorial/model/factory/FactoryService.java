@@ -4,9 +4,9 @@ import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.ProductionLineService;
-import de.yggdrasil128.factorial.model.ReorderInputEntry;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepRemovedEvent;
@@ -22,9 +22,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toMap;
@@ -107,16 +105,18 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         resourceService.delete(resourceId);
     }
 
-    public void reorder(Save save, List<ReorderInputEntry> input) {
-        Map<Integer, Integer> order = input.stream()
-                .collect(toMap(ReorderInputEntry::getId, ReorderInputEntry::getOrdinal));
+    public void reorder(Save save, List<EntityPosition> input) {
+        Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        Collection<Factory> factories = new ArrayList<>();
         for (Factory factory : save.getFactories()) {
             Integer ordinal = order.get(factory.getId());
             if (null != ordinal) {
                 factory.setOrdinal(ordinal.intValue());
+                factories.add(factory);
                 repository.save(factory);
             }
         }
+        events.publishEvent(new FactoriesReorderedEvent(save.getId(), factories));
     }
 
     @Override

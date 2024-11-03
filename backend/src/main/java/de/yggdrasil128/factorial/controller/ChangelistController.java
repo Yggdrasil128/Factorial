@@ -3,7 +3,7 @@ package de.yggdrasil128.factorial.controller;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.ReorderInputEntry;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
@@ -64,7 +64,7 @@ public class ChangelistController {
     }
 
     @PatchMapping("save/changelists/order")
-    public void reorder(int saveId, @RequestBody List<ReorderInputEntry> input) {
+    public void order(int saveId, @RequestBody List<EntityPosition> input) {
         changelistService.reorder(saveService.get(saveId), input);
     }
 

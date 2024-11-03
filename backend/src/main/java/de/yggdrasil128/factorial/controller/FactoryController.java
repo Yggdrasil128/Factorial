@@ -1,7 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.ReorderInputEntry;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
@@ -46,7 +46,7 @@ public class FactoryController {
     }
 
     @PatchMapping("/save/factories/order")
-    public void reorder(int saveId, @RequestBody List<ReorderInputEntry> input) {
+    public void order(int saveId, @RequestBody List<EntityPosition> input) {
         factoryService.reorder(saveService.get(saveId), input);
     }
 

@@ -19,7 +19,7 @@ public record ProductionStepStandalone(@JsonProperty(access = READ_ONLY) int id,
                                        Object recipeId,
                                        List<Object> modifierIds,
                                        Fraction machineCount,
-                                       QuantityByChangelist machineCounts,
+                                       @JsonProperty(access = READ_ONLY) QuantityByChangelist machineCounts,
                                        @JsonProperty(access = READ_ONLY) List<ProductionEntryStandalone> inputs,
                                        @JsonProperty(access = READ_ONLY) List<ProductionEntryStandalone> outputs) {
 
