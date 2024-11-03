@@ -9,6 +9,8 @@ import { Check, Delete, Edit, Plus, Star } from '@element-plus/icons-vue';
 import IconImg from '@/components/IconImg.vue';
 import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElTooltip } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
+import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
+import type { EntityWithOrdinal } from '@/types/model/basic';
 
 const currentSaveStore = useCurrentSaveStore();
 const changelistStore = useChangelistStore();
@@ -18,8 +20,14 @@ const router = useRouter();
 const route = useRoute();
 
 const changelists: ComputedRef<Changelist[]> = computed(() => {
-  return [...changelistStore.map.values()].filter(changelist => changelist.saveId === currentSaveStore.save?.id);
+  return [...changelistStore.map.values()]
+    .filter(changelist => changelist.saveId === currentSaveStore.save?.id)
+    .sort((a, b) => a.ordinal - b.ordinal);
 });
+
+const draggableSupport: DraggableSupport = useDraggableSupport(changelists,
+  (input: EntityWithOrdinal[]) => changelistApi.reorder(currentSaveStore.save!.id, input)
+);
 
 function newChangelist(): void {
   router.push({ name: 'newChangelist', params: { factoryId: route.params.factoryId } });
@@ -79,7 +87,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
 <template>
   <div class="changelists">
     <h2>Changelists</h2>
-    <vue-draggable-next :list="changelists">
+    <vue-draggable-next :model-value="changelists" @end="draggableSupport.onDragEnd">
       <div
         v-for="changelist in changelists"
         :key="changelist.id"

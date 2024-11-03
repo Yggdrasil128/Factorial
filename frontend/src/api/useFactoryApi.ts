@@ -1,5 +1,6 @@
 import type { Factory } from '@/types/model/standalone';
 import { type Api, useApi } from '@/api/useApi';
+import type { EntityWithOrdinal } from '@/types/model/basic';
 
 export interface FactoryApi {
   createFactory(factory: Partial<Factory>): Promise<void>;
@@ -7,6 +8,8 @@ export interface FactoryApi {
   editFactory(factory: Partial<Factory>): Promise<void>;
 
   deleteFactory(factoryId: number): Promise<void>;
+
+  reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void>;
 }
 
 export function useFactoryApi(): FactoryApi {
@@ -24,9 +27,14 @@ export function useFactoryApi(): FactoryApi {
     return api.delete('/api/factory', { factoryId: factoryId });
   }
 
+  async function reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void> {
+    return api.patch('/api/save/factories/order', input, { saveId: saveId });
+  }
+
   return {
     createFactory,
     editFactory,
-    deleteFactory
+    deleteFactory,
+    reorder
   };
 }

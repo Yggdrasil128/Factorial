@@ -5,3 +5,8 @@ export type QuantityByChangelist = {
 }
 
 export type Fraction = string;
+
+export interface EntityWithOrdinal {
+  id: number;
+  ordinal: number;
+}

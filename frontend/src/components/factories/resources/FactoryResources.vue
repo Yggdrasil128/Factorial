@@ -8,12 +8,16 @@ import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus
 import { VueDraggableNext } from 'vue-draggable-next';
 import { Plus } from '@element-plus/icons-vue';
 import FactoryResource from '@/components/factories/resources/FactoryResource.vue';
+import { useResourceApi } from '@/api/useResourceApi';
+import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
+import type { EntityWithOrdinal } from '@/types/model/basic';
 
 const route = useRoute();
 const router = useRouter();
 
 const factoryStore = useFactoryStore();
 const resourceStore = useResourceStore();
+const resourceApi = useResourceApi();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
   route.params.factoryId ? Number(route.params.factoryId) : undefined
@@ -25,6 +29,11 @@ const factory: ComputedRef<Factory> = computed(() =>
 
 const resources: ComputedRef<Resource[]> = computed(() =>
   resourceStore.getByFactoryId(currentFactoryId.value)
+    .sort((a, b) => a.ordinal - b.ordinal)
+);
+
+const draggableSupport: DraggableSupport = useDraggableSupport(resources,
+  (input: EntityWithOrdinal[]) => resourceApi.reorder(currentFactoryId.value!, input)
 );
 
 function newProductionStep() {
@@ -65,7 +74,7 @@ function newEgress() {
       </div>
     </div>
 
-    <vue-draggable-next :list="resources">
+    <vue-draggable-next :model-value="resources" @end="draggableSupport.onDragEnd">
       <factory-resource
         v-for="resource in resources"
         :key="resource.id"

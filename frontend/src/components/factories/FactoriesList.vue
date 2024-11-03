@@ -9,6 +9,8 @@ import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import IconImg from '@/components/IconImg.vue';
 import { type FactoryApi, useFactoryApi } from '@/api/useFactoryApi';
+import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
+import type { EntityWithOrdinal } from '@/types/model/basic';
 
 const currentSaveStore = useCurrentSaveStore();
 const factoryStore = useFactoryStore();
@@ -22,8 +24,14 @@ const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
 );
 
 const factories: ComputedRef<Factory[]> = computed(() => {
-  return [...factoryStore.map.values()].filter(factory => factory.saveId === currentSaveStore.save?.id);
+  return [...factoryStore.map.values()]
+    .filter(factory => factory.saveId === currentSaveStore.save?.id)
+    .sort((a, b) => a.ordinal - b.ordinal);
 });
+
+const draggableSupport: DraggableSupport = useDraggableSupport(factories,
+  (input: EntityWithOrdinal[]) => factoryApi.reorder(currentSaveStore.save!.id, input)
+);
 
 const routerMethods = {
   newFactory(): void {
@@ -60,7 +68,7 @@ function deleteFactory(factoryId: number) {
 <template>
   <div class="factoryList">
     <h2>Factory list</h2>
-    <vue-draggable-next :list="factories">
+    <vue-draggable-next :model-value="factories" @end="draggableSupport.onDragEnd">
       <div
         v-for="factory in factories"
         :key="factory.id"

@@ -1,5 +1,6 @@
 import type { Changelist } from '@/types/model/standalone';
 import { type Api, useApi } from '@/api/useApi';
+import type { EntityWithOrdinal } from '@/types/model/basic';
 
 export interface ChangelistApi {
   createChangelist(changelist: Partial<Changelist>): Promise<void>;
@@ -13,6 +14,8 @@ export interface ChangelistApi {
   setActive(changelistId: number, active: boolean): Promise<void>;
 
   apply(changelistId: number): Promise<void>;
+
+  reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void>;
 }
 
 export function useChangelistApi(): ChangelistApi {
@@ -49,12 +52,17 @@ export function useChangelistApi(): ChangelistApi {
     return api.post('/api/changelist/apply', undefined, { changelistId: changelistId });
   }
 
+  async function reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void> {
+    return api.patch('/api/save/changelists/order', input, { saveId: saveId });
+  }
+
   return {
     createChangelist,
     editChangelist,
     deleteChangelist,
     setPrimary,
     setActive,
-    apply
+    apply,
+    reorder
   };
 }
