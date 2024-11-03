@@ -1,4 +1,4 @@
-import type { Changelist, ProductionStep, Resource } from '@/types/model/standalone';
+import type { Changelist, Factory, ProductionStep, Resource } from '@/types/model/standalone';
 
 export type WebsocketMessage = {
   runtimeId: string;
@@ -7,6 +7,7 @@ export type WebsocketMessage = {
 }
 
 export type WebsocketMessageType = 'initial'
+  | 'factoryUpdated' | 'factoryRemoved'
   | 'changelistUpdated' | 'changelistRemoved'
   | 'productionStepUpdated' | 'productionStepRemoved'
   | 'resourceUpdated' | 'resourceRemoved';
@@ -25,6 +26,26 @@ export type ModelChangedMessage = WebsocketMessage & {
 
 export function isModelChangedMessage(message: WebsocketMessage): message is ModelChangedMessage {
   return message.type !== 'initial';
+}
+
+
+export type FactoryUpdatedMessage = ModelChangedMessage & {
+  type: 'factoryUpdated';
+  factory: Factory;
+}
+
+export function isFactoryUpdatedMessage(message: WebsocketMessage): message is FactoryUpdatedMessage {
+  return message.type === 'factoryUpdated';
+}
+
+
+export type FactoryRemovedMessage = ModelChangedMessage & {
+  type: 'factoryRemoved';
+  factoryId: number;
+}
+
+export function isFactoryRemovedMessage(message: WebsocketMessage): message is FactoryRemovedMessage {
+  return message.type === 'factoryRemoved';
 }
 
 

@@ -132,9 +132,9 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(FactoryRemovedEvent event) {
-        FactoryRemovedMessage mesage = new FactoryRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
+        FactoryRemovedMessage message = new FactoryRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
                 event.getFactoryId());
-        broadcast(mesage);
+        broadcast(message);
     }
 
     @EventListener

@@ -1,6 +1,6 @@
 import { reactive, type Ref, ref } from 'vue';
 import { ElLoading } from 'element-plus';
-import { isInitialMessage, type WebsocketMessage } from '@/types/websocketMessages/modelChangedEvents';
+import { isInitialMessage, type WebsocketMessage } from '@/types/websocketMessages/modelChangedMessages';
 
 export interface ModelSyncWebsocket {
   connect: () => void;

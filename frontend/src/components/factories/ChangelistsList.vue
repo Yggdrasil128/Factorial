@@ -53,7 +53,7 @@ function setActive(changelistId: number, active: boolean): void {
 }
 
 async function askApplyChangelist(changelistId: number, isPrimary: boolean): Promise<void> {
-  const checked: Ref<boolean> = ref(!isPrimary);
+  const checked: Ref<boolean> = ref(false);
   const confirm = await new Promise((r) =>
     ElMessageBox({
       title: 'Apply all changes from this changelist?',
@@ -61,7 +61,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
       cancelButtonText: 'No',
       showCancelButton: true,
       customClass: 'el-dark',
-      message: () =>
+      message: isPrimary ? undefined : () =>
         h('div', null, [
           h(ElSwitch, {
             disabled: isPrimary,

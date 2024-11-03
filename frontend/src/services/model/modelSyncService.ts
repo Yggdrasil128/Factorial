@@ -5,13 +5,15 @@ import { type ModelSyncWebsocket, useModelSyncWebsocket } from '@/api/useModelSy
 import {
   isChangelistRemovedMessage,
   isChangelistUpdatedMessage,
+  isFactoryRemovedMessage,
+  isFactoryUpdatedMessage,
   isModelChangedMessage,
   isProductionStepRemovedMessage,
   isProductionStepUpdatedMessage,
   isResourceRemovedMessage,
   isResourceUpdatedMessage,
   type WebsocketMessage
-} from '@/types/websocketMessages/modelChangedEvents';
+} from '@/types/websocketMessages/modelChangedMessages';
 import { useSummaryApi } from '@/api/useSummaryApi';
 
 export interface ModelSyncService {
@@ -56,7 +58,11 @@ function useModelSyncService(): ModelSyncService {
     if (!isModelChangedMessage(message)) return;
     if (currentSaveStore.save.id !== message.saveId) return;
 
-    if (isChangelistUpdatedMessage(message)) {
+    if (isFactoryUpdatedMessage(message)) {
+      modelStoresUpdateService.updateFactory(message.factory);
+    } else if (isFactoryRemovedMessage(message)) {
+      modelStoresUpdateService.deleteFactory(message.factoryId);
+    } else if (isChangelistUpdatedMessage(message)) {
       modelStoresUpdateService.updateChangelist(message.changelist);
     } else if (isChangelistRemovedMessage(message)) {
       modelStoresUpdateService.deleteChangelist(message.changelistId);
