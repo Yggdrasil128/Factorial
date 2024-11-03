@@ -15,7 +15,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
                                  @JsonProperty(access = READ_ONLY) int factoryId,
-                                 int ordinal,
+                                 Integer ordinal,
                                  Object itemId,
                                  boolean imported,
                                  boolean exported,

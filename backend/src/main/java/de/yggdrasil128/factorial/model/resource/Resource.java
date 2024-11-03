@@ -1,12 +1,13 @@
 package de.yggdrasil128.factorial.model.resource;
 
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.OrderedModel;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.item.Item;
 import jakarta.persistence.*;
 
 @Entity
-public class Resource {
+public class Resource implements OrderedModel {
 
     @Id
     @GeneratedValue
@@ -48,10 +49,12 @@ public class Resource {
         this.factory = factory;
     }
 
+    @Override
     public int getOrdinal() {
         return ordinal;
     }
 
+    @Override
     public void setOrdinal(int ordinal) {
         this.ordinal = ordinal;
     }

@@ -3,6 +3,7 @@ package de.yggdrasil128.factorial.model.changelist;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.OrderedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-public class Changelist implements NamedModel {
+public class Changelist implements NamedModel, OrderedModel {
 
     @Id
     @GeneratedValue
@@ -59,10 +60,12 @@ public class Changelist implements NamedModel {
         this.save = save;
     }
 
+    @Override
     public int getOrdinal() {
         return ordinal;
     }
 
+    @Override
     public void setOrdinal(int ordinal) {
         this.ordinal = ordinal;
     }

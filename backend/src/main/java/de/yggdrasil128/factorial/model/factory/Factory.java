@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.OrderedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.resource.Resource;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Factory implements NamedModel {
+public class Factory implements NamedModel, OrderedModel {
 
     @Id
     @GeneratedValue
@@ -61,10 +62,12 @@ public class Factory implements NamedModel {
         this.save = save;
     }
 
+    @Override
     public int getOrdinal() {
         return ordinal;
     }
 
+    @Override
     public void setOrdinal(int ordinal) {
         this.ordinal = ordinal;
     }

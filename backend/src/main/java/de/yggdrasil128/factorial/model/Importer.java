@@ -67,29 +67,12 @@ public class Importer {
         SaveStandalone input = summary.getSave();
         Save save = new Save(gameVersion, input);
         /**
-         * Caveat: The order of these loops is meaningful, because each the latter one one uses the objects that were
-         * imported in the first one.
+         * Caveat: The order of invocations is meaningful, because the latter one uses the objects that were imported in
+         * the first one.
          */
-        for (FactorySummary factory : summary.getFactories()) {
-            save.getFactories().add(importFactory(save, factory, gameVersion, importer));
-        }
-        for (ChangelistStandalone changelist : summary.getChangelists()) {
-            save.getChangelists().add(importer.importChangelist(save, changelist));
-        }
+        importer.importFactories(summary, save);
+        importer.importChangelists(summary, save);
         return save;
-    }
-
-    private static Factory importFactory(Save save, FactorySummary summary, GameVersion gameVersion,
-                                         Importer importer) {
-        Factory factory = importer.importFactory(save, summary.getFactory());
-        save.getFactories().add(factory);
-        for (ProductionStepStandalone productionStep : summary.getProductionSteps()) {
-            factory.getProductionSteps().add(importer.importProductionStep(factory, productionStep));
-        }
-        for (ResourceStandalone resource : summary.getResources()) {
-            factory.getResources().add(importer.importResource(factory, resource));
-        }
-        return factory;
     }
 
     private final Map<String, Icon> icons = new HashMap<>();
@@ -157,6 +140,20 @@ public class Importer {
         return recipe;
     }
 
+    private void importFactories(SaveSummary summary, Save save) {
+        int ordinal = 0;
+        for (FactorySummary input : summary.getFactories()) {
+            Factory factory = importFactory(save, input.getFactory());
+            ordinal = inferOrdinal(ordinal, factory, input.getFactory().ordinal());
+            save.getFactories().add(factory);
+            for (ProductionStepStandalone productionStep : input.getProductionSteps()) {
+                factory.getProductionSteps().add(importProductionStep(factory, productionStep));
+            }
+            importResources(input, factory);
+            save.getFactories().add(factory);
+        }
+    }
+
     private Factory importFactory(Save save, FactoryStandalone input) {
         Factory factory = new Factory(save, input);
         factory.setIcon(findIcon(input.iconId()));
@@ -171,10 +168,28 @@ public class Importer {
         return productionStep;
     }
 
+    private void importResources(FactorySummary summary, Factory factory) {
+        int ordinal = 0;
+        for (ResourceStandalone input : summary.getResources()) {
+            Resource resource = importResource(factory, input);
+            ordinal = inferOrdinal(ordinal, resource, input.ordinal());
+            factory.getResources().add(resource);
+        }
+    }
+
     private Resource importResource(Factory factory, ResourceStandalone input) {
         Resource resource = new Resource(factory, input);
         resource.setItem(findItem(input.itemId()));
         return resource;
+    }
+
+    private void importChangelists(SaveSummary summary, Save save) {
+        int ordinal = 0;
+        for (ChangelistStandalone input : summary.getChangelists()) {
+            Changelist changelist = importChangelist(save, input);
+            ordinal = inferOrdinal(ordinal, changelist, input.ordinal());
+            save.getChangelists().add(changelist);
+        }
     }
 
     private Changelist importChangelist(Save save, ChangelistStandalone input) {
@@ -243,6 +258,12 @@ public class Importer {
             return save.getFactories().get(Integer.parseInt(parts[0])).getProductionSteps()
                     .get(Integer.parseInt(parts[1]));
         }, ProductionStepChangeStandalone::change));
+    }
+
+    private static int inferOrdinal(int max, OrderedModel entity, Integer input) {
+        int ordinal = null == input ? max + 1 : input.intValue();
+        entity.setOrdinal(ordinal);
+        return Integer.max(max, ordinal);
     }
 
 }
