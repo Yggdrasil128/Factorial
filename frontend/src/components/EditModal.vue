@@ -74,7 +74,7 @@ defineExpose({ validate });
   <el-dialog
     :model-value="visible"
     :before-close="beforeClose"
-    width="1000px"
+    width="500px"
     :title="title"
   >
     <p style="margin-top: 0; margin-bottom: 30px;">
@@ -83,7 +83,7 @@ defineExpose({ validate });
 
     <el-form
       :label-width="formLabelWidth ?? '120px'"
-      style="width: 900px; overflow: auto;"
+      style="width: 100%; overflow: auto;"
       v-loading="formLoading"
       element-loading-background="rgba(20, 20, 20, 0.8)"
       :model="formModel"

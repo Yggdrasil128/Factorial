@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { ElFormItem, ElInput, ElSwitch } from 'element-plus';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/EditModal.vue';
-import CascaderSelect from '@/components/CascaderSelect.vue';
+import CascaderSelect from '@/components/input/CascaderSelect.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -108,7 +108,11 @@ async function submitForm(): Promise<void> {
       </el-form-item>
 
       <el-form-item label="Icon">
-        <CascaderSelect v-model="changelist.iconId!" :options="[...iconStore.map.values()]" is-icon-entity clearable />
+        <CascaderSelect v-model="changelist.iconId!"
+                        :options="[...iconStore.map.values()]"
+                        is-icon-entity
+                        clearable
+                        style="width: 100%;" />
       </el-form-item>
 
       <el-form-item label="Primary">

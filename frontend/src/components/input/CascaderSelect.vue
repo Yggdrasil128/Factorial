@@ -9,6 +9,7 @@ export interface CascaderSelectProps {
   clearable?: boolean;
   isIconEntity?: boolean;
   disabled?: boolean;
+  placeholder?: string;
 }
 
 export interface EntityWithCategory {
@@ -117,17 +118,19 @@ function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): T
 </script>
 
 <template>
-  <div style="display: flex;">
+  <div style="display: flex; width: 214px;">
     <IconImg :icon="isIconEntity ? model : modelEntity?.iconId" :size="32" style="margin-right: 8px;" />
 
     <el-cascader
       v-model="cascaderModel"
       :options="options"
+      style="width: 100%;"
       :show-all-levels="false"
       :clearable="props.clearable"
       :filterable="true"
       :filter-method="filterMethod"
-      :disabled="disabled">
+      :disabled="disabled"
+      :placeholder="placeholder">
       <template #default="{ node, data }">
         <template v-if="node.isLeaf">
           <div style="height: 36px; display: flex;">

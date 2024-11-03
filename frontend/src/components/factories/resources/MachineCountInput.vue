@@ -6,6 +6,7 @@ import type { Fraction } from '@/types/model/basic';
 import { useVModel } from '@vueuse/core';
 import { useProductionStepApi } from '@/api/useProductionStepApi';
 import BgcElButton from '@/components/input/BgcElButton.vue';
+import { modifyFraction } from '@/utils/fractionUtils';
 
 export interface MachineCountInputProps {
   modelValue: Fraction;
@@ -58,7 +59,7 @@ async function updateMachineCount(): Promise<void> {
 }
 
 async function plusOne(): Promise<void> {
-  modelCache.value = editFraction(modelCache.value, 1);
+  modelCache.value = modifyFraction(modelCache.value, 1);
   clearSubmitTimeout();
   plusButtonLoading.value = true;
   updateMachineCount()
@@ -66,26 +67,11 @@ async function plusOne(): Promise<void> {
 }
 
 async function minusOne(): Promise<void> {
-  modelCache.value = editFraction(modelCache.value, -1);
+  modelCache.value = modifyFraction(modelCache.value, -1);
   clearSubmitTimeout();
   minusButtonLoading.value = true;
   updateMachineCount()
     .finally(() => minusButtonLoading.value = false);
-}
-
-function editFraction(fraction: Fraction, delta: number): Fraction {
-  const i = fraction.indexOf('/');
-  if (i < 0) {
-    return String(Math.max(Number(fraction) + delta, 0));
-  } else {
-    let n = Number(fraction.substring(0, i));
-    const d = Number(fraction.substring(i + 1));
-    n += d * delta;
-    if (n <= 0) {
-      return '0';
-    }
-    return String(n) + '/' + String(d);
-  }
 }
 
 async function apply(): Promise<void> {

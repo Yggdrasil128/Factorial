@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { useIconStore } from '@/stores/model/iconStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
 import { computed, type ComputedRef, reactive, ref, type Ref, watch } from 'vue';
-import type { Machine, ProductionStep, Recipe } from '@/types/model/standalone';
+import type { Machine, ProductionStep, Recipe, RecipeModifier } from '@/types/model/standalone';
 import _ from 'lodash';
-import { ElFormItem } from 'element-plus';
-import CascaderSelect from '@/components/CascaderSelect.vue';
+import { ElFormItem, ElInput, type FormRules } from 'element-plus';
+import CascaderSelect from '@/components/input/CascaderSelect.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/EditModal.vue';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useCurrentGameVersionStore } from '@/stores/currentGameVersionStore';
+import IconImg from '@/components/IconImg.vue';
+import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
+import { Minus, Plus } from '@element-plus/icons-vue';
+import type { RuleItem } from 'async-validator/dist-types/interface';
 
 const router = useRouter();
 const route = useRoute();
 
 const currentGameVersionStore = useCurrentGameVersionStore();
 const productionStepStore = useProductionStepStore();
-const iconStore = useIconStore();
 const recipeStore = useRecipeStore();
 const recipeModifierStore = useRecipeModifierStore();
 const machineStore = useMachineStore();
@@ -31,9 +33,13 @@ const editModal = ref();
 
 const hasChanges = computed(() => !_.isEqual(productionStep.value, original.value));
 
-const formRules = reactive({
+const formRules: FormRules<string> = reactive({
   recipeId: [{ required: true, message: 'Please select a recipe', trigger: 'blur' }],
-  machineId: [{ required: true, message: 'Please select a machine', trigger: 'blur' }]
+  machineId: [{ required: true, message: 'Please select a machine', trigger: 'blur' }],
+  machineCount: [{
+    required: true, message: 'Please enter a valid machine count', trigger: 'blur',
+    validator: elFormFractionValidator, allowZero: true, allowNegative: false
+  } as RuleItem]
 });
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
@@ -97,6 +103,14 @@ const machines: ComputedRef<Machine[]> = computed(() => {
     .filter(machine => machine !== undefined) as Machine[];
 });
 
+const modifiers: ComputedRef<RecipeModifier[]> = computed(() => {
+  // if (1 + 1 === 2) return [...recipeModifierStore.map.values()];
+  if (!recipe.value) return [];
+  return recipe.value.applicableModifierIds
+    .map(modifierId => recipeModifierStore.map.get(modifierId))
+    .filter(modifier => modifier !== undefined) as RecipeModifier[];
+});
+
 watch(() => productionStep.value.recipeId, () => {
   if (!productionStep.value.recipeId) {
     productionStep.value.machineId = 0;
@@ -106,6 +120,16 @@ watch(() => productionStep.value.recipeId, () => {
   if (recipe.value.applicableMachineIds.length === 0) return;
   productionStep.value.machineId = recipe.value.applicableMachineIds[0];
 });
+
+function incrementMachineCount() {
+  if (!isValidFraction(productionStep.value.machineCount!, { allowZero: true })) return;
+  productionStep.value.machineCount = modifyFraction(productionStep.value.machineCount!, 1);
+}
+
+function decrementMachineCount() {
+  if (!isValidFraction(productionStep.value.machineCount!, { allowZero: true })) return;
+  productionStep.value.machineCount = modifyFraction(productionStep.value.machineCount!, -1);
+}
 
 </script>
 
@@ -127,13 +151,43 @@ watch(() => productionStep.value.recipeId, () => {
     <template #form>
       <el-form-item label="Recipe" prop="recipeId">
         <cascader-select v-model="productionStep.recipeId!"
-                         :options="recipes" />
+                         :options="recipes"
+                         style="width: 100%;" />
       </el-form-item>
 
       <el-form-item label="Machine" prop="machineId">
         <cascader-select v-model="productionStep.machineId!"
+                         :placeholder="!recipe ? 'Select recipe first' : 'Select'"
                          :options="machines"
-                         :disabled="!productionStep.recipeId" />
+                         :disabled="!productionStep.recipeId"
+                         style="width: 100%;" />
+      </el-form-item>
+
+      <el-form-item label="Modifiers" prop="modifierIds">
+        <el-select v-model="productionStep.modifierIds"
+                   style="width: 100%;"
+                   :placeholder="!recipe ? 'Select recipe first' : modifiers.length === 0 ? 'No applicable modifiers' : 'Select'"
+                   :disabled="modifiers.length === 0"
+                   multiple>
+          <el-option v-for="modifier in modifiers"
+                     :key="modifier.id"
+                     :value="modifier.id"
+                     :label="modifier.name">
+            <icon-img :icon="modifier.iconId" :size="24" />
+            {{ modifier.name }}
+          </el-option>
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="Machine count" prop="machineCount">
+        <div style="display: flex; width: 100%; gap: 4px;">
+          <el-input v-model="productionStep.machineCount"
+                    style="flex-grow: 1;" />
+          <el-button :icon="Plus" @click="incrementMachineCount" />
+          <el-button :icon="Minus" @click="decrementMachineCount"
+                     :disabled="productionStep.machineCount === '0'"
+                     style="margin-left: 0;" />
+        </div>
       </el-form-item>
     </template>
   </edit-modal>

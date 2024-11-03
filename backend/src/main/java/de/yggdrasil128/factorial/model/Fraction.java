@@ -30,7 +30,7 @@ public class Fraction extends Number {
     public static Fraction of(String s) {
         int index = s.indexOf('/');
         if (index == -1) {
-            return new Fraction(Long.parseLong(s));
+            return new Fraction(Long.parseLong(s.trim()));
         }
         return new Fraction(Long.parseLong(s.substring(0, index).trim()),
                 Long.parseLong(s.substring(index + 1).trim()));
@@ -141,8 +141,8 @@ public class Fraction extends Number {
 
     @Override
     public int hashCode() {
-        int result = (int) (numerator ^ (numerator >>> 32));
-        result = 31 * result + (int) (denominator ^ (denominator >>> 32));
+        int result = Long.hashCode(numerator);
+        result = 31 * result + Long.hashCode(denominator);
         return result;
     }
 

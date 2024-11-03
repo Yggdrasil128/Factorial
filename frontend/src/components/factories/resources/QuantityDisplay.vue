@@ -2,7 +2,7 @@
 import { computed, type ComputedRef } from 'vue';
 import { ElTooltip } from 'element-plus';
 import type { QuantityByChangelist } from '@/types/model/basic';
-import { fractionToNumber } from '@/utils/utils';
+import { fractionToNumber } from '@/utils/fractionUtils';
 
 export interface QuantityDisplayProps {
   quantity?: QuantityByChangelist;

@@ -3,7 +3,7 @@
 import { useIconStore } from '@/stores/model/iconStore';
 import { type Ref, ref } from 'vue';
 import IconImg from '@/components/IconImg.vue';
-import IconCascaderSelect from '@/components/CascaderSelect.vue';
+import IconCascaderSelect from '@/components/input/CascaderSelect.vue';
 import { useItemStore } from '@/stores/model/itemStore';
 
 const iconStore = useIconStore();
