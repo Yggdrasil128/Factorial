@@ -11,7 +11,7 @@ modelSyncService.setSaveIdAndReload(1);
   <AppHeader />
   <NavBar />
 
-  <div style="margin: 20px">
+  <div style="margin: 10px 20px;">
     <router-view />
   </div>
 </template>

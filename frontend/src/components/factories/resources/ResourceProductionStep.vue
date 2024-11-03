@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import type { Item, Machine, ProductionStep, Recipe } from '@/types/model/standalone';
+import type { Item, Machine, ProductionStep, Recipe, RecipeModifier } from '@/types/model/standalone';
 import { computed, type ComputedRef } from 'vue';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useMachineStore } from '@/stores/model/machineStore';
-import { Delete, Edit } from '@element-plus/icons-vue';
+import { CaretLeft, Delete, Edit } from '@element-plus/icons-vue';
 import IconImg from '@/components/IconImg.vue';
 import { ElButton, ElButtonGroup } from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
 import ResourceProductionEntry from '@/components/factories/resources/ResourceProductionEntry.vue';
+import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -18,6 +19,7 @@ export interface ResourceProductionStepProps {
 const props: ResourceProductionStepProps = defineProps<ResourceProductionStepProps>();
 
 const recipeStore = useRecipeStore();
+const recipeModifierStore = useRecipeModifierStore();
 const itemStore = useItemStore();
 const machineStore = useMachineStore();
 
@@ -43,6 +45,12 @@ const recipeName: ComputedRef<string> = computed(() => {
   if (!firstOutputItem.value) return '';
   return firstOutputItem.value.name;
 });
+
+const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
+  return props.productionStep.modifierIds
+    .map(recipeModifierId => recipeModifierStore.map.get(recipeModifierId))
+    .filter(recipeModifier => recipeModifier !== undefined) as RecipeModifier[];
+});
 </script>
 
 <template>
@@ -58,14 +66,29 @@ const recipeName: ComputedRef<string> = computed(() => {
         <icon-img :icon="recipeIconId" :size="48" />
       </div>
       <div class="stepInfo">
-        <div class="stepName">Recipe: {{ recipeName }}</div>
+        <div class="stepName">
+          Recipe: {{ recipeName }}
+          <template v-if="recipeModifiers.length > 0">
+            (
+            <template v-for="(recipeModifier, index) in recipeModifiers" :key="recipeModifier.id">
+              <icon-img :icon="recipeModifier.iconId" :size="24" />
+              {{ recipeModifier.name }}
+              <template v-if="index < recipeModifiers.length - 1">
+                ,
+              </template>
+            </template>
+            )
+          </template>
+        </div>
         <div class="stepThroughput">
           <div>
             <resource-production-entry v-for="(output, index) in productionStep.outputs" :key="index"
                                        :production-entry="output" />
             <div v-if="productionStep.outputs.length === 0" class="nothing">(nothing)</div>
           </div>
-          <span> &#x27F5;&ensp; </span>
+          <el-icon :size="24" style="margin: 0 8px;">
+            <CaretLeft />
+          </el-icon>
           <div>
             <resource-production-entry v-for="(input, index) in productionStep.inputs" :key="index"
                                        :production-entry="input" />
@@ -134,10 +157,7 @@ const recipeName: ComputedRef<string> = computed(() => {
 
 .nothing {
   color: #a0a0a0;
-}
-
-.nothing {
-  margin-top: 3px;
+  margin-top: 6px;
 }
 
 .stepActions {

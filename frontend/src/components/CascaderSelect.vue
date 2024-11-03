@@ -117,7 +117,7 @@ function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): T
 
 <template>
   <div style="display: flex;">
-    <IconImg :icon-id="isIconEntity ? model : modelEntity?.iconId" :size="32" style="margin-right: 8px;" />
+    <IconImg :icon="isIconEntity ? model : modelEntity?.iconId" :size="32" style="margin-right: 8px;" />
 
     <el-cascader
       v-model="cascaderModel"

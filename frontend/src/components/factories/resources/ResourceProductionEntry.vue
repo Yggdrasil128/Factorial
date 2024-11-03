@@ -18,9 +18,9 @@ const item: ComputedRef<Item | undefined> = computed(() => itemStore.map.get(pro
 </script>
 
 <template>
-  <div>
+  <div style="vertical-align: central;">
     <quantity-display :quantity="productionEntry.quantity" />
-    <icon-img :icon="item?.iconId" :size="24" style="margin-left: 3px;" />
+    <icon-img :icon="item?.iconId" :size="24" style="margin-left: 4px; margin-right: 4px; margin-bottom: -4px;" />
     <span>{{ item?.name }}</span>
     <quantity-display :quantity="undefined" show-unit />
   </div>

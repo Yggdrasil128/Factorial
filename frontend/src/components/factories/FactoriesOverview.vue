@@ -5,7 +5,6 @@ import FactoryResources from '@/components/factories/resources/FactoryResources.
 </script>
 
 <template>
-  <h1>Factories</h1>
   <div class="left">
     <factories-list />
     <changelists-list />

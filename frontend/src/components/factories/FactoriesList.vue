@@ -71,7 +71,7 @@ function deleteFactory(factoryId: number) {
 
 <template>
   <div class="factoryList">
-    <h2>Factory list</h2>
+    <h2>Factories</h2>
     <vue-draggable-next :model-value="factories" @end="draggableSupport.onDragEnd">
       <div
         v-for="factory in factories"
