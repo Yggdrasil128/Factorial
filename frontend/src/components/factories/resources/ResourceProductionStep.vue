@@ -11,6 +11,7 @@ import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vu
 import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
 import ResourceProductionEntry from '@/components/factories/resources/ResourceProductionEntry.vue';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
+import BgcElButton from '@/components/input/BgcElButton.vue';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -101,7 +102,7 @@ const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
                              :production-step-id="productionStep.id" />
         &ensp;
         <el-button-group>
-          <el-button :icon="Edit" />
+          <bgc-el-button :icon="Edit" />
           <el-button type="danger" :icon="Delete" />
         </el-button-group>
       </div>

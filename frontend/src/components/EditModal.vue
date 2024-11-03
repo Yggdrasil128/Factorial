@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, type Ref, ref } from 'vue';
+import { type Ref, ref } from 'vue';
 import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { ElMessageBox, type FormRules } from 'element-plus';
 import { Check, Close } from '@element-plus/icons-vue';
@@ -20,14 +20,6 @@ const emit = defineEmits(['submit']);
 const router = useRouter();
 
 const visible: Ref<boolean> = ref(true);
-
-onMounted(() => {
-  document.body.classList.add('el-dark-popper');
-});
-
-onUnmounted(() => {
-  document.body.classList.remove('el-dark-popper');
-});
 
 // handle navigation
 
@@ -55,8 +47,7 @@ async function checkLeave() {
         confirmButtonText: 'Discard changes',
         cancelButtonText: 'Cancel',
         showCancelButton: true,
-        type: 'warning',
-        customClass: 'el-dark'
+        type: 'warning'
       })
         .then(() => r(true))
         .catch(() => r(false))
@@ -83,7 +74,6 @@ defineExpose({ validate });
   <el-dialog
     :model-value="visible"
     :before-close="beforeClose"
-    class="el-dark"
     width="1000px"
     :title="title"
   >

@@ -8,6 +8,7 @@ import DevTools from '@/components/devtools/DevTools.vue';
 import FactoriesOverview from '@/components/factories/FactoriesOverview.vue';
 import EditFactoryModal from '@/components/factories/modal/EditFactoryModal.vue';
 import EditChangelistModal from '@/components/factories/modal/EditChangelistModal.vue';
+import EditProductionStepModal from '@/components/factories/modal/EditProductionStepModal.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -38,6 +39,16 @@ const router = createRouter({
           path: 'editChangelist/:editChangelistId',
           name: 'editChangelist',
           components: { modal: EditChangelistModal }
+        },
+        {
+          path: 'newProductionStep',
+          name: 'newProductionStep',
+          components: { modal: EditProductionStepModal }
+        },
+        {
+          path: 'editProductionStep/:editProductionStepId',
+          name: 'editProductionStep',
+          components: { modal: EditProductionStepModal }
         }
       ]
     },

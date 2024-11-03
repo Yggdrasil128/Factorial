@@ -8,6 +8,7 @@ export interface CascaderSelectProps {
   options: EntityWithCategory[];
   clearable?: boolean;
   isIconEntity?: boolean;
+  disabled?: boolean;
 }
 
 export interface EntityWithCategory {
@@ -122,11 +123,11 @@ function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): T
     <el-cascader
       v-model="cascaderModel"
       :options="options"
-      popper-class="el-dark"
       :show-all-levels="false"
       :clearable="props.clearable"
       :filterable="true"
-      :filter-method="filterMethod">
+      :filter-method="filterMethod"
+      :disabled="disabled">
       <template #default="{ node, data }">
         <template v-if="node.isLeaf">
           <div style="height: 36px; display: flex;">

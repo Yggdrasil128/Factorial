@@ -11,6 +11,7 @@ import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElToolti
 import { VueDraggableNext } from 'vue-draggable-next';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
+import BgcElButton from '@/components/input/BgcElButton.vue';
 
 const currentSaveStore = useCurrentSaveStore();
 const changelistStore = useChangelistStore();
@@ -60,7 +61,6 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
       showCancelButton: true,
-      customClass: 'el-dark',
       message: isPrimary ? undefined : () =>
         h('div', null, [
           h(ElSwitch, {
@@ -132,7 +132,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
                   content="Set primary"
                   v-if="!changelist.primary"
                 >
-                  <el-button :icon="Star" @click="setPrimary(changelist.id)" />
+                  <bgc-el-button :icon="Star" @click="setPrimary(changelist.id)" />
                 </el-tooltip>
                 <el-tooltip
                   effect="dark"
@@ -141,7 +141,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
                   :hide-after="0"
                   content="Apply all changes"
                 >
-                  <el-button
+                  <bgc-el-button
                     :icon="Check"
                     @click="askApplyChangelist(changelist.id, changelist.primary)"
                   />
@@ -153,7 +153,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
                   :hide-after="0"
                   content="Edit"
                 >
-                  <el-button :icon="Edit" @click="editChangelist(changelist.id)" />
+                  <bgc-el-button :icon="Edit" @click="editChangelist(changelist.id)" />
                 </el-tooltip>
                 <el-popconfirm
                   title="Delete this changelist?"

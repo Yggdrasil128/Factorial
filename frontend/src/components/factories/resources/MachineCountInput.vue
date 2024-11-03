@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { type Ref, ref, watch } from 'vue';
 import { Check, Minus, Plus } from '@element-plus/icons-vue';
-import { ElButton, ElButtonGroup, ElInput } from 'element-plus';
+import { ElButtonGroup, ElInput } from 'element-plus';
 import type { Fraction } from '@/types/model/basic';
 import { useVModel } from '@vueuse/core';
 import { useProductionStepApi } from '@/api/useProductionStepApi';
+import BgcElButton from '@/components/input/BgcElButton.vue';
 
 export interface MachineCountInputProps {
   modelValue: Fraction;
@@ -108,19 +109,19 @@ async function apply(): Promise<void> {
   >
   </el-input>
   <el-button-group class="mciButtonGroup">
-    <el-button
+    <bgc-el-button
       :icon="Plus"
       @click="plusOne"
       :loading="plusButtonLoading"
       :disabled="buttonsDisabled"
     />
-    <el-button
+    <bgc-el-button
       :icon="Minus"
       @click="minusOne"
       :loading="minusButtonLoading"
       :disabled="buttonsDisabled || modelCache === '0'"
     />
-    <el-button
+    <bgc-el-button
       :icon="Check"
       @click="apply"
       :loading="checkButtonLoading"
@@ -134,11 +135,20 @@ async function apply(): Promise<void> {
 .mciInput .el-input__wrapper {
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
+  box-shadow: 0 0 0 1px #454545 inset;
+  background-color: #80808080;
+}
+
+.mciInput .el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px #a0a0a0 inset;
+}
+
+.mciInput .el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--el-input-focus-border-color) inset;
 }
 
 .mciButtonGroup button:nth-child(1) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  border-left: none;
 }
 </style>

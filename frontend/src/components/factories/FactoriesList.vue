@@ -11,6 +11,7 @@ import IconImg from '@/components/IconImg.vue';
 import { type FactoryApi, useFactoryApi } from '@/api/useFactoryApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
+import BgcElButton from '@/components/input/BgcElButton.vue';
 
 const currentSaveStore = useCurrentSaveStore();
 const factoryStore = useFactoryStore();
@@ -94,7 +95,7 @@ function deleteFactory(factoryId: number) {
               :hide-after="0"
               content="Edit"
             >
-              <el-button :icon="Edit" @click="routerMethods.editFactory(factory.id)" />
+              <bgc-el-button :icon="Edit" @click="routerMethods.editFactory(factory.id)" />
             </el-tooltip>
 
             <el-popconfirm

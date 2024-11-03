@@ -25,6 +25,7 @@ export type ProductionStep = {
   machineId: number;
   recipeId: number;
   modifierIds: number[];
+  machineCount: Fraction;
   machineCounts: QuantityByChangelist;
   readonly inputs: ProductionEntry[];
   readonly outputs: ProductionEntry[];
