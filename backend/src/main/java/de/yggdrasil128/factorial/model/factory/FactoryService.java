@@ -13,6 +13,7 @@ import de.yggdrasil128.factorial.model.productionstep.ProductionStepRemovedEvent
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepThroughputsChangedEvent;
 import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.resource.ResourceContributionsChangedEvent;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
 import de.yggdrasil128.factorial.model.resource.ResourceUpdatedEvent;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -180,6 +181,10 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
 
     @EventListener
     public FactoryProductionLineChangedEvent on(ResourceUpdatedEvent event) {
+        if (event instanceof ResourceContributionsChangedEvent) {
+            // in that case, the ensuing event is already being propagated otherwise
+            return null;
+        }
         ProductionLine productionLine = cache.get(event.getResource().getFactory().getId());
         if (null == productionLine) {
             // TODO guarantee that a production line is computed?
