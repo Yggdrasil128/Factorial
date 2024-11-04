@@ -25,6 +25,10 @@ const availableTestDataSetups: {
   'SatisfactoryUpdate8_withIcons + ExampleWithSteelProductionNorth': {
     gameFile: 'SatisfactoryUpdate8_withIcons',
     saveFile: 'ExampleWithSteelProductionNorthV8'
+  },
+  'SatisfactoryUpdate8_withIcons + SatisfactorySeason3': {
+    gameFile: 'SatisfactoryUpdate8_withIcons',
+    saveFile: 'SatisfactorySeason3'
   }
 };
 

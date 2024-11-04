@@ -88,7 +88,7 @@ public class SaveController {
     public SaveStandalone update(int saveId, @RequestBody SaveStandalone input) {
         Save save = saveService.get(saveId);
         if (null != input.gameId()) {
-            throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
+            throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game");
         }
         save.applyBasics(input);
         return SaveStandalone.of(saveService.update(save));

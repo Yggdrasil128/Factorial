@@ -31,7 +31,7 @@ const machineStore = useMachineStore();
   <h3>Current save</h3>
   <pre v-if="currentSaveStore.save">{{ JSON.stringify(currentSaveStore.save, null, 2) }}</pre>
 
-  <h3>Current game version</h3>
+  <h3>Current game</h3>
   <pre v-if="currentGameStore.game">{{ JSON.stringify(currentGameStore.game, null, 2)
     }}</pre>
 
