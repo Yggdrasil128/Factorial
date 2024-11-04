@@ -14,16 +14,16 @@ const selectedTestDataSetup = ref('');
 
 const availableTestDataSetups: {
   [key: string]: {
-    gameVersionFile: string;
+    gameFile: string;
     saveFile: string;
   }
 } = {
   'SatisfactoryUpdate7 + ExampleWithSteelProductionNorth': {
-    gameVersionFile: 'SatisfactoryUpdate7',
+    gameFile: 'SatisfactoryUpdate7',
     saveFile: 'ExampleWithSteelProductionNorth'
   },
   'SatisfactoryUpdate8_withIcons + ExampleWithSteelProductionNorth': {
-    gameVersionFile: 'SatisfactoryUpdate8_withIcons',
+    gameFile: 'SatisfactoryUpdate8_withIcons',
     saveFile: 'ExampleWithSteelProductionNorthV8'
   }
 };
@@ -48,11 +48,11 @@ async function setupTestData() {
   setupTestDataButtonState.value = 1;
 
   const setup = availableTestDataSetups[selectedTestDataSetup.value] as {
-    gameVersionFile: string;
+    gameFile: string;
     saveFile: string;
   };
 
-  await importJsonFile('gameVersion', setup.gameVersionFile);
+  await importJsonFile('game', setup.gameFile);
   await importJsonFile('save', setup.saveFile);
 
   setupTestDataButtonState.value = 2;

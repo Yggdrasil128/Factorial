@@ -1,4 +1,4 @@
-import type { GameVersionSummary, SaveSummary } from '@/types/model/summary';
+import type { GameSummary, SaveSummary } from '@/types/model/summary';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
@@ -6,7 +6,7 @@ import { useCurrentSaveStore } from '@/stores/currentSaveStore';
 import type {
   Changelist,
   Factory,
-  GameVersion,
+  Game,
   Icon,
   Item,
   Machine,
@@ -17,7 +17,7 @@ import type {
   Save
 } from '@/types/model/standalone';
 import { useResourceStore } from '@/stores/model/resourceStore';
-import { useCurrentGameVersionStore } from '@/stores/currentGameVersionStore';
+import { useCurrentGameStore } from '@/stores/currentGameStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useRecipeStore } from '@/stores/model/recipeStore';
@@ -26,7 +26,7 @@ import { useMachineStore } from '@/stores/model/machineStore';
 
 export interface ModelStoresUpdateService {
   applyCurrentSave: (save: Save) => void;
-  applyCurrentGameVersion: (gameVersion: GameVersion) => void;
+  applyCurrentGame: (game: Game) => void;
 
   updateFactory: (factory: Factory) => void;
   updateProductionStep: (productionStep: ProductionStep) => void;
@@ -49,12 +49,12 @@ export interface ModelStoresUpdateService {
   deleteMachine: (id: number) => void;
 
   applySaveSummary: (saveSummary: SaveSummary) => void;
-  applyGameVersionSummary: (gameVersionSummary: GameVersionSummary) => void;
+  applyGameSummary: (gameSummary: GameSummary) => void;
 }
 
 export function useModelStoresUpdateService(): ModelStoresUpdateService {
   const currentSaveStore = useCurrentSaveStore();
-  const currentGameVersionStore = useCurrentGameVersionStore();
+  const currentGameStore = useCurrentGameStore();
 
   const changelistStore = useChangelistStore();
   const factoryStore = useFactoryStore();
@@ -70,8 +70,8 @@ export function useModelStoresUpdateService(): ModelStoresUpdateService {
     currentSaveStore.save = save;
   }
 
-  function applyCurrentGameVersion(gameVersion: GameVersion) {
-    currentGameVersionStore.gameVersion = gameVersion;
+  function applyCurrentGame(game: Game) {
+    currentGameStore.game = game;
   }
 
 
@@ -171,14 +171,14 @@ export function useModelStoresUpdateService(): ModelStoresUpdateService {
     }
   }
 
-  function applyGameVersionSummary(summary: GameVersionSummary): void {
+  function applyGameSummary(summary: GameSummary): void {
     iconStore.map.clear();
     itemStore.map.clear();
     recipeStore.map.clear();
     recipeModifierStore.map.clear();
     machineStore.map.clear();
 
-    applyCurrentGameVersion(summary.gameVersion);
+    applyCurrentGame(summary.game);
 
     for (const icon of summary.icons) {
       updateIcon(icon);
@@ -199,7 +199,7 @@ export function useModelStoresUpdateService(): ModelStoresUpdateService {
 
   return {
     applyCurrentSave,
-    applyCurrentGameVersion,
+    applyCurrentGame: applyCurrentGame,
 
     updateFactory,
     updateChangelist,
@@ -222,6 +222,6 @@ export function useModelStoresUpdateService(): ModelStoresUpdateService {
     deleteMachine,
 
     applySaveSummary,
-    applyGameVersionSummary
+    applyGameSummary: applyGameSummary
   };
 }

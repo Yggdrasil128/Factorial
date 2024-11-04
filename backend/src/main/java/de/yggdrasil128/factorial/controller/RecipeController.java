@@ -1,8 +1,8 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.machine.MachineService;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api")
 public class RecipeController {
 
-    private final GameVersionService gameVersionService;
+    private final GameService gameService;
     private final IconService iconService;
     private final ItemService itemService;
     private final RecipeService recipeService;
@@ -25,10 +25,10 @@ public class RecipeController {
     private final MachineService machineService;
 
     @Autowired
-    public RecipeController(GameVersionService gameVersionService, IconService iconService, ItemService itemService,
+    public RecipeController(GameService gameService, IconService iconService, ItemService itemService,
                             RecipeService recipeService, RecipeModifierService recipeModifierService,
                             MachineService machineService) {
-        this.gameVersionService = gameVersionService;
+        this.gameService = gameService;
         this.iconService = iconService;
         this.itemService = itemService;
         this.recipeService = recipeService;
@@ -36,10 +36,10 @@ public class RecipeController {
         this.machineService = machineService;
     }
 
-    @PostMapping("/gameVersion/recipes")
-    public RecipeStandalone create(int gameVersionId, @RequestBody RecipeStandalone input) {
-        GameVersion gameVersion = gameVersionService.get(gameVersionId);
-        Recipe recipe = new Recipe(gameVersion, input);
+    @PostMapping("/game/recipes")
+    public RecipeStandalone create(int gameId, @RequestBody RecipeStandalone input) {
+        Game game = gameService.get(gameId);
+        Recipe recipe = new Recipe(game, input);
         applyRelations(input, recipe);
         recipe = recipeService.create(recipe);
         return new RecipeStandalone(recipe);
@@ -49,9 +49,9 @@ public class RecipeController {
         return new ItemQuantity(itemService.get((int) input.itemId()), input.quantity());
     }
 
-    @GetMapping("/gameVersion/recipes")
-    public List<RecipeStandalone> retrieveAlL(int gameVersionId) {
-        return gameVersionService.get(gameVersionId).getRecipes().stream().map(RecipeStandalone::new).toList();
+    @GetMapping("/game/recipes")
+    public List<RecipeStandalone> retrieveAlL(int gameId) {
+        return gameService.get(gameId).getRecipes().stream().map(RecipeStandalone::new).toList();
     }
 
     @GetMapping("/recipe")

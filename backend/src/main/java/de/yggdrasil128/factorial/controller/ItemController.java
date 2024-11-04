@@ -1,8 +1,8 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemService;
@@ -16,30 +16,30 @@ import java.util.List;
 @RequestMapping("/api")
 public class ItemController {
 
-    private final GameVersionService gameVersionService;
+    private final GameService gameService;
     private final IconService iconService;
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(GameVersionService gameVersionService, IconService iconService, ItemService itemService) {
-        this.gameVersionService = gameVersionService;
+    public ItemController(GameService gameService, IconService iconService, ItemService itemService) {
+        this.gameService = gameService;
         this.iconService = iconService;
         this.itemService = itemService;
     }
 
-    @PostMapping("/gameVersion/items")
-    public ItemStandalone create(int gameVersionId, @RequestBody ItemStandalone input) {
-        GameVersion gameVersion = gameVersionService.get(gameVersionId);
-        Item item = new Item(gameVersion, input);
+    @PostMapping("/game/items")
+    public ItemStandalone create(int gameId, @RequestBody ItemStandalone input) {
+        Game game = gameService.get(gameId);
+        Item item = new Item(game, input);
         applyRelations(input, item);
         item = itemService.create(item);
-        gameVersionService.addAttachedItem(gameVersion, item);
+        gameService.addAttachedItem(game, item);
         return ItemStandalone.of(item);
     }
 
-    @GetMapping("/gameVersion/items")
-    public List<ItemStandalone> retrieveAll(int gameVersionId) {
-        return gameVersionService.get(gameVersionId).getItems().stream().map(ItemStandalone::of).toList();
+    @GetMapping("/game/items")
+    public List<ItemStandalone> retrieveAll(int gameId) {
+        return gameService.get(gameId).getItems().stream().map(ItemStandalone::of).toList();
     }
 
     @GetMapping("/item")

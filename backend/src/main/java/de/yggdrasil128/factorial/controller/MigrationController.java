@@ -1,12 +1,12 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.Exporter;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.Importer;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.External;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionSummary;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameService;
+import de.yggdrasil128.factorial.model.game.GameSummary;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import de.yggdrasil128.factorial.model.save.SaveSummary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,32 +17,32 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/migration")
 public class MigrationController {
 
-    private final GameVersionService gameVersionService;
+    private final GameService gameService;
     private final SaveService saveService;
 
     @Autowired
-    public MigrationController(GameVersionService gameVersionService, SaveService saveService) {
-        this.gameVersionService = gameVersionService;
+    public MigrationController(GameService gameService, SaveService saveService) {
+        this.gameService = gameService;
         this.saveService = saveService;
     }
 
-    @PostMapping("/gameVersion")
-    public void importGameVersion(@RequestBody GameVersionSummary input) {
-        gameVersionService.create(Importer.importGameVersion(input));
+    @PostMapping("/game")
+    public void importGame(@RequestBody GameSummary input) {
+        gameService.create(Importer.importGame(input));
     }
 
     @PostMapping("/save")
     public void importSave(@RequestBody SaveSummary input) {
-        String gameVersionName = (String) input.getSave().gameVersionId();
-        GameVersion gameVersion = gameVersionService.get(gameVersionName)
+        String gameName = (String) input.getSave().gameId();
+        Game game = gameService.get(gameName)
                 .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                        "save requires the game version '" + gameVersionName + "' to be installed"));
-        saveService.create(Importer.importSave(input, gameVersion));
+                        "save requires the game '" + gameName + "' to be installed"));
+        saveService.create(Importer.importSave(input, game));
     }
 
-    @GetMapping("/gameVersion")
-    public GameVersionSummary exportGameVersion(int gameVersionId) {
-        return Exporter.exportGameVersion(gameVersionService.get(gameVersionId), External.SAVE_FILE);
+    @GetMapping("/game")
+    public GameSummary exportGame(int gameId) {
+        return Exporter.exportGame(gameService.get(gameId), External.SAVE_FILE);
     }
 
     @GetMapping("/save")

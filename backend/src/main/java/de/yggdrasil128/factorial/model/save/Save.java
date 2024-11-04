@@ -4,7 +4,7 @@ import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.game.Game;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class Save implements NamedModel {
     @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
-    private GameVersion gameVersion;
+    private Game game;
     @Column(nullable = false)
     private String name = "";
     @JoinColumn
@@ -30,8 +30,8 @@ public class Save implements NamedModel {
     public Save() {
     }
 
-    public Save(GameVersion gameVersion, SaveStandalone standalone) {
-        this.gameVersion = gameVersion;
+    public Save(Game game, SaveStandalone standalone) {
+        this.game = game;
         factories = new ArrayList<>();
         changelists = new ArrayList<>();
         applyBasics(standalone);
@@ -46,12 +46,12 @@ public class Save implements NamedModel {
         return id;
     }
 
-    public GameVersion getGameVersion() {
-        return gameVersion;
+    public Game getGame() {
+        return game;
     }
 
-    public void setGameVersion(GameVersion gameVersion) {
-        this.gameVersion = gameVersion;
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     public void setId(int id) {

@@ -2,7 +2,7 @@ import type { Fraction, QuantityByChangelist } from '@/types/model/basic';
 
 export type Save = {
   readonly id: number;
-  gameVersionId: number;
+  gameId: number;
   name: string;
 }
 
@@ -72,7 +72,7 @@ export type Resource = {
   readonly overProduced: QuantityByChangelist;
 }
 
-export type GameVersion = {
+export type Game = {
   readonly id: number;
   name: string;
   iconId: number;
@@ -80,7 +80,7 @@ export type GameVersion = {
 
 export type Icon = {
   readonly id: number;
-  readonly gameVersionId: number;
+  readonly gameId: number;
   name: string;
   mimeType: string;
   category: string[];
@@ -88,7 +88,7 @@ export type Icon = {
 
 export type Item = {
   readonly id: number;
-  readonly gameVersionId: number;
+  readonly gameId: number;
   name: string;
   description: string;
   iconId: number;
@@ -97,7 +97,7 @@ export type Item = {
 
 export type Recipe = {
   readonly id: number;
-  readonly gameVersionId: number;
+  readonly gameId: number;
   name: string;
   iconId: number;
   ingredients: ItemQuantity[];
@@ -110,7 +110,7 @@ export type Recipe = {
 
 export type RecipeModifier = {
   readonly id: number;
-  readonly gameVersionId: number;
+  readonly gameId: number;
   name: string;
   description: string;
   iconId: number;
@@ -121,7 +121,7 @@ export type RecipeModifier = {
 
 export type Machine = {
   readonly id: number;
-  readonly gameVersionId: number;
+  readonly gameId: number;
   name: string;
   iconId: number;
   machineModifierId: number[];

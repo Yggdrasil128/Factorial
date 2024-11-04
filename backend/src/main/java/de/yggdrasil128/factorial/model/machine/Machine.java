@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.model.machine;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import jakarta.persistence.*;
@@ -18,7 +18,7 @@ public class Machine implements NamedModel {
     @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
-    private GameVersion gameVersion;
+    private Game game;
     @Column(nullable = false)
     private String name = "";
     @ManyToOne
@@ -31,8 +31,8 @@ public class Machine implements NamedModel {
     public Machine() {
     }
 
-    public Machine(GameVersion gameVersion, MachineStandalone standalone) {
-        this.gameVersion = gameVersion;
+    public Machine(Game game, MachineStandalone standalone) {
+        this.game = game;
         machineModifiers = new ArrayList<>();
         applyBaics(standalone);
     }
@@ -47,12 +47,12 @@ public class Machine implements NamedModel {
         return id;
     }
 
-    public GameVersion getGameVersion() {
-        return gameVersion;
+    public Game getGame() {
+        return game;
     }
 
-    public void setGameVersion(GameVersion gameVersion) {
-        this.gameVersion = gameVersion;
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     @Override

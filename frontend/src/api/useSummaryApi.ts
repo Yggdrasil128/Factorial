@@ -1,9 +1,9 @@
-import type { GameVersionSummary, SaveSummary } from '@/types/model/summary';
+import type { GameSummary, SaveSummary } from '@/types/model/summary';
 import { type Api, useApi } from '@/api/useApi';
 
 export interface SummaryApi {
   getSaveSummary: (saveId: number) => Promise<SaveSummary>;
-  getGameVersionSummary: (gameVersionId: number) => Promise<GameVersionSummary>;
+  getGameSummary: (gameId: number) => Promise<GameSummary>;
 }
 
 export function useSummaryApi(): SummaryApi {
@@ -13,12 +13,12 @@ export function useSummaryApi(): SummaryApi {
     return api.get('/api/save/summary', { saveId: saveId });
   }
 
-  async function getGameVersionSummary(gameVersionId: number): Promise<GameVersionSummary> {
-    return api.get('/api/gameVersion/summary', { gameVersionId: gameVersionId });
+  async function getGameSummary(gameId: number): Promise<GameSummary> {
+    return api.get('/api/game/summary', { gameId: gameId });
   }
 
   return {
     getSaveSummary,
-    getGameVersionSummary
+    getGameSummary
   };
 }

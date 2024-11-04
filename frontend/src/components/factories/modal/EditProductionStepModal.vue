@@ -11,7 +11,7 @@ import EditModal from '@/components/EditModal.vue';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import { useCurrentGameVersionStore } from '@/stores/currentGameVersionStore';
+import { useCurrentGameStore } from '@/stores/currentGameStore';
 import IconImg from '@/components/IconImg.vue';
 import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
 import { Minus, Plus } from '@element-plus/icons-vue';
@@ -21,7 +21,7 @@ import { useProductionStepApi } from '@/api/useProductionStepApi';
 const router = useRouter();
 const route = useRoute();
 
-const currentGameVersionStore = useCurrentGameVersionStore();
+const currentGameStore = useCurrentGameStore();
 const productionStepStore = useProductionStepStore();
 const recipeStore = useRecipeStore();
 const recipeModifierStore = useRecipeModifierStore();
@@ -95,7 +95,7 @@ async function submitForm(): Promise<void> {
 
 const recipes: ComputedRef<Recipe[]> = computed(() =>
   [...recipeStore.map.values()]
-    .filter(recipe => recipe.gameVersionId === currentGameVersionStore.gameVersion?.id)
+    .filter(recipe => recipe.gameId === currentGameStore.game?.id)
 );
 
 const recipe: ComputedRef<Recipe | undefined> = computed(() => {

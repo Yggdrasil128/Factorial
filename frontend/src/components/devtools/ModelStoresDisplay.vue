@@ -4,7 +4,7 @@ import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
 import { useResourceStore } from '@/stores/model/resourceStore';
-import { useCurrentGameVersionStore } from '@/stores/currentGameVersionStore';
+import { useCurrentGameStore } from '@/stores/currentGameStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useRecipeStore } from '@/stores/model/recipeStore';
@@ -12,7 +12,7 @@ import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 
 const currentSaveStore = useCurrentSaveStore();
-const currentGameVersionStore = useCurrentGameVersionStore();
+const currentGameStore = useCurrentGameStore();
 
 const changelistStore = useChangelistStore();
 const factoryStore = useFactoryStore();
@@ -32,7 +32,7 @@ const machineStore = useMachineStore();
   <pre v-if="currentSaveStore.save">{{ JSON.stringify(currentSaveStore.save, null, 2) }}</pre>
 
   <h3>Current game version</h3>
-  <pre v-if="currentGameVersionStore.gameVersion">{{ JSON.stringify(currentGameVersionStore.gameVersion, null, 2)
+  <pre v-if="currentGameStore.game">{{ JSON.stringify(currentGameStore.game, null, 2)
     }}</pre>
 
   <h3>Changelists</h3>

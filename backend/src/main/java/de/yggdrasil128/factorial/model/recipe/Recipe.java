@@ -4,7 +4,7 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.FractionConverter;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
@@ -21,7 +21,7 @@ public class Recipe implements NamedModel {
     @GeneratedValue
     private int id;
     @ManyToOne(optional = false)
-    private GameVersion gameVersion;
+    private Game game;
     @Column(nullable = false)
     private String name = "";
     @ManyToOne
@@ -43,8 +43,8 @@ public class Recipe implements NamedModel {
     public Recipe() {
     }
 
-    public Recipe(GameVersion gameVersion, RecipeStandalone standalone) {
-        this.gameVersion = gameVersion;
+    public Recipe(Game game, RecipeStandalone standalone) {
+        this.game = game;
         ingredients = new ArrayList<>();
         products = new ArrayList<>();
         applicableModifiers = new ArrayList<>();
@@ -63,12 +63,12 @@ public class Recipe implements NamedModel {
         return id;
     }
 
-    public GameVersion getGameVersion() {
-        return gameVersion;
+    public Game getGame() {
+        return game;
     }
 
-    public void setGameVersion(GameVersion gameVersion) {
-        this.gameVersion = gameVersion;
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     @Override

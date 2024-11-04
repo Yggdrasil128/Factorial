@@ -123,7 +123,7 @@ function deleteFactory(factoryId: number) {
     </vue-draggable-next>
 
     <div class="createFactory">
-      <el-button type="primary" :icon="Plus" @click="routerMethods.newFactory()">Create factory</el-button>
+      <el-button type="primary" :icon="Plus" @click="routerMethods.newFactory()">New factory</el-button>
     </div>
   </div>
 </template>

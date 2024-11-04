@@ -1,7 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
@@ -16,27 +16,27 @@ import java.util.List;
 @RequestMapping("/api")
 public class IconController {
 
-    private final GameVersionService gameVersionService;
+    private final GameService gameService;
     private final IconService iconService;
 
     @Autowired
-    public IconController(GameVersionService gameVersionService, IconService iconService) {
-        this.gameVersionService = gameVersionService;
+    public IconController(GameService gameService, IconService iconService) {
+        this.gameService = gameService;
         this.iconService = iconService;
     }
 
-    @PostMapping("/gameVersion/icons")
-    public IconStandalone create(int gameVersionId, @RequestBody IconStandalone input) {
-        GameVersion gameVersion = gameVersionService.get(gameVersionId);
-        Icon icon = new Icon(gameVersion, input);
+    @PostMapping("/game/icons")
+    public IconStandalone create(int gameId, @RequestBody IconStandalone input) {
+        Game game = gameService.get(gameId);
+        Icon icon = new Icon(game, input);
         icon = iconService.create(icon);
-        gameVersionService.addAttachedIcon(gameVersion, icon);
+        gameService.addAttachedIcon(game, icon);
         return IconStandalone.of(icon);
     }
 
-    @GetMapping("/gameVersion/icons")
-    public List<IconStandalone> retrieveAll(int gameVersionId) {
-        return gameVersionService.get(gameVersionId).getIcons().stream().map(IconStandalone::of).toList();
+    @GetMapping("/game/icons")
+    public List<IconStandalone> retrieveAll(int gameId) {
+        return gameService.get(gameId).getIcons().stream().map(IconStandalone::of).toList();
     }
 
     @GetMapping("/icon")

@@ -8,8 +8,8 @@ import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
 import de.yggdrasil128.factorial.model.factory.FactorySummary;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionService;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
 import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
@@ -28,15 +28,15 @@ import java.util.function.Supplier;
 @RequestMapping("/api")
 public class SaveController {
 
-    private final GameVersionService gameVersionService;
+    private final GameService gameService;
     private final SaveService saveService;
     private final FactoryService factoryService;
     private final ProductionStepService productionStepService;
 
     @Autowired
-    public SaveController(GameVersionService gameVersionService, SaveService saveService, FactoryService factoryService,
+    public SaveController(GameService gameService, SaveService saveService, FactoryService factoryService,
                           ProductionStepService productionStepService) {
-        this.gameVersionService = gameVersionService;
+        this.gameService = gameService;
         this.saveService = saveService;
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
@@ -44,8 +44,8 @@ public class SaveController {
 
     @PostMapping("/saves")
     public SaveStandalone create(@RequestBody SaveStandalone input) {
-        GameVersion gameVersion = gameVersionService.get((int) input.gameVersionId());
-        Save save = new Save(gameVersion, input);
+        Game game = gameService.get((int) input.gameId());
+        Save save = new Save(game, input);
         return SaveStandalone.of(saveService.create(save));
     }
 
@@ -87,7 +87,7 @@ public class SaveController {
     @PatchMapping("/save")
     public SaveStandalone update(int saveId, @RequestBody SaveStandalone input) {
         Save save = saveService.get(saveId);
-        if (null != input.gameVersionId()) {
+        if (null != input.gameId()) {
             throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game version");
         }
         save.applyBasics(input);

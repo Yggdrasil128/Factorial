@@ -1,7 +1,7 @@
 import type {
   Changelist,
   Factory,
-  GameVersion,
+  Game,
   Icon,
   Item,
   Machine,
@@ -24,8 +24,8 @@ export type FactorySummary = {
   resources: Resource[];
 }
 
-export type GameVersionSummary = {
-  gameVersion: GameVersion;
+export type GameSummary = {
+  game: Game;
   icons: Icon[];
   items: Item[];
   recipes: Recipe[];

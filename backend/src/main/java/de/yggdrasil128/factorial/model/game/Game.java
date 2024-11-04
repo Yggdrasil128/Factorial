@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.gameversion;
+package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class GameVersion implements NamedModel {
+public class Game implements NamedModel {
 
     @Id
     @GeneratedValue
@@ -38,10 +38,10 @@ public class GameVersion implements NamedModel {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Machine> machines;
 
-    public GameVersion() {
+    public Game() {
     }
 
-    public GameVersion(GameVersionStandalone standalone) {
+    public Game(GameStandalone standalone) {
         items = new ArrayList<>();
         recipes = new ArrayList<>();
         recipeModifiers = new ArrayList<>();
@@ -50,7 +50,7 @@ public class GameVersion implements NamedModel {
         applyBasics(standalone);
     }
 
-    public void applyBasics(GameVersionStandalone standalone) {
+    public void applyBasics(GameStandalone standalone) {
         OptionalInputField.of(standalone.name()).apply(this::setName);
     }
 

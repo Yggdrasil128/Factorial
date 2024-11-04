@@ -1,5 +1,5 @@
 import { type ModelStoresUpdateService, useModelStoresUpdateService } from '@/services/model/modelStoresUpdateService';
-import type { GameVersionSummary, SaveSummary } from '@/types/model/summary';
+import type { GameSummary, SaveSummary } from '@/types/model/summary';
 import { useCurrentSaveStore } from '@/stores/currentSaveStore';
 import { type ModelSyncWebsocket, useModelSyncWebsocket } from '@/api/useModelSyncWebsocket';
 import {
@@ -38,9 +38,9 @@ function useModelSyncService(): ModelSyncService {
           modelSyncWebsocket.connect();
         }
 
-        summaryApi.getGameVersionSummary(saveSummary.save.gameVersionId)
-          .then((gameVersionSummary: GameVersionSummary) => {
-            modelStoresUpdateService.applyGameVersionSummary(gameVersionSummary);
+        summaryApi.getGameSummary(saveSummary.save.gameId)
+          .then((gameSummary: GameSummary) => {
+            modelStoresUpdateService.applyGameSummary(gameSummary);
           });
       });
   }

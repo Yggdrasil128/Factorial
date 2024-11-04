@@ -34,6 +34,9 @@ body {
   font-size: 16px;
   min-height: 100vh;
   overflow: auto;
+
+  --el-input-bg-color: #00000030;
+  --el-fill-color-blank: #00000030;
 }
 
 .el-switch__core {

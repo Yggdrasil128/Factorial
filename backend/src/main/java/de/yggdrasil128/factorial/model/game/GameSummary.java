@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.gameversion;
+package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
@@ -8,21 +8,21 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 
 import java.util.List;
 
-public class GameVersionSummary {
+public class GameSummary {
 
-    private GameVersionStandalone gameVersion;
+    private GameStandalone game;
     private List<IconStandalone> icons;
     private List<ItemStandalone> items;
     private List<RecipeStandalone> recipes;
     private List<RecipeModifierStandalone> recipeModifiers;
     private List<MachineStandalone> machines;
 
-    public GameVersionStandalone getGameVersion() {
-        return gameVersion;
+    public GameStandalone getGame() {
+        return game;
     }
 
-    public void setGameVersion(GameVersionStandalone gameVersion) {
-        this.gameVersion = gameVersion;
+    public void setGame(GameStandalone game) {
+        this.game = game;
     }
 
     public List<IconStandalone> getIcons() {

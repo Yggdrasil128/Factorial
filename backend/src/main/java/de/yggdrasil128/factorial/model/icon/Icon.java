@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.model.icon;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
+import de.yggdrasil128.factorial.model.game.Game;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class Icon implements NamedModel {
     @GeneratedValue
     private int id;
     @ManyToOne
-    private GameVersion gameVersion;
+    private Game game;
     @Column(nullable = false)
     private String name = "";
     @Lob
@@ -30,8 +30,8 @@ public class Icon implements NamedModel {
     public Icon() {
     }
 
-    public Icon(GameVersion gameVersion, IconStandalone standalone) {
-        this.gameVersion = gameVersion;
+    public Icon(Game game, IconStandalone standalone) {
+        this.game = game;
         applyBasics(standalone);
     }
 
@@ -50,12 +50,12 @@ public class Icon implements NamedModel {
         this.id = id;
     }
 
-    public GameVersion getGameVersion() {
-        return gameVersion;
+    public Game getGame() {
+        return game;
     }
 
-    public void setGameVersion(GameVersion gameVersion) {
-        this.gameVersion = gameVersion;
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     public String getName() {

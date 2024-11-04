@@ -4,9 +4,9 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
 import de.yggdrasil128.factorial.model.factory.FactorySummary;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionSummary;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameStandalone;
+import de.yggdrasil128.factorial.model.game.GameSummary;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
 import de.yggdrasil128.factorial.model.machine.MachineStandalone;
@@ -20,19 +20,19 @@ import de.yggdrasil128.factorial.model.save.SaveSummary;
 
 public class Exporter {
 
-    public static GameVersionSummary exportGameVersion(GameVersion gameVersion,
-                                                       External resolveStrategy) {
-        GameVersionSummary summary = new GameVersionSummary();
-        summary.setGameVersion(GameVersionStandalone.of(gameVersion, resolveStrategy));
+    public static GameSummary exportGame(Game game,
+                                         External resolveStrategy) {
+        GameSummary summary = new GameSummary();
+        summary.setGame(GameStandalone.of(game, resolveStrategy));
         summary.setIcons(
-                gameVersion.getIcons().stream().map(icon -> IconStandalone.of(icon, resolveStrategy)).toList());
+                game.getIcons().stream().map(icon -> IconStandalone.of(icon, resolveStrategy)).toList());
         summary.setItems(
-                gameVersion.getItems().stream().map(item -> ItemStandalone.of(item, resolveStrategy)).toList());
-        summary.setRecipes(gameVersion.getRecipes().stream()
+                game.getItems().stream().map(item -> ItemStandalone.of(item, resolveStrategy)).toList());
+        summary.setRecipes(game.getRecipes().stream()
                 .map(recipe -> new RecipeStandalone(recipe, resolveStrategy)).toList());
-        summary.setRecipeModifiers(gameVersion.getRecipeModifiers().stream()
+        summary.setRecipeModifiers(game.getRecipeModifiers().stream()
                 .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier, resolveStrategy)).toList());
-        summary.setMachines(gameVersion.getMachines().stream()
+        summary.setMachines(game.getMachines().stream()
                 .map(machine -> new MachineStandalone(machine, resolveStrategy)).toList());
         return summary;
     }

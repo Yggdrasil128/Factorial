@@ -186,7 +186,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
     </vue-draggable-next>
 
     <div class="createChangelist">
-      <el-button type="primary" :icon="Plus" @click="newChangelist()">Create changelist</el-button>
+      <el-button type="primary" :icon="Plus" @click="newChangelist()">New changelist</el-button>
     </div>
   </div>
 </template>

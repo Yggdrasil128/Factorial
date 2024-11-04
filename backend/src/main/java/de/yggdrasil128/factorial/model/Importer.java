@@ -6,9 +6,9 @@ import de.yggdrasil128.factorial.model.changelist.ProductionStepChangeStandalone
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
 import de.yggdrasil128.factorial.model.factory.FactorySummary;
-import de.yggdrasil128.factorial.model.gameversion.GameVersion;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionStandalone;
-import de.yggdrasil128.factorial.model.gameversion.GameVersionSummary;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameStandalone;
+import de.yggdrasil128.factorial.model.game.GameSummary;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.Item;
@@ -35,37 +35,37 @@ import java.util.stream.Collectors;
 
 public class Importer {
 
-    public static GameVersion importGameVersion(GameVersionSummary summary) {
+    public static Game importGame(GameSummary summary) {
         Importer importer = new Importer();
-        GameVersionStandalone input = summary.getGameVersion();
-        GameVersion gameVersion = new GameVersion(input);
+        GameStandalone input = summary.getGame();
+        Game game = new Game(input);
         /*
          * Caveat: The order of these loops is meaningful, because the 'importer.import...' calls also populate the
          * 'importer' instance's mappings, which are then used in the later loops.
          */
         for (IconStandalone icon : summary.getIcons()) {
-            gameVersion.getIcons().add(importer.importIcon(gameVersion, icon));
+            game.getIcons().add(importer.importIcon(game, icon));
         }
         for (ItemStandalone item : summary.getItems()) {
-            gameVersion.getItems().add(importer.importItem(gameVersion, item));
+            game.getItems().add(importer.importItem(game, item));
         }
         for (RecipeModifierStandalone recipeModifier : summary.getRecipeModifiers()) {
-            gameVersion.getRecipeModifiers().add(importer.importRecipeModifier(gameVersion, recipeModifier));
+            game.getRecipeModifiers().add(importer.importRecipeModifier(game, recipeModifier));
         }
         for (MachineStandalone machine : summary.getMachines()) {
-            gameVersion.getMachines().add(importer.importMachine(gameVersion, machine));
+            game.getMachines().add(importer.importMachine(game, machine));
         }
         for (RecipeStandalone recipe : summary.getRecipes()) {
-            gameVersion.getRecipes().add(importer.importRecipe(gameVersion, recipe));
+            game.getRecipes().add(importer.importRecipe(game, recipe));
         }
-        gameVersion.setIcon(importer.findIcon(input.iconId()));
-        return gameVersion;
+        game.setIcon(importer.findIcon(input.iconId()));
+        return game;
     }
 
-    public static Save importSave(SaveSummary summary, GameVersion gameVersion) {
-        Importer importer = new Importer(gameVersion);
+    public static Save importSave(SaveSummary summary, Game game) {
+        Importer importer = new Importer(game);
         SaveStandalone input = summary.getSave();
-        Save save = new Save(gameVersion, input);
+        Save save = new Save(game, input);
         /**
          * Caveat: The order of invocations is meaningful, because the latter one uses the objects that were imported in
          * the first one.
@@ -84,7 +84,7 @@ public class Importer {
     private Importer() {
     }
 
-    private Importer(GameVersion context) {
+    private Importer(Game context) {
         for (Icon icon : context.getIcons()) {
             icons.put(icon.getName(), icon);
         }
@@ -102,36 +102,36 @@ public class Importer {
         }
     }
 
-    private Icon importIcon(GameVersion gameVersion, IconStandalone input) {
-        Icon icon = new Icon(gameVersion, input);
+    private Icon importIcon(Game game, IconStandalone input) {
+        Icon icon = new Icon(game, input);
         icons.put(icon.getName(), icon);
         return icon;
     }
 
-    private Item importItem(GameVersion gameVersion, ItemStandalone input) {
-        Item item = new Item(gameVersion, input);
+    private Item importItem(Game game, ItemStandalone input) {
+        Item item = new Item(game, input);
         item.setIcon(findIcon(input.iconId()));
         items.put(item.getName(), item);
         return item;
     }
 
-    private RecipeModifier importRecipeModifier(GameVersion gameVersion, RecipeModifierStandalone input) {
-        RecipeModifier recipeModifier = new RecipeModifier(gameVersion, input);
+    private RecipeModifier importRecipeModifier(Game game, RecipeModifierStandalone input) {
+        RecipeModifier recipeModifier = new RecipeModifier(game, input);
         recipeModifier.setIcon(findIcon(input.iconId()));
         recipeModifiers.put(recipeModifier.getName(), recipeModifier);
         return recipeModifier;
     }
 
-    private Machine importMachine(GameVersion gameVersion, MachineStandalone input) {
-        Machine machine = new Machine(gameVersion, input);
+    private Machine importMachine(Game game, MachineStandalone input) {
+        Machine machine = new Machine(game, input);
         machine.setIcon(findIcon(input.iconId()));
         machine.setMachineModifiers(findRecipeModifiers(input.machineModifierIds()));
         machines.put(machine.getName(), machine);
         return machine;
     }
 
-    private Recipe importRecipe(GameVersion gameVersion, RecipeStandalone input) {
-        Recipe recipe = new Recipe(gameVersion, input);
+    private Recipe importRecipe(Game game, RecipeStandalone input) {
+        Recipe recipe = new Recipe(game, input);
         recipe.setIcon(findIcon(input.iconId()));
         recipe.setIngredients(findResources(input.ingredients()));
         recipe.setProducts(findResources(input.products()));
