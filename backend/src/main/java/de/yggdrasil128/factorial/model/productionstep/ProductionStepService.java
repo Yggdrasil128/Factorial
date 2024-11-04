@@ -120,9 +120,14 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
     }
 
     @EventListener
-    public void on(ChangelistProductionStepChangeAppliedEvent event) {
-        setCurrentMachineCount(event.getProductionStep(),
-                event.getProductionStep().getMachineCount().add(event.getChange()), event.getChanges());
+    public ProductionStepThroughputsChangedEvent on(ChangelistProductionStepChangeAppliedEvent event) {
+        ProductionStep productionStep = event.getProductionStep();
+        Fraction current = event.getChange();
+        Fraction primary = event.getChangelist().isPrimary() ? Fraction.ZERO : current;
+        QuantityByChangelist change = new QuantityByChangelist(current, primary, Fraction.ZERO);
+        ProductionStepThroughputs throughputs = computeThroughputs(productionStep, () -> event.getChanges(),
+                existing -> existing.changeMachineCounts(productionStep, change));
+        return new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false);
     }
 
 }

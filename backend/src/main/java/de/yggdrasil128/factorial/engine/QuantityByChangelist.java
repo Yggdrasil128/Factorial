@@ -29,6 +29,10 @@ public class QuantityByChangelist {
         this.withActiveChangelists = withActiveChangelists;
     }
 
+    public boolean isZero() {
+        return current.isZero() && withPrimaryChangelist.isZero() && withActiveChangelists.isZero();
+    }
+
     public Fraction getCurrent() {
         return current;
     }

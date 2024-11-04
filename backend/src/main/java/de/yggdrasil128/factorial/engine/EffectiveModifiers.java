@@ -56,6 +56,15 @@ public class EffectiveModifiers {
         return true;
     }
 
+    public boolean changeMachineCounts(QuantityByChangelist change) {
+        if (change.isZero()) {
+            return false;
+        }
+        machineCounts = machineCounts.add(change);
+        recompute();
+        return true;
+    }
+
     private static EffectiveModifier computeEffectiveMachineModifier(Machine machine) {
         return EffectiveModifier.multiply(machine.getMachineModifiers().stream().map(EffectiveModifier::of));
     }
