@@ -201,13 +201,13 @@ public class ProductionLine implements Production {
         Map<Integer, ResourceContributions> modified = new HashMap<>();
         for (Integer input : contributor.getInputs().keySet()) {
             ResourceContributions contribution = contributions.get(input);
-            if (contribution.getProducers().remove(contributor)) {
+            if (contribution.getConsumers().remove(contributor)) {
                 modified.put(input, contribution);
             }
         }
         for (Integer output : contributor.getOutputs().keySet()) {
             ResourceContributions contribution = contributions.get(output);
-            if (contribution.getConsumers().remove(contributor)) {
+            if (contribution.getProducers().remove(contributor)) {
                 modified.put(output, contribution);
             }
         }

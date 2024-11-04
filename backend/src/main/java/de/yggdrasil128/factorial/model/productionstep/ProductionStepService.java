@@ -101,7 +101,7 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
 
     @Override
     public void delete(int id) {
-        Factory factory = factories.findByResourcesId(id);
+        Factory factory = factories.findByProductionStepsId(id);
         super.delete(id);
         ProductionStepThroughputs throughputs = cache.remove(id);
         if (null != factory) {
