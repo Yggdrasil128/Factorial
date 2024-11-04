@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, type ComputedRef } from 'vue';
 import type { Icon } from '@/types/model/standalone';
 import { useIconStore } from '@/stores/model/iconStore';
+import { ElTooltip } from 'element-plus';
 
 export interface IconImgProps {
-  icon?: Icon | number;
+  icon: Icon | number | undefined;
   size: number;
 }
 
@@ -12,35 +13,46 @@ const props: IconImgProps = defineProps<IconImgProps>();
 
 const iconStore = useIconStore();
 
-const src = computed(() => {
-  if (!props.icon) {
-    return '';
-  }
+const icon: ComputedRef<Icon | undefined> = computed(() => {
+  if (!props.icon) return undefined;
   if (typeof props.icon === 'number') {
-    return 'http://localhost:8080/api/icon/raw?id=' + props.icon;
+    return iconStore.map.get(props.icon);
+  } else {
+    return props.icon;
   }
-  return 'http://localhost:8080/api/icon/raw?id=' + props.icon.id;
 });
 
-const alt = computed(() => {
-  if (!props.icon) {
+const src: ComputedRef<string> = computed(() => {
+  if (!icon.value) {
     return '';
   }
-  if (typeof props.icon === 'number') {
-    const icon = iconStore.map.get(props.icon);
-    return icon ? icon.name : '';
+  return 'http://localhost:8080/api/icon/raw?id=' + icon.value.id;
+});
+
+const iconName: ComputedRef<string> = computed(() => {
+  if (!icon.value) {
+    return '';
   }
-  return props.icon.name;
+  return icon.value.name;
 });
 </script>
 
 <template>
-  <img
-    v-if="src"
-    :src="src"
-    :alt="alt"
-    :style="{ width: size + 'px', height: size + 'px' }"
-  />
+  <el-tooltip
+    v-if="icon"
+    effect="dark"
+    placement="top-start"
+    transition="none"
+    :hide-after="0"
+    :content="iconName"
+  >
+    <img
+      :src="src"
+      :alt="iconName"
+      :style="{ width: size + 'px', height: size + 'px' }"
+      v-bind="$attrs"
+    />
+  </el-tooltip>
 </template>
 
 <style scoped></style>
