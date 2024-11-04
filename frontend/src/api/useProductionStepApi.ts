@@ -1,6 +1,7 @@
 import { type Api, useApi } from '@/api/useApi';
 import type { Fraction } from '@/types/model/basic';
 import type { ProductionStep } from '@/types/model/standalone';
+import { ElMessage } from 'element-plus';
 
 export interface ProductionStepApi {
   createProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
@@ -18,15 +19,24 @@ export function useProductionStepApi(): ProductionStepApi {
   const api: Api = useApi();
 
   async function createProductionStep(productionStep: Partial<ProductionStep>): Promise<void> {
-    return api.post('/api/factory/productionSteps', productionStep, { factoryId: productionStep.factoryId });
+    return api.post('/api/factory/productionSteps', productionStep, { factoryId: productionStep.factoryId })
+      .then(() => {
+        ElMessage.success({ message: 'Production step created.' });
+      });
   }
 
   async function editProductionStep(productionStep: Partial<ProductionStep>): Promise<void> {
-    return api.patch('/api/productionStep', productionStep, { productionStepId: productionStep.id });
+    return api.patch('/api/productionStep', productionStep, { productionStepId: productionStep.id })
+      .then(() => {
+        ElMessage.success({ message: 'Production step updated.' });
+      });
   }
 
   async function deleteProductionStep(productionStepId: number): Promise<void> {
-    return api.delete('/api/productionStep', { productionStepId: productionStepId });
+    return api.delete('/api/productionStep', { productionStepId: productionStepId })
+      .then(() => {
+        ElMessage.success({ message: 'Production step deleted.' });
+      });
   }
 
   async function applyPrimaryChangelist(productionStepId: number): Promise<void> {

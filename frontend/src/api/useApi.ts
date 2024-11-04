@@ -29,8 +29,7 @@ export function useApi(): Api {
       return response.data;
     }).catch(error => {
       ElMessage.error({
-        message: error.message,
-        customClass: 'el-dark'
+        message: error.message
       });
       return Promise.reject(error);
     });

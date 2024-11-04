@@ -1,6 +1,7 @@
 import type { Changelist } from '@/types/model/standalone';
 import { type Api, useApi } from '@/api/useApi';
 import type { EntityWithOrdinal } from '@/types/model/basic';
+import { ElMessage } from 'element-plus';
 
 export interface ChangelistApi {
   createChangelist(changelist: Partial<Changelist>): Promise<void>;
@@ -22,15 +23,24 @@ export function useChangelistApi(): ChangelistApi {
   const api: Api = useApi();
 
   async function createChangelist(changelist: Partial<Changelist>): Promise<void> {
-    return api.post('/api/save/changelists', changelist, { saveId: changelist.saveId });
+    return api.post('/api/save/changelists', changelist, { saveId: changelist.saveId })
+      .then(() => {
+        ElMessage.success({ message: 'Changelist created.' });
+      });
   }
 
   async function editChangelist(changelist: Partial<Changelist>): Promise<void> {
-    return api.patch('/api/changelist', changelist, { changelistId: changelist.id });
+    return api.patch('/api/changelist', changelist, { changelistId: changelist.id })
+      .then(() => {
+        ElMessage.success({ message: 'Changelist updated.' });
+      });
   }
 
   async function deleteChangelist(changelistId: number): Promise<void> {
-    return api.delete('/api/changelist', { changelistId: changelistId });
+    return api.delete('/api/changelist', { changelistId: changelistId })
+      .then(() => {
+        ElMessage.success({ message: 'Changelist deleted.' });
+      });
   }
 
   async function setPrimary(changelistId: number): Promise<void> {
