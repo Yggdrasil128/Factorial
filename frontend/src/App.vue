@@ -18,6 +18,7 @@ modelSyncService.setSaveIdAndReload(1);
 
 <style scoped></style>
 
+<!--suppress CssUnusedSymbol -->
 <style>
 html {
   overflow-y: scroll;
@@ -33,5 +34,9 @@ body {
   font-size: 16px;
   min-height: 100vh;
   overflow: auto;
+}
+
+.el-switch__core {
+  background-color: #30303080;
 }
 </style>
