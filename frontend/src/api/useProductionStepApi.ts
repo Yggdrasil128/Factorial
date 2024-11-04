@@ -1,7 +1,14 @@
 import { type Api, useApi } from '@/api/useApi';
 import type { Fraction } from '@/types/model/basic';
+import type { ProductionStep } from '@/types/model/standalone';
 
 export interface ProductionStepApi {
+  createProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
+
+  editProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
+
+  deleteProductionStep(productionStepId: number): Promise<void>;
+
   applyPrimaryChangelist(productionStepId: number): Promise<void>;
 
   updateMachineCount(productionStepId: number, machineCount: Fraction): Promise<void>;
@@ -9,6 +16,18 @@ export interface ProductionStepApi {
 
 export function useProductionStepApi(): ProductionStepApi {
   const api: Api = useApi();
+
+  async function createProductionStep(productionStep: Partial<ProductionStep>): Promise<void> {
+    return api.post('/api/factory/productionSteps', productionStep, { factoryId: productionStep.factoryId });
+  }
+
+  async function editProductionStep(productionStep: Partial<ProductionStep>): Promise<void> {
+    return api.patch('/api/productionStep', productionStep, { productionStepId: productionStep.id });
+  }
+
+  async function deleteProductionStep(productionStepId: number): Promise<void> {
+    return api.delete('/api/productionStep', { productionStepId: productionStepId });
+  }
 
   async function applyPrimaryChangelist(productionStepId: number): Promise<void> {
     return api.patch('/api/productionStep/applyPrimaryChangelist', undefined, { productionStepId });
@@ -19,6 +38,9 @@ export function useProductionStepApi(): ProductionStepApi {
   }
 
   return {
+    createProductionStep,
+    editProductionStep,
+    deleteProductionStep,
     applyPrimaryChangelist,
     updateMachineCount
   };

@@ -63,9 +63,6 @@ initFromRoute(route);
 onBeforeRouteUpdate(initFromRoute);
 
 async function submitForm(): Promise<void> {
-  if (!factory.value) {
-    return;
-  }
   factory.value.name = factory.value.name?.trim();
 
   if (!(await editModal.value.validate())) {

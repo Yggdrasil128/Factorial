@@ -6,12 +6,14 @@ import { useItemStore } from '@/stores/model/itemStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { CaretLeft, Delete, Edit } from '@element-plus/icons-vue';
 import IconImg from '@/components/IconImg.vue';
-import { ElButton, ElButtonGroup } from 'element-plus';
+import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
 import ResourceProductionEntry from '@/components/factories/resources/ResourceProductionEntry.vue';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import BgcElButton from '@/components/input/BgcElButton.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useProductionStepApi } from '@/api/useProductionStepApi';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -19,10 +21,15 @@ export interface ResourceProductionStepProps {
 
 const props: ResourceProductionStepProps = defineProps<ResourceProductionStepProps>();
 
+const router = useRouter();
+const route = useRoute();
+
 const recipeStore = useRecipeStore();
 const recipeModifierStore = useRecipeModifierStore();
 const itemStore = useItemStore();
 const machineStore = useMachineStore();
+
+const productionStepApi = useProductionStepApi();
 
 const recipe: ComputedRef<Recipe | undefined> = computed(() => recipeStore.map.get(props.productionStep.recipeId));
 const machine: ComputedRef<Machine | undefined> = computed(() => machineStore.map.get(props.productionStep.machineId));
@@ -52,6 +59,20 @@ const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
     .map(recipeModifierId => recipeModifierStore.map.get(recipeModifierId))
     .filter(recipeModifier => recipeModifier !== undefined) as RecipeModifier[];
 });
+
+function editProductionStep(): void {
+  router.push({
+    name: 'editProductionStep', params: {
+      factoryId: route.params.factoryId,
+      editProductionStepId: props.productionStep.id
+    }
+  });
+}
+
+function deleteProductionStep(): void {
+  productionStepApi.deleteProductionStep(props.productionStep.id);
+}
+
 </script>
 
 <template>
@@ -102,8 +123,32 @@ const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
                              :production-step-id="productionStep.id" />
         &ensp;
         <el-button-group>
-          <bgc-el-button :icon="Edit" />
-          <el-button type="danger" :icon="Delete" />
+          <el-tooltip
+            effect="dark"
+            placement="top-start"
+            transition="none"
+            :hide-after="0"
+            content="Edit">
+            <bgc-el-button :icon="Edit" @click="editProductionStep" />
+          </el-tooltip>
+
+          <el-popconfirm
+            title="Delete this production step?"
+            width="200px"
+            @confirm="deleteProductionStep">
+            <template #reference>
+              <span class="row center tooltipHelperSpan">
+                <el-tooltip
+                  effect="dark"
+                  placement="top-start"
+                  transition="none"
+                  :hide-after="0"
+                  content="Delete">
+                  <el-button type="danger" :icon="Delete" />
+                </el-tooltip>
+              </span>
+            </template>
+          </el-popconfirm>
         </el-button-group>
       </div>
     </div>

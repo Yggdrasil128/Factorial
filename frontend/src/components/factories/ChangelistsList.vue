@@ -161,21 +161,21 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
                   @confirm="deleteChangelist(changelist.id)"
                 >
                   <template #reference>
-                      <span class="row center tooltipHelperSpan">
-                        <el-tooltip
-                          effect="dark"
-                          placement="top-start"
-                          transition="none"
-                          :hide-after="0"
-                          content="Delete"
-                        >
-                          <el-button
-                            type="danger"
-                            :icon="Delete"
-                            :disabled="changelists.length === 1 || changelist.primary"
-                          />
-                        </el-tooltip>
-                      </span>
+                    <span class="row center tooltipHelperSpan">
+                      <el-tooltip
+                        effect="dark"
+                        placement="top-start"
+                        transition="none"
+                        :hide-after="0"
+                        content="Delete"
+                      >
+                        <el-button
+                          type="danger"
+                          :icon="Delete"
+                          :disabled="changelists.length === 1 || changelist.primary"
+                        />
+                      </el-tooltip>
+                    </span>
                   </template>
                 </el-popconfirm>
               </el-button-group>

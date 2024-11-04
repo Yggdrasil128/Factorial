@@ -16,6 +16,7 @@ import IconImg from '@/components/IconImg.vue';
 import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
 import { Minus, Plus } from '@element-plus/icons-vue';
 import type { RuleItem } from 'async-validator/dist-types/interface';
+import { useProductionStepApi } from '@/api/useProductionStepApi';
 
 const router = useRouter();
 const route = useRoute();
@@ -26,6 +27,8 @@ const recipeStore = useRecipeStore();
 const recipeModifierStore = useRecipeModifierStore();
 const machineStore = useMachineStore();
 
+const productionStepApi = useProductionStepApi();
+
 const isSaving: Ref<boolean> = ref(false);
 const productionStep: Ref<Partial<ProductionStep>> = ref({});
 const original: Ref<Partial<ProductionStep>> = ref({});
@@ -33,7 +36,7 @@ const editModal = ref();
 
 const hasChanges = computed(() => !_.isEqual(productionStep.value, original.value));
 
-const formRules: FormRules<string> = reactive({
+const formRules: FormRules = reactive({
   recipeId: [{ required: true, message: 'Please select a recipe', trigger: 'blur' }],
   machineId: [{ required: true, message: 'Please select a machine', trigger: 'blur' }],
   machineCount: [{
@@ -75,15 +78,19 @@ initFromRoute(route);
 onBeforeRouteUpdate(initFromRoute);
 
 async function submitForm(): Promise<void> {
-  if (!productionStep.value) {
-    return;
-  }
-
   if (!(await editModal.value.validate())) {
     return;
   }
 
-  // TODO
+  isSaving.value = true;
+
+  if (route.name === 'newProductionStep') {
+    await productionStepApi.createProductionStep(productionStep.value);
+  } else {
+    await productionStepApi.editProductionStep(productionStep.value);
+  }
+
+  await router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
 }
 
 const recipes: ComputedRef<Recipe[]> = computed(() =>

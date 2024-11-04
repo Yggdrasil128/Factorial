@@ -68,9 +68,6 @@ initFromRoute(route);
 onBeforeRouteUpdate(initFromRoute);
 
 async function submitForm(): Promise<void> {
-  if (!changelist.value) {
-    return;
-  }
   changelist.value.name = changelist.value.name?.trim();
 
   if (!(await editModal.value.validate())) {
