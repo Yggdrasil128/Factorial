@@ -83,6 +83,12 @@ public class ProductionStepThroughputs implements Production {
         return changes.add(productionStep.getMachineCount());
     }
 
+    public void changeMachineCounts(ProductionStep productionStep, QuantityByChangelist change) {
+        if (effectiveModifiers.changeMachineCounts(change)) {
+            recompute();
+        }
+    }
+
     private void recompute() {
         inputs = computeThroughputs(ingredients, EffectiveModifier::getInputSpeedMultiplier);
         outputs = computeThroughputs(products, EffectiveModifier::getOutputSpeedMultiplier);

@@ -62,8 +62,8 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
 
     public void apply(Changelist changelist, ProductionStepChanges changes) {
         for (Map.Entry<ProductionStep, Fraction> change : changelist.getProductionStepChanges().entrySet()) {
-            events.publishEvent(
-                    new ChangelistProductionStepChangeAppliedEvent(change.getKey(), change.getValue(), changes));
+            events.publishEvent(new ChangelistProductionStepChangeAppliedEvent(changelist, change.getKey(),
+                    change.getValue(), changes));
         }
         changelist.getProductionStepChanges().clear();
         repository.save(changelist);

@@ -72,6 +72,10 @@ public class Fraction extends Number {
         denominator /= gcd;
     }
 
+    public boolean isZero() {
+        return 0 == numerator;
+    }
+
     public Fraction add(Fraction that) {
         return new Fraction(
                 Math.addExact(Math.multiplyExact(this.numerator, that.denominator),

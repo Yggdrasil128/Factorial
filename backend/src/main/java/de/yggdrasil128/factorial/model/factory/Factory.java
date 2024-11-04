@@ -30,6 +30,7 @@ public class Factory implements NamedModel, OrderedModel {
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ProductionStep> productionSteps;
+    @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Resource> resources;
 
