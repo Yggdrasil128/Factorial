@@ -1,6 +1,5 @@
 package de.yggdrasil128.factorial.model.machine;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.NamedModel;
@@ -16,18 +15,12 @@ public record MachineStandalone(@JsonProperty(access = READ_ONLY) int id,
                                 List<Object> machineModifierIds,
                                 List<String> category) {
 
-    @JsonCreator
-    public static MachineStandalone create(int id, int gameId, String name, Object iconId,
-                                           List<Object> machineModifierIds, List<String> category) {
-        return new MachineStandalone(id, gameId, name, iconId, machineModifierIds, category);
+    public static MachineStandalone of(Machine model) {
+        return of(model, External.FRONTEND);
     }
 
-    public MachineStandalone(Machine model) {
-        this(model, External.FRONTEND);
-    }
-
-    public MachineStandalone(Machine model, External destination) {
-        this(model.getId(), model.getGame().getId(), model.getName(),
+    public static MachineStandalone of(Machine model, External destination) {
+        return new MachineStandalone(model.getId(), model.getGame().getId(), model.getName(),
                 NamedModel.resolve(model.getIcon(), destination),
                 NamedModel.resolve(model.getMachineModifiers(), destination), model.getCategory());
     }

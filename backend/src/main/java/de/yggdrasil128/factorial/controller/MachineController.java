@@ -42,7 +42,7 @@ public class MachineController {
         applyRelations(input, machine);
         machine = machineService.create(machine);
         gameService.addAttachedMachine(game, machine);
-        return new MachineStandalone(machine);
+        return MachineStandalone.of(machine);
     }
 
     @GetMapping("save/machines")
@@ -56,12 +56,12 @@ public class MachineController {
     }
 
     private static List<MachineStandalone> retrieveAll(Game game) {
-        return game.getMachines().stream().map(MachineStandalone::new).toList();
+        return game.getMachines().stream().map(MachineStandalone::of).toList();
     }
 
     @GetMapping("machine")
     public MachineStandalone retrieve(int machineId) {
-        return new MachineStandalone(machineService.get(machineId));
+        return MachineStandalone.of(machineService.get(machineId));
     }
 
     @PatchMapping("/machine")
@@ -69,7 +69,7 @@ public class MachineController {
         Machine machine = machineService.get(machineId);
         machine.applyBaics(input);
         applyRelations(input, machine);
-        return new MachineStandalone(machineService.update(machine));
+        return MachineStandalone.of(machineService.update(machine));
     }
 
     private void applyRelations(MachineStandalone input, Machine machine) {

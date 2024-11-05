@@ -42,7 +42,7 @@ public class RecipeController {
         Recipe recipe = new Recipe(game, input);
         applyRelations(input, recipe);
         recipe = recipeService.create(recipe);
-        return new RecipeStandalone(recipe);
+        return RecipeStandalone.of(recipe);
     }
 
     private ItemQuantity createResoruce(ItemQuantityStandalone input) {
@@ -51,12 +51,12 @@ public class RecipeController {
 
     @GetMapping("/game/recipes")
     public List<RecipeStandalone> retrieveAlL(int gameId) {
-        return gameService.get(gameId).getRecipes().stream().map(RecipeStandalone::new).toList();
+        return gameService.get(gameId).getRecipes().stream().map(RecipeStandalone::of).toList();
     }
 
     @GetMapping("/recipe")
     public RecipeStandalone retrieve(int recipeId) {
-        return new RecipeStandalone(recipeService.get(recipeId));
+        return RecipeStandalone.of(recipeService.get(recipeId));
     }
 
     @PatchMapping("/recipe")
@@ -64,7 +64,7 @@ public class RecipeController {
         Recipe recipe = recipeService.get(recipeId);
         recipe.applyBasics(input);
         applyRelations(input, recipe);
-        return new RecipeStandalone(recipeService.update(recipe));
+        return RecipeStandalone.of(recipeService.update(recipe));
     }
 
     private void applyRelations(RecipeStandalone input, Recipe recipe) {

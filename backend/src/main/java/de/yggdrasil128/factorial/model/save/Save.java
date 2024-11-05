@@ -22,7 +22,8 @@ public class Save implements NamedModel, OrderedModel {
     private Game game;
     @Column(nullable = false)
     private int ordinal;
-    @Column(nullable = false)
+    // TODO validate uniqueness in service operations
+    @Column(unique = true, nullable = false)
     private String name = "";
     private String description = "";
     @ManyToOne

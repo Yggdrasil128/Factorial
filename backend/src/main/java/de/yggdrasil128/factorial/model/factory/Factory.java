@@ -12,7 +12,9 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO validate uniqueness in service operations
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"save_id", "name"}))
 public class Factory implements NamedModel, OrderedModel {
 
     @Id
@@ -22,7 +24,7 @@ public class Factory implements NamedModel, OrderedModel {
     private Save save;
     @Column(nullable = false)
     private int ordinal;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name = "";
     private String description = "";
     @ManyToOne
