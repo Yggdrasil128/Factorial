@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller.websocket.messages;
 
 import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
 
-public class ResourceUpdatedMessage extends AbstractModelChangedMessage {
+public class ResourceUpdatedMessage extends SaveRelatedModelChangedMessage {
 
     private final ResourceStandalone resource;
 

@@ -4,7 +4,7 @@ import de.yggdrasil128.factorial.model.EntityPosition;
 
 import java.util.List;
 
-public class FactoriesReorderedMessage extends AbstractModelChangedMessage {
+public class FactoriesReorderedMessage extends SaveRelatedModelChangedMessage {
 
     private final List<EntityPosition> order;
 

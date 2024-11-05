@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller.websocket.messages;
 
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 
-public class ChangelistUpdatedMessage extends AbstractModelChangedMessage {
+public class ChangelistUpdatedMessage extends SaveRelatedModelChangedMessage {
 
     private final ChangelistStandalone changelist;
 

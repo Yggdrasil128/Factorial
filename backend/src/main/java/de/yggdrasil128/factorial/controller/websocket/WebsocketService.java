@@ -12,8 +12,28 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
 import de.yggdrasil128.factorial.model.changelist.ChangelistsReorderedEvent;
 import de.yggdrasil128.factorial.model.factory.*;
-import de.yggdrasil128.factorial.model.game.GamesReorderedEvent;
+import de.yggdrasil128.factorial.model.game.*;
+import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.icon.IconRemovedEvent;
+import de.yggdrasil128.factorial.model.icon.IconStandalone;
+import de.yggdrasil128.factorial.model.icon.IconUpdatedEvent;
+import de.yggdrasil128.factorial.model.item.Item;
+import de.yggdrasil128.factorial.model.item.ItemRemovedEvent;
+import de.yggdrasil128.factorial.model.item.ItemStandalone;
+import de.yggdrasil128.factorial.model.item.ItemUpdatedEvent;
+import de.yggdrasil128.factorial.model.machine.Machine;
+import de.yggdrasil128.factorial.model.machine.MachineRemovedEvent;
+import de.yggdrasil128.factorial.model.machine.MachineStandalone;
+import de.yggdrasil128.factorial.model.machine.MachineUpdatedEvent;
 import de.yggdrasil128.factorial.model.productionstep.*;
+import de.yggdrasil128.factorial.model.recipe.Recipe;
+import de.yggdrasil128.factorial.model.recipe.RecipeRemovedEvent;
+import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
+import de.yggdrasil128.factorial.model.recipe.RecipeUpdatedEvent;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierRemovedEvent;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierUpdatedEvent;
 import de.yggdrasil128.factorial.model.resource.*;
 import de.yggdrasil128.factorial.model.save.*;
 import org.slf4j.Logger;
@@ -126,6 +146,73 @@ public class WebsocketService extends TextWebSocketHandler {
                 .map(game -> new EntityPosition(game.getId(), game.getOrdinal())).toList();
 
         broadcast(new GamesReorderedMessage(runtimeId, nextMessageId(), order));
+    }
+
+    @EventListener
+    public void on(GameUpdatedEvent event) {
+        broadcast(new GameUpdatedMessage(runtimeId, nextMessageId(), event.getGame().getId(),
+                GameStandalone.of(event.getGame())));
+    }
+
+    @EventListener
+    public void on(GameRemovedEvent event) {
+        broadcast(new GameRemovedMessage(runtimeId, nextMessageId(), event.getGameId()));
+    }
+
+    @EventListener
+    public void on(IconUpdatedEvent event) {
+        broadcast(new IconUpdatedMessage(runtimeId, nextMessageId(), event.getIcon().getGame().getId(),
+                IconStandalone.of(event.getIcon())));
+    }
+
+    @EventListener
+    public void on(IconRemovedEvent event) {
+        broadcast(new IconRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getIconId()));
+    }
+
+    @EventListener
+    public void on(ItemUpdatedEvent event) {
+        broadcast(new ItemUpdatedMessage(runtimeId, nextMessageId(), event.getItem().getGame().getId(),
+                ItemStandalone.of(event.getItem())));
+    }
+
+    @EventListener
+    public void ON(ItemRemovedEvent event) {
+        broadcast(new ItemRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getItemId()));
+    }
+
+    @EventListener
+    public void on(RecipeUpdatedEvent event) {
+        broadcast(new RecipeUpdatedMessage(runtimeId, nextMessageId(), event.getRecipe().getGame().getId(),
+                RecipeStandalone.of(event.getRecipe())));
+    }
+
+    @EventListener
+    public void on(RecipeRemovedEvent event) {
+        broadcast(new RecipeRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getRecipeId()));
+    }
+
+    @EventListener
+    public void on(RecipeModifierUpdatedEvent event) {
+        broadcast(new RecipeModifierUpdatedMessage(runtimeId, nextMessageId(),
+                event.getRecipeModifier().getGame().getId(), RecipeModifierStandalone.of(event.getRecipeModifier())));
+    }
+
+    @EventListener
+    public void on(RecipeModifierRemovedEvent event) {
+        broadcast(new RecipeModifierRemovedMessage(runtimeId, nextMessageId(), event.getGameId(),
+                event.getRecipeModifierId()));
+    }
+
+    @EventListener
+    public void on(MachineUpdatedEvent event) {
+        broadcast(new MachineUpdatedMessage(runtimeId, nextMessageId(), event.getMachine().getGame().getId(),
+                MachineStandalone.of(event.getMachine())));
+    }
+
+    @EventListener
+    public void on(MachineRemovedEvent event) {
+        broadcast(new MachineRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getMachineId()));
     }
 
     @EventListener

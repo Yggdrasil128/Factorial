@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller.websocket.messages;
 
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
 
-public class ProductionStepUpdatedMessage extends AbstractModelChangedMessage {
+public class ProductionStepUpdatedMessage extends SaveRelatedModelChangedMessage {
 
     private final ProductionStepStandalone productionStep;
 

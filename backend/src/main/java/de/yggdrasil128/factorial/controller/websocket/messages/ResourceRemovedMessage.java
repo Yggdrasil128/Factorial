@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.controller.websocket.messages;
 
-public class ResourceRemovedMessage extends AbstractModelChangedMessage {
+public class ResourceRemovedMessage extends SaveRelatedModelChangedMessage {
 
     private final int resourceId;
 

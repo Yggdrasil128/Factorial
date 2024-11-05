@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.controller.websocket.messages;
 
-public class ProductionStepRemovedMessage extends AbstractModelChangedMessage {
+public class ProductionStepRemovedMessage extends SaveRelatedModelChangedMessage {
 
     private final int productionStepId;
 

@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.controller.websocket.messages;
 
-public class ChangelistRemovedMessage extends AbstractModelChangedMessage {
+public class ChangelistRemovedMessage extends SaveRelatedModelChangedMessage {
 
     private final int changelistId;
 

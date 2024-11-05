@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.controller.websocket.messages;
 
-public class FactoryRemovedMessage extends AbstractModelChangedMessage {
+public class FactoryRemovedMessage extends SaveRelatedModelChangedMessage {
 
     private final int factoryId;
 

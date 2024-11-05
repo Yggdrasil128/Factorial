@@ -23,6 +23,16 @@ public class GameService extends ModelService<Game, GameRepository> {
         this.events = events;
     }
 
+    @Override
+    public Game create(Game entity) {
+        if (0 >= entity.getOrdinal()) {
+            entity.setOrdinal(stream().mapToInt(Game::getOrdinal).max().orElse(0) + 1);
+        }
+        Game game = super.create(entity);
+        events.publishEvent(new GameUpdatedEvent(game));
+        return game;
+    }
+
     public Optional<Game> get(String name) {
         return repository.findByName(name);
     }
@@ -65,6 +75,19 @@ public class GameService extends ModelService<Game, GameRepository> {
             }
         }
         events.publishEvent(new GamesReorderedEvent(games));
+    }
+
+    @Override
+    public Game update(Game entity) {
+        Game game = super.update(entity);
+        events.publishEvent(new GameUpdatedEvent(game));
+        return game;
+    }
+
+    @Override
+    public void delete(int id) {
+        super.delete(id);
+        events.publishEvent(new GameRemovedEvent(id));
     }
 
 }

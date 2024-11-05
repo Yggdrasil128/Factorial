@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller.websocket.messages;
 
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
 
-public class SaveUpdatedMessage extends AbstractModelChangedMessage {
+public class SaveUpdatedMessage extends SaveRelatedModelChangedMessage {
 
     private final SaveStandalone save;
 

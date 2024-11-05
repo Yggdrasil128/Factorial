@@ -40,7 +40,9 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         if (0 >= entity.getOrdinal()) {
             entity.setOrdinal(stream().mapToInt(Save::getOrdinal).max().orElse(0) + 1);
         }
-        return super.create(entity);
+        Save save = super.create(entity);
+        events.publishEvent(new SaveUpdatedEvent(save));
+        return save;
     }
 
     public ProductionStepChanges computeProductionStepChanges(Save save) {

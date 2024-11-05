@@ -2,7 +2,7 @@ package de.yggdrasil128.factorial.controller.websocket.messages;
 
 import de.yggdrasil128.factorial.model.factory.FactoryStandalone;
 
-public class FactoryUpdatedMessage extends AbstractModelChangedMessage {
+public class FactoryUpdatedMessage extends SaveRelatedModelChangedMessage {
 
     private final FactoryStandalone factory;
 
