@@ -15,6 +15,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
                                  @JsonProperty(access = READ_ONLY) int factoryId,
+                                 @JsonProperty(access = READ_ONLY) int saveId,
                                  Integer ordinal,
                                  Object itemId,
                                  boolean imported,
@@ -48,9 +49,9 @@ public record ResourceStandalone(@JsonProperty(access = READ_ONLY) int id,
     private static ResourceStandalone of(Resource model, External destination, List<Object> producerIds,
                                          QuantityByChangelist produced, List<Object> consumerIds,
                                          QuantityByChangelist consumed, QuantityByChangelist overProduced) {
-        return new ResourceStandalone(model.getId(), model.getFactory().getId(), model.getOrdinal(),
-                NamedModel.resolve(model.getItem(), destination), model.isImported(), model.isExported(), producerIds,
-                produced, consumerIds, consumed, overProduced);
+        return new ResourceStandalone(model.getId(), model.getFactory().getId(), model.getFactory().getSave().getId(),
+                model.getOrdinal(), NamedModel.resolve(model.getItem(), destination), model.isImported(),
+                model.isExported(), producerIds, produced, consumerIds, consumed, overProduced);
     }
 
 }

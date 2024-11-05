@@ -15,6 +15,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public record ProductionStepStandalone(@JsonProperty(access = READ_ONLY) int id,
                                        @JsonProperty(access = READ_ONLY) int factoryId,
+                                       @JsonProperty(access = READ_ONLY) int saveId,
                                        Object machineId,
                                        Object recipeId,
                                        List<Object> modifierIds,
@@ -37,7 +38,8 @@ public record ProductionStepStandalone(@JsonProperty(access = READ_ONLY) int id,
             of(ProductionStep model, External destination, QuantityByChangelist machineCounts,
                List<ProductionEntryStandalone> inputs, List<ProductionEntryStandalone> outputs) {
         return new ProductionStepStandalone(model.getId(), model.getFactory().getId(),
-                NamedModel.resolve(model.getMachine(), destination), NamedModel.resolve(model.getRecipe(), destination),
+                model.getFactory().getSave().getId(), NamedModel.resolve(model.getMachine(), destination),
+                NamedModel.resolve(model.getRecipe(), destination),
                 NamedModel.resolve(model.getModifiers(), destination), model.getMachineCount(), machineCounts, inputs,
                 outputs);
     }
