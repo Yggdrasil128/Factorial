@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = InitialMessage.class, name = "initial"),
 
+        @JsonSubTypes.Type(value = SavesReorderedMessage.class, name = "savesReordered"),
+        @JsonSubTypes.Type(value = SaveUpdatedMessage.class, name = "saveUpdated"),
+        @JsonSubTypes.Type(value = SaveRemovedMessage.class, name = "saveRemoved"),
         @JsonSubTypes.Type(value = FactoriesReorderedMessage.class, name = "factoriesReordered"),
         @JsonSubTypes.Type(value = FactoryUpdatedMessage.class, name = "factoryUpdated"),
         @JsonSubTypes.Type(value = FactoryRemovedMessage.class, name = "factoryRemoved"),

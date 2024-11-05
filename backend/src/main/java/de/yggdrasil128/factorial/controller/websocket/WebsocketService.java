@@ -14,8 +14,7 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistsReorderedEvent;
 import de.yggdrasil128.factorial.model.factory.*;
 import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.*;
-import de.yggdrasil128.factorial.model.save.Save;
-import de.yggdrasil128.factorial.model.save.SaveService;
+import de.yggdrasil128.factorial.model.save.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -121,6 +120,26 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
+    public void on(SavesReorderedEvent event) {
+        List<EntityPosition> order = event.getSaves().stream()
+                .map(save -> new EntityPosition(save.getId(), save.getOrdinal())).toList();
+
+        broadcast(new SavesReorderedMessage(runtimeId, nextMessageId(), order));
+    }
+
+    @EventListener
+    public void on(SaveUpdatedEvent event) {
+        Save save = event.getSave();
+
+        broadcast(new SaveUpdatedMessage(runtimeId, nextMessageId(), save.getId(), SaveStandalone.of(save)));
+    }
+
+    @EventListener
+    public void on(SaveRemovedMessage event) {
+        broadcast(new SaveRemovedMessage(runtimeId, nextMessageId(), event.getSaveId()));
+    }
+
+    @EventListener
     public void on(FactoriesReorderedEvent event) {
         List<EntityPosition> order = event.getFactories().stream()
                 .map(factory -> new EntityPosition(factory.getId(), factory.getOrdinal())).toList();
@@ -190,7 +209,7 @@ public class WebsocketService extends TextWebSocketHandler {
     public void on(ResourceRemovedEvent event) {
         broadcast(new ResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getResourceId()));
     }
-    
+
     @EventListener
     public void on(ChangelistsReorderedEvent event) {
         List<EntityPosition> order = event.getChangelists().stream()

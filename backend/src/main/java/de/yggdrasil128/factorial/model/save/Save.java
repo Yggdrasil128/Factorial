@@ -2,16 +2,18 @@ package de.yggdrasil128.factorial.model.save;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.OrderedModel;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Save implements NamedModel {
+public class Save implements NamedModel, OrderedModel {
 
     @Id
     @GeneratedValue
@@ -19,7 +21,12 @@ public class Save implements NamedModel {
     @ManyToOne(optional = false)
     private Game game;
     @Column(nullable = false)
+    private int ordinal;
+    @Column(nullable = false)
     private String name = "";
+    private String description = "";
+    @ManyToOne
+    private Icon icon;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Factory> factories;
@@ -59,12 +66,38 @@ public class Save implements NamedModel {
     }
 
     @Override
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    @Override
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Icon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Icon icon) {
+        this.icon = icon;
     }
 
     public List<Factory> getFactories() {

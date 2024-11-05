@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -52,6 +53,11 @@ public class SaveController {
     @GetMapping("/saves")
     public List<SaveStandalone> retrieveAll() {
         return saveService.stream().map(SaveStandalone::of).toList();
+    }
+
+    @PatchMapping("/saves/order")
+    public void order(@RequestBody List<EntityPosition> input) {
+        saveService.reorder(input);
     }
 
     @GetMapping("/save")

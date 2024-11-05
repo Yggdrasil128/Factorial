@@ -3,6 +3,7 @@ package de.yggdrasil128.factorial.model.save;
 import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.QuantityByChangelist;
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
@@ -15,12 +16,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class SaveService extends ModelService<Save, SaveRepository> {
@@ -33,6 +33,14 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         super(repository);
         this.events = events;
         this.factoryService = factoryService;
+    }
+
+    @Override
+    public Save create(Save entity) {
+        if (0 >= entity.getOrdinal()) {
+            entity.setOrdinal(stream().mapToInt(Save::getOrdinal).max().orElse(0) + 1);
+        }
+        return super.create(entity);
     }
 
     public ProductionStepChanges computeProductionStepChanges(Save save) {
@@ -64,16 +72,34 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         events.publishEvent(new ChangelistUpdatedEvent(changelist, true));
     }
 
+    public void reorder(List<EntityPosition> input) {
+        Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        Collection<Save> saves = new ArrayList<>();
+        // we want to have all saves in memory so that we are immune to circles in the given order
+        for (Save save : stream().toList()) {
+            Integer ordinal = order.get(save.getId());
+            if (null != ordinal) {
+                save.setOrdinal(ordinal.intValue());
+                saves.add(save);
+                repository.save(save);
+            }
+        }
+        events.publishEvent(new SavesReorderedEvent(saves));
+    }
+
     @Override
     public Save update(Save entity) {
         // no need to invalidate resources, since we don't change anything related
-        return super.update(entity);
+        Save save = super.update(entity);
+        events.publishEvent(new SaveUpdatedEvent(save));
+        return save;
     }
 
     @Override
     public void delete(int id) {
         super.delete(id);
         cache.remove(id);
+        events.publishEvent(new SaveRemovedEvent(id));
     }
 
     @EventListener
