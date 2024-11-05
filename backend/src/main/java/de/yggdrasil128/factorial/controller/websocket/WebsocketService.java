@@ -12,6 +12,7 @@ import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
 import de.yggdrasil128.factorial.model.changelist.ChangelistsReorderedEvent;
 import de.yggdrasil128.factorial.model.factory.*;
+import de.yggdrasil128.factorial.model.game.GamesReorderedEvent;
 import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.*;
 import de.yggdrasil128.factorial.model.save.*;
@@ -117,6 +118,14 @@ public class WebsocketService extends TextWebSocketHandler {
                         session.getRemoteAddress(), e);
             }
         }
+    }
+
+    @EventListener
+    public void on(GamesReorderedEvent event) {
+        List<EntityPosition> order = event.getGames().stream()
+                .map(game -> new EntityPosition(game.getId(), game.getOrdinal())).toList();
+
+        broadcast(new GamesReorderedMessage(runtimeId, nextMessageId(), order));
     }
 
     @EventListener

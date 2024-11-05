@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.OptionalInputField;
@@ -36,6 +37,11 @@ public class GameController {
     @GetMapping("/games")
     public List<GameStandalone> retrieveAll() {
         return gameService.stream().map(GameStandalone::of).toList();
+    }
+
+    @PatchMapping("/games/order")
+    public void order(@RequestBody List<EntityPosition> input) {
+        gameService.reorder(input);
     }
 
     @GetMapping("/game")

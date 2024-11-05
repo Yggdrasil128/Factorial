@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.OrderedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.machine.Machine;
@@ -13,13 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Game implements NamedModel {
+public class Game implements NamedModel, OrderedModel {
 
     @Id
     @GeneratedValue
     private int id;
+    @Column(nullable = false)
+    private int ordinal;
     @Column(nullable = false, unique = true)
     private String name = "";
+    private String description = "";
     @ManyToOne
     private Icon icon;
     @JoinColumn
@@ -60,12 +64,30 @@ public class Game implements NamedModel {
     }
 
     @Override
+    public int getOrdinal() {
+        return ordinal;
+    }
+
+    @Override
+    public void setOrdinal(int ordinal) {
+        this.ordinal = ordinal;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Icon getIcon() {
