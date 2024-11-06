@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.engine;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 
@@ -29,6 +30,7 @@ public class QuantityByChangelist {
         this.withActiveChangelists = withActiveChangelists;
     }
 
+    @JsonIgnore
     public boolean isZero() {
         return current.isZero() && withPrimaryChangelist.isZero() && withActiveChangelists.isZero();
     }
