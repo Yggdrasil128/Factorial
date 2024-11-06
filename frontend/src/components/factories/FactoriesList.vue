@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useFactoryStore } from '@/stores/model/factoryStore';
-import { useCurrentSaveStore } from '@/stores/currentSaveStore';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { computed, type ComputedRef, watch } from 'vue';
 import { type RouteLocationAsRelativeGeneric, useRoute, useRouter } from 'vue-router';
 import type { Factory } from '@/types/model/standalone';
@@ -13,7 +13,7 @@ import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggable
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import BgcElButton from '@/components/input/BgcElButton.vue';
 
-const currentSaveStore = useCurrentSaveStore();
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const factoryStore = useFactoryStore();
 const factoryApi: FactoryApi = useFactoryApi();
 
@@ -25,43 +25,43 @@ const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
 );
 
 const factories: ComputedRef<Factory[]> = computed(() => {
-  return [...factoryStore.map.values()]
-    .filter(factory => factory.saveId === currentSaveStore.save?.id)
+  return factoryStore.getBySaveId(currentGameAndSaveStore.save?.id)
     .sort((a, b) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(factories,
-  (input: EntityWithOrdinal[]) => factoryApi.reorder(currentSaveStore.save!.id, input)
+  (input: EntityWithOrdinal[]) => factoryApi.reorder(currentGameAndSaveStore.save!.id, input)
 );
 
-const routerMethods = {
-  newFactory(): void {
-    router.push({ name: 'newFactory', params: { factoryId: route.params.factoryId } });
-  },
-  editFactory(editFactoryId: number): void {
-    router.push({
-      name: 'editFactory',
-      params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId }
-    });
-  },
-  viewFactory(factoryId: number, replace?: boolean): void {
-    if (currentFactoryId.value === factoryId) {
-      return;
-    }
-    const toRoute: RouteLocationAsRelativeGeneric =
-      { name: 'factories', params: { factoryId: factoryId } };
+function newFactory(): void {
+  router.push({ name: 'newFactory', params: { factoryId: route.params.factoryId } });
+}
 
-    if (replace) {
-      router.replace(toRoute);
-    } else {
-      router.push(toRoute);
-    }
+function editFactory(editFactoryId: number): void {
+  router.push({
+    name: 'editFactory',
+    params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId }
+  });
+}
+
+function viewFactory(factoryId: number, replace?: boolean): void {
+  if (currentFactoryId.value === factoryId) {
+    return;
   }
-};
+
+  const toRoute: RouteLocationAsRelativeGeneric =
+    { name: 'factories', params: { factoryId: factoryId } };
+
+  if (replace) {
+    router.replace(toRoute);
+  } else {
+    router.push(toRoute);
+  }
+}
 
 watch(computed(() => factories.value.length), () => {
   if (factories.value.length > 0 && !currentFactoryId.value) {
-    routerMethods.viewFactory(factories.value[0].id, true);
+    viewFactory(factories.value[0].id, true);
   }
 }, { immediate: true });
 
@@ -80,10 +80,10 @@ function deleteFactory(factoryId: number) {
         class="list-group-item"
         :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
       >
-        <div class="icon" @click="routerMethods.viewFactory(factory.id)" v-if="factory.iconId">
+        <div class="icon" @click="viewFactory(factory.id)" v-if="factory.iconId">
           <icon-img :icon="factory.iconId" :size="40" />
         </div>
-        <div class="name" @click="routerMethods.viewFactory(factory.id)">
+        <div class="name" @click="viewFactory(factory.id)">
           {{ factory.name }}
         </div>
         <div class="buttons">
@@ -95,7 +95,7 @@ function deleteFactory(factoryId: number) {
               :hide-after="0"
               content="Edit"
             >
-              <bgc-el-button :icon="Edit" @click="routerMethods.editFactory(factory.id)" />
+              <bgc-el-button :icon="Edit" @click="editFactory(factory.id)" />
             </el-tooltip>
 
             <el-popconfirm
@@ -123,7 +123,7 @@ function deleteFactory(factoryId: number) {
     </vue-draggable-next>
 
     <div class="createFactory">
-      <el-button type="primary" :icon="Plus" @click="routerMethods.newFactory()">New factory</el-button>
+      <el-button type="primary" :icon="Plus" @click="newFactory()">New factory</el-button>
     </div>
   </div>
 </template>

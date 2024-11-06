@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCurrentSaveStore } from '@/stores/currentSaveStore';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useChangelistApi } from '@/api/useChangelistApi';
 import { useRoute, useRouter } from 'vue-router';
@@ -13,7 +13,7 @@ import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggable
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import BgcElButton from '@/components/input/BgcElButton.vue';
 
-const currentSaveStore = useCurrentSaveStore();
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const changelistStore = useChangelistStore();
 const changelistApi = useChangelistApi();
 
@@ -21,13 +21,12 @@ const router = useRouter();
 const route = useRoute();
 
 const changelists: ComputedRef<Changelist[]> = computed(() => {
-  return [...changelistStore.map.values()]
-    .filter(changelist => changelist.saveId === currentSaveStore.save?.id)
+  return changelistStore.getBySaveId(currentGameAndSaveStore.save?.id)
     .sort((a, b) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(changelists,
-  (input: EntityWithOrdinal[]) => changelistApi.reorder(currentSaveStore.save!.id, input)
+  (input: EntityWithOrdinal[]) => changelistApi.reorder(currentGameAndSaveStore.save!.id, input)
 );
 
 function newChangelist(): void {

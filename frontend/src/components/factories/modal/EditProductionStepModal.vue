@@ -11,7 +11,7 @@ import EditModal from '@/components/EditModal.vue';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import { useCurrentGameStore } from '@/stores/currentGameStore';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import IconImg from '@/components/IconImg.vue';
 import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
 import { Minus, Plus } from '@element-plus/icons-vue';
@@ -21,7 +21,7 @@ import { useProductionStepApi } from '@/api/useProductionStepApi';
 const router = useRouter();
 const route = useRoute();
 
-const currentGameStore = useCurrentGameStore();
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const productionStepStore = useProductionStepStore();
 const recipeStore = useRecipeStore();
 const recipeModifierStore = useRecipeModifierStore();
@@ -56,7 +56,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
     };
   } else {
     const productionStepId: number = Number(route.params.editProductionStepId);
-    const currentProductionStep: ProductionStep | undefined = productionStepStore.map.get(productionStepId);
+    const currentProductionStep: ProductionStep | undefined = productionStepStore.getById(productionStepId);
     if (!currentProductionStep) {
       console.error('ProductionStep with id ' + productionStepId + ' not found');
       router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
@@ -94,27 +94,25 @@ async function submitForm(): Promise<void> {
 }
 
 const recipes: ComputedRef<Recipe[]> = computed(() =>
-  [...recipeStore.map.values()]
-    .filter(recipe => recipe.gameId === currentGameStore.game?.id)
+  recipeStore.getByGameId(currentGameAndSaveStore.game?.id)
 );
 
 const recipe: ComputedRef<Recipe | undefined> = computed(() => {
   if (!productionStep.value.recipeId) return undefined;
-  return recipeStore.map.get(productionStep.value.recipeId);
+  return recipeStore.getById(productionStep.value.recipeId);
 });
 
 const machines: ComputedRef<Machine[]> = computed(() => {
   if (!recipe.value) return [];
   return recipe.value.applicableMachineIds
-    .map(machineId => machineStore.map.get(machineId))
+    .map(machineId => machineStore.getById(machineId))
     .filter(machine => machine !== undefined) as Machine[];
 });
 
 const modifiers: ComputedRef<RecipeModifier[]> = computed(() => {
-  // if (1 + 1 === 2) return [...recipeModifierStore.map.values()];
   if (!recipe.value) return [];
   return recipe.value.applicableModifierIds
-    .map(modifierId => recipeModifierStore.map.get(modifierId))
+    .map(modifierId => recipeModifierStore.getById(modifierId))
     .filter(modifier => modifier !== undefined) as RecipeModifier[];
 });
 

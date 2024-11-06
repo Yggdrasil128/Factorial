@@ -1,9 +1,12 @@
-import type { Fraction, QuantityByChangelist } from '@/types/model/basic';
+import type { Fraction, ItemQuantity, QuantityByChangelist } from '@/types/model/basic';
 
 export type Save = {
   readonly id: number;
   gameId: number;
+  iconId: number;
   name: string;
+  description: string;
+  ordinal: number;
 }
 
 export type Factory = {
@@ -21,6 +24,7 @@ export type Factory = {
 
 export type ProductionStep = {
   readonly id: number;
+  readonly saveId: number;
   readonly factoryId: number;
   machineId: number;
   recipeId: number;
@@ -54,6 +58,7 @@ export type ProductionEntry = {
 
 export type Resource = {
   readonly id: number;
+  readonly saveId: number;
   readonly factoryId: number;
   ordinal: number;
   readonly itemId: number;
@@ -76,6 +81,7 @@ export type Game = {
   readonly id: number;
   name: string;
   iconId: number;
+  ordinal: number;
 }
 
 export type Icon = {
@@ -126,9 +132,4 @@ export type Machine = {
   iconId: number;
   machineModifierId: number[];
   category: string[];
-}
-
-export type ItemQuantity = {
-  itemId: number;
-  quantity: Fraction;
 }

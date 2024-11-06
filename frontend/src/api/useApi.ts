@@ -3,10 +3,10 @@ import { inject } from 'vue';
 import { ElMessage } from 'element-plus';
 
 export interface Api {
-  get: <T>(url: string, params: RequestParams) => Promise<T>;
-  post: <T>(url: string, payload: any, params: RequestParams) => Promise<T>;
-  patch: <T>(url: string, payload: any, params: RequestParams) => Promise<T>;
-  delete: <T>(url: string, params: RequestParams) => Promise<T>;
+  get: <T>(url: string, params?: RequestParams) => Promise<T>;
+  post: <T>(url: string, payload: any, params?: RequestParams) => Promise<T>;
+  patch: <T>(url: string, payload: any, params?: RequestParams) => Promise<T>;
+  delete: <T>(url: string, params?: RequestParams) => Promise<T>;
 }
 
 export interface RequestParams {
@@ -35,19 +35,19 @@ export function useApi(): Api {
     });
   }
 
-  async function get<T>(url: string, params: RequestParams): Promise<T> {
+  async function get<T>(url: string, params?: RequestParams): Promise<T> {
     return request('GET', url, undefined, params);
   }
 
-  async function post<T>(url: string, payload: any, params: RequestParams): Promise<T> {
+  async function post<T>(url: string, payload: any, params?: RequestParams): Promise<T> {
     return request('POST', url, payload, params);
   }
 
-  async function patch<T>(url: string, payload: any, params: RequestParams): Promise<T> {
+  async function patch<T>(url: string, payload: any, params?: RequestParams): Promise<T> {
     return request('PATCH', url, payload, params);
   }
 
-  async function delete_<T>(url: string, params: RequestParams): Promise<T> {
+  async function delete_<T>(url: string, params?: RequestParams): Promise<T> {
     return request('DELETE', url, undefined, params);
   }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { useCurrentSaveStore } from '@/stores/currentSaveStore';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useChangelistApi } from '@/api/useChangelistApi';
@@ -15,7 +15,7 @@ import CascaderSelect from '@/components/input/CascaderSelect.vue';
 const router = useRouter();
 const route = useRoute();
 
-const currentSaveStore = useCurrentSaveStore();
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const changelistStore = useChangelistStore();
 const iconStore = useIconStore();
 
@@ -36,7 +36,7 @@ const formRules = reactive({
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
   if (route.name === 'newChangelist') {
     changelist.value = {
-      saveId: currentSaveStore.save?.id,
+      saveId: currentGameAndSaveStore.save?.id,
       name: '',
       iconId: 0,
       primary: false,
@@ -45,7 +45,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
     isEditingPrimaryChangelist.value = false;
   } else {
     const changelistId: number = Number(route.params.editChangelistId);
-    const currentChangelist: Changelist | undefined = changelistStore.map.get(changelistId);
+    const currentChangelist: Changelist | undefined = changelistStore.getById(changelistId);
     if (!currentChangelist) {
       console.error('Changelist with id ' + changelistId + ' not found');
       router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
@@ -106,7 +106,7 @@ async function submitForm(): Promise<void> {
 
       <el-form-item label="Icon">
         <CascaderSelect v-model="changelist.iconId!"
-                        :options="[...iconStore.map.values()]"
+                        :options="iconStore.getByGameId(currentGameAndSaveStore.game?.id)"
                         is-icon-entity
                         clearable
                         style="width: 100%;" />

@@ -13,7 +13,7 @@ const props: ResourceProductionEntryProps = defineProps<ResourceProductionEntryP
 
 const itemStore = useItemStore();
 
-const item: ComputedRef<Item | undefined> = computed(() => itemStore.map.get(props.productionEntry.itemId));
+const item: ComputedRef<Item | undefined> = computed(() => itemStore.getById(props.productionEntry.itemId));
 
 </script>
 

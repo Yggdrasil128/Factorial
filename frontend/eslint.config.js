@@ -15,7 +15,8 @@ export default [
     rules: {
       semi: 'error',
       'prefer-const': 'error',
-      '@typescript-eslint/no-explicit-any': 'off'
+      '@typescript-eslint/no-explicit-any': 'off',
+      'comma-dangle': ['error', 'only-multiline']
     }
   }
 ];

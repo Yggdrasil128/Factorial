@@ -24,7 +24,7 @@ const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
 );
 
 const factory: ComputedRef<Factory> = computed(() =>
-  factoryStore.map.get(currentFactoryId.value!)!
+  factoryStore.getById(currentFactoryId.value!)!
 );
 
 const resources: ComputedRef<Resource[]> = computed(() =>

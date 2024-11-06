@@ -2,7 +2,7 @@
 import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
 import { computed, reactive, type Ref, ref } from 'vue';
 import type { Factory } from '@/types/model/standalone';
-import { useCurrentSaveStore } from '@/stores/currentSaveStore';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import _ from 'lodash';
 import { useFactoryApi } from '@/api/useFactoryApi';
@@ -15,7 +15,7 @@ import CascaderSelect from '@/components/input/CascaderSelect.vue';
 const router = useRouter();
 const route = useRoute();
 
-const currentSaveStore = useCurrentSaveStore();
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const factoryStore = useFactoryStore();
 const iconStore = useIconStore();
 
@@ -35,14 +35,14 @@ const formRules = reactive({
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
   if (route.name === 'newFactory') {
     factory.value = {
-      saveId: currentSaveStore.save?.id,
+      saveId: currentGameAndSaveStore.save?.id,
       name: '',
       description: '',
       iconId: 0
     };
   } else {
     const factoryId: number = Number(route.params.editFactoryId);
-    const currentFactory: Factory | undefined = factoryStore.map.get(factoryId);
+    const currentFactory: Factory | undefined = factoryStore.getById(factoryId);
     if (!currentFactory) {
       console.error('Factory with id ' + factoryId + ' not found');
       router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
@@ -103,7 +103,7 @@ async function submitForm(): Promise<void> {
 
       <el-form-item label="Icon">
         <CascaderSelect v-model="factory.iconId!"
-                        :options="[...iconStore.map.values()]"
+                        :options="iconStore.getByGameId(currentGameAndSaveStore.game?.id)"
                         is-icon-entity
                         clearable
                         style="width: 100%;" />

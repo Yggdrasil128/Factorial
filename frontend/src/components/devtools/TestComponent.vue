@@ -15,15 +15,13 @@ const selectedItem: Ref<number> = ref(0);
 </script>
 
 <template>
-  <icon-img :icon="iconStore.map.get(1)" :size="64" />
+  <icon-img :icon="iconStore.getById(1)" :size="64" />
   <icon-img :icon="2" :size="64" />
 
-  <!--  <pre>{{ JSON.stringify(convertToTreeByCategory([...iconStore.map.values()]), null, 2) }}</pre>-->
-
-  <IconCascaderSelect v-model="selectedIcon" :options="[...iconStore.map.values()]" is-icon-entity clearable />
+  <IconCascaderSelect v-model="selectedIcon" :options="[...iconStore.getAll()]" is-icon-entity clearable />
   {{ selectedIcon }}
 
-  <IconCascaderSelect v-model="selectedItem" :options="[...itemStore.map.values()]" clearable />
+  <IconCascaderSelect v-model="selectedItem" :options="[...itemStore.getAll()]" clearable />
   {{ selectedItem }}
 </template>
 

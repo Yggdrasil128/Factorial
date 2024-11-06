@@ -4,7 +4,7 @@ import NavBar from '@/components/NavBar.vue';
 import { getModelSyncService, type ModelSyncService } from '@/services/model/modelSyncService';
 
 const modelSyncService: ModelSyncService = getModelSyncService();
-modelSyncService.setSaveIdAndReload(1);
+modelSyncService.setCurrentSaveIdAndLoad(1);
 </script>
 
 <template>
