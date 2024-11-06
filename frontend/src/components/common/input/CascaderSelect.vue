@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, type ComputedRef, type Ref } from 'vue';
 import { useVModel } from '@vueuse/core';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 
 export interface CascaderSelectProps {
   modelValue: number;

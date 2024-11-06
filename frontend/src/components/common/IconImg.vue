@@ -26,7 +26,8 @@ const src: ComputedRef<string> = computed(() => {
   if (!icon.value) {
     return '';
   }
-  return 'http://localhost:8080/api/icon/raw?id=' + icon.value.id;
+  const iconId: number = typeof props.icon === 'number' ? props.icon : icon.value.id;
+  return 'http://localhost:8080/api/icon/raw?id=' + iconId;
 });
 
 const iconName: ComputedRef<string> = computed(() => {

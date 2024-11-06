@@ -7,11 +7,11 @@ import type { Factory } from '@/types/model/standalone';
 import { Delete, Edit, Plus } from '@element-plus/icons-vue';
 import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 import { type FactoryApi, useFactoryApi } from '@/api/useFactoryApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
-import BgcElButton from '@/components/input/BgcElButton.vue';
+import BgcElButton from '@/components/common/input/BgcElButton.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const factoryStore = useFactoryStore();

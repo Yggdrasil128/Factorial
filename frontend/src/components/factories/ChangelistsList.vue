@@ -6,12 +6,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { computed, type ComputedRef, h, type Ref, ref } from 'vue';
 import type { Changelist } from '@/types/model/standalone';
 import { Check, Delete, Edit, Plus, Star } from '@element-plus/icons-vue';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElTooltip } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
-import BgcElButton from '@/components/input/BgcElButton.vue';
+import BgcElButton from '@/components/common/input/BgcElButton.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const changelistStore = useChangelistStore();

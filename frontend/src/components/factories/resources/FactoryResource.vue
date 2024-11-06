@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Item, ProductionStep, Resource } from '@/types/model/standalone';
 import { ElTooltip } from 'element-plus';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 import { useItemStore } from '@/stores/model/itemStore';
 import { computed, type ComputedRef } from 'vue';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';

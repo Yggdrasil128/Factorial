@@ -5,6 +5,8 @@ import HomePage from '@/components/HomePage.vue';
 import AboutPage from '@/components/AboutPage.vue';
 import DevTools from '@/components/devtools/DevTools.vue';
 
+import SavesAndGames from '@/components/savesAndGames/SavesAndGames.vue';
+
 import FactoriesOverview from '@/components/factories/FactoriesOverview.vue';
 import EditFactoryModal from '@/components/factories/modal/EditFactoryModal.vue';
 import EditChangelistModal from '@/components/factories/modal/EditChangelistModal.vue';
@@ -15,6 +17,11 @@ const router = createRouter({
   routes: [
     { path: '/', component: HomePage },
     { path: '/about', component: AboutPage },
+    {
+      path: '/savesAndGames',
+      name: 'savesAndGames',
+      component: SavesAndGames
+    },
     {
       path: '/factories/:factoryId?',
       name: 'factories',

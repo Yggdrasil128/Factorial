@@ -5,13 +5,13 @@ import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { CaretLeft, Delete, Edit } from '@element-plus/icons-vue';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
 import ResourceProductionEntry from '@/components/factories/resources/ResourceProductionEntry.vue';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import BgcElButton from '@/components/input/BgcElButton.vue';
+import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductionStepApi } from '@/api/useProductionStepApi';
 

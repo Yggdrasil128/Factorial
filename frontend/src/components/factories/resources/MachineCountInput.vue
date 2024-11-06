@@ -5,7 +5,7 @@ import { ElButtonGroup, ElInput } from 'element-plus';
 import type { Fraction } from '@/types/model/basic';
 import { useVModel } from '@vueuse/core';
 import { useProductionStepApi } from '@/api/useProductionStepApi';
-import BgcElButton from '@/components/input/BgcElButton.vue';
+import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { modifyFraction } from '@/utils/fractionUtils';
 
 export interface MachineCountInputProps {

@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import AppHeader from '@/components/AppHeader.vue';
 import NavBar from '@/components/NavBar.vue';
-import { getModelSyncService, type ModelSyncService } from '@/services/model/modelSyncService';
-
-const modelSyncService: ModelSyncService = getModelSyncService();
-modelSyncService.setCurrentSaveIdAndLoad(1);
 </script>
 
 <template>

@@ -20,6 +20,7 @@ const modelSyncService: ModelSyncService = getModelSyncService();
     <div id="navList">
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
+      <router-link :to="{ name: 'savesAndGames' }">Saves / Games</router-link>
       <router-link :to="{ name: 'factories' }">Factories</router-link>
       <router-link to="/devtools">Dev Tools</router-link>
     </div>

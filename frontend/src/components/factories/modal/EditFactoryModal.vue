@@ -8,9 +8,9 @@ import _ from 'lodash';
 import { useFactoryApi } from '@/api/useFactoryApi';
 import { ElFormItem, ElInput } from 'element-plus';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import EditModal from '@/components/EditModal.vue';
+import EditModal from '@/components/common/EditModal.vue';
 import { useIconStore } from '@/stores/model/iconStore';
-import CascaderSelect from '@/components/input/CascaderSelect.vue';
+import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 
 const router = useRouter();
 const route = useRoute();

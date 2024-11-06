@@ -2,7 +2,7 @@
 import type { Item, ProductionEntry } from '@/types/model/standalone';
 import { useItemStore } from '@/stores/model/itemStore';
 import { computed, type ComputedRef } from 'vue';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 
 export interface ResourceProductionEntryProps {

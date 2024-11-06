@@ -5,14 +5,14 @@ import { computed, type ComputedRef, reactive, ref, type Ref, watch } from 'vue'
 import type { Machine, ProductionStep, Recipe, RecipeModifier } from '@/types/model/standalone';
 import _ from 'lodash';
 import { ElFormItem, ElInput, type FormRules } from 'element-plus';
-import CascaderSelect from '@/components/input/CascaderSelect.vue';
+import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import EditModal from '@/components/EditModal.vue';
+import EditModal from '@/components/common/EditModal.vue';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import IconImg from '@/components/IconImg.vue';
+import IconImg from '@/components/common/IconImg.vue';
 import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
 import { Minus, Plus } from '@element-plus/icons-vue';
 import type { RuleItem } from 'async-validator/dist-types/interface';
