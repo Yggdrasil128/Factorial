@@ -19,14 +19,14 @@ const itemStore = useItemStore();
 const productionStepStore = useProductionStepStore();
 
 const item: ComputedRef<Item> = computed(() =>
-  itemStore.map.get(props.resource.itemId)!
+  itemStore.getById(props.resource.itemId)!
 );
 
 const productionSteps: ComputedRef<ProductionStep[]> = computed(() => {
   // TODO: add options to show consumers and/or producers
   const productionStepIds: number[] = _.uniq([...props.resource.producerIds]);
   return productionStepIds
-    .map(productionStepId => productionStepStore.map.get(productionStepId))
+    .map(productionStepId => productionStepStore.getById(productionStepId))
     .filter(productionStep => !!productionStep) as ProductionStep[];
 });
 </script>

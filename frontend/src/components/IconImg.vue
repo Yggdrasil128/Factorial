@@ -16,7 +16,7 @@ const iconStore = useIconStore();
 const icon: ComputedRef<Icon | undefined> = computed(() => {
   if (!props.icon) return undefined;
   if (typeof props.icon === 'number') {
-    return iconStore.map.get(props.icon);
+    return iconStore.getById(props.icon);
   } else {
     return props.icon;
   }

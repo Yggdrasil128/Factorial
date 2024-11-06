@@ -31,13 +31,13 @@ const machineStore = useMachineStore();
 
 const productionStepApi = useProductionStepApi();
 
-const recipe: ComputedRef<Recipe | undefined> = computed(() => recipeStore.map.get(props.productionStep.recipeId));
-const machine: ComputedRef<Machine | undefined> = computed(() => machineStore.map.get(props.productionStep.machineId));
+const recipe: ComputedRef<Recipe | undefined> = computed(() => recipeStore.getById(props.productionStep.recipeId));
+const machine: ComputedRef<Machine | undefined> = computed(() => machineStore.getById(props.productionStep.machineId));
 
 const firstOutputItem: ComputedRef<Item | undefined> = computed(() => {
   if (!recipe.value) return undefined;
   if (recipe.value.products.length === 0) return undefined;
-  return itemStore.map.get(recipe.value.products[0].itemId);
+  return itemStore.getById(recipe.value.products[0].itemId);
 });
 
 const recipeIconId: ComputedRef<number> = computed(() => {
@@ -56,7 +56,7 @@ const recipeName: ComputedRef<string> = computed(() => {
 
 const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
   return props.productionStep.modifierIds
-    .map(recipeModifierId => recipeModifierStore.map.get(recipeModifierId))
+    .map(recipeModifierId => recipeModifierStore.getById(recipeModifierId))
     .filter(recipeModifier => recipeModifier !== undefined) as RecipeModifier[];
 });
 

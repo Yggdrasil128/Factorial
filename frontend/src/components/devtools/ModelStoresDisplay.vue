@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { useCurrentSaveStore } from '@/stores/currentSaveStore';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
 import { useResourceStore } from '@/stores/model/resourceStore';
-import { useCurrentGameStore } from '@/stores/currentGameStore';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useMachineStore } from '@/stores/model/machineStore';
 
-const currentSaveStore = useCurrentSaveStore();
-const currentGameStore = useCurrentGameStore();
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 
 const changelistStore = useChangelistStore();
 const factoryStore = useFactoryStore();
@@ -29,54 +27,54 @@ const machineStore = useMachineStore();
   <h2>Model Stores:</h2>
 
   <h3>Current save</h3>
-  <pre v-if="currentSaveStore.save">{{ JSON.stringify(currentSaveStore.save, null, 2) }}</pre>
+  <pre v-if="currentGameAndSaveStore.save">{{ JSON.stringify(currentGameAndSaveStore.save, null, 2) }}</pre>
 
   <h3>Current game</h3>
-  <pre v-if="currentGameStore.game">{{ JSON.stringify(currentGameStore.game, null, 2)
+  <pre v-if="currentGameAndSaveStore.game">{{ JSON.stringify(currentGameAndSaveStore.game, null, 2)
     }}</pre>
 
   <h3>Changelists</h3>
-  <pre v-for="changelist in changelistStore.map.values()" :key="changelist.id">{{
+  <pre v-for="changelist in changelistStore.getAll()" :key="changelist.id">{{
       JSON.stringify(changelist, null, 2)
     }}</pre>
 
   <h3>Factories</h3>
-  <pre v-for="factory in factoryStore.map.values()" :key="factory.id">{{
+  <pre v-for="factory in factoryStore.getAll()" :key="factory.id">{{
       JSON.stringify(factory, null, 2)
     }}</pre>
 
   <h3>Production steps</h3>
-  <pre v-for="productionStep in productionStepStore.map.values()" :key="productionStep.id">{{
+  <pre v-for="productionStep in productionStepStore.getAll()" :key="productionStep.id">{{
       JSON.stringify(productionStep, null, 2)
     }}</pre>
 
   <h3>Resources</h3>
-  <pre v-for="resource in resourceStore.map.values()" :key="resource.id">{{
+  <pre v-for="resource in resourceStore.getAll()" :key="resource.id">{{
       JSON.stringify(resource, null, 2)
     }}</pre>
 
   <h3>Icons</h3>
-  <pre v-for="icon in iconStore.map.values()" :key="icon.id">{{
+  <pre v-for="icon in iconStore.getAll()" :key="icon.id">{{
       JSON.stringify(icon, null, 2)
     }}</pre>
 
   <h3>Items</h3>
-  <pre v-for="item in itemStore.map.values()" :key="item.id">{{
+  <pre v-for="item in itemStore.getAll()" :key="item.id">{{
       JSON.stringify(item, null, 2)
     }}</pre>
 
   <h3>Recipes</h3>
-  <pre v-for="recipe in recipeStore.map.values()" :key="recipe.id">{{
+  <pre v-for="recipe in recipeStore.getAll()" :key="recipe.id">{{
       JSON.stringify(recipe, null, 2)
     }}</pre>
 
   <h3>Recipe modifiers</h3>
-  <pre v-for="recipeModifier in recipeModifierStore.map.values()" :key="recipeModifier.id">{{
+  <pre v-for="recipeModifier in recipeModifierStore.getAll()" :key="recipeModifier.id">{{
       JSON.stringify(recipeModifier, null, 2)
     }}</pre>
 
   <h3>Machines</h3>
-  <pre v-for="machine in machineStore.map.values()" :key="machine.id">{{
+  <pre v-for="machine in machineStore.getAll()" :key="machine.id">{{
       JSON.stringify(machine, null, 2)
     }}</pre>
 </template>
