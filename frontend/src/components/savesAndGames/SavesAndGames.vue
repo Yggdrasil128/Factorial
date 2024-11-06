@@ -17,11 +17,11 @@ import GamesList from '@/components/savesAndGames/GamesList.vue';
 <style scoped>
 .container {
   display: flex;
-  gap: 10%;
+  gap: 4%;
 }
 
 .saves, .games {
-  width: 45%;
+  width: 48%;
   flex: 0 0 auto;
 }
 </style>

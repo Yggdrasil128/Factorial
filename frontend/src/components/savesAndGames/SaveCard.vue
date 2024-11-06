@@ -8,6 +8,7 @@ import { useGameStore } from '@/stores/model/gameStore';
 import { computed, type ComputedRef, type Ref, ref } from 'vue';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { getModelSyncService } from '@/services/model/modelSyncService';
+import BgcElButton from '@/components/common/input/BgcElButton.vue';
 
 export interface SaveCardProps {
   save: Save;
@@ -72,7 +73,7 @@ function deleteSave(): void {
               :hide-after="0"
               content="Edit"
             >
-              <el-button :icon="Edit" @click="editSave" />
+              <bgc-el-button :icon="Edit" @click="editSave" />
             </el-tooltip>
 
             <el-popconfirm

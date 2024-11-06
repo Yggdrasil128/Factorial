@@ -40,7 +40,6 @@ function importSave(): void {
   <vue-draggable-next :model-value="saves" @end="draggableSupport.onDragEnd">
     <SaveCard v-for="save in saves" :key="save.id" :save="save" />
   </vue-draggable-next>
-
 </template>
 
 <style scoped>
