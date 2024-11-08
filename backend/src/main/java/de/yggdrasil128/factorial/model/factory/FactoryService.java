@@ -1,12 +1,8 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.engine.ProductionLine;
-import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
-import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.ProductionLineService;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.productionstep.*;

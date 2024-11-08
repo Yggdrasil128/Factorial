@@ -2,11 +2,7 @@ package de.yggdrasil128.factorial.model.changelist;
 
 import de.yggdrasil128.factorial.engine.ProductionStepChanges;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
-import de.yggdrasil128.factorial.engine.QuantityByChangelist;
-import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
 import de.yggdrasil128.factorial.model.icon.IconService;

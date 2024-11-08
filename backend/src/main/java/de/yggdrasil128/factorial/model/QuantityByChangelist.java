@@ -1,7 +1,6 @@
-package de.yggdrasil128.factorial.engine;
+package de.yggdrasil128.factorial.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 
 import java.util.Objects;

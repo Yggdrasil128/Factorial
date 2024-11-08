@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.ProductionLineService;
+import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import jakarta.persistence.Entity;
 

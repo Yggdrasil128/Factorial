@@ -2,11 +2,7 @@ package de.yggdrasil128.factorial.model.productionstep;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
-import de.yggdrasil128.factorial.engine.QuantityByChangelist;
-import de.yggdrasil128.factorial.model.External;
-import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.ProductionEntryStandalone;
+import de.yggdrasil128.factorial.model.*;
 
 import java.util.Collections;
 import java.util.List;

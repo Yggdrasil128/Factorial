@@ -3,9 +3,9 @@ package de.yggdrasil128.factorial.model.resource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.engine.Production;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
-import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.NamedModel;
+import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.External;
 
 import java.util.Collections;

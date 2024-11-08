@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
+import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.recipe.ItemQuantity;
 import de.yggdrasil128.factorial.model.recipe.Recipe;
