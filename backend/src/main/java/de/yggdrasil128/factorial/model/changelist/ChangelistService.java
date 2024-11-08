@@ -48,6 +48,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Changelist changelist = new Changelist(save, standalone);
         applyRelations(changelist, standalone);
+        inferOrdinal(save, changelist);
         changelist = create(changelist);
         if (changelist.isPrimary()) {
             handleNewPrimaryChangelist(changelist).forEach(this::publishProductionStepThroughputsChanged);
@@ -57,13 +58,10 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
     }
 
-    @Override
-    public Changelist create(Changelist changelist) {
-        Save save = changelist.getSave();
+    private static void inferOrdinal(Save save, Changelist changelist) {
         if (0 >= changelist.getOrdinal()) {
             changelist.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
         }
-        return super.create(changelist);
     }
 
     private ProductionStepChanges computeProductionStepChanges(Changelist changelist) {
@@ -147,20 +145,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
         changelist.applyBasics(standalone);
         applyRelations(changelist, standalone);
-        update(changelist);
-    }
-
-    private void applyRelations(Changelist changelist, ChangelistStandalone standalone) {
-        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(changelist::setIcon);
-        OptionalInputField.of(standalone.productionStepChanges())
-                .apply(list -> changelist.setProductionStepChanges(list.stream()
-                        .collect(toMap(change -> productionStepService.get((int) change.productionStepId()),
-                                ProductionStepChangeStandalone::change))));
-    }
-
-    @Override
-    public Changelist update(Changelist entity) {
-        Changelist changelist = super.update(entity);
+        changelist = update(changelist);
         Map<Integer, ProductionStepThroughputs> collectThroughputs = new HashMap<>();
         if (changelist.isPrimary()) {
             handleNewPrimaryChangelist(changelist)
@@ -175,7 +160,14 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
                 .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
         collectThroughputs.values().forEach(this::publishProductionStepThroughputsChanged);
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
-        return changelist;
+    }
+
+    private void applyRelations(Changelist changelist, ChangelistStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(changelist::setIcon);
+        OptionalInputField.of(standalone.productionStepChanges())
+                .apply(list -> changelist.setProductionStepChanges(list.stream()
+                        .collect(toMap(change -> productionStepService.get((int) change.productionStepId()),
+                                ProductionStepChangeStandalone::change))));
     }
 
     private Stream<ProductionStepThroughputs> handleNewPrimaryChangelist(Changelist changelist) {
@@ -208,6 +200,9 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
             throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
         }
         Save save = saveRepository.findByChangelistsId(id);
+        if (null == save) {
+            throw report(HttpStatus.CONFLICT, "changelist does not belong to a save");
+        }
         super.delete(id);
         ProductionStepChanges changes = cache.remove(id);
         if (null != changes) {

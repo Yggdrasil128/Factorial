@@ -1,12 +1,12 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +26,9 @@ public class IconController {
     }
 
     @PostMapping("/game/icons")
-    public IconStandalone create(int gameId, @RequestBody IconStandalone input) {
-        Game game = gameService.get(gameId);
-        Icon icon = new Icon(game, input);
-        icon = iconService.create(icon);
-        gameService.addAttachedIcon(game, icon);
-        return IconStandalone.of(icon);
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public void create(int gameId, @RequestBody IconStandalone input) {
+        iconService.create(gameId, input);
     }
 
     @GetMapping("/game/icons")
@@ -59,13 +56,13 @@ public class IconController {
     }
 
     @PatchMapping("/icon")
-    public IconStandalone update(int iconId, @RequestBody IconStandalone input) {
-        Icon icon = iconService.get(iconId);
-        icon.applyBasics(input);
-        return IconStandalone.of(iconService.update(icon));
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public void update(int iconId, @RequestBody IconStandalone input) {
+        iconService.update(iconId, input);
     }
 
     @DeleteMapping("/icon")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void delete(int iconId) {
         iconService.delete(iconId);
     }

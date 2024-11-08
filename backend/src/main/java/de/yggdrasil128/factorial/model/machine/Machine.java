@@ -34,10 +34,10 @@ public class Machine implements NamedModel {
     public Machine(Game game, MachineStandalone standalone) {
         this.game = game;
         machineModifiers = new ArrayList<>();
-        applyBaics(standalone);
+        applyBasics(standalone);
     }
 
-    public void applyBaics(MachineStandalone standalone) {
+    public void applyBasics(MachineStandalone standalone) {
         OptionalInputField.of(standalone.name()).apply(this::setName);
         OptionalInputField.of(standalone.category()).apply(this::setCategory);
     }

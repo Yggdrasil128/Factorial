@@ -4,7 +4,6 @@ import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
-import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import de.yggdrasil128.factorial.model.resource.ResourceService;
@@ -28,19 +27,17 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
     private final ApplicationEventPublisher events;
     private final SaveRepository saveRepository;
     private final IconService iconService;
-    private final ItemService itemService;
     private final ProductionStepService productionStepService;
     private final ResourceService resourceService;
     private final Map<Integer, ProductionLine> cache = new HashMap<>();
 
     public FactoryService(FactoryRepository repository, ApplicationEventPublisher events, SaveRepository saveRepository,
-                          IconService iconService, ItemService itemService, ProductionStepService productionStepService,
+                          IconService iconService, ProductionStepService productionStepService,
                           ResourceService resourceService) {
         super(repository);
         this.events = events;
         this.saveRepository = saveRepository;
         this.iconService = iconService;
-        this.itemService = itemService;
         this.productionStepService = productionStepService;
         this.resourceService = resourceService;
     }
@@ -49,25 +46,23 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Factory factory = new Factory(save, standalone);
         applyRelations(factory, standalone);
+        inferOrdinal(save, factory);
         factory = create(factory);
         save.getFactories().add(factory);
         saveRepository.save(save);
-        events.publishEvent(new FactoryProductionLineChangedEvent(factory, startEmptyProductionLine(factory), false));
+        events.publishEvent(new FactoryProductionLineChangedEvent(factory, initEmptyProductionLine(factory), false));
     }
 
-    private ProductionLine startEmptyProductionLine(Factory factory) {
+    private static void inferOrdinal(Save save, Factory factory) {
+        if (0 >= factory.getOrdinal()) {
+            factory.setOrdinal(save.getFactories().stream().mapToInt(Factory::getOrdinal).max().orElse(0) + 1);
+        }
+    }
+
+    private ProductionLine initEmptyProductionLine(Factory factory) {
         ProductionLine productionLine = new ProductionLine(factory.getId(), this);
         cache.put(factory.getId(), productionLine);
         return productionLine;
-    }
-
-    @Override
-    public Factory create(Factory entity) {
-        if (0 >= entity.getOrdinal()) {
-            entity.setOrdinal(
-                    entity.getSave().getFactories().stream().mapToInt(Factory::getOrdinal).max().orElse(0) + 1);
-        }
-        return super.create(entity);
     }
 
     public ProductionLine
@@ -96,13 +91,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
 
     @Override
     public ResourceContributions spawnResource(int id, int itemId) {
-        Factory factory = get(id);
-        Resource resource = new Resource();
-        resource.setFactory(factory);
-        resource.setItem(itemService.get(itemId));
-        resource = resourceService.create(resource);
-        factory.getResources().add(resource);
-        return resourceService.computeContributions(resource);
+        return resourceService.spawn(id, itemId);
     }
 
     @Override
@@ -149,18 +138,11 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         factory.applyBasics(standalone);
         applyRelations(factory, standalone);
         update(factory);
+        events.publishEvent(new FactoryUpdatedEvent(factory));
     }
 
     private void applyRelations(Factory factory, FactoryStandalone standalone) {
         OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(factory::setIcon);
-    }
-
-    @Override
-    public Factory update(Factory entity) {
-        // no need to invalidate resources, since we don't change anything related
-        Factory factory = super.update(entity);
-        events.publishEvent(new FactoryUpdatedEvent(factory));
-        return factory;
     }
 
     @Override

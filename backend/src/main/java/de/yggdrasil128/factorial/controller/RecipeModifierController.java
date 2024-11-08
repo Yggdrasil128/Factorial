@@ -1,13 +1,10 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
-import de.yggdrasil128.factorial.model.icon.IconService;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,31 +14,23 @@ import java.util.List;
 public class RecipeModifierController {
 
     private final GameService gameService;
-    private final IconService iconService;
     private final RecipeModifierService recipeModifierService;
 
     @Autowired
-    public RecipeModifierController(GameService gameService, IconService iconService,
-                                    RecipeModifierService recipeModifierService) {
+    public RecipeModifierController(GameService gameService, RecipeModifierService recipeModifierService) {
         this.gameService = gameService;
-        this.iconService = iconService;
         this.recipeModifierService = recipeModifierService;
     }
 
     @PostMapping("/game/recipeModifiers")
-    public RecipeModifierStandalone create(int gameId, @RequestBody RecipeModifierStandalone input) {
-        Game game = gameService.get(gameId);
-        RecipeModifier recipeModifier = new RecipeModifier(game, input);
-        applyRelations(input, recipeModifier);
-        recipeModifier = recipeModifierService.create(recipeModifier);
-        gameService.addAttachedRecipeModifier(game, recipeModifier);
-        return RecipeModifierStandalone.of(recipeModifier);
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public void create(int gameId, @RequestBody RecipeModifierStandalone input) {
+        recipeModifierService.create(gameId, input);
     }
 
     @GetMapping("/game/recipeModifiers")
     public List<RecipeModifierStandalone> retrieveAll(int gameId) {
-        return gameService.get(gameId).getRecipeModifiers().stream().map(RecipeModifierStandalone::of)
-                .toList();
+        return gameService.get(gameId).getRecipeModifiers().stream().map(RecipeModifierStandalone::of).toList();
     }
 
     @GetMapping("/recipeModifier")
@@ -50,18 +39,13 @@ public class RecipeModifierController {
     }
 
     @PatchMapping("/recipeModifier")
-    public RecipeModifierStandalone update(int recipeModifierId, @RequestBody RecipeModifierStandalone input) {
-        RecipeModifier recipeModifier = recipeModifierService.get(recipeModifierId);
-        recipeModifier.applyBasics(input);
-        applyRelations(input, recipeModifier);
-        return RecipeModifierStandalone.of(recipeModifierService.update(recipeModifier));
-    }
-
-    private void applyRelations(RecipeModifierStandalone input, RecipeModifier recipeModifier) {
-        OptionalInputField.ofId(input.iconId(), iconService::get).apply(recipeModifier::setIcon);
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public void update(int recipeModifierId, @RequestBody RecipeModifierStandalone input) {
+        recipeModifierService.update(recipeModifierId, input);
     }
 
     @DeleteMapping("/recipeModifier")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void delete(int recipeModifierId) {
         recipeModifierService.delete(recipeModifierId);
     }

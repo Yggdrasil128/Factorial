@@ -2,63 +2,61 @@ package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.item.Item;
-import de.yggdrasil128.factorial.model.machine.Machine;
-import de.yggdrasil128.factorial.model.recipe.Recipe;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
+import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.icon.IconStandalone;
+import de.yggdrasil128.factorial.model.item.ItemStandalone;
+import de.yggdrasil128.factorial.model.machine.MachineStandalone;
+import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
 public class GameService extends ModelService<Game, GameRepository> {
 
     private final ApplicationEventPublisher events;
+    private final IconService iconService;
 
-    public GameService(GameRepository repository, ApplicationEventPublisher events) {
+    public GameService(GameRepository repository, ApplicationEventPublisher events, IconService iconService) {
         super(repository);
         this.events = events;
+        this.iconService = iconService;
     }
 
-    @Override
-    public Game create(Game entity) {
-        if (0 >= entity.getOrdinal()) {
-            entity.setOrdinal(stream().mapToInt(Game::getOrdinal).max().orElse(0) + 1);
-        }
-        Game game = super.create(entity);
+    public void create(GameStandalone standalone) {
+        Game game = new Game(standalone);
+        applyRelations(game, standalone);
+        inferOrdinal(game);
+        game = create(game);
         events.publishEvent(new GameUpdatedEvent(game));
-        return game;
+    }
+
+    private void inferOrdinal(Game game) {
+        if (0 >= game.getOrdinal()) {
+            game.setOrdinal(stream().mapToInt(Game::getOrdinal).max().orElse(0) + 1);
+        }
     }
 
     public Optional<Game> get(String name) {
         return repository.findByName(name);
     }
 
-    public void addAttachedIcon(Game game, Icon icon) {
-        game.getIcons().add(icon);
-        repository.save(game);
-    }
-
-    public void addAttachedItem(Game game, Item item) {
-        game.getItems().add(item);
-        repository.save(game);
-    }
-
-    public void addAttachedRecipe(Game game, Recipe recipe) {
-        game.getRecipes().add(recipe);
-    }
-
-    public void addAttachedRecipeModifier(Game game, RecipeModifier recipeModifier) {
-        game.getRecipeModifiers().add(recipeModifier);
-        repository.save(game);
-    }
-
-    public void addAttachedMachine(Game game, Machine machine) {
-        game.getMachines().add(machine);
-        repository.save(game);
+    public CompletableFuture<GameSummary> getSummary(int id) {
+        Game game = get(id);
+        GameSummary summary = new GameSummary();
+        summary.setGame(GameStandalone.of(game));
+        summary.setIcons(game.getIcons().stream().map(icon -> IconStandalone.of(icon)).toList());
+        summary.setItems(game.getItems().stream().map(item -> ItemStandalone.of(item)).toList());
+        summary.setRecipes(game.getRecipes().stream().map(recipe -> RecipeStandalone.of(recipe)).toList());
+        summary.setRecipeModifiers(game.getRecipeModifiers().stream()
+                .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier)).toList());
+        summary.setMachines(game.getMachines().stream().map(machine -> MachineStandalone.of(machine)).toList());
+        return CompletableFuture.completedFuture(summary);
     }
 
     public void reorder(List<EntityPosition> input) {
@@ -77,11 +75,16 @@ public class GameService extends ModelService<Game, GameRepository> {
         events.publishEvent(new GamesReorderedEvent(games));
     }
 
-    @Override
-    public Game update(Game entity) {
-        Game game = super.update(entity);
+    public void update(int id, GameStandalone standalone) {
+        Game game = get(id);
+        game.applyBasics(standalone);
+        applyRelations(game, standalone);
+        update(game);
         events.publishEvent(new GameUpdatedEvent(game));
-        return game;
+    }
+
+    private void applyRelations(Game game, GameStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(game::setIcon);
     }
 
     @Override

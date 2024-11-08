@@ -43,17 +43,15 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         Game game = gameService.get((int) standalone.gameId());
         Save save = new Save(game, standalone);
         applyRelations(save, standalone);
-        create(save);
+        inferOrdinal(save);
+        save = create(save);
+        events.publishEvent(new SaveUpdatedEvent(save));
     }
 
-    @Override
-    public Save create(Save entity) {
-        if (0 >= entity.getOrdinal()) {
-            entity.setOrdinal(stream().mapToInt(Save::getOrdinal).max().orElse(0) + 1);
+    private void inferOrdinal(Save save) {
+        if (0 >= save.getOrdinal()) {
+            save.setOrdinal(stream().mapToInt(Save::getOrdinal).max().orElse(0) + 1);
         }
-        Save save = super.create(entity);
-        events.publishEvent(new SaveUpdatedEvent(save));
-        return save;
     }
 
     public CompletableFuture<SaveSummary> getSummary(int id) {
@@ -87,14 +85,7 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         save.applyBasics(standalone);
         applyRelations(save, standalone);
         update(save);
-    }
-
-    @Override
-    public Save update(Save entity) {
-        // no need to invalidate resources, since we don't change anything related
-        Save save = super.update(entity);
         events.publishEvent(new SaveUpdatedEvent(save));
-        return save;
     }
 
     private void applyRelations(Save save, SaveStandalone standalone) {
