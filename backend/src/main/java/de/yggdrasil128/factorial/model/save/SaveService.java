@@ -1,24 +1,22 @@
 package de.yggdrasil128.factorial.model.save;
 
-import de.yggdrasil128.factorial.engine.ProductionLine;
-import de.yggdrasil128.factorial.engine.ProductionStepChanges;
-import de.yggdrasil128.factorial.engine.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.changelist.Changelist;
-import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
-import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
-import de.yggdrasil128.factorial.model.factory.Factory;
-import de.yggdrasil128.factorial.model.factory.FactoryProductionLineChangedEvent;
+import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.changelist.ChangelistService;
+import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepChangelistEntryChangedEvent;
+import de.yggdrasil128.factorial.model.game.Game;
+import de.yggdrasil128.factorial.model.game.GameService;
+import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -26,13 +24,26 @@ import static java.util.stream.Collectors.toMap;
 public class SaveService extends ModelService<Save, SaveRepository> {
 
     private final ApplicationEventPublisher events;
+    private final GameService gameService;
+    private final IconService iconService;
     private final FactoryService factoryService;
-    private final Map<Integer, ProductionStepChanges> cache = new HashMap<>();
+    private final ChangelistService changelistService;
 
-    public SaveService(SaveRepository repository, ApplicationEventPublisher events, FactoryService factoryService) {
+    public SaveService(SaveRepository repository, ApplicationEventPublisher events, GameService gameService,
+                       IconService iconService, FactoryService factoryService, ChangelistService changelistService) {
         super(repository);
         this.events = events;
+        this.gameService = gameService;
+        this.iconService = iconService;
         this.factoryService = factoryService;
+        this.changelistService = changelistService;
+    }
+
+    public void create(SaveStandalone standalone) {
+        Game game = gameService.get((int) standalone.gameId());
+        Save save = new Save(game, standalone);
+        applyRelations(save, standalone);
+        create(save);
     }
 
     @Override
@@ -45,33 +56,15 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         return save;
     }
 
-    public ProductionStepChanges computeProductionStepChanges(Save save) {
-        return cache.computeIfAbsent(save.getId(), key -> new ProductionStepChanges(save));
-    }
-
-    private ProductionStepChanges computeProductionStepChanges(Save save,
-                                                               Consumer<? super ProductionStepChanges> update) {
-        return cache.compute(save.getId(), (key, existing) -> {
-            if (null == existing) {
-                return new ProductionStepChanges(save);
-            }
-            update.accept(existing);
-            return existing;
-        });
-    }
-
-    public void addAttachedFactory(Save save, Factory factory) {
-        save.getFactories().add(factory);
-        repository.save(save);
-        ProductionLine productionLine = factoryService.computeProductionLine(factory,
-                () -> computeProductionStepChanges(save));
-        events.publishEvent(new FactoryProductionLineChangedEvent(factory, productionLine, true));
-    }
-
-    public void addAttachedChangelist(Save save, Changelist changelist) {
-        save.getChangelists().add(changelist);
-        repository.save(save);
-        events.publishEvent(new ChangelistUpdatedEvent(changelist, true));
+    public CompletableFuture<SaveSummary> getSummary(int id) {
+        Save save = get(id);
+        SaveSummary summary = new SaveSummary();
+        summary.setSave(SaveStandalone.of(save));
+        summary.setFactories(save.getFactories().stream()
+                .map(factory -> factoryService.getFactorySummary(factory, changelistService::getProductionStepChanges))
+                .toList());
+        summary.setChangelists(save.getChangelists().stream().map(ChangelistStandalone::of).toList());
+        return CompletableFuture.completedFuture(summary);
     }
 
     public void reorder(List<EntityPosition> input) {
@@ -89,6 +82,13 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         events.publishEvent(new SavesReorderedEvent(saves));
     }
 
+    public void update(int id, SaveStandalone standalone) {
+        Save save = get(id);
+        save.applyBasics(standalone);
+        applyRelations(save, standalone);
+        update(save);
+    }
+
     @Override
     public Save update(Save entity) {
         // no need to invalidate resources, since we don't change anything related
@@ -97,38 +97,14 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         return save;
     }
 
+    private void applyRelations(Save save, SaveStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(save::setIcon);
+    }
+
     @Override
     public void delete(int id) {
         super.delete(id);
-        cache.remove(id);
         events.publishEvent(new SaveRemovedEvent(id));
-    }
-
-    @EventListener
-    public Collection<ProductionStepChangelistEntryChangedEvent> on(ChangelistUpdatedEvent event) {
-        Changelist changelist = event.getChangelist();
-        Save save = changelist.getSave();
-        ProductionStepChanges changes = computeProductionStepChanges(save,
-                existing -> existing.updateChangelist(changelist));
-        return event.isUpdateProductionSteps()
-                ? propagateProductionStepChanges(changes, changes.getChangesAffectedBy(changelist.getId()))
-                : Collections.emptyList();
-    }
-
-    @EventListener
-    public Collection<ProductionStepChangelistEntryChangedEvent> on(ChangelistRemovedEvent event) {
-        AtomicReference<Map<Integer, QuantityByChangelist>> ref = new AtomicReference<>();
-        ProductionStepChanges changes = computeProductionStepChanges(get(event.getSaveId()),
-                existing -> ref.set(existing.removeChangelist(event.getChangelistId())));
-        return propagateProductionStepChanges(changes, ref.get());
-    }
-
-    private static Collection<ProductionStepChangelistEntryChangedEvent>
-            propagateProductionStepChanges(ProductionStepChanges changes,
-                                           Map<Integer, QuantityByChangelist> affectedProductionSteps) {
-        return affectedProductionSteps.entrySet().stream()
-                .map(entry -> new ProductionStepChangelistEntryChangedEvent(entry.getKey(), changes, entry.getValue()))
-                .toList();
     }
 
 }

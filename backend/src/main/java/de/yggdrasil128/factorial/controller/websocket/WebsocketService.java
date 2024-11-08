@@ -7,30 +7,25 @@ import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
-import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
-import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
-import de.yggdrasil128.factorial.model.changelist.ChangelistsReorderedEvent;
+import de.yggdrasil128.factorial.model.changelist.*;
 import de.yggdrasil128.factorial.model.factory.*;
-import de.yggdrasil128.factorial.model.game.*;
-import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.game.GameRemovedEvent;
+import de.yggdrasil128.factorial.model.game.GameStandalone;
+import de.yggdrasil128.factorial.model.game.GameUpdatedEvent;
+import de.yggdrasil128.factorial.model.game.GamesReorderedEvent;
 import de.yggdrasil128.factorial.model.icon.IconRemovedEvent;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.icon.IconUpdatedEvent;
-import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemRemovedEvent;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
 import de.yggdrasil128.factorial.model.item.ItemUpdatedEvent;
-import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.machine.MachineRemovedEvent;
 import de.yggdrasil128.factorial.model.machine.MachineStandalone;
 import de.yggdrasil128.factorial.model.machine.MachineUpdatedEvent;
 import de.yggdrasil128.factorial.model.productionstep.*;
-import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipe.RecipeRemovedEvent;
 import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipe.RecipeUpdatedEvent;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierRemovedEvent;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierUpdatedEvent;
@@ -58,20 +53,20 @@ public class WebsocketService extends TextWebSocketHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebsocketService.class);
 
-    private final SaveService saveService;
     private final FactoryService factoryService;
     private final ProductionStepService productionStepService;
+    private final ChangelistService changelistService;
 
     private final ObjectMapper mapper;
     private final Set<WebSocketSession> sessions;
     private final AtomicInteger lastMessageIdCounter;
     private final String runtimeId;
 
-    public WebsocketService(SaveService saveService, FactoryService factoryService,
-                            ProductionStepService productionStepService) {
-        this.saveService = saveService;
+    public WebsocketService(FactoryService factoryService, ProductionStepService productionStepService,
+                            ChangelistService changelistService) {
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
+        this.changelistService = changelistService;
 
         mapper = new ObjectMapper();
         sessions = new CopyOnWriteArraySet<>();
@@ -249,7 +244,7 @@ public class WebsocketService extends TextWebSocketHandler {
         Save save = factory.getSave();
         ProductionLine productionLine = event instanceof FactoryProductionLineChangedEvent
                 ? ((FactoryProductionLineChangedEvent) event).getProductionLine()
-                : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save));
+                : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges);
 
         broadcast(new FactoryUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
                 FactoryStandalone.of(factory, productionLine)));
@@ -267,7 +262,7 @@ public class WebsocketService extends TextWebSocketHandler {
         ProductionStepThroughputs throughputs = event instanceof ProductionStepThroughputsChangedEvent
                 ? ((ProductionStepThroughputsChangedEvent) event).getThroughputs()
                 : productionStepService.computeThroughputs(productionStep,
-                        () -> saveService.computeProductionStepChanges(save));
+                        () -> changelistService.getProductionStepChanges(productionStep));
 
         broadcast(new ProductionStepUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
                 ProductionStepStandalone.of(productionStep, throughputs)));
@@ -289,16 +284,18 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(ResourceUpdatedEvent event) {
-        Resource resource = event.getResource();
-        Factory factory = resource.getFactory();
-        Save save = factory.getSave();
-        ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
-                ? ((ResourceContributionsChangedEvent) event).getContributions()
-                : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save))
-                        .getContributions(resource);
+        if (event.isComplete()) {
+            Resource resource = event.getResource();
+            Factory factory = resource.getFactory();
+            Save save = factory.getSave();
+            ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
+                    ? ((ResourceContributionsChangedEvent) event).getContributions()
+                    : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges)
+                            .getContributions(resource);
 
-        broadcast(new ResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
-                ResourceStandalone.of(resource, contributions)));
+            broadcast(new ResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                    ResourceStandalone.of(resource, contributions)));
+        }
     }
 
     @EventListener

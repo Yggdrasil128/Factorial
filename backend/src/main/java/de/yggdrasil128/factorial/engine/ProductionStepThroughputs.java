@@ -3,6 +3,7 @@ package de.yggdrasil128.factorial.engine;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.recipe.ItemQuantity;
+import de.yggdrasil128.factorial.model.recipe.Recipe;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,10 +38,9 @@ public class ProductionStepThroughputs implements Production {
     private final int productionStepId;
     private final EffectiveModifiers effectiveModifiers;
 
-    // we cache all of these, because if the recipe changes, we will be replaced anyway
-    private final List<ItemAmount> ingredients;
-    private final List<ItemAmount> products;
-    private final Fraction recipeDuration;
+    private List<ItemAmount> ingredients;
+    private List<ItemAmount> products;
+    private Fraction recipeDuration;
 
     // key is Item.id, but we must not keep references to the entities here
     private Map<Integer, QuantityByChangelist> inputs;
@@ -50,9 +50,7 @@ public class ProductionStepThroughputs implements Production {
     public ProductionStepThroughputs(ProductionStep productionStep, QuantityByChangelist changes) {
         productionStepId = productionStep.getId();
         effectiveModifiers = new EffectiveModifiers(productionStep, machineCounts(productionStep, changes));
-        ingredients = productionStep.getRecipe().getIngredients().stream().map(ItemAmount::new).toList();
-        products = productionStep.getRecipe().getProducts().stream().map(ItemAmount::new).toList();
-        recipeDuration = productionStep.getRecipe().getDuration();
+        copyRecipeInfo(productionStep.getRecipe());
         recompute();
     }
 
@@ -64,7 +62,14 @@ public class ProductionStepThroughputs implements Production {
         effectiveModifiers.applyMachine(productionStep.getMachine());
         effectiveModifiers.applyProductionStep(productionStep);
         effectiveModifiers.applyMachineCount(productionStep.getMachineCount());
+        copyRecipeInfo(productionStep.getRecipe());
         recompute();
+    }
+
+    private void copyRecipeInfo(Recipe recipe) {
+        ingredients = recipe.getIngredients().stream().map(ItemAmount::new).toList();
+        products = recipe.getProducts().stream().map(ItemAmount::new).toList();
+        recipeDuration = recipe.getDuration();
     }
 
     public void updateMachineCount(ProductionStep productionStep, Fraction machineCount) {
@@ -83,7 +88,7 @@ public class ProductionStepThroughputs implements Production {
         return changes.add(productionStep.getMachineCount());
     }
 
-    public void changeMachineCounts(ProductionStep productionStep, QuantityByChangelist change) {
+    public void changeMachineCounts(QuantityByChangelist change) {
         if (effectiveModifiers.changeMachineCounts(change)) {
             recompute();
         }

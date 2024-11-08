@@ -1,9 +1,6 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.NamedModel;
-import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.OrderedModel;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.save.Save;
@@ -29,6 +26,7 @@ public class Changelist implements NamedModel, OrderedModel {
     @ManyToOne
     private Icon icon;
     @ElementCollection
+    @Convert(converter = FractionConverter.class, attributeName = "value")
     private Map<ProductionStep, Fraction> productionStepChanges;
 
     public Changelist() {

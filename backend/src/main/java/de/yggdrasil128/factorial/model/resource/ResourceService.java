@@ -27,6 +27,15 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         this.factories = factories;
     }
 
+    public Resource create(int factoryId, ResourceStandalone standalone) {
+        Factory factory = factories.findById(factoryId).orElseThrow(ModelService::reportNotFound);
+        Resource resource = create(new Resource(factory, standalone));
+        factory.getResources().add(resource);
+        factories.save(factory);
+        events.publishEvent(new ResourceUpdatedEvent(resource, false));
+        return resource;
+    }
+
     @Override
     public Resource create(Resource entity) {
         if (0 >= entity.getOrdinal()) {
@@ -44,7 +53,8 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         return cache.computeIfAbsent(resource.getId(), key -> new ResourceContributions(resource));
     }
 
-    public void reorder(Factory factory, List<EntityPosition> input) {
+    public void reorder(int factoryId, List<EntityPosition> input) {
+        Factory factory = factories.findById(factoryId).orElseThrow(ModelService::reportNotFound);
         Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
         Collection<Resource> resources = new ArrayList<>();
         for (Resource resource : factory.getResources()) {
@@ -62,10 +72,17 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         events.publishEvent(new ResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
     }
 
+    public void update(int id, ResourceStandalone standalone) {
+        Resource resource = get(id);
+        resource.applyBasics(standalone);
+        resource = super.update(resource);
+        events.publishEvent(new ResourceUpdatedEvent(resource, false));
+    }
+
     @Override
     public Resource update(Resource entity) {
         Resource resource = super.update(entity);
-        events.publishEvent(new ResourceUpdatedEvent(resource));
+        events.publishEvent(new ResourceUpdatedEvent(resource, false));
         return resource;
     }
 

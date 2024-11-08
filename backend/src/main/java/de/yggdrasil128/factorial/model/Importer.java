@@ -252,12 +252,15 @@ public class Importer {
 
     private static Map<ProductionStep, Fraction>
             findProductionStepChanges(Save save, List<ProductionStepChangeStandalone> standalones) {
+        // During import, production steps do not have an id, so we cannot use a normal HashMap here.
         return null == standalones ? new HashMap<>() : standalones.stream().collect(Collectors.toMap(standalone -> {
             // TODO error handling
             String[] parts = ((String) standalone.productionStepId()).split("\\.");
             return save.getFactories().get(Integer.parseInt(parts[0])).getProductionSteps()
                     .get(Integer.parseInt(parts[1]));
-        }, ProductionStepChangeStandalone::change));
+        }, ProductionStepChangeStandalone::change, (p1, p2) -> {
+            throw new IllegalStateException("Duplicate key " + p1);
+        }, IdentityHashMap::new));
     }
 
     private static int inferOrdinal(int max, OrderedModel entity, Integer input) {
