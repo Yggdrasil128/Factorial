@@ -232,7 +232,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
                 if (null != link) {
                     Fraction change = link.getChange();
                     if (link.applyChange()) {
-                        setProductionStepMachineCount(productionStep, link.getThroughputs(), change);
+                        productionStepService.setMachineCount(productionStep, link.getThroughputs(), change);
                     }
                 }
             }
@@ -250,7 +250,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
                 () -> getProductionStepChanges(productionStep));
         ProductionStepChanges changes = computeProductionStepChanges(changelist);
         if (changes.setChange(productionStepId, throughputs, change)) {
-            publishProductionStepThroughputsChanged(productionStep, throughputs);
+            events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
         }
         changelist.getProductionStepChanges().put(productionStep, change);
         repository.save(changelist);
@@ -264,7 +264,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         if (null != link) {
             Fraction change = link.getChange();
             if (link.applyChange()) {
-                setProductionStepMachineCount(productionStep, link.getThroughputs(), change);
+                productionStepService.setMachineCount(productionStep, link.getThroughputs(), change);
                 events.publishEvent(new ChangelistUpdatedEvent(changelist));
             }
         }
@@ -277,18 +277,6 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         Factory factory = factoryRepository.findByProductionStepsId(productionStepId);
         Save save = saveRepository.findByFactoriesId(factory.getId());
         return repository.findBySaveIdAndPrimaryIsTrue(save.getId());
-    }
-
-    private void setProductionStepMachineCount(ProductionStep productionStep, ProductionStepThroughputs throughputs,
-                                               Fraction change) {
-        productionStep.setMachineCount(productionStep.getMachineCount().add(change));
-        productionStep = productionStepService.update(productionStep);
-        publishProductionStepThroughputsChanged(productionStep, throughputs);
-    }
-
-    private void publishProductionStepThroughputsChanged(ProductionStep productionStep,
-                                                         ProductionStepThroughputs throughputs) {
-        events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
     }
 
     /**

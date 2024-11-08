@@ -1,8 +1,6 @@
 package de.yggdrasil128.factorial.model.save;
 
-import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
@@ -10,6 +8,7 @@ import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -54,14 +53,21 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         }
     }
 
-    public CompletableFuture<SaveSummary> getSummary(int id) {
+    public void doImport(SaveSummary summary) {
+        String gameName = (String) summary.getSave().gameId();
+        Game game = gameService.get(gameName).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
+                "save requires the game '" + gameName + "' to be installed"));
+        create(Importer.importSave(summary, game));
+    }
+
+    public CompletableFuture<SaveSummary> getSummary(int id, External destination) {
         Save save = get(id);
         SaveSummary summary = new SaveSummary();
-        summary.setSave(SaveStandalone.of(save));
-        summary.setFactories(save.getFactories().stream()
-                .map(factory -> factoryService.getFactorySummary(factory, changelistService::getProductionStepChanges))
-                .toList());
-        summary.setChangelists(save.getChangelists().stream().map(ChangelistStandalone::of).toList());
+        summary.setSave(SaveStandalone.of(save, destination));
+        summary.setFactories(save.getFactories().stream().map(factory -> factoryService.getFactorySummary(factory,
+                destination, changelistService::getProductionStepChanges)).toList());
+        summary.setChangelists(save.getChangelists().stream()
+                .map(changelist -> ChangelistStandalone.of(changelist, destination)).toList());
         return CompletableFuture.completedFuture(summary);
     }
 

@@ -1,10 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
-import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.External;
-import de.yggdrasil128.factorial.model.Importer;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.game.GameSummary;
 import de.yggdrasil128.factorial.model.save.SaveService;
@@ -12,6 +8,8 @@ import de.yggdrasil128.factorial.model.save.SaveSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/migration")
@@ -27,27 +25,25 @@ public class MigrationController {
     }
 
     @PostMapping("/game")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void importGame(@RequestBody GameSummary input) {
-        gameService.create(Importer.importGame(input));
+        gameService.doImport(input);
     }
 
     @PostMapping("/save")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void importSave(@RequestBody SaveSummary input) {
-        String gameName = (String) input.getSave().gameId();
-        Game game = gameService.get(gameName)
-                .orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
-                        "save requires the game '" + gameName + "' to be installed"));
-        saveService.create(Importer.importSave(input, game));
+        saveService.doImport(input);
     }
 
     @GetMapping("/game")
-    public GameSummary exportGame(int gameId) {
-        return Exporter.exportGame(gameService.get(gameId), External.SAVE_FILE);
+    public CompletableFuture<GameSummary> exportGame(int gameId) {
+        return gameService.getSummary(gameId, External.SAVE_FILE);
     }
 
     @GetMapping("/save")
-    public SaveSummary exportSave(int saveId) {
-        return Exporter.exportSave(saveService.get(saveId), External.SAVE_FILE);
+    public CompletableFuture<SaveSummary> exportSave(int saveId) {
+        return saveService.getSummary(saveId, External.SAVE_FILE);
     }
 
 }

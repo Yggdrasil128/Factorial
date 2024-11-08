@@ -104,17 +104,32 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         resourceService.delete(resourceId);
     }
 
-    public FactorySummary getFactorySummary(Factory factory,
+    public FactorySummary getFactorySummary(Factory factory, External destination,
                                             Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
         FactorySummary summary = new FactorySummary();
-        summary.setProductionSteps(factory.getProductionSteps().stream()
-                .map(productionStep -> ProductionStepStandalone.of(productionStep,
-                        productionStepService.computeThroughputs(productionStep, () -> QuantityByChangelist.ZERO)))
-                .toList());
-        ProductionLine productionLine = computeProductionLine(factory, changes);
-        summary.setResources(factory.getResources().stream()
-                .map(resource -> ResourceStandalone.of(resource, productionLine.getContributions(resource))).toList());
-        summary.setFactory(FactoryStandalone.of(factory, productionLine));
+        switch (destination) {
+        case FRONTEND:
+            summary.setProductionSteps(factory.getProductionSteps().stream()
+                    .map(productionStep -> ProductionStepStandalone.of(productionStep,
+                            productionStepService.computeThroughputs(productionStep, () -> QuantityByChangelist.ZERO)))
+                    .toList());
+            ProductionLine productionLine = computeProductionLine(factory, changes);
+            summary.setResources(factory.getResources().stream()
+                    .map(resource -> ResourceStandalone.of(resource, productionLine.getContributions(resource)))
+                    .toList());
+            summary.setFactory(FactoryStandalone.of(factory, productionLine));
+            break;
+        case SAVE_FILE:
+            summary.setFactory(FactoryStandalone.of(factory, External.SAVE_FILE));
+            summary.setProductionSteps(factory.getProductionSteps().stream()
+                    .map(productionStep -> ProductionStepStandalone.of(productionStep, External.SAVE_FILE)).toList());
+            summary.setResources(factory.getResources().stream()
+                    .map(resource -> ResourceStandalone.of(resource, External.SAVE_FILE)).toList());
+            break;
+        default:
+            throw new AssertionError(
+                    "unexpected enum constant: " + External.class.getCanonicalName() + '.' + destination.name());
+        }
         return summary;
     }
 

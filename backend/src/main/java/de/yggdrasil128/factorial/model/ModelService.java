@@ -4,7 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -18,7 +17,7 @@ public abstract class ModelService<E, R extends CrudRepository<E, Integer>> {
         this.repository = repository;
     }
 
-    public E create(E entity) {
+    protected E create(E entity) {
         return repository.save(entity);
     }
 
@@ -30,15 +29,11 @@ public abstract class ModelService<E, R extends CrudRepository<E, Integer>> {
         return repository.findById(id).orElseThrow(ModelService::reportNotFound);
     }
 
-    public List<E> get(List<Integer> ids) {
-        return StreamSupport.stream(repository.findAllById(ids).spliterator(), false).toList();
-    }
-
-    public E update(E entity) {
+    protected E update(E entity) {
         return repository.save(entity);
     }
 
-    public void delete(int id) {
+    protected void delete(int id) {
         repository.deleteById(id);
     }
 

@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
+import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
@@ -70,6 +71,12 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         } else {
             events.publishEvent(new ProductionStepUpdatedEvent(productionStep, itemsChanged));
         }
+    }
+
+    public void setMachineCount(ProductionStep productionStep, ProductionStepThroughputs throughputs, Fraction change) {
+        productionStep.setMachineCount(productionStep.getMachineCount().add(change));
+        productionStep = update(productionStep);
+        events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
     }
 
     private void applyRelations(ProductionStep productionStep, ProductionStepStandalone standalone) {

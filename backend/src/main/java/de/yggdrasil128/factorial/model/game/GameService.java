@@ -1,8 +1,6 @@
 package de.yggdrasil128.factorial.model.game;
 
-import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
@@ -42,21 +40,26 @@ public class GameService extends ModelService<Game, GameRepository> {
         }
     }
 
-    public Optional<Game> get(String name) {
-        return repository.findByName(name);
+    public void doImport(GameSummary summary) {
+        create(Importer.importGame(summary));
     }
 
-    public CompletableFuture<GameSummary> getSummary(int id) {
+    public CompletableFuture<GameSummary> getSummary(int id, External destination) {
         Game game = get(id);
         GameSummary summary = new GameSummary();
-        summary.setGame(GameStandalone.of(game));
-        summary.setIcons(game.getIcons().stream().map(icon -> IconStandalone.of(icon)).toList());
-        summary.setItems(game.getItems().stream().map(item -> ItemStandalone.of(item)).toList());
-        summary.setRecipes(game.getRecipes().stream().map(recipe -> RecipeStandalone.of(recipe)).toList());
+        summary.setGame(GameStandalone.of(game, destination));
+        summary.setIcons(game.getIcons().stream().map(icon -> IconStandalone.of(icon, destination)).toList());
+        summary.setItems(game.getItems().stream().map(item -> ItemStandalone.of(item, destination)).toList());
+        summary.setRecipes(game.getRecipes().stream().map(recipe -> RecipeStandalone.of(recipe, destination)).toList());
         summary.setRecipeModifiers(game.getRecipeModifiers().stream()
-                .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier)).toList());
-        summary.setMachines(game.getMachines().stream().map(machine -> MachineStandalone.of(machine)).toList());
+                .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier, destination)).toList());
+        summary.setMachines(
+                game.getMachines().stream().map(machine -> MachineStandalone.of(machine, destination)).toList());
         return CompletableFuture.completedFuture(summary);
+    }
+
+    public Optional<Game> get(String name) {
+        return repository.findByName(name);
     }
 
     public void reorder(List<EntityPosition> input) {

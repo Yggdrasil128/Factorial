@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.EntityPosition;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.save.SaveService;
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
@@ -41,7 +42,7 @@ public class SaveController {
 
     @GetMapping("/save/summary")
     public CompletableFuture<SaveSummary> retrieveSummary(int saveId) {
-        return saveService.getSummary(saveId);
+        return saveService.getSummary(saveId, External.FRONTEND);
     }
 
     @PatchMapping("/saves/order")

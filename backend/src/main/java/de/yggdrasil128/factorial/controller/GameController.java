@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.EntityPosition;
+import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.game.GameStandalone;
 import de.yggdrasil128.factorial.model.game.GameSummary;
@@ -46,7 +47,7 @@ public class GameController {
 
     @GetMapping("/game/summary")
     public CompletableFuture<GameSummary> retrieveSummary(int gameId) {
-        return gameService.getSummary(gameId);
+        return gameService.getSummary(gameId, External.FRONTEND);
     }
 
     @PatchMapping("/game")
