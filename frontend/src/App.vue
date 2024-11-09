@@ -17,19 +17,19 @@ import NavBar from '@/components/NavBar.vue';
 <!--suppress CssUnusedSymbol -->
 <style>
 html {
-  overflow-y: scroll;
+  scrollbar-gutter: stable;
   background-color: #373737;
+  height: 100%;
 }
 
 body {
+  min-height: 100vh;
   width: 1600px !important;
   background-color: #414141;
   margin: 0 auto;
   color: #dddddd;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
-  min-height: 100vh;
-  overflow: auto;
 
   --el-input-bg-color: #00000030;
   --el-fill-color-blank: #00000030;

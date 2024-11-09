@@ -11,6 +11,7 @@ import FactoriesOverview from '@/components/factories/FactoriesOverview.vue';
 import EditFactoryModal from '@/components/factories/modal/EditFactoryModal.vue';
 import EditChangelistModal from '@/components/factories/modal/EditChangelistModal.vue';
 import EditProductionStepModal from '@/components/factories/modal/EditProductionStepModal.vue';
+import GameEditor from '@/components/gameEditor/GameEditor.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -21,6 +22,11 @@ const router = createRouter({
       path: '/savesAndGames',
       name: 'savesAndGames',
       component: SavesAndGames
+    },
+    {
+      path: '/gameEditor/:editGameId',
+      name: 'gameEditor',
+      component: GameEditor,
     },
     {
       path: '/factories/:factoryId?',

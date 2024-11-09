@@ -5,13 +5,9 @@ import { ElMessage } from 'element-plus';
 
 export interface ProductionStepApi {
   createProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
-
   editProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
-
   deleteProductionStep(productionStepId: number): Promise<void>;
-
   applyPrimaryChangelist(productionStepId: number): Promise<void>;
-
   updateMachineCount(productionStepId: number, machineCount: Fraction): Promise<void>;
 }
 

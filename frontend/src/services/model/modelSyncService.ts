@@ -31,7 +31,7 @@ import {
   isSaveRemovedMessage,
   isSavesReorderedMessage,
   isSaveUpdatedMessage,
-  type WebsocketMessage
+  type WebsocketMessage,
 } from '@/types/websocketMessages/modelChangedMessages';
 import { useSummaryApi } from '@/api/useSummaryApi';
 import { useChangelistStore } from '@/stores/model/changelistStore';
@@ -78,6 +78,8 @@ function useModelSyncService(): ModelSyncService {
   const gameApi = useGameApi();
 
   const modelSyncWebsocket: ModelSyncWebsocket = useModelSyncWebsocket(onWebsocketMessage, reload);
+
+  modelSyncWebsocket.connect();
 
   interface GameRelatedEntityStore {
     map: Map<number, GameRelatedEntity>;
@@ -183,9 +185,7 @@ function useModelSyncService(): ModelSyncService {
     applySaveSummary(saveSummary);
     applyGameSummary(gameSummary);
 
-    if (previousSaveId === undefined) {
-      modelSyncWebsocket.connect();
-    } else if (previousSaveId !== saveSummary.save.id) {
+    if (previousSaveId !== undefined && previousSaveId !== saveSummary.save.id) {
       console.log('Current save ID changed, clearing entities from previous save');
       clearStoresBySaveId(previousSaveId);
     }
@@ -287,6 +287,7 @@ function useModelSyncService(): ModelSyncService {
   }
 
   function onWebsocketMessage(message: WebsocketMessage) {
+    console.log(message);
     if (isSaveUpdatedMessage(message)) {
       saveStore.map.set(message.save.id, message.save);
     } else if (isSaveRemovedMessage(message)) {

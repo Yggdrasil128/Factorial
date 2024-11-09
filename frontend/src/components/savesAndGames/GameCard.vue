@@ -7,6 +7,7 @@ import { Delete, EditPen } from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
 import { ElButton, ElPopconfirm, ElTooltip } from 'element-plus';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
+import { useRouter } from 'vue-router';
 
 export interface GameCardProps {
   game: Game;
@@ -14,6 +15,7 @@ export interface GameCardProps {
 
 const props: GameCardProps = defineProps<GameCardProps>();
 
+const router = useRouter();
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const saveStore = useSaveStore();
 
@@ -26,7 +28,7 @@ const numberOfSaves: ComputedRef<number> = computed(() =>
 );
 
 function openEditor(): void {
-
+  router.push({ name: 'gameEditor', params: { editGameId: props.game.id } });
 }
 
 function deleteGame(): void {

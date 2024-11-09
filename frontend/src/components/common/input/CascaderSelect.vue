@@ -2,6 +2,7 @@
 import { computed, type ComputedRef, type Ref } from 'vue';
 import { useVModel } from '@vueuse/core';
 import IconImg from '@/components/common/IconImg.vue';
+import { convertToTreeByCategory, type EntityWithCategory, type TreeNode } from '@/utils/treeUtils';
 
 export interface CascaderSelectProps {
   modelValue: number;
@@ -10,21 +11,6 @@ export interface CascaderSelectProps {
   isIconEntity?: boolean;
   disabled?: boolean;
   placeholder?: string;
-}
-
-export interface EntityWithCategory {
-  id: number;
-  name: string;
-  iconId?: number;
-  category: string[];
-}
-
-type TreeNode = {
-  id?: number;
-  iconId?: number;
-  label: string;
-  children?: TreeNode[];
-  value?: number;
 }
 
 const props: CascaderSelectProps = defineProps<CascaderSelectProps>();
@@ -68,51 +54,6 @@ function getLeafCount(node: any) {
     c += getLeafCount(child);
   }
   return c;
-}
-
-function convertToTreeByCategory<T extends EntityWithCategory>(elements: T[]): TreeNode[] {
-  const tree: TreeNode[] = [];
-
-  function insert(nodes: TreeNode[], element: T, categoryPath: string[]) {
-    if (categoryPath.length > 0) {
-      const category: string = categoryPath.shift() as string;
-      for (const node of nodes) {
-        if (node.children && node.label === category) {
-          insert(node.children, element, categoryPath);
-          return;
-        }
-      }
-      const node: TreeNode = { label: category, children: [] };
-      nodes.push(node);
-      insert(node.children as TreeNode[], element, categoryPath);
-      return;
-    }
-    const node: TreeNode = { id: element.id, value: element.id, iconId: element.iconId, label: element.name };
-    nodes.push(node);
-  }
-
-  for (const element of elements) {
-    insert(tree, element, [...element.category]);
-  }
-
-  function sort(nodes: TreeNode[]) {
-    nodes.sort((a: TreeNode, b: TreeNode): number => {
-      if (!a.children !== !b.children) {
-        return !a.children ? 1 : -1;
-      }
-      return a.label.localeCompare(b.label);
-    });
-
-    for (const node of nodes) {
-      if (node.children) {
-        sort(node.children);
-      }
-    }
-  }
-
-  sort(tree);
-
-  return tree;
 }
 
 </script>

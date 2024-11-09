@@ -89,6 +89,7 @@ export type Icon = {
   readonly gameId: number;
   name: string;
   mimeType: string;
+  imageData: string;
   category: string[];
 }
 
