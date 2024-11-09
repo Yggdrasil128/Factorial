@@ -5,6 +5,7 @@ import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.NamedModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
@@ -31,7 +32,7 @@ public record RecipeStandalone(@JsonProperty(access = READ_ONLY) int id,
                         .toList(),
                 model.getProducts().stream().map(resource -> ItemQuantityStandalone.of(resource, destination)).toList(),
                 model.getDuration(), NamedModel.resolve(model.getApplicableModifiers(), destination),
-                NamedModel.resolve(model.getApplicableMachines(), destination), model.getCategory());
+                NamedModel.resolve(model.getApplicableMachines(), destination), new ArrayList<>(model.getCategory()));
     }
 
 }

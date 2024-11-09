@@ -3,6 +3,7 @@ package de.yggdrasil128.factorial.model.icon;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.External;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
@@ -21,7 +22,7 @@ public record IconStandalone(@JsonProperty(access = READ_ONLY) int id,
     public static IconStandalone of(Icon model, External destination) {
         return new IconStandalone(model.getId(), model.getGame().getId(), model.getName(),
                 External.SAVE_FILE == destination ? model.getImageData() : null, model.getMimeType(),
-                model.getCategory());
+                new ArrayList<>(model.getCategory()));
     }
 
 }

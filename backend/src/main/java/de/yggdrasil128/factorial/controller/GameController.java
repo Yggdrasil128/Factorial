@@ -1,47 +1,40 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.Exporter;
 import de.yggdrasil128.factorial.model.External;
-import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.game.GameStandalone;
 import de.yggdrasil128.factorial.model.game.GameSummary;
-import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class GameController {
 
+    private final AsyncHelper asyncHelper;
     private final GameService gameService;
-    private final IconService iconService;
 
     @Autowired
-    public GameController(GameService gameService, IconService iconService) {
+    public GameController(AsyncHelper asyncHelper, GameService gameService) {
+        this.asyncHelper = asyncHelper;
         this.gameService = gameService;
-        this.iconService = iconService;
     }
 
     @PostMapping("/games")
-    public GameStandalone create(@RequestBody GameStandalone input) {
-        Game game = new Game(input);
-        applyRelations(input, game);
-        return GameStandalone.of(gameService.create(game));
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> create(@RequestBody GameStandalone input) {
+        return asyncHelper.submit(result -> gameService.create(input, result));
     }
 
     @GetMapping("/games")
-    public List<GameStandalone> retrieveAll() {
-        return gameService.stream().map(GameStandalone::of).toList();
-    }
-
-    @PatchMapping("/games/order")
-    public void order(@RequestBody List<EntityPosition> input) {
-        gameService.reorder(input);
+    public CompletableFuture<List<GameStandalone>> retrieveAll() {
+        return asyncHelper.submit(() -> gameService.getAll());
     }
 
     @GetMapping("/game")
@@ -49,26 +42,26 @@ public class GameController {
         return GameStandalone.of(gameService.get(gameId));
     }
 
+    @PatchMapping("/games/order")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> order(@RequestBody List<EntityPosition> input) {
+        return asyncHelper.submit(result -> gameService.reorder(input, result));
+    }
+
     @GetMapping("/game/summary")
-    public GameSummary retrieveSummary(int gameId) {
-        return Exporter.exportGame(gameService.get(gameId), External.FRONTEND);
+    public CompletableFuture<GameSummary> retrieveSummary(int gameId) {
+        return asyncHelper.submit(() -> gameService.getSummary(gameId, External.FRONTEND));
     }
 
     @PatchMapping("/game")
-    public GameStandalone update(int gameId, @RequestBody GameStandalone input) {
-        Game game = gameService.get(gameId);
-        game.applyBasics(input);
-        applyRelations(input, game);
-        return GameStandalone.of(gameService.update(game));
-    }
-
-    private void applyRelations(GameStandalone input, Game game) {
-        OptionalInputField.ofId(input.iconId(), iconService::get).apply(game::setIcon);
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> update(int gameId, @RequestBody GameStandalone input) {
+        return asyncHelper.submit(result -> gameService.update(gameId, input, result));
     }
 
     @DeleteMapping("/game")
-    public void delete(int gameId) {
-        gameService.delete(gameId);
+    public CompletableFuture<Void> delete(int gameId) {
+        return asyncHelper.submit(result -> gameService.delete(gameId, result));
     }
 
 }

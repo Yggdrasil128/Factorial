@@ -1,69 +1,85 @@
 package de.yggdrasil128.factorial.model.game;
 
-import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.icon.Icon;
-import de.yggdrasil128.factorial.model.item.Item;
-import de.yggdrasil128.factorial.model.machine.Machine;
-import de.yggdrasil128.factorial.model.recipe.Recipe;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
+import de.yggdrasil128.factorial.model.*;
+import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.icon.IconStandalone;
+import de.yggdrasil128.factorial.model.item.ItemStandalone;
+import de.yggdrasil128.factorial.model.machine.MachineStandalone;
+import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
+import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
 public class GameService extends ModelService<Game, GameRepository> {
 
     private final ApplicationEventPublisher events;
+    private final IconService iconService;
 
-    public GameService(GameRepository repository, ApplicationEventPublisher events) {
+    public GameService(GameRepository repository, ApplicationEventPublisher events, IconService iconService) {
         super(repository);
         this.events = events;
+        this.iconService = iconService;
     }
 
-    @Override
-    public Game create(Game entity) {
-        if (0 >= entity.getOrdinal()) {
-            entity.setOrdinal(stream().mapToInt(Game::getOrdinal).max().orElse(0) + 1);
-        }
-        Game game = super.create(entity);
+    @Transactional
+    public void create(GameStandalone standalone, CompletableFuture<Void> result) {
+        Game game = new Game(standalone);
+        applyRelations(game, standalone);
+        AsyncHelper.complete(result);
+        inferOrdinal(game);
+        game = create(game);
         events.publishEvent(new GameUpdatedEvent(game));
-        return game;
+    }
+
+    private void inferOrdinal(Game game) {
+        if (0 >= game.getOrdinal()) {
+            game.setOrdinal(stream().mapToInt(Game::getOrdinal).max().orElse(0) + 1);
+        }
+    }
+
+    @Transactional
+    public void doImport(GameSummary summary, CompletableFuture<Void> result) {
+        Game game = Importer.importGame(summary);
+        AsyncHelper.complete(result);
+        create(game);
+        events.publishEvent(new GameUpdatedEvent(game));
+    }
+
+    @Transactional
+    public GameSummary getSummary(int id, External destination) {
+        Game game = get(id);
+        GameSummary summary = new GameSummary();
+        summary.setGame(GameStandalone.of(game, destination));
+        summary.setIcons(game.getIcons().stream().map(icon -> IconStandalone.of(icon, destination)).toList());
+        summary.setItems(game.getItems().stream().map(item -> ItemStandalone.of(item, destination)).toList());
+        summary.setRecipes(game.getRecipes().stream().map(recipe -> RecipeStandalone.of(recipe, destination)).toList());
+        summary.setRecipeModifiers(game.getRecipeModifiers().stream()
+                .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier, destination)).toList());
+        summary.setMachines(
+                game.getMachines().stream().map(machine -> MachineStandalone.of(machine, destination)).toList());
+        return summary;
     }
 
     public Optional<Game> get(String name) {
         return repository.findByName(name);
     }
 
-    public void addAttachedIcon(Game game, Icon icon) {
-        game.getIcons().add(icon);
-        repository.save(game);
+    @Transactional
+    public List<GameStandalone> getAll() {
+        return stream().map(GameStandalone::of).toList();
     }
 
-    public void addAttachedItem(Game game, Item item) {
-        game.getItems().add(item);
-        repository.save(game);
-    }
-
-    public void addAttachedRecipe(Game game, Recipe recipe) {
-        game.getRecipes().add(recipe);
-    }
-
-    public void addAttachedRecipeModifier(Game game, RecipeModifier recipeModifier) {
-        game.getRecipeModifiers().add(recipeModifier);
-        repository.save(game);
-    }
-
-    public void addAttachedMachine(Game game, Machine machine) {
-        game.getMachines().add(machine);
-        repository.save(game);
-    }
-
-    public void reorder(List<EntityPosition> input) {
+    @Transactional
+    public void reorder(List<EntityPosition> input, CompletableFuture<Void> result) {
         Map<Integer, Integer> order = input.stream()
                 .collect(Collectors.toMap(EntityPosition::id, EntityPosition::ordinal));
+        AsyncHelper.complete(result);
         Collection<Game> games = new ArrayList<>();
         // we want to all games in memory so that we are immune to circles in the given order
         for (Game game : stream().toList()) {
@@ -77,16 +93,24 @@ public class GameService extends ModelService<Game, GameRepository> {
         events.publishEvent(new GamesReorderedEvent(games));
     }
 
-    @Override
-    public Game update(Game entity) {
-        Game game = super.update(entity);
+    @Transactional
+    public void update(int id, GameStandalone standalone, CompletableFuture<Void> result) {
+        Game game = get(id);
+        game.applyBasics(standalone);
+        applyRelations(game, standalone);
+        AsyncHelper.complete(result);
+        update(game);
         events.publishEvent(new GameUpdatedEvent(game));
-        return game;
     }
 
-    @Override
-    public void delete(int id) {
-        super.delete(id);
+    private void applyRelations(Game game, GameStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(game::setIcon);
+    }
+
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
+        AsyncHelper.complete(result);
+        delete(id);
         events.publishEvent(new GameRemovedEvent(id));
     }
 

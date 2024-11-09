@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.Fraction;
+import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
@@ -43,15 +44,6 @@ public class EffectiveModifiers {
         }
         machineCounts = new QuantityByChangelist(value, machineCounts.getWithPrimaryChangelist(),
                 machineCounts.getWithActiveChangelists());
-        recompute();
-        return true;
-    }
-
-    public boolean applyMachineCounts(QuantityByChangelist value) {
-        if (machineCounts.equals(value)) {
-            return false;
-        }
-        machineCounts = value;
         recompute();
         return true;
     }

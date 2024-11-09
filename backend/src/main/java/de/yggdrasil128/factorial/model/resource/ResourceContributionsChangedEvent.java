@@ -7,7 +7,7 @@ public class ResourceContributionsChangedEvent extends ResourceUpdatedEvent {
     private final ResourceContributions contributions;
 
     public ResourceContributionsChangedEvent(Resource resource, ResourceContributions contributions) {
-        super(resource);
+        super(resource, true);
         this.contributions = contributions;
     }
 

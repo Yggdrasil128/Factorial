@@ -7,35 +7,35 @@ import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.changelist.ChangelistRemovedEvent;
-import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
-import de.yggdrasil128.factorial.model.changelist.ChangelistUpdatedEvent;
-import de.yggdrasil128.factorial.model.changelist.ChangelistsReorderedEvent;
+import de.yggdrasil128.factorial.model.changelist.*;
 import de.yggdrasil128.factorial.model.factory.*;
-import de.yggdrasil128.factorial.model.game.*;
-import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.game.GameRemovedEvent;
+import de.yggdrasil128.factorial.model.game.GameStandalone;
+import de.yggdrasil128.factorial.model.game.GameUpdatedEvent;
+import de.yggdrasil128.factorial.model.game.GamesReorderedEvent;
 import de.yggdrasil128.factorial.model.icon.IconRemovedEvent;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.icon.IconUpdatedEvent;
-import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemRemovedEvent;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
 import de.yggdrasil128.factorial.model.item.ItemUpdatedEvent;
-import de.yggdrasil128.factorial.model.machine.Machine;
 import de.yggdrasil128.factorial.model.machine.MachineRemovedEvent;
 import de.yggdrasil128.factorial.model.machine.MachineStandalone;
 import de.yggdrasil128.factorial.model.machine.MachineUpdatedEvent;
 import de.yggdrasil128.factorial.model.productionstep.*;
-import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipe.RecipeRemovedEvent;
 import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipe.RecipeUpdatedEvent;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierRemovedEvent;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierUpdatedEvent;
 import de.yggdrasil128.factorial.model.resource.*;
-import de.yggdrasil128.factorial.model.save.*;
+import de.yggdrasil128.factorial.model.save.Save;
+import de.yggdrasil128.factorial.model.save.SaveStandalone;
+import de.yggdrasil128.factorial.model.save.SaveUpdatedEvent;
+import de.yggdrasil128.factorial.model.save.SavesReorderedEvent;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -50,6 +50,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,25 +60,51 @@ public class WebsocketService extends TextWebSocketHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebsocketService.class);
 
-    private final SaveService saveService;
     private final FactoryService factoryService;
     private final ProductionStepService productionStepService;
+    private final ChangelistService changelistService;
 
     private final ObjectMapper mapper;
     private final Set<WebSocketSession> sessions;
     private final AtomicInteger lastMessageIdCounter;
     private final String runtimeId;
 
-    public WebsocketService(SaveService saveService, FactoryService factoryService,
-                            ProductionStepService productionStepService) {
-        this.saveService = saveService;
+    private final BlockingQueue<AbstractMessage> outboundMessages = new ArrayBlockingQueue<>(1000);
+    private final Thread messageSender = new Thread(this::broadcastMessages, "WebSocketSender");
+
+    public WebsocketService(FactoryService factoryService, ProductionStepService productionStepService,
+                            ChangelistService changelistService) {
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
+        this.changelistService = changelistService;
 
         mapper = new ObjectMapper();
         sessions = new CopyOnWriteArraySet<>();
         lastMessageIdCounter = new AtomicInteger(0);
         runtimeId = UUID.randomUUID().toString();
+    }
+
+    @PostConstruct
+    public void startMessaging() {
+        messageSender.start();
+    }
+
+    @PreDestroy
+    public void stopMessaging() {
+        messageSender.interrupt();
+        try {
+            messageSender.join();
+        } catch (InterruptedException exc) {
+            LOG.warn("Interrupted while joining outbound message thread");
+        }
+        for (WebSocketSession session : sessions) {
+            try {
+                session.close(CloseStatus.GOING_AWAY);
+            } catch (IOException exc) {
+                LOG.error("IOException while closing websocket connection, ID: {}, remote address: {}", session.getId(),
+                        session.getRemoteAddress());
+            }
+        }
     }
 
     @Override
@@ -85,8 +113,8 @@ public class WebsocketService extends TextWebSocketHandler {
                 session.getRemoteAddress());
 
         InitialMessage message = new InitialMessage(runtimeId, lastMessageIdCounter.get());
-        TextMessage textMessage = convertMessage(message);
         try {
+            TextMessage textMessage = convertMessage(message);
             session.sendMessage(textMessage);
         } catch (IOException e) {
             LOG.warn("IOException while sending message to websocket, ID: {}, remote address: {}", session.getId(),
@@ -115,21 +143,28 @@ public class WebsocketService extends TextWebSocketHandler {
         sessions.remove(session);
     }
 
-    public void broadcast(AbstractMessage message) {
-        TextMessage textMessage = convertMessage(message);
-        broadcast(textMessage);
+    private TextMessage convertMessage(AbstractMessage message) throws JsonProcessingException {
+        String json = mapper.writeValueAsString(message);
+        return new TextMessage(json);
     }
 
-    private TextMessage convertMessage(AbstractMessage message) {
+    public void broadcastMessages() {
         try {
-            String json = mapper.writeValueAsString(message);
-            return new TextMessage(json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            while (true) {
+                AbstractMessage message = outboundMessages.take();
+                try {
+                    broadcast(convertMessage(message));
+                } catch (JsonProcessingException e) {
+                    LOG.error("Could not convert message for broadcasting, message: {}", message, e);
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.debug("Outbound message thread was interrupt, expecting shutdown");
         }
     }
 
-    private synchronized void broadcast(TextMessage message) {
+    private void broadcast(TextMessage message) {
         for (WebSocketSession session : sessions) {
             try {
                 session.sendMessage(message);
@@ -140,79 +175,88 @@ public class WebsocketService extends TextWebSocketHandler {
         }
     }
 
+    public void enqueue(AbstractMessage message) {
+        try {
+            outboundMessages.put(message);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.error("Interrupted while trying to enqueue message {}", message, e);
+        }
+    }
+
     @EventListener
     public void on(GamesReorderedEvent event) {
         List<EntityPosition> order = event.getGames().stream()
                 .map(game -> new EntityPosition(game.getId(), game.getOrdinal())).toList();
 
-        broadcast(new GamesReorderedMessage(runtimeId, nextMessageId(), order));
+        enqueue(new GamesReorderedMessage(runtimeId, nextMessageId(), order));
     }
 
     @EventListener
     public void on(GameUpdatedEvent event) {
-        broadcast(new GameUpdatedMessage(runtimeId, nextMessageId(), event.getGame().getId(),
+        enqueue(new GameUpdatedMessage(runtimeId, nextMessageId(), event.getGame().getId(),
                 GameStandalone.of(event.getGame())));
     }
 
     @EventListener
     public void on(GameRemovedEvent event) {
-        broadcast(new GameRemovedMessage(runtimeId, nextMessageId(), event.getGameId()));
+        enqueue(new GameRemovedMessage(runtimeId, nextMessageId(), event.getGameId()));
     }
 
     @EventListener
     public void on(IconUpdatedEvent event) {
-        broadcast(new IconUpdatedMessage(runtimeId, nextMessageId(), event.getIcon().getGame().getId(),
+        enqueue(new IconUpdatedMessage(runtimeId, nextMessageId(), event.getIcon().getGame().getId(),
                 IconStandalone.of(event.getIcon())));
     }
 
     @EventListener
     public void on(IconRemovedEvent event) {
-        broadcast(new IconRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getIconId()));
+        enqueue(new IconRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getIconId()));
     }
 
     @EventListener
     public void on(ItemUpdatedEvent event) {
-        broadcast(new ItemUpdatedMessage(runtimeId, nextMessageId(), event.getItem().getGame().getId(),
+        enqueue(new ItemUpdatedMessage(runtimeId, nextMessageId(), event.getItem().getGame().getId(),
                 ItemStandalone.of(event.getItem())));
     }
 
     @EventListener
     public void ON(ItemRemovedEvent event) {
-        broadcast(new ItemRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getItemId()));
+        enqueue(new ItemRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getItemId()));
     }
 
     @EventListener
     public void on(RecipeUpdatedEvent event) {
-        broadcast(new RecipeUpdatedMessage(runtimeId, nextMessageId(), event.getRecipe().getGame().getId(),
+        enqueue(new RecipeUpdatedMessage(runtimeId, nextMessageId(), event.getRecipe().getGame().getId(),
                 RecipeStandalone.of(event.getRecipe())));
     }
 
     @EventListener
     public void on(RecipeRemovedEvent event) {
-        broadcast(new RecipeRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getRecipeId()));
+        enqueue(new RecipeRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getRecipeId()));
     }
 
     @EventListener
     public void on(RecipeModifierUpdatedEvent event) {
-        broadcast(new RecipeModifierUpdatedMessage(runtimeId, nextMessageId(),
+        enqueue(new RecipeModifierUpdatedMessage(runtimeId, nextMessageId(),
                 event.getRecipeModifier().getGame().getId(), RecipeModifierStandalone.of(event.getRecipeModifier())));
     }
 
     @EventListener
     public void on(RecipeModifierRemovedEvent event) {
-        broadcast(new RecipeModifierRemovedMessage(runtimeId, nextMessageId(), event.getGameId(),
+        enqueue(new RecipeModifierRemovedMessage(runtimeId, nextMessageId(), event.getGameId(),
                 event.getRecipeModifierId()));
     }
 
     @EventListener
     public void on(MachineUpdatedEvent event) {
-        broadcast(new MachineUpdatedMessage(runtimeId, nextMessageId(), event.getMachine().getGame().getId(),
+        enqueue(new MachineUpdatedMessage(runtimeId, nextMessageId(), event.getMachine().getGame().getId(),
                 MachineStandalone.of(event.getMachine())));
     }
 
     @EventListener
     public void on(MachineRemovedEvent event) {
-        broadcast(new MachineRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getMachineId()));
+        enqueue(new MachineRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getMachineId()));
     }
 
     @EventListener
@@ -220,19 +264,19 @@ public class WebsocketService extends TextWebSocketHandler {
         List<EntityPosition> order = event.getSaves().stream()
                 .map(save -> new EntityPosition(save.getId(), save.getOrdinal())).toList();
 
-        broadcast(new SavesReorderedMessage(runtimeId, nextMessageId(), order));
+        enqueue(new SavesReorderedMessage(runtimeId, nextMessageId(), order));
     }
 
     @EventListener
     public void on(SaveUpdatedEvent event) {
         Save save = event.getSave();
 
-        broadcast(new SaveUpdatedMessage(runtimeId, nextMessageId(), save.getId(), SaveStandalone.of(save)));
+        enqueue(new SaveUpdatedMessage(runtimeId, nextMessageId(), save.getId(), SaveStandalone.of(save)));
     }
 
     @EventListener
     public void on(SaveRemovedMessage event) {
-        broadcast(new SaveRemovedMessage(runtimeId, nextMessageId(), event.getSaveId()));
+        enqueue(new SaveRemovedMessage(runtimeId, nextMessageId(), event.getSaveId()));
     }
 
     @EventListener
@@ -240,7 +284,7 @@ public class WebsocketService extends TextWebSocketHandler {
         List<EntityPosition> order = event.getFactories().stream()
                 .map(factory -> new EntityPosition(factory.getId(), factory.getOrdinal())).toList();
 
-        broadcast(new FactoriesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
+        enqueue(new FactoriesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
     }
 
     @EventListener
@@ -249,15 +293,15 @@ public class WebsocketService extends TextWebSocketHandler {
         Save save = factory.getSave();
         ProductionLine productionLine = event instanceof FactoryProductionLineChangedEvent
                 ? ((FactoryProductionLineChangedEvent) event).getProductionLine()
-                : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save));
+                : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges);
 
-        broadcast(new FactoryUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+        enqueue(new FactoryUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
                 FactoryStandalone.of(factory, productionLine)));
     }
 
     @EventListener
     public void on(FactoryRemovedEvent event) {
-        broadcast(new FactoryRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getFactoryId()));
+        enqueue(new FactoryRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getFactoryId()));
     }
 
     @EventListener
@@ -267,15 +311,15 @@ public class WebsocketService extends TextWebSocketHandler {
         ProductionStepThroughputs throughputs = event instanceof ProductionStepThroughputsChangedEvent
                 ? ((ProductionStepThroughputsChangedEvent) event).getThroughputs()
                 : productionStepService.computeThroughputs(productionStep,
-                        () -> saveService.computeProductionStepChanges(save));
+                        () -> changelistService.getProductionStepChanges(productionStep));
 
-        broadcast(new ProductionStepUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+        enqueue(new ProductionStepUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
                 ProductionStepStandalone.of(productionStep, throughputs)));
     }
 
     @EventListener
     public void on(ProductionStepRemovedEvent event) {
-        broadcast(new ProductionStepRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
+        enqueue(new ProductionStepRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(),
                 event.getProductionStepId()));
     }
 
@@ -284,26 +328,28 @@ public class WebsocketService extends TextWebSocketHandler {
         List<EntityPosition> order = event.getResources().stream()
                 .map(resource -> new EntityPosition(resource.getId(), resource.getOrdinal())).toList();
 
-        broadcast(new ResourcesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
+        enqueue(new ResourcesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
     }
 
     @EventListener
     public void on(ResourceUpdatedEvent event) {
-        Resource resource = event.getResource();
-        Factory factory = resource.getFactory();
-        Save save = factory.getSave();
-        ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
-                ? ((ResourceContributionsChangedEvent) event).getContributions()
-                : factoryService.computeProductionLine(factory, () -> saveService.computeProductionStepChanges(save))
-                        .getContributions(resource);
+        if (event.isComplete()) {
+            Resource resource = event.getResource();
+            Factory factory = resource.getFactory();
+            Save save = factory.getSave();
+            ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
+                    ? ((ResourceContributionsChangedEvent) event).getContributions()
+                    : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges)
+                            .getContributions(resource);
 
-        broadcast(new ResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
-                ResourceStandalone.of(resource, contributions)));
+            enqueue(new ResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                    ResourceStandalone.of(resource, contributions)));
+        }
     }
 
     @EventListener
     public void on(ResourceRemovedEvent event) {
-        broadcast(new ResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getResourceId()));
+        enqueue(new ResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getResourceId()));
     }
 
     @EventListener
@@ -311,18 +357,18 @@ public class WebsocketService extends TextWebSocketHandler {
         List<EntityPosition> order = event.getChangelists().stream()
                 .map(changelist -> new EntityPosition(changelist.getId(), changelist.getOrdinal())).toList();
 
-        broadcast(new ChangelistsReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
+        enqueue(new ChangelistsReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
     }
 
     @EventListener
     public void on(ChangelistUpdatedEvent event) {
-        broadcast(new ChangelistUpdatedMessage(runtimeId, nextMessageId(), event.getChangelist().getSave().getId(),
+        enqueue(new ChangelistUpdatedMessage(runtimeId, nextMessageId(), event.getChangelist().getSave().getId(),
                 ChangelistStandalone.of(event.getChangelist())));
     }
 
     @EventListener
     public void on(ChangelistRemovedEvent event) {
-        broadcast(new ChangelistRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getChangelistId()));
+        enqueue(new ChangelistRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getChangelistId()));
     }
 
     private int nextMessageId() {
