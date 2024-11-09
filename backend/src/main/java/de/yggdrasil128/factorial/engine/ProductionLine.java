@@ -4,6 +4,8 @@ import de.yggdrasil128.factorial.model.ProductionLineService;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.resource.Resource;
 import jakarta.persistence.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
  * outputs of the production line. Therefore, a <i>production line</i> is also a {@link Production}.
  */
 public class ProductionLine implements Production {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ProductionLine.class);
 
     private final int hostId;
     // key is Item.id, but we must not keep references to the entities here
@@ -166,6 +170,7 @@ public class ProductionLine implements Production {
 
     private ResourceContributions spawnResource(int itemId) {
         hasAlteredResources = true;
+        LOG.debug("Spawning a new Resource, Production Line {}, Item: {}", hostId, itemId);
         return service.spawnResource(hostId, itemId);
     }
 
@@ -220,6 +225,8 @@ public class ProductionLine implements Production {
             ResourceContributions contribution = entry.getValue();
             if (canDestroy(contribution)) {
                 contributions.remove(entry.getKey());
+                LOG.debug("Destroying Resource, Production Line: {}, Resource {}, Item: {}", hostId,
+                        entry.getValue().getResourceId(), entry.getKey());
                 service.destroyResource(hostId, contribution.getResourceId());
                 hasAlteredResources = true;
             } else {

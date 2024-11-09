@@ -6,10 +6,7 @@ import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
 import de.yggdrasil128.factorial.model.icon.IconService;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepThroughputsChangedEvent;
-import de.yggdrasil128.factorial.model.productionstep.ProductionStepThroughputsInitalizedEvent;
+import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
@@ -64,7 +60,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
     }
 
-    private ProductionStepChanges computeProductionStepChanges(Changelist changelist) {
+    public ProductionStepChanges computeProductionStepChanges(Changelist changelist) {
         ProductionStepChanges cached = cache.get(changelist.getId());
         if (null != cached) {
             return cached;
@@ -127,10 +123,6 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         events.publishEvent(new ChangelistsReorderedEvent(save.getId(), changelists));
     }
 
-    public Changelist getPrimaryChangelistExcept(Changelist not) {
-        return repository.findBySaveIdAndIdNotAndPrimaryIsTrue(not.getSave().getId(), not.getId());
-    }
-
     public void update(int id, ChangelistStandalone standalone) {
         Changelist changelist = get(id);
         if (changelist.isPrimary()) {
@@ -170,11 +162,11 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
                                 ProductionStepChangeStandalone::change))));
     }
 
-    private Stream<ProductionStepThroughputs> handleNewPrimaryChangelist(Changelist changelist) {
+    private Collection<ProductionStepThroughputs> handleNewPrimaryChangelist(Changelist changelist) {
         Changelist oldPrimary = repository.findBySaveIdAndIdNotAndPrimaryIsTrue(changelist.getSave().getId(),
                 changelist.getId());
         if (null == oldPrimary) {
-            return Stream.empty();
+            return Collections.emptyList();
         }
         ProductionStepChanges changes = computeProductionStepChanges(oldPrimary);
         oldPrimary.setPrimary(false);
@@ -298,6 +290,20 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
          * we should really try to arrive at causing an invocation to ProductionLine.addContributor to ensue.
          */
         return new ProductionStepThroughputsChangedEvent(event.getProductionStep(), event.getThroughputs(), true);
+    }
+
+    @EventListener
+    public List<ChangelistUpdatedEvent> on(ProductionStepRemovedEvent event) {
+        List<ChangelistUpdatedEvent> downstream = new ArrayList<>();
+        for (Changelist changelist : repository.findAllBySaveIdAndActiveIsTrue(event.getSaveId())) {
+            ProductionStepChanges changes = cache.get(changelist.getId());
+            if (null != changes) {
+                if (changes.drop(event.getProductionStepId())) {
+                    downstream.add(new ChangelistUpdatedEvent(changelist));
+                }
+            }
+        }
+        return downstream;
     }
 
 }

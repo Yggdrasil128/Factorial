@@ -11,6 +11,8 @@ import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
 import de.yggdrasil128.factorial.model.resource.ResourceUpdatedEvent;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,8 @@ import static java.util.stream.Collectors.toMap;
 
 @Service
 public class FactoryService extends ModelService<Factory, FactoryRepository> implements ProductionLineService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(FactoryService.class);
 
     private final ApplicationEventPublisher events;
     private final SaveRepository saveRepository;
@@ -109,10 +113,11 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         FactorySummary summary = new FactorySummary();
         switch (destination) {
         case FRONTEND:
-            summary.setProductionSteps(factory.getProductionSteps().stream()
-                    .map(productionStep -> ProductionStepStandalone.of(productionStep,
-                            productionStepService.computeThroughputs(productionStep, () -> QuantityByChangelist.ZERO)))
-                    .toList());
+            summary.setProductionSteps(
+                    factory.getProductionSteps().stream()
+                            .map(productionStep -> ProductionStepStandalone.of(productionStep, productionStepService
+                                    .computeThroughputs(productionStep, () -> changes.apply(productionStep))))
+                            .toList());
             ProductionLine productionLine = computeProductionLine(factory, changes);
             summary.setResources(factory.getResources().stream()
                     .map(resource -> ResourceStandalone.of(resource, productionLine.getContributions(resource)))
@@ -205,6 +210,9 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
             } else {
                 // TODO find a better solution
                 // we don't have access to the old throughputs here, so we can only do a full invalidate
+                LOG.warn(
+                        "Removed a production step that had no computed throughputs, doing a full invalidate for Production Line of Factory {}",
+                        event.getFactoryId());
                 cache.remove(event.getFactoryId());
             }
         }

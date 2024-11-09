@@ -64,10 +64,14 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         Save save = get(id);
         SaveSummary summary = new SaveSummary();
         summary.setSave(SaveStandalone.of(save, destination));
+        summary.setChangelists(save.getChangelists().stream().map(changelist -> {
+            if (External.FRONTEND == destination) {
+                changelistService.computeProductionStepChanges(changelist);
+            }
+            return ChangelistStandalone.of(changelist, destination);
+        }).toList());
         summary.setFactories(save.getFactories().stream().map(factory -> factoryService.getFactorySummary(factory,
                 destination, changelistService::getProductionStepChanges)).toList());
-        summary.setChangelists(save.getChangelists().stream()
-                .map(changelist -> ChangelistStandalone.of(changelist, destination)).toList());
         return CompletableFuture.completedFuture(summary);
     }
 

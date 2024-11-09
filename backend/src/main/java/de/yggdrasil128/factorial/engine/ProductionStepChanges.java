@@ -4,11 +4,14 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * Represents the changes a {@link Changelist} makes to {@link ProductionStep ProductionSteps}.
@@ -24,6 +27,9 @@ import java.util.stream.Stream;
  */
 public class ProductionStepChanges {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProductionStepChanges.class);
+
+    private int changelistId;
     private boolean primary;
     private boolean active;
     // key is ProductionStep.id, but we must not keep references to the entities here
@@ -31,10 +37,12 @@ public class ProductionStepChanges {
 
     public class Link {
 
+        private final int productionStepId;
         private Fraction change;
         private ProductionStepThroughputs throughputs;
 
-        Link(Fraction change, ProductionStepThroughputs throughputs) {
+        Link(int productionStepId, Fraction change, ProductionStepThroughputs throughputs) {
+            this.productionStepId = productionStepId;
             this.throughputs = throughputs;
             this.change = change;
         }
@@ -59,10 +67,10 @@ public class ProductionStepChanges {
         }
 
         boolean deactivatePrimary() {
-            return doChange(Fraction.ZERO, change.negative(), change.negative());
+            return doChange(Fraction.ZERO, change.negative(), Fraction.ZERO);
         }
 
-        public boolean setChange(Fraction value) {
+        boolean setChange(Fraction value) {
             Fraction currentChange = Fraction.ZERO;
             Fraction primaryChange = primary ? value.subtract(change) : Fraction.ZERO;
             Fraction activeChange = active ? value.subtract(change) : Fraction.ZERO;
@@ -71,6 +79,12 @@ public class ProductionStepChanges {
         }
 
         public boolean applyChange() {
+            boolean result = applyChange0();
+            links.remove(productionStepId);
+            return result;
+        }
+
+        private boolean applyChange0() {
             if (change.isZero()) {
                 return false;
             }
@@ -81,7 +95,7 @@ public class ProductionStepChanges {
             return doChange(currentChange, primaryChange, activeChange);
         }
 
-        public boolean undo() {
+        boolean undo() {
             if (change.isZero()) {
                 return false;
             }
@@ -101,14 +115,16 @@ public class ProductionStepChanges {
             if (throughputsChange.isZero()) {
                 return false;
             }
+            LOG.debug("Changing machine counts, Changelist: {}, Production Step: {}, change: {}", changelistId,
+                    throughputs.getProductionStepId(), throughputsChange);
             throughputs.changeMachineCounts(throughputsChange);
             return true;
         }
 
         @Override
         public String toString() {
-            return change
-                    + (null == throughputs ? " (unlinked)" : " (linked to " + throughputs.getProductionStepId() + ")");
+            return change + (null == throughputs ? " (unlinked)"
+                    : " (linked to PID " + throughputs.getProductionStepId() + ")");
         }
 
     }
@@ -122,10 +138,11 @@ public class ProductionStepChanges {
     }
 
     public ProductionStepChanges(Changelist changelist) {
+        changelistId = changelist.getId();
         primary = changelist.isPrimary();
         active = changelist.isActive();
         for (Map.Entry<ProductionStep, Fraction> entry : changelist.getProductionStepChanges().entrySet()) {
-            links.put(entry.getKey().getId(), new Link(entry.getValue(), null));
+            links.put(entry.getKey().getId(), new Link(entry.getKey().getId(), entry.getValue(), null));
         }
     }
 
@@ -135,7 +152,9 @@ public class ProductionStepChanges {
 
     public boolean establishLink(ProductionStepThroughputs throughputs, boolean applyChanges) {
         Link link = links.get(throughputs.getProductionStepId());
-        if (null != link) {
+        if (null != link && null == link.getThroughputs()) {
+            LOG.debug("Establishing link, Changelist: {}, Production Step: {}", changelistId,
+                    throughputs.getProductionStepId());
             link.setThroughputs(throughputs);
             if (applyChanges) {
                 return link.applyChanges();
@@ -155,14 +174,21 @@ public class ProductionStepChanges {
         return new QuantityByChangelist(currentChange, primaryChange, activeChange);
     }
 
-    public Stream<ProductionStepThroughputs> deactivatePrimary() {
-        return links.values().stream().filter(Link::deactivatePrimary).map(Link::getThroughputs);
+    public Collection<ProductionStepThroughputs> deactivatePrimary() {
+        Collection<ProductionStepThroughputs> cache = new ArrayList<>(links.size());
+        for (Link link : links.values()) {
+            if (link.deactivatePrimary()) {
+                cache.add(link.getThroughputs());
+            }
+        }
+        primary = false;
+        return cache;
     }
 
     public boolean setChange(int productionStepId, ProductionStepThroughputs throughputs, Fraction change) {
         Link link = links.compute(productionStepId, (key, existing) -> {
             if (null == existing) {
-                return new Link(Fraction.ZERO, throughputs);
+                return new Link(productionStepId, Fraction.ZERO, throughputs);
             }
             existing.setThroughputs(throughputs);
             return existing;
@@ -170,17 +196,19 @@ public class ProductionStepChanges {
         return link.setChange(change);
     }
 
-    public ProductionStepThroughputs applyChange(int productionStepId) {
-        Link link = links.get(productionStepId);
-        return null != link && link.applyChange() ? link.getThroughputs() : null;
+    public Collection<ProductionStepThroughputs> undo() {
+        Collection<ProductionStepThroughputs> cache = new ArrayList<>(links.size());
+        for (Link link : links.values()) {
+            if (link.undo()) {
+                cache.add(link.getThroughputs());
+            }
+        }
+        links.clear();
+        return cache;
     }
 
-    public Stream<ProductionStepThroughputs> apply() {
-        return links.values().stream().filter(Link::applyChange).map(Link::getThroughputs);
-    }
-
-    public Stream<ProductionStepThroughputs> undo() {
-        return links.values().stream().filter(Link::undo).map(Link::getThroughputs);
+    public boolean drop(int productionStepId) {
+        return null != links.remove(productionStepId);
     }
 
     @Override

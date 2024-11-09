@@ -82,8 +82,15 @@ public class QuantityByChangelist {
 
     @Override
     public String toString() {
-        return "[current = " + current + ", primary = " + withPrimaryChangelist + ", active = " + withActiveChangelists
-                + " ]";
+        StringBuilder sb = new StringBuilder();
+        sb.append(current);
+        if (!current.equals(withPrimaryChangelist) || !current.equals(withActiveChangelists)) {
+            sb.append('|').append(withPrimaryChangelist);
+        }
+        if (!withPrimaryChangelist.equals(withActiveChangelists)) {
+            sb.append('|').append(withActiveChangelists);
+        }
+        return sb.toString();
     }
 
 }

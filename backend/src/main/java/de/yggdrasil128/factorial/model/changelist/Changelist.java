@@ -25,6 +25,7 @@ public class Changelist implements NamedModel, OrderedModel {
     private boolean active;
     @ManyToOne
     private Icon icon;
+    // TODO this currently prevents us from deleting a production step that has a change associated with it
     @ElementCollection
     @Convert(converter = FractionConverter.class, attributeName = "value")
     private Map<ProductionStep, Fraction> productionStepChanges;

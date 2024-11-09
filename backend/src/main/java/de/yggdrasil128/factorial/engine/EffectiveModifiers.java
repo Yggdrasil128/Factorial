@@ -48,15 +48,6 @@ public class EffectiveModifiers {
         return true;
     }
 
-    public boolean applyMachineCounts(QuantityByChangelist value) {
-        if (machineCounts.equals(value)) {
-            return false;
-        }
-        machineCounts = value;
-        recompute();
-        return true;
-    }
-
     public boolean changeMachineCounts(QuantityByChangelist change) {
         if (change.isZero()) {
             return false;
