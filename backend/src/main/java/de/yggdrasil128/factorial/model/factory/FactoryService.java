@@ -17,8 +17,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
@@ -46,10 +48,12 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         this.resourceService = resourceService;
     }
 
-    public void create(int saveId, FactoryStandalone standalone) {
+    @Transactional
+    public void create(int saveId, FactoryStandalone standalone, CompletableFuture<Void> result) {
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Factory factory = new Factory(save, standalone);
         applyRelations(factory, standalone);
+        AsyncHelper.complete(result);
         inferOrdinal(save, factory);
         factory = create(factory);
         save.getFactories().add(factory);
@@ -105,7 +109,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
 
     @Override
     public void destroyResource(int id, int resourceId) {
-        resourceService.delete(resourceId);
+        resourceService.delete(get(id), resourceId);
     }
 
     public FactorySummary getFactorySummary(Factory factory, External destination,
@@ -138,9 +142,11 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         return summary;
     }
 
-    public void reorder(int saveId, List<EntityPosition> input) {
+    @Transactional
+    public void reorder(int saveId, List<EntityPosition> input, CompletableFuture<Void> result) {
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        AsyncHelper.complete(result);
         Collection<Factory> factories = new ArrayList<>();
         for (Factory factory : save.getFactories()) {
             Integer ordinal = order.get(factory.getId());
@@ -153,10 +159,12 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         events.publishEvent(new FactoriesReorderedEvent(save.getId(), factories));
     }
 
-    public void update(int id, FactoryStandalone standalone) {
+    @Transactional
+    public void update(int id, FactoryStandalone standalone, CompletableFuture<Void> result) {
         Factory factory = get(id);
         factory.applyBasics(standalone);
         applyRelations(factory, standalone);
+        AsyncHelper.complete(result);
         update(factory);
         events.publishEvent(new FactoryUpdatedEvent(factory));
     }
@@ -165,8 +173,8 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(factory::setIcon);
     }
 
-    @Override
-    public void delete(int id) {
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
         Save save = saveRepository.findByFactoriesId(id);
         if (null == save) {
             throw report(HttpStatus.CONFLICT, "factory does not belong to a save");
@@ -174,7 +182,8 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         if (1 == repository.countBySaveId(save.getId())) {
             throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
         }
-        super.delete(id);
+        AsyncHelper.complete(result);
+        delete(id);
         ProductionLine productionLine = cache.remove(id);
         events.publishEvent(new FactoryRemovedEvent(save.getId(), id, productionLine));
     }

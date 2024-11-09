@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -11,24 +12,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class FactoryController {
 
+    private final AsyncHelper asyncHelper;
     private final SaveService saveService;
     private final FactoryService factoryService;
 
     @Autowired
-    public FactoryController(SaveService saveService, FactoryService factoryService) {
+    public FactoryController(AsyncHelper asyncHelper, SaveService saveService, FactoryService factoryService) {
+        this.asyncHelper = asyncHelper;
         this.saveService = saveService;
         this.factoryService = factoryService;
     }
 
     @PostMapping("/save/factories")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void create(int saveId, @RequestBody FactoryStandalone input) {
-        factoryService.create(saveId, input);
+    public CompletableFuture<Void> create(int saveId, @RequestBody FactoryStandalone input) {
+        return asyncHelper.submit(result -> factoryService.create(saveId, input, result));
     }
 
     @GetMapping("/save/factories")
@@ -43,20 +47,20 @@ public class FactoryController {
 
     @PatchMapping("/save/factories/order")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void order(int saveId, @RequestBody List<EntityPosition> input) {
-        factoryService.reorder(saveId, input);
+    public CompletableFuture<Void> order(int saveId, @RequestBody List<EntityPosition> input) {
+        return asyncHelper.submit(result -> factoryService.reorder(saveId, input, result));
     }
 
     @PatchMapping("/factory")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void update(int factoryId, @RequestBody FactoryStandalone input) {
-        factoryService.update(factoryId, input);
+    public CompletableFuture<Void> update(int factoryId, @RequestBody FactoryStandalone input) {
+        return asyncHelper.submit(result -> factoryService.update(factoryId, input, result));
     }
 
     @DeleteMapping("/factory")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(int factoryId) {
-        factoryService.delete(factoryId);
+    public CompletableFuture<Void> delete(int factoryId) {
+        return asyncHelper.submit(result -> factoryService.delete(factoryId, result));
     }
 
     private static FactoryStandalone toOutput(Factory factory) {

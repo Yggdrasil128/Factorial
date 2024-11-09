@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.game.GameSummary;
@@ -15,35 +16,37 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api/migration")
 public class MigrationController {
 
+    private final AsyncHelper asyncHelper;
     private final GameService gameService;
     private final SaveService saveService;
 
     @Autowired
-    public MigrationController(GameService gameService, SaveService saveService) {
+    public MigrationController(AsyncHelper asyncHelper, GameService gameService, SaveService saveService) {
+        this.asyncHelper = asyncHelper;
         this.gameService = gameService;
         this.saveService = saveService;
     }
 
     @PostMapping("/game")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void importGame(@RequestBody GameSummary input) {
-        gameService.doImport(input);
+    public CompletableFuture<Void> importGame(@RequestBody GameSummary input) {
+        return asyncHelper.submit(result -> gameService.doImport(input, result));
     }
 
     @PostMapping("/save")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void importSave(@RequestBody SaveSummary input) {
-        saveService.doImport(input);
+    public CompletableFuture<Void> importSave(@RequestBody SaveSummary input) {
+        return asyncHelper.submit(result -> saveService.doImport(input, result));
     }
 
     @GetMapping("/game")
     public CompletableFuture<GameSummary> exportGame(int gameId) {
-        return gameService.getSummary(gameId, External.SAVE_FILE);
+        return asyncHelper.submit(() -> gameService.getSummary(gameId, External.SAVE_FILE));
     }
 
     @GetMapping("/save")
     public CompletableFuture<SaveSummary> exportSave(int saveId) {
-        return saveService.getSummary(saveId, External.SAVE_FILE);
+        return asyncHelper.submit(() -> saveService.getSummary(saveId, External.SAVE_FILE));
     }
 
 }

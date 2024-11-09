@@ -1,20 +1,20 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
-import de.yggdrasil128.factorial.model.Fraction;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
-import de.yggdrasil128.factorial.model.QuantityByChangelist;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
 import de.yggdrasil128.factorial.model.machine.MachineService;
 import de.yggdrasil128.factorial.model.recipe.RecipeService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 @Service
@@ -38,10 +38,12 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         this.machineService = machineService;
     }
 
-    public void create(int factoryId, ProductionStepStandalone standalone) {
+    @Transactional
+    public void create(int factoryId, ProductionStepStandalone standalone, CompletableFuture<Void> result) {
         Factory factory = factoryRepository.findById(factoryId).orElseThrow(ModelService::reportNotFound);
         ProductionStep productionStep = new ProductionStep(factory, standalone);
         applyRelations(productionStep, standalone);
+        AsyncHelper.complete(result);
         productionStep = super.create(productionStep);
         ProductionStepThroughputs throughputs = new ProductionStepThroughputs(productionStep,
                 QuantityByChangelist.ZERO);
@@ -57,11 +59,13 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
                 key -> new ProductionStepThroughputs(productionStep, changes.get()));
     }
 
-    public void update(int id, ProductionStepStandalone standalone) {
+    @Transactional
+    public void update(int id, ProductionStepStandalone standalone, CompletableFuture<Void> result) {
         ProductionStep productionStep = get(id);
         int recipeId = productionStep.getRecipe().getId();
         productionStep.applyBasics(standalone);
         applyRelations(productionStep, standalone);
+        AsyncHelper.complete(result);
         productionStep = super.update(productionStep);
         boolean itemsChanged = recipeId != productionStep.getRecipe().getId();
         ProductionStepThroughputs throughputs = cache.get(productionStep.getId());
@@ -86,10 +90,14 @@ public class ProductionStepService extends ModelService<ProductionStep, Producti
         OptionalInputField.ofId(standalone.machineId(), machineService::get).apply(productionStep::setMachine);
     }
 
-    @Override
-    public void delete(int id) {
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
         Factory factory = factoryRepository.findByProductionStepsId(id);
-        super.delete(id);
+        if (null == factory) {
+            throw report(HttpStatus.CONFLICT, "production step does not belong to a factory");
+        }
+        AsyncHelper.complete(result);
+        delete(id);
         ProductionStepThroughputs throughputs = cache.remove(id);
         events.publishEvent(
                 new ProductionStepRemovedEvent(factory.getSave().getId(), factory.getId(), id, throughputs));

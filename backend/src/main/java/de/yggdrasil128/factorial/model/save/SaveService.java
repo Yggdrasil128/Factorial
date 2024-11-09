@@ -10,6 +10,7 @@ import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,10 +39,12 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         this.changelistService = changelistService;
     }
 
-    public void create(SaveStandalone standalone) {
+    @Transactional
+    public void create(SaveStandalone standalone, CompletableFuture<Void> result) {
         Game game = gameService.get((int) standalone.gameId());
         Save save = new Save(game, standalone);
         applyRelations(save, standalone);
+        AsyncHelper.complete(result);
         inferOrdinal(save);
         save = create(save);
         events.publishEvent(new SaveUpdatedEvent(save));
@@ -53,14 +56,16 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         }
     }
 
-    public void doImport(SaveSummary summary) {
+    @Transactional
+    public void doImport(SaveSummary summary, CompletableFuture<Void> result) {
         String gameName = (String) summary.getSave().gameId();
         Game game = gameService.get(gameName).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                 "save requires the game '" + gameName + "' to be installed"));
         create(Importer.importSave(summary, game));
     }
 
-    public CompletableFuture<SaveSummary> getSummary(int id, External destination) {
+    @Transactional
+    public SaveSummary getSummary(int id, External destination) {
         Save save = get(id);
         SaveSummary summary = new SaveSummary();
         summary.setSave(SaveStandalone.of(save, destination));
@@ -72,11 +77,18 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         }).toList());
         summary.setFactories(save.getFactories().stream().map(factory -> factoryService.getFactorySummary(factory,
                 destination, changelistService::getProductionStepChanges)).toList());
-        return CompletableFuture.completedFuture(summary);
+        return summary;
     }
 
-    public void reorder(List<EntityPosition> input) {
+    @Transactional
+    public List<SaveStandalone> getAll() {
+        return stream().map(SaveStandalone::of).toList();
+    }
+
+    @Transactional
+    public void reorder(List<EntityPosition> input, CompletableFuture<Void> result) {
         Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        AsyncHelper.complete(result);
         Collection<Save> saves = new ArrayList<>();
         // we want to have all saves in memory so that we are immune to circles in the given order
         for (Save save : stream().toList()) {
@@ -90,10 +102,12 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         events.publishEvent(new SavesReorderedEvent(saves));
     }
 
-    public void update(int id, SaveStandalone standalone) {
+    @Transactional
+    public void update(int id, SaveStandalone standalone, CompletableFuture<Void> result) {
         Save save = get(id);
         save.applyBasics(standalone);
         applyRelations(save, standalone);
+        AsyncHelper.complete(result);
         update(save);
         events.publishEvent(new SaveUpdatedEvent(save));
     }
@@ -102,9 +116,10 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(save::setIcon);
     }
 
-    @Override
-    public void delete(int id) {
-        super.delete(id);
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
+        AsyncHelper.complete(result);
+        delete(id);
         events.publishEvent(new SaveRemovedEvent(id));
     }
 

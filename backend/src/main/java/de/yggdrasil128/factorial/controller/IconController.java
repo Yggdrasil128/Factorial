@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.icon.IconService;
@@ -11,24 +12,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class IconController {
 
+    private final AsyncHelper asyncHelper;
     private final GameService gameService;
     private final IconService iconService;
 
     @Autowired
-    public IconController(GameService gameService, IconService iconService) {
+    public IconController(AsyncHelper asyncHelper, GameService gameService, IconService iconService) {
+        this.asyncHelper = asyncHelper;
         this.gameService = gameService;
         this.iconService = iconService;
     }
 
     @PostMapping("/game/icons")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void create(int gameId, @RequestBody IconStandalone input) {
-        iconService.create(gameId, input);
+    public CompletableFuture<Void> create(int gameId, @RequestBody IconStandalone input) {
+        return asyncHelper.submit(result -> iconService.create(gameId, input, result));
     }
 
     @GetMapping("/game/icons")
@@ -48,23 +52,26 @@ public class IconController {
      * @return the raw image data in bytes
      */
     @GetMapping("/icon/raw")
-    public ResponseEntity<byte[]> getRawIcon(int id) {
-        Icon icon = iconService.get(id);
+    public CompletableFuture<ResponseEntity<byte[]>> getRawIcon(int id) {
+        return asyncHelper.submit(() -> iconService.getStandalone(id)).thenApply(IconController::rawBytesResponse);
+    }
+
+    private static ResponseEntity<byte[]> rawBytesResponse(IconStandalone icon) {
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set(HttpHeaders.CONTENT_TYPE, icon.getMimeType());
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, icon.getMimeType()).body(icon.getImageData());
+        responseHeaders.set(HttpHeaders.CONTENT_TYPE, icon.mimeType());
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, icon.mimeType()).body(icon.imageData());
     }
 
     @PatchMapping("/icon")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(int iconId, @RequestBody IconStandalone input) {
-        iconService.update(iconId, input);
+    public CompletableFuture<Void> update(int iconId, @RequestBody IconStandalone input) {
+        return asyncHelper.submit(result -> iconService.update(iconId, input, result));
     }
 
     @DeleteMapping("/icon")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(int iconId) {
-        iconService.delete(iconId);
+    public CompletableFuture<Void> delete(int iconId) {
+        return asyncHelper.submit(result -> iconService.delete(iconId, result));
     }
 
 }

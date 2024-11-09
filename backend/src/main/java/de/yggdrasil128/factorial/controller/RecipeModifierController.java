@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
@@ -8,24 +9,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class RecipeModifierController {
 
+    private final AsyncHelper asyncHelper;
     private final GameService gameService;
     private final RecipeModifierService recipeModifierService;
 
     @Autowired
-    public RecipeModifierController(GameService gameService, RecipeModifierService recipeModifierService) {
+    public RecipeModifierController(AsyncHelper asyncHelper, GameService gameService,
+                                    RecipeModifierService recipeModifierService) {
+        this.asyncHelper = asyncHelper;
         this.gameService = gameService;
         this.recipeModifierService = recipeModifierService;
     }
 
     @PostMapping("/game/recipeModifiers")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void create(int gameId, @RequestBody RecipeModifierStandalone input) {
-        recipeModifierService.create(gameId, input);
+    public CompletableFuture<Void> create(int gameId, @RequestBody RecipeModifierStandalone input) {
+        return asyncHelper.submit(result -> recipeModifierService.create(gameId, input, result));
     }
 
     @GetMapping("/game/recipeModifiers")
@@ -40,14 +45,14 @@ public class RecipeModifierController {
 
     @PatchMapping("/recipeModifier")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(int recipeModifierId, @RequestBody RecipeModifierStandalone input) {
-        recipeModifierService.update(recipeModifierId, input);
+    public CompletableFuture<Void> update(int recipeModifierId, @RequestBody RecipeModifierStandalone input) {
+        return asyncHelper.submit(result -> recipeModifierService.update(recipeModifierId, input, result));
     }
 
     @DeleteMapping("/recipeModifier")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(int recipeModifierId) {
-        recipeModifierService.delete(recipeModifierId);
+    public CompletableFuture<Void> delete(int recipeModifierId) {
+        return asyncHelper.submit(result -> recipeModifierService.delete(recipeModifierId, result));
     }
 
 }

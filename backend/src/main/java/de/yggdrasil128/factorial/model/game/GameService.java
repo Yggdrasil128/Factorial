@@ -9,6 +9,7 @@ import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -26,9 +27,11 @@ public class GameService extends ModelService<Game, GameRepository> {
         this.iconService = iconService;
     }
 
-    public void create(GameStandalone standalone) {
+    @Transactional
+    public void create(GameStandalone standalone, CompletableFuture<Void> result) {
         Game game = new Game(standalone);
         applyRelations(game, standalone);
+        AsyncHelper.complete(result);
         inferOrdinal(game);
         game = create(game);
         events.publishEvent(new GameUpdatedEvent(game));
@@ -40,11 +43,16 @@ public class GameService extends ModelService<Game, GameRepository> {
         }
     }
 
-    public void doImport(GameSummary summary) {
-        create(Importer.importGame(summary));
+    @Transactional
+    public void doImport(GameSummary summary, CompletableFuture<Void> result) {
+        Game game = Importer.importGame(summary);
+        AsyncHelper.complete(result);
+        create(game);
+        events.publishEvent(new GameUpdatedEvent(game));
     }
 
-    public CompletableFuture<GameSummary> getSummary(int id, External destination) {
+    @Transactional
+    public GameSummary getSummary(int id, External destination) {
         Game game = get(id);
         GameSummary summary = new GameSummary();
         summary.setGame(GameStandalone.of(game, destination));
@@ -55,16 +63,23 @@ public class GameService extends ModelService<Game, GameRepository> {
                 .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier, destination)).toList());
         summary.setMachines(
                 game.getMachines().stream().map(machine -> MachineStandalone.of(machine, destination)).toList());
-        return CompletableFuture.completedFuture(summary);
+        return summary;
     }
 
     public Optional<Game> get(String name) {
         return repository.findByName(name);
     }
 
-    public void reorder(List<EntityPosition> input) {
+    @Transactional
+    public List<GameStandalone> getAll() {
+        return stream().map(GameStandalone::of).toList();
+    }
+
+    @Transactional
+    public void reorder(List<EntityPosition> input, CompletableFuture<Void> result) {
         Map<Integer, Integer> order = input.stream()
                 .collect(Collectors.toMap(EntityPosition::id, EntityPosition::ordinal));
+        AsyncHelper.complete(result);
         Collection<Game> games = new ArrayList<>();
         // we want to all games in memory so that we are immune to circles in the given order
         for (Game game : stream().toList()) {
@@ -78,10 +93,12 @@ public class GameService extends ModelService<Game, GameRepository> {
         events.publishEvent(new GamesReorderedEvent(games));
     }
 
-    public void update(int id, GameStandalone standalone) {
+    @Transactional
+    public void update(int id, GameStandalone standalone, CompletableFuture<Void> result) {
         Game game = get(id);
         game.applyBasics(standalone);
         applyRelations(game, standalone);
+        AsyncHelper.complete(result);
         update(game);
         events.publishEvent(new GameUpdatedEvent(game));
     }
@@ -90,9 +107,10 @@ public class GameService extends ModelService<Game, GameRepository> {
         OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(game::setIcon);
     }
 
-    @Override
-    public void delete(int id) {
-        super.delete(id);
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
+        AsyncHelper.complete(result);
+        delete(id);
         events.publishEvent(new GameRemovedEvent(id));
     }
 

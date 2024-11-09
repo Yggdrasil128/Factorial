@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.ModelService;
@@ -17,22 +18,24 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api")
 public class SaveController {
 
+    private final AsyncHelper asyncHelper;
     private final SaveService saveService;
 
     @Autowired
-    public SaveController(SaveService saveService) {
+    public SaveController(AsyncHelper asyncHelper, SaveService saveService) {
+        this.asyncHelper = asyncHelper;
         this.saveService = saveService;
     }
 
     @PostMapping("/saves")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void create(@RequestBody SaveStandalone input) {
-        saveService.create(input);
+    public CompletableFuture<Void> create(@RequestBody SaveStandalone input) {
+        return asyncHelper.submit(result -> saveService.create(input, result));
     }
 
     @GetMapping("/saves")
-    public List<SaveStandalone> retrieveAll() {
-        return saveService.stream().map(SaveStandalone::of).toList();
+    public CompletableFuture<List<SaveStandalone>> retrieveAll() {
+        return asyncHelper.submit(() -> saveService.getAll());
     }
 
     @GetMapping("/save")
@@ -42,28 +45,28 @@ public class SaveController {
 
     @GetMapping("/save/summary")
     public CompletableFuture<SaveSummary> retrieveSummary(int saveId) {
-        return saveService.getSummary(saveId, External.FRONTEND);
+        return asyncHelper.submit(() -> saveService.getSummary(saveId, External.FRONTEND));
     }
 
     @PatchMapping("/saves/order")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void order(@RequestBody List<EntityPosition> input) {
-        saveService.reorder(input);
+    public CompletableFuture<Void> order(@RequestBody List<EntityPosition> input) {
+        return asyncHelper.submit(result -> saveService.reorder(input, result));
     }
 
     @PatchMapping("/save")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void update(int saveId, @RequestBody SaveStandalone input) {
+    public CompletableFuture<Void> update(int saveId, @RequestBody SaveStandalone input) {
         if (null != input.gameId()) {
             throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game of an existing save");
         }
-        saveService.update(saveId, input);
+        return asyncHelper.submit(result -> saveService.update(saveId, input, result));
     }
 
     @DeleteMapping("/save")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(int saveId) {
-        saveService.delete(saveId);
+    public CompletableFuture<Void> delete(int saveId) {
+        return asyncHelper.submit(result -> saveService.delete(saveId, result));
     }
 
 }

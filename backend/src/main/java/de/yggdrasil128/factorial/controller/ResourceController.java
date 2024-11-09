@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.engine.ProductionLine;
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.factory.Factory;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Manages {@link Resource Resources}.
@@ -24,11 +26,13 @@ import java.util.List;
 @RequestMapping("/api")
 public class ResourceController {
 
+    private final AsyncHelper asyncHelper;
     private final FactoryService factoryService;
     private final ResourceService resourceService;
 
     @Autowired
-    public ResourceController(FactoryService factoryService, ResourceService resourceService) {
+    public ResourceController(AsyncHelper asyncHelper, FactoryService factoryService, ResourceService resourceService) {
+        this.asyncHelper = asyncHelper;
         this.factoryService = factoryService;
         this.resourceService = resourceService;
     }
@@ -41,14 +45,14 @@ public class ResourceController {
 
     @PatchMapping("/factory/resources/order")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void order(int factoryId, @RequestBody List<EntityPosition> input) {
-        resourceService.reorder(factoryId, input);
+    public CompletableFuture<Void> order(int factoryId, @RequestBody List<EntityPosition> input) {
+        return asyncHelper.submit(result -> resourceService.reorder(factoryId, input, result));
     }
 
     @PatchMapping("/resource")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void update(int resourceId, ResourceStandalone input) {
-        resourceService.update(resourceId, input);
+    public CompletableFuture<Void> update(int resourceId, ResourceStandalone input) {
+        return asyncHelper.submit(result -> resourceService.update(resourceId, input, result));
     }
 
     private static ResourceStandalone toOutput(Resource resource) {

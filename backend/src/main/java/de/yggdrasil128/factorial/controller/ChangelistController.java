@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
@@ -13,27 +14,30 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class ChangelistController {
 
+    private final AsyncHelper asyncHelper;
     private final SaveService saveService;
     private final ChangelistService changelistService;
 
     @Autowired
-    public ChangelistController(SaveService saveService, ChangelistService changelistService) {
+    public ChangelistController(AsyncHelper asyncHelper, SaveService saveService, ChangelistService changelistService) {
+        this.asyncHelper = asyncHelper;
         this.saveService = saveService;
         this.changelistService = changelistService;
     }
 
     @PostMapping("/save/changelists")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void create(int saveId, @RequestBody ChangelistStandalone input) {
+    public CompletableFuture<Void> create(int saveId, @RequestBody ChangelistStandalone input) {
         if (input.primary() && !input.active()) {
             throw primaryInactive();
         }
-        changelistService.create(saveId, input);
+        return asyncHelper.submit(result -> changelistService.create(saveId, input, result));
     }
 
     @GetMapping("/save/changelists")
@@ -48,18 +52,18 @@ public class ChangelistController {
 
     @PatchMapping("save/changelists/order")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void order(int saveId, @RequestBody List<EntityPosition> input) {
-        changelistService.reorder(saveId, input);
+    public CompletableFuture<Void> order(int saveId, @RequestBody List<EntityPosition> input) {
+        return asyncHelper.submit(result -> changelistService.reorder(saveId, input, result));
     }
 
     @PatchMapping("/changelist")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void update(int changelistId, @RequestBody ChangelistStandalone input) {
+    public CompletableFuture<Void> update(int changelistId, @RequestBody ChangelistStandalone input) {
         if (null != input.primary() && null != input.active() && input.primary().booleanValue()
                 && !input.active().booleanValue()) {
             throw primaryInactive();
         }
-        changelistService.update(changelistId, input);
+        return asyncHelper.submit(result -> changelistService.update(changelistId, input, result));
     }
 
     private static ResponseStatusException primaryInactive() {
@@ -68,8 +72,8 @@ public class ChangelistController {
 
     @DeleteMapping("/changelist")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(int changelistId) {
-        changelistService.delete(changelistId);
+    public CompletableFuture<Void> delete(int changelistId) {
+        return asyncHelper.submit(result -> changelistService.delete(changelistId, result));
     }
 
     /**

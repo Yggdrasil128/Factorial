@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
@@ -13,18 +14,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class ProductionStepController {
 
+    private final AsyncHelper asyncHelper;
     private final FactoryService factoryService;
     private final ProductionStepService productionStepService;
     private final ChangelistService changelistService;
 
     @Autowired
-    public ProductionStepController(FactoryService factoryService, ProductionStepService productionStepService,
-                                    ChangelistService changelistService) {
+    public ProductionStepController(AsyncHelper asyncHelper, FactoryService factoryService,
+                                    ProductionStepService productionStepService, ChangelistService changelistService) {
+        this.asyncHelper = asyncHelper;
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
         this.changelistService = changelistService;
@@ -32,8 +36,8 @@ public class ProductionStepController {
 
     @PostMapping("/factory/productionSteps")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void create(int factoryId, @RequestBody ProductionStepStandalone input) {
-        productionStepService.create(factoryId, input);
+    public CompletableFuture<Void> create(int factoryId, @RequestBody ProductionStepStandalone input) {
+        return asyncHelper.submit(result -> productionStepService.create(factoryId, input, result));
     }
 
     @GetMapping("/factory/productionSteps")
@@ -48,14 +52,14 @@ public class ProductionStepController {
 
     @PatchMapping("/productionStep")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void update(int productionStepId, @RequestBody ProductionStepStandalone input) {
-        productionStepService.update(productionStepId, input);
+    public CompletableFuture<Void> update(int productionStepId, @RequestBody ProductionStepStandalone input) {
+        return asyncHelper.submit(result -> productionStepService.update(productionStepId, input, result));
     }
 
     @DeleteMapping("/productionStep")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void delete(int productionStepId) {
-        productionStepService.delete(productionStepId);
+    public CompletableFuture<Void> delete(int productionStepId) {
+        return asyncHelper.submit(result -> productionStepService.delete(productionStepId, result));
     }
 
     /**
@@ -69,8 +73,8 @@ public class ProductionStepController {
      */
     @PatchMapping("/productionStep/applyPrimaryChangelist")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void applyPrimaryChangelist(int productionStepId) {
-        changelistService.applyPrimaryChangelist(productionStepId);
+    public CompletableFuture<Void> applyPrimaryChangelist(int productionStepId) {
+        return asyncHelper.submit(result -> changelistService.applyPrimaryChangelist(productionStepId, result));
     }
 
     /**
@@ -84,8 +88,9 @@ public class ProductionStepController {
      */
     @PatchMapping("/productionStep/machineCount")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateMachineCount(int productionStepId, String machineCount) {
-        changelistService.setPrimaryMachineCount(productionStepId, Fraction.of(machineCount));
+    public CompletableFuture<Void> updateMachineCount(int productionStepId, String machineCount) {
+        return asyncHelper.submit(result -> changelistService.setPrimaryMachineCount(productionStepId,
+                Fraction.of(machineCount), result));
     }
 
     private ProductionStepStandalone toOutput(ProductionStep productionStep) {

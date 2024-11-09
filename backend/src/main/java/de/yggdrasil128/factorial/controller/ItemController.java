@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.item.ItemService;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
@@ -8,24 +9,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class ItemController {
 
+    private final AsyncHelper asyncHelper;
     private final GameService gameService;
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(GameService gameService, ItemService itemService) {
+    public ItemController(AsyncHelper asyncHelper, GameService gameService, ItemService itemService) {
+        this.asyncHelper = asyncHelper;
         this.gameService = gameService;
         this.itemService = itemService;
     }
 
     @PostMapping("/game/items")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void create(int gameId, @RequestBody ItemStandalone input) {
-        itemService.create(gameId, input);
+    public CompletableFuture<Void> create(int gameId, @RequestBody ItemStandalone input) {
+        return asyncHelper.submit(result -> itemService.create(gameId, input, result));
     }
 
     @GetMapping("/game/items")
@@ -40,14 +44,14 @@ public class ItemController {
 
     @PatchMapping("/item")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(int itemId, @RequestBody ItemStandalone input) {
-        itemService.update(itemId, input);
+    public CompletableFuture<Void> update(int itemId, @RequestBody ItemStandalone input) {
+        return asyncHelper.submit(result -> itemService.update(itemId, input, result));
     }
 
     @DeleteMapping("/item")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(int itemId) {
-        itemService.delete(itemId);
+    public CompletableFuture<Void> delete(int itemId) {
+        return asyncHelper.submit(result -> itemService.delete(itemId, result));
     }
 
 }

@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.model.recipe;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.game.Game;
@@ -11,6 +12,9 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class RecipeService extends ModelService<Recipe, RecipeRepository> {
@@ -34,20 +38,24 @@ public class RecipeService extends ModelService<Recipe, RecipeRepository> {
         this.machineService = machineService;
     }
 
-    public void create(int gameId, RecipeStandalone standalone) {
+    @Transactional
+    public void create(int gameId, RecipeStandalone standalone, CompletableFuture<Void> result) {
         Game game = gameRepository.findById(gameId).orElseThrow(ModelService::reportNotFound);
         Recipe recipe = new Recipe(game, standalone);
         applyRelations(recipe, standalone);
+        AsyncHelper.complete(result);
         recipe = create(recipe);
         game.getRecipes().add(recipe);
         gameRepository.save(game);
         events.publishEvent(new RecipeUpdatedEvent(recipe));
     }
 
-    public void update(int id, RecipeStandalone standalone) {
+    @Transactional
+    public void update(int id, RecipeStandalone standalone, CompletableFuture<Void> result) {
         Recipe recipe = get(id);
         recipe.applyBasics(standalone);
         applyRelations(recipe, standalone);
+        AsyncHelper.complete(result);
         recipe = update(recipe);
         events.publishEvent(new RecipeUpdatedEvent(recipe));
     }
@@ -66,13 +74,14 @@ public class RecipeService extends ModelService<Recipe, RecipeRepository> {
         return new ItemQuantity(itemService.get((int) input.itemId()), input.quantity());
     }
 
-    @Override
-    public void delete(int id) {
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
         Game game = gameRepository.findByRecipesId(id);
         if (null == game) {
             throw report(HttpStatus.CONFLICT, "recipe does not belong to a game");
         }
-        super.delete(id);
+        AsyncHelper.complete(result);
+        delete(id);
         events.publishEvent(new RecipeRemovedEvent(game.getId(), id));
     }
 

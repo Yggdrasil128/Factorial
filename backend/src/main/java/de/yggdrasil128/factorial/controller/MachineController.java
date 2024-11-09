@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.controller;
 
+import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.machine.MachineService;
 import de.yggdrasil128.factorial.model.machine.MachineStandalone;
@@ -8,24 +9,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api")
 public class MachineController {
 
+    private final AsyncHelper asyncHelper;
     private final GameService gameService;
     private final MachineService machineService;
 
     @Autowired
-    public MachineController(GameService gameService, MachineService machineService) {
+    public MachineController(AsyncHelper asyncHelper, GameService gameService, MachineService machineService) {
+        this.asyncHelper = asyncHelper;
         this.gameService = gameService;
         this.machineService = machineService;
     }
 
     @PostMapping("/game/machines")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void create(int gameId, @RequestBody MachineStandalone input) {
-        machineService.create(gameId, input);
+    public CompletableFuture<Void> create(int gameId, @RequestBody MachineStandalone input) {
+        return asyncHelper.submit(result -> machineService.create(gameId, input, result));
     }
 
     @GetMapping("game/machines")
@@ -40,14 +44,14 @@ public class MachineController {
 
     @PatchMapping("/machine")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(int machineId, @RequestBody MachineStandalone input) {
-        machineService.update(machineId, input);
+    public CompletableFuture<Void> update(int machineId, @RequestBody MachineStandalone input) {
+        return asyncHelper.submit(result -> machineService.update(machineId, input, result));
     }
 
     @DeleteMapping("/machine")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(int machineId) {
-        machineService.delete(machineId);
+    public CompletableFuture<Void> delete(int machineId) {
+        return asyncHelper.submit(result -> machineService.delete(machineId, result));
     }
 
 }

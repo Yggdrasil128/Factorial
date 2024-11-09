@@ -13,8 +13,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
@@ -40,7 +42,8 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         this.productionStepService = productionStepService;
     }
 
-    public void create(int saveId, ChangelistStandalone standalone) {
+    @Transactional
+    public void create(int saveId, ChangelistStandalone standalone, CompletableFuture<Void> result) {
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Changelist changelist = new Changelist(save, standalone);
         applyRelations(changelist, standalone);
@@ -108,7 +111,8 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         return cache.computeIfAbsent(changelist.getId(), key -> new ProductionStepChanges(changelist));
     }
 
-    public void reorder(int saveId, List<EntityPosition> input) {
+    @Transactional
+    public void reorder(int saveId, List<EntityPosition> input, CompletableFuture<Void> result) {
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
         Collection<Changelist> changelists = new ArrayList<>();
@@ -123,20 +127,20 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         events.publishEvent(new ChangelistsReorderedEvent(save.getId(), changelists));
     }
 
-    public void update(int id, ChangelistStandalone standalone) {
+    @Transactional
+    public void update(int id, ChangelistStandalone standalone, CompletableFuture<Void> result) {
         Changelist changelist = get(id);
         if (changelist.isPrimary()) {
             if (Boolean.FALSE.equals(standalone.primary())) {
-                // cannot set primary to false
-                return;
+                throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
             }
             if (Boolean.FALSE.equals(standalone.active())) {
-                // cannot set primary to inactive
-                return;
+                throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
             }
         }
         changelist.applyBasics(standalone);
         applyRelations(changelist, standalone);
+        AsyncHelper.complete(result);
         changelist = update(changelist);
         Map<Integer, ProductionStepThroughputs> collectThroughputs = new HashMap<>();
         if (changelist.isPrimary()) {
@@ -186,8 +190,8 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
     }
 
-    @Override
-    public void delete(int id) {
+    @Transactional
+    public void delete(int id, CompletableFuture<Void> result) {
         if (repository.existsByIdAndPrimaryIsTrue(id)) {
             throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
         }
@@ -195,7 +199,8 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         if (null == save) {
             throw report(HttpStatus.CONFLICT, "changelist does not belong to a save");
         }
-        super.delete(id);
+        AsyncHelper.complete(result);
+        delete(id);
         ProductionStepChanges changes = cache.remove(id);
         if (null != changes) {
             changes.undo().forEach(this::publishProductionStepThroughputsChanged);
@@ -234,8 +239,10 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
     }
 
-    public void setPrimaryMachineCount(int productionStepId, Fraction machineCount) {
+    @Transactional
+    public void setPrimaryMachineCount(int productionStepId, Fraction machineCount, CompletableFuture<Void> result) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
+        AsyncHelper.complete(result);
         Changelist changelist = findPrimaryChangelist(productionStepId);
         Fraction change = machineCount.subtract(productionStep.getMachineCount());
         ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
@@ -249,8 +256,10 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
     }
 
-    public void applyPrimaryChangelist(int productionStepId) {
+    @Transactional
+    public void applyPrimaryChangelist(int productionStepId, CompletableFuture<Void> result) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
+        AsyncHelper.complete(result);
         Changelist changelist = findPrimaryChangelist(productionStepId);
         ProductionStepChanges.Link link = computeProductionStepChanges(changelist).getLink(productionStepId);
         if (null != link) {
@@ -277,7 +286,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
      * are computed on demand.
      * 
      * @param event the event that signals the initialization of a new {@link ProductionStepThroughputs} engine object
-     * @return an event signalling that the {@link ProductionStepChanges} have been updated
+     * @return an event signalling that the {@link ProductionStepThroughputs} have been updated
      */
     @EventListener
     public ProductionStepThroughputsChangedEvent on(ProductionStepThroughputsInitalizedEvent event) {
