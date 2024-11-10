@@ -9,7 +9,11 @@ import {
 import { computed, type ComputedRef, ref, type Ref } from 'vue';
 import { useGameStore } from '@/stores/model/gameStore';
 import type { Game } from '@/types/model/standalone';
-import ItemEditor from '@/components/gameEditor/items/ItemEditor.vue';
+import ItemEditor from '@/components/gameEditor/tabs/ItemEditor.vue';
+import MachineEditor from '@/components/gameEditor/tabs/MachineEditor.vue';
+import RecipeEditor from '@/components/gameEditor/tabs/RecipeEditor.vue';
+import RecipeModifierEditor from '@/components/gameEditor/tabs/RecipeModifierEditor.vue';
+import IconEditor from '@/components/gameEditor/tabs/IconEditor.vue';
 
 const route = useRoute();
 
@@ -51,6 +55,10 @@ const activeTab: Ref<EditorTabs> = ref('items');
     </div>
 
     <ItemEditor v-show="activeTab === 'items'" :game="game" />
+    <MachineEditor v-show="activeTab === 'machines'" :game="game" />
+    <RecipeEditor v-show="activeTab === 'recipes'" :game="game" />
+    <RecipeModifierEditor v-show="activeTab === 'recipeModifiers'" :game="game" />
+    <IconEditor v-show="activeTab === 'icons'" :game="game" />
   </template>
 </template>
 

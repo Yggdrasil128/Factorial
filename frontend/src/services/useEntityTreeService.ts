@@ -543,11 +543,6 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     const entity: ComputedRef<T> = computed(() => entities.value.filter(e => e.id === sourceId)[0]!);
 
-    console.log('sourceNode', sourceNode);
-    console.log('entity', entity);
-    console.log('sourceNode.data.category', sourceNode.data.category);
-    console.log('targetPath', targetPath);
-
     if (_.isEqual(entity.value.category, targetPath)) {
       return;
     }

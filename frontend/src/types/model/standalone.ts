@@ -106,6 +106,7 @@ export type Recipe = {
   readonly id: number;
   readonly gameId: number;
   name: string;
+  description: string;
   iconId: number;
   ingredients: ItemQuantity[];
   products: ItemQuantity[];
@@ -121,6 +122,7 @@ export type RecipeModifier = {
   name: string;
   description: string;
   iconId: number;
+  category: string[];
   durationMultiplier: Fraction;
   inputQuantityMultiplier: Fraction;
   outputQuantityMultiplier: Fraction;
@@ -130,6 +132,7 @@ export type Machine = {
   readonly id: number;
   readonly gameId: number;
   name: string;
+  description: string;
   iconId: number;
   machineModifierIds: number[];
   category: string[];
