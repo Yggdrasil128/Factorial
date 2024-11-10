@@ -102,12 +102,12 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.recipes = recipeStore.getAll().filter(recipe => {
-      for (let ingredient of recipe.ingredients) {
+      for (const ingredient of recipe.ingredients) {
         if (ingredient.itemId === itemId) {
           return true;
         }
       }
-      for (let product of recipe.products) {
+      for (const product of recipe.products) {
         if (product.itemId === itemId) {
           return true;
         }
@@ -116,12 +116,12 @@ export function useEntityUsagesService(): EntityUsagesService {
     });
 
     usages.productionSteps = productionStepStore.getAll().filter(productionStep => {
-      for (let input of productionStep.inputs) {
+      for (const input of productionStep.inputs) {
         if (input.itemId === itemId) {
           return true;
         }
       }
-      for (let output of productionStep.outputs) {
+      for (const output of productionStep.outputs) {
         if (output.itemId === itemId) {
           return true;
         }

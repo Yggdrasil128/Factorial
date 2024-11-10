@@ -12,10 +12,12 @@ import { useIconStore } from '@/stores/model/iconStore';
 import { useIconApi } from '@/api/useIconApi';
 import type { BulkCrudEntityApi } from '@/api/useApi';
 import { type EntityUsages, useEntityUsagesService } from '@/services/useEntityUsagesService';
+import type { NodeDropType } from 'element-plus/es/components/tree/src/tree.type';
 
 export type EntityTreeServiceState<T extends EntityWithCategory> = {
   entities: ComputedRef<T[]>;
-  tree: ComputedRef<TreeNode[]>;
+  tree: Ref<TreeNode[]>;
+  treeLoading: Ref<boolean>;
   categories: Ref<string[][]>;
   expandedKeys: Set<string>;
   expandedKeysList: ComputedRef<string[]>;
@@ -43,6 +45,7 @@ export interface EntityTreeService<T extends EntityWithCategory> {
 
   onTreeNodeExpanded: (node: TreeNode) => void;
   onTreeNodeCollapsed: (node: TreeNode) => void;
+  onDragAndDrop: (sourceNode: Node, targetNode: Node, dropType: NodeDropType) => Promise<void>;
 
   createNewEntityAtRoot: () => void;
   createNewEntityAtNode: (node: Node) => void;
@@ -63,11 +66,14 @@ export interface FolderModel {
   name: string;
 }
 
+export type EntityType = 'Item' | 'Machine' | 'Recipe' | 'Recipe modifier' | 'Icon';
+
+const waitUntilDoneTimeoutMillis: number = 5000;
+
 export function useEntityTreeService<T extends EntityWithCategory>(
   game: ComputedRef<Game>,
   entities: ComputedRef<T[]>,
-  isIconEntity: boolean,
-  iconSubfolder: string,
+  entityType: EntityType,
   getNewEntityModel: () => Partial<T>,
   getExistingEntityModel: (id: number) => Partial<T>,
   validateForm: () => Promise<boolean>,
@@ -81,9 +87,23 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
   const categories: Ref<string[][]> = ref([]);
 
-  const tree: ComputedRef<TreeNode[]> = computed(() =>
-    convertToTreeByCategory(entities.value, isIconEntity, categories.value),
+  const treeUpdatesPaused: Ref<boolean> = ref(false);
+  const treeLoading: Ref<boolean> = ref(false);
+  const computedTree: ComputedRef<TreeNode[]> = computed(() =>
+    convertToTreeByCategory(entities.value, entityType === 'Icon', categories.value),
   );
+
+  function updateTree(): void {
+    tree.value = _.cloneDeep(computedTree.value);
+  }
+
+  const tree: Ref<TreeNode[]> = ref([]);
+
+  watch(computedTree, () => {
+    if (!treeUpdatesPaused.value) {
+      updateTree();
+    }
+  }, { deep: true, immediate: true });
 
   function addCategory(categoryToAdd: string[]): void {
     let found: boolean = false;
@@ -243,25 +263,25 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   async function deleteEntity(id: number): Promise<void> {
-    const entityUsages: EntityUsages = findEntityUsages(id);
-    if (entityUsages.hasAnyUsages()) {
-      entityUsages.showMessageBox(
-        'Cannot delete this item.',
-        'The item is still being used in the following places:',
-      );
-      return;
-    }
-
     const entity: ComputedRef<T | undefined> = computed(() =>
       entities.value.filter(e => e.id == id)[0],
     );
+
+    const entityUsages: EntityUsages = findEntityUsages(id);
+    if (entityUsages.hasAnyUsages()) {
+      entityUsages.showMessageBox(
+        'Cannot delete ' + entityType.toLowerCase() + ' \'' + (entity.value?.name ?? '') + '\'.',
+        'The ' + entityType.toLowerCase() + ' is still being used in the following places:',
+      );
+      return;
+    }
 
     const iconId: number = entity.value?.iconId ?? 0;
 
     await entityApi.delete(id);
 
     if (iconId && autoDeleteIcons.value) {
-      await until(entity).toBeUndefined({ timeout: 5000 });
+      await until(entity).toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
 
       if (!entityUsageService.findIconUsages(iconId).hasAnyUsages()) {
         await iconApi.delete(iconId);
@@ -302,7 +322,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
         const icon: Partial<Icon> = {
           name: entity.name,
           gameId: game.value.id,
-          category: [iconSubfolder, ...(entity.category ?? [])],
+          category: [entityType + 's', ...(entity.category ?? [])],
           mimeType: mimeType,
           imageData: base64,
         };
@@ -313,7 +333,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
           iconStore.getByGameId(game.value.id).filter(icon => icon.name === entity.name)[0],
         );
 
-        await until(savedIcon).not.toBeUndefined({ timeout: 5000 });
+        await until(savedIcon).not.toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
 
         if (!savedIcon.value) {
           ElMessage.error({
@@ -338,7 +358,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     }
 
     isSaving.value = false;
-    resetForms(); // to close and reset the form
+    resetForms();
   }
 
   function resetForms(): void {
@@ -360,7 +380,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     createNewFolder(getNodePath(node));
   }
 
-  function createNewFolder(parentPath: string[]) {
+  function createNewFolder(parentPath: string[]): void {
     resetForms();
 
     editingFolderPath.value = parentPath;
@@ -368,7 +388,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingFolderOriginalModel.value = { name: '' };
   }
 
-  function editFolder(node: Node) {
+  function editFolder(node: Node): void {
     resetForms();
 
     const path: string[] = getNodePath(node);
@@ -379,8 +399,49 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingFolderOriginalModel.value = { name };
   }
 
-  function deleteFolder(node: Node) {
+  async function deleteFolder(node: Node): Promise<void> {
+    const path: string[] = getNodePath(node);
 
+    const entitiesToDelete: T[] = entities.value.filter(
+      entity => categoryStartsWith(entity.category, path),
+    );
+
+    for (const entity of entitiesToDelete) {
+      const entityUsages: EntityUsages = findEntityUsages(entity.id);
+      if (entityUsages.hasAnyUsages()) {
+        entityUsages.showMessageBox(
+          'Cannot delete ' + entityType.toLowerCase() + ' \'' + (entity.name ?? '') + '\'.',
+          'The ' + entityType.toLowerCase() + ' is still being used in the following places:',
+        );
+        return;
+      }
+    }
+
+    const idsToDelete: number[] = entitiesToDelete.map(entity => entity.id);
+
+    await entityApi.bulkDelete(idsToDelete);
+
+    removeCategory(path);
+
+    if (!autoDeleteIcons.value) {
+      return;
+    }
+
+    const numberOfEntitiesLeftToDelete: ComputedRef<number> = computed(() =>
+      entities.value.filter(entity => idsToDelete.includes(entity.id)).length,
+    );
+
+    await until(numberOfEntitiesLeftToDelete).toBe(0, { timeout: waitUntilDoneTimeoutMillis });
+
+    const iconIdsToDelete: number[] = [];
+
+    for (const entity of entitiesToDelete) {
+      if (entity.iconId && !entityUsageService.findIconUsages(entity.iconId).hasAnyUsages()) {
+        iconIdsToDelete.push(entity.iconId);
+      }
+    }
+
+    await iconApi.bulkDelete(iconIdsToDelete);
   }
 
   async function saveFolder(): Promise<void> {
@@ -416,14 +477,105 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   async function moveFolder(source: string[], destination: string[]): Promise<void> {
-    console.log('move folder', 'source', source, 'destination', destination);
-    // TODO
+    const entityUpdates: Partial<T>[] = [];
+    for (const entity of entities.value) {
+      if (categoryStartsWith(entity.category, source)) {
+        entityUpdates.push({
+          id: entity.id,
+          category: [...destination, ...entity.category.slice(source.length)],
+        } as Partial<T>);
+      }
+    }
+
+    treeLoading.value = true;
+    treeUpdatesPaused.value = true;
+
+    try {
+      await entityApi.bulkEdit(entityUpdates);
+
+      const isDone: ComputedRef<boolean> = computed(() => {
+        for (const entityUpdate of entityUpdates) {
+          const entity: T | undefined = entities.value.filter(e => e.id === entityUpdate.id)[0];
+          if (!_.isEqual(entity?.category, entityUpdate.category)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      await until(isDone).toBeTruthy({ timeout: waitUntilDoneTimeoutMillis });
+
+      removeCategory(source);
+
+    } finally {
+      treeLoading.value = false;
+      treeUpdatesPaused.value = false;
+      updateTree();
+    }
+  }
+
+  async function onDragAndDrop(sourceNode: Node, targetNode: Node, dropType: NodeDropType): Promise<void> {
+    updateTree();
+
+    if (dropType !== 'inner') {
+      targetNode = targetNode.parent;
+    }
+
+    const sourceIsFolder: boolean = sourceNode.data.id === undefined;
+    const targetIsFolder: boolean = targetNode.data.id === undefined;
+
+    if (sourceIsFolder) {
+      // Workaround: sourceNode.parent is null for some reason,
+      // thus we need to parse the sourcePath from sourceNode.data.key
+      const sourceKey: string = sourceNode.data.key;
+      const sourcePath: string[] = sourceKey.slice(1, sourceKey.length - 1).split('/');
+      const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent);
+      targetPath.push(sourcePath[sourcePath.length - 1]);
+
+      if (!_.isEqual(sourcePath, targetPath)) {
+        await moveFolder(sourcePath, targetPath);
+      }
+      return;
+    }
+
+    const sourceId: number = sourceNode.data.id;
+    const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent);
+
+    const entity: ComputedRef<T> = computed(() => entities.value.filter(e => e.id === sourceId)[0]!);
+
+    console.log('sourceNode', sourceNode);
+    console.log('entity', entity);
+    console.log('sourceNode.data.category', sourceNode.data.category);
+    console.log('targetPath', targetPath);
+
+    if (_.isEqual(entity.value.category, targetPath)) {
+      return;
+    }
+
+    treeLoading.value = true;
+
+    try {
+      await entityApi.edit({
+        id: entity.value.id,
+        category: targetPath,
+      } as Partial<T>);
+
+      const isDone: ComputedRef<boolean> = computed(() =>
+        _.isEqual(entity.value.category, targetPath),
+      );
+
+      await until(isDone).toBeTruthy({ timeout: waitUntilDoneTimeoutMillis });
+
+    } finally {
+      treeLoading.value = false;
+    }
   }
 
   return {
     state: {
       entities,
       tree,
+      treeLoading,
       categories,
       expandedKeys,
       expandedKeysList,
@@ -448,6 +600,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     onTreeNodeExpanded,
     onTreeNodeCollapsed,
+    onDragAndDrop,
 
     createNewEntityAtRoot,
     createNewEntityAtNode,

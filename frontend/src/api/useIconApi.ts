@@ -2,6 +2,7 @@ import type { Icon } from '@/types/model/standalone';
 import { type Api, type BulkCrudEntityApi, useApi } from '@/api/useApi';
 import { ElMessage } from 'element-plus';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IconApi extends BulkCrudEntityApi<Icon> {
 }
 
@@ -29,13 +30,26 @@ export function useIconApi(): IconApi {
       });
   }
 
+  async function bulkEdit(icons: Partial<Icon>[]): Promise<void> {
+    // TODO replace this implementation with new endpoint
+    for (const icon of icons) {
+      await edit(icon);
+    }
+  }
+
+  async function bulkDelete(iconIds: number[]): Promise<void> {
+    // TODO replace this implementation with new endpoint
+    for (const iconId of iconIds) {
+      await delete_(iconId);
+    }
+  }
+
   return {
     create,
     edit,
     delete: delete_,
 
-    // TODO
-    bulkEdit: () => Promise.resolve(),
-    bulkDelete: () => Promise.resolve(),
+    bulkEdit,
+    bulkDelete,
   };
 }

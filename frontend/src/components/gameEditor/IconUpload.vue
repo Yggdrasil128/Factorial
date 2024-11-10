@@ -39,7 +39,7 @@ watch(fileList, () => {
     dataBase64Model.value = '';
     return;
   }
-  const file: UploadRawFile = fileList.value[0].raw;
+  const file: UploadRawFile = fileList.value[0].raw as UploadRawFile;
 
   const reader = new FileReader();
 

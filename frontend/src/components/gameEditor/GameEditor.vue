@@ -39,7 +39,7 @@ const activeTab: Ref<EditorTabs> = ref('items');
   </template>
   <template v-else>
     <div class="titleBar">
-      <h1>Game Editor</h1>
+      <h1>Game Editor - {{ game.name }}</h1>
 
       <el-tabs class="tabs" v-model="activeTab">
         <el-tab-pane label="Items" name="items" />

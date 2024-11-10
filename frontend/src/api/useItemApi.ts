@@ -2,6 +2,7 @@ import type { Item } from '@/types/model/standalone';
 import { type Api, type BulkCrudEntityApi, useApi } from '@/api/useApi';
 import { ElMessage } from 'element-plus';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ItemApi extends BulkCrudEntityApi<Item> {
 }
 
@@ -29,13 +30,26 @@ export function useItemApi(): ItemApi {
       });
   }
 
+  async function bulkEdit(items: Partial<Item>[]): Promise<void> {
+    // TODO replace this implementation with new endpoint
+    for (const item of items) {
+      await edit(item);
+    }
+  }
+
+  async function bulkDelete(itemIds: number[]): Promise<void> {
+    // TODO replace this implementation with new endpoint
+    for (const itemId of itemIds) {
+      await delete_(itemId);
+    }
+  }
+
   return {
     create,
     edit,
     delete: delete_,
 
-    // TODO
-    bulkEdit: () => Promise.resolve(),
-    bulkDelete: () => Promise.resolve(),
+    bulkEdit,
+    bulkDelete,
   };
 }

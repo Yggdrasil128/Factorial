@@ -11,7 +11,7 @@ export interface EntityTreeProps {
 
 const props: EntityTreeProps = defineProps<EntityTreeProps>();
 
-// :allow-drop="(draggingNode, dropNode, type) => {console.log(draggingNode, dropNode, type); return true;}"
+const service = props.service;
 </script>
 
 <template>
@@ -24,9 +24,8 @@ const props: EntityTreeProps = defineProps<EntityTreeProps>();
       @node-expand="service.onTreeNodeExpanded"
       @node-collapse="service.onTreeNodeCollapsed"
       draggable
-      @node-drag-start="console.log"
-      @node-drag-end="console.log"
-      @node-drop="console.log"
+      @node-drop="service.onDragAndDrop"
+      v-loading="service.state.treeLoading.value"
     >
       <!--suppress VueUnrecognizedSlot -->
       <template #default="{ node, data }">
@@ -121,7 +120,8 @@ const props: EntityTreeProps = defineProps<EntityTreeProps>();
           Auto-delete icons
         </div>
         <div class="footnote">
-          When deleting an item, this option will also delete the item's icon,
+          When deleting {{ /^[aeiou]/i.test(entityName) ? 'an' : 'a' }} {{ entityName.toLowerCase() }},
+          this option will also delete the {{ entityName.toLowerCase() }}'s icon,
           unless that icon is still used somewhere else.
         </div>
       </div>
@@ -183,5 +183,12 @@ const props: EntityTreeProps = defineProps<EntityTreeProps>();
 
 .footnote {
   font-size: 14px;
+}
+</style>
+
+<!--suppress CssUnusedSymbol -->
+<style>
+.tree .el-loading-mask {
+  --el-mask-color: #00000060;
 }
 </style>
