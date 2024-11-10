@@ -21,6 +21,7 @@ public class Machine implements NamedModel {
     private Game game;
     @Column(nullable = false)
     private String name = "";
+    private String description = "";
     @ManyToOne
     private Icon icon;
     @ManyToMany
@@ -39,6 +40,7 @@ public class Machine implements NamedModel {
 
     public void applyBasics(MachineStandalone standalone) {
         OptionalInputField.of(standalone.name()).apply(this::setName);
+        OptionalInputField.of(standalone.description()).apply(this::setDescription);
         OptionalInputField.of(standalone.category()).apply(this::setCategory);
     }
 
@@ -62,6 +64,14 @@ public class Machine implements NamedModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Icon getIcon() {

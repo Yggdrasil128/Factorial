@@ -13,6 +13,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 public record RecipeStandalone(@JsonProperty(access = READ_ONLY) int id,
                                @JsonProperty(access = READ_ONLY) int gameId,
                                String name,
+                               String description,
                                Object iconId,
                                List<ItemQuantityStandalone> ingredients,
                                List<ItemQuantityStandalone> products,
@@ -26,7 +27,7 @@ public record RecipeStandalone(@JsonProperty(access = READ_ONLY) int id,
     }
 
     public static RecipeStandalone of(Recipe model, External destination) {
-        return new RecipeStandalone(model.getId(), model.getGame().getId(), model.getName(),
+        return new RecipeStandalone(model.getId(), model.getGame().getId(), model.getName(), model.getDescription(),
                 NamedModel.resolve(model.getIcon(), destination),
                 model.getIngredients().stream().map(resource -> ItemQuantityStandalone.of(resource, destination))
                         .toList(),
