@@ -10,6 +10,8 @@ import type { Game, Icon } from '@/types/model/standalone';
 import { ElMessage } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useIconApi } from '@/api/useIconApi';
+import type { BulkCrudEntityApi } from '@/api/useApi';
+import { type EntityUsages, useEntityUsagesService } from '@/services/useEntityUsagesService';
 
 export type EntityTreeServiceState<T extends EntityWithCategory> = {
   entities: ComputedRef<T[]>;
@@ -26,10 +28,10 @@ export type EntityTreeServiceState<T extends EntityWithCategory> = {
   selectedIconOption: Ref<IconOptionValue>;
 
   editingFolderPath: Ref<string[] | undefined>;
-  editingFolderIsNew: Ref<boolean>;
-  editingFolderName: Ref<string>;
-  editingFolderOriginalName: Ref<string>;
+  editingFolderModel: Ref<FolderModel>;
+  editingFolderOriginalModel: Ref<FolderModel>;
 
+  autoDeleteIcons: Ref<boolean>;
   editingHasChanges: ComputedRef<boolean>;
   isSaving: Ref<boolean>;
 }
@@ -57,13 +59,8 @@ export interface EntityTreeService<T extends EntityWithCategory> {
   cancel: () => void;
 }
 
-export interface EntityApi<T> {
-  createEntity: (entity: Partial<T>) => Promise<void>;
-  editEntity: (entity: Partial<T>) => Promise<void>;
-  deleteEntity: (entityId: number) => Promise<void>;
-
-  bulkEditEntities: (entities: Partial<T>[]) => Promise<void>;
-  bulkDeleteEntities: (entityIds: number[]) => Promise<void>;
+export interface FolderModel {
+  name: string;
 }
 
 export function useEntityTreeService<T extends EntityWithCategory>(
@@ -74,35 +71,66 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   getNewEntityModel: () => Partial<T>,
   getExistingEntityModel: (id: number) => Partial<T>,
   validateForm: () => Promise<boolean>,
-  entityApi: EntityApi<T>,
+  validateFolderForm: () => Promise<boolean>,
+  findEntityUsages: (entityId: number) => EntityUsages,
+  entityApi: BulkCrudEntityApi<T>,
 ): EntityTreeService<T> {
   const iconApi = useIconApi();
   const iconStore = useIconStore();
+  const entityUsageService = useEntityUsagesService();
 
-  const categories: Ref<string[][]> = ref([['foo', 'bar', 'baz']]);
+  const categories: Ref<string[][]> = ref([]);
 
   const tree: ComputedRef<TreeNode[]> = computed(() =>
     convertToTreeByCategory(entities.value, isIconEntity, categories.value),
   );
 
-  function addNewCategories(): void {
+  function addCategory(categoryToAdd: string[]): void {
+    let found: boolean = false;
+    for (const category of categories.value) {
+      if (_.isEqual(category, categoryToAdd)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      if (categoryToAdd.length > 1) {
+        const parentCategory: string[] = categoryToAdd.slice(0, -1);
+        addCategory(parentCategory);
+      }
+      categories.value.push(categoryToAdd);
+    }
+  }
+
+  function categoryStartsWith(category: string[], startsWith: string[]): boolean {
+    if (category.length < startsWith.length) {
+      return false;
+    }
+    for (let i = 0; i < startsWith.length; i++) {
+      if (startsWith[i] !== category[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function removeCategory(categoryToRemove: string[]): void {
+    for (let i = categories.value.length - 1; i >= 0; i--) {
+      if (categoryStartsWith(categories.value[i], categoryToRemove)) {
+        categories.value.splice(i, 1);
+      }
+    }
+  }
+
+  function addCategoriesFromTree(): void {
     for (const entity of entities.value) {
-      let found: boolean = false;
-      for (const category of categories.value) {
-        if (_.isEqual(category, entity.category)) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        categories.value.push(entity.category);
-      }
+      addCategory(entity.category);
     }
   }
 
   watch(
     entities,
-    () => addNewCategories(),
+    () => addCategoriesFromTree(),
     { deep: true, immediate: true },
   );
 
@@ -134,17 +162,24 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   const editingEntityOriginalModel: Ref<Partial<T>> = ref({});
 
   const editingFolderPath: Ref<string[] | undefined> = ref();
-  const editingFolderIsNew: Ref<boolean> = ref(false);
-  const editingFolderName: Ref<string> = ref('');
-  const editingFolderOriginalName: Ref<string> = ref('');
+  const editingFolderModel: Ref<FolderModel> = ref({ name: '' });
+  const editingFolderOriginalModel: Ref<FolderModel> = ref({ name: '' });
+
+  const autoDeleteIcons: Ref<boolean> = ref(true);
 
   const editingHasChanges = computed(() =>
     !_.isEqual(editingEntityModel.value, editingEntityOriginalModel.value)
     || editingEntityIconDataBase64.value !== ''
-    || editingFolderName.value !== editingFolderOriginalName.value,
+    || editingFolderModel.value.name !== editingFolderOriginalModel.value.name,
   );
 
   const editingEntityDisplayPath: ComputedRef<string> = computed(() => {
+    if (editingFolderPath.value !== undefined) {
+      if (editingFolderPath.value.length === 0) {
+        return '/';
+      }
+      return '/ ' + _.join(editingFolderPath.value, ' / ') + ' /';
+    }
     if (!editingEntityModel.value.category || editingEntityModel.value.category.length === 0) {
       return '/';
     }
@@ -182,7 +217,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   function createNewEntity(path: string[]) {
-    cancel();
+    resetForms();
 
     const entity: Partial<T> = getNewEntityModel();
     entity.category = path;
@@ -195,7 +230,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   function editEntity(id: number) {
-    cancel();
+    resetForms();
 
     const entity: Partial<T> = getExistingEntityModel(id);
 
@@ -207,8 +242,31 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingEntityIconDataBase64.value = '';
   }
 
-  function deleteEntity(id: number): void {
-    void entityApi.deleteEntity(id);
+  async function deleteEntity(id: number): Promise<void> {
+    const entityUsages: EntityUsages = findEntityUsages(id);
+    if (entityUsages.hasAnyUsages()) {
+      entityUsages.showMessageBox(
+        'Cannot delete this item.',
+        'The item is still being used in the following places:',
+      );
+      return;
+    }
+
+    const entity: ComputedRef<T | undefined> = computed(() =>
+      entities.value.filter(e => e.id == id)[0],
+    );
+
+    const iconId: number = entity.value?.iconId ?? 0;
+
+    await entityApi.delete(id);
+
+    if (iconId && autoDeleteIcons.value) {
+      await until(entity).toBeUndefined({ timeout: 5000 });
+
+      if (!entityUsageService.findIconUsages(iconId).hasAnyUsages()) {
+        await iconApi.delete(iconId);
+      }
+    }
   }
 
   const isSaving: Ref<boolean> = ref(false);
@@ -249,7 +307,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
           imageData: base64,
         };
 
-        await iconApi.createIcon(icon);
+        await iconApi.create(icon);
 
         const savedIcon: ComputedRef<Icon | undefined> = computed(() =>
           iconStore.getByGameId(game.value.id).filter(icon => icon.name === entity.name)[0],
@@ -269,30 +327,29 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       }
 
       if (editingEntityId.value === 0) {
-        await entityApi.createEntity(entity);
+        await entityApi.create(entity);
       } else {
-        await entityApi.editEntity(entity);
+        await entityApi.edit(entity);
       }
 
-    } catch (error) {
+    } catch {
       isSaving.value = false;
       return;
     }
 
     isSaving.value = false;
-    cancel(); // to close and reset the form
+    resetForms(); // to close and reset the form
   }
 
-  function cancel(): void {
+  function resetForms(): void {
     editingEntityId.value = undefined;
     editingEntityModel.value = {};
     editingEntityOriginalModel.value = {};
     editingEntityIconDataBase64.value = '';
 
     editingFolderPath.value = undefined;
-    editingFolderIsNew.value = false;
-    editingFolderName.value = '';
-    editingFolderOriginalName.value = '';
+    editingFolderModel.value = { name: '' };
+    editingFolderOriginalModel.value = { name: '' };
   }
 
   function createNewFolderAtRoot(): void {
@@ -304,24 +361,22 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   function createNewFolder(parentPath: string[]) {
-    cancel();
+    resetForms();
 
     editingFolderPath.value = parentPath;
-    editingFolderIsNew.value = true;
-    editingFolderName.value = '';
-    editingFolderOriginalName.value = '';
+    editingFolderModel.value = { name: '' };
+    editingFolderOriginalModel.value = { name: '' };
   }
 
   function editFolder(node: Node) {
-    cancel();
+    resetForms();
 
     const path: string[] = getNodePath(node);
     const name: string = path.pop()!;
 
     editingFolderPath.value = path;
-    editingFolderIsNew.value = false;
-    editingFolderName.value = name;
-    editingFolderOriginalName.value = name;
+    editingFolderModel.value = { name };
+    editingFolderOriginalModel.value = { name };
   }
 
   function deleteFolder(node: Node) {
@@ -329,7 +384,40 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   async function saveFolder(): Promise<void> {
+    if (!editingFolderPath.value) {
+      resetForms();
+      return;
+    }
 
+    editingFolderModel.value.name = editingFolderModel.value.name.trim();
+
+    if (!await validateFolderForm()) {
+      return;
+    }
+
+    if (editingFolderOriginalModel.value.name === '') {
+      // new folder
+      addCategory([...editingFolderPath.value, editingFolderModel.value.name]);
+
+      ElMessage.success({
+        message: 'Folder created.',
+      });
+
+      resetForms();
+      return;
+    }
+
+    await moveFolder(
+      [...editingFolderPath.value, editingFolderOriginalModel.value.name],
+      [...editingFolderPath.value, editingFolderModel.value.name],
+    );
+
+    resetForms();
+  }
+
+  async function moveFolder(source: string[], destination: string[]): Promise<void> {
+    console.log('move folder', 'source', source, 'destination', destination);
+    // TODO
   }
 
   return {
@@ -348,10 +436,10 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       selectedIconOption,
 
       editingFolderPath,
-      editingFolderIsNew,
-      editingFolderName,
-      editingFolderOriginalName,
+      editingFolderModel,
+      editingFolderOriginalModel,
 
+      autoDeleteIcons,
       editingHasChanges,
       isSaving,
     },
@@ -373,7 +461,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     save,
     saveFolder,
-    cancel,
+    cancel: resetForms,
   };
 }
 

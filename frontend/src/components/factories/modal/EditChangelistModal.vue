@@ -36,7 +36,7 @@ const formRules = reactive({
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
   if (route.name === 'newChangelist') {
     changelist.value = {
-      saveId: currentGameAndSaveStore.save?.id,
+      saveId: currentGameAndSaveStore.currentSaveId,
       name: '',
       iconId: 0,
       primary: false,
@@ -77,9 +77,9 @@ async function submitForm(): Promise<void> {
   isSaving.value = true;
 
   if (route.name === 'newChangelist') {
-    await changelistApi.createChangelist(changelist.value);
+    await changelistApi.create(changelist.value);
   } else {
-    await changelistApi.editChangelist(changelist.value);
+    await changelistApi.edit(changelist.value);
   }
 
   await router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
@@ -106,7 +106,7 @@ async function submitForm(): Promise<void> {
 
       <el-form-item label="Icon">
         <CascaderSelect v-model="changelist.iconId!"
-                        :options="iconStore.getByGameId(currentGameAndSaveStore.game?.id)"
+                        :options="iconStore.getByGameId(currentGameAndSaveStore.currentGameId)"
                         is-icon-entity
                         clearable
                         style="width: 100%;" />

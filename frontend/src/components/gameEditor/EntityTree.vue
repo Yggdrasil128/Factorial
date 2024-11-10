@@ -69,15 +69,14 @@ const props: EntityTreeProps = defineProps<EntityTreeProps>();
                 <el-popconfirm
                   :title="'Delete this folder and its contents?'"
                   width="200px"
-                  @confirm=""
+                  @confirm="service.deleteFolder(node)"
                 >
                   <template #reference>
                     <span class="row center tooltipHelperSpan">
                       <el-tooltip :content="service.getButtonTooltip('Delete folder')"
                                   effect="dark" placement="top" transition="none" :hide-after="0">
                         <el-button type="danger" :icon="Delete"
-                                   :disabled="service.state.editingHasChanges.value"
-                                   @click="service.deleteFolder(node)" />
+                                   :disabled="service.state.editingHasChanges.value" />
                       </el-tooltip>
                     </span>
                   </template>
@@ -115,11 +114,22 @@ const props: EntityTreeProps = defineProps<EntityTreeProps>();
       </template>
     </el-tree>
 
-    <div class="note">
-      <p>
+    <div class="belowTree">
+      <div style="margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; gap:8px;">
+          <el-switch v-model="service.state.autoDeleteIcons.value" />
+          Auto-delete icons
+        </div>
+        <div class="footnote">
+          When deleting an item, this option will also delete the item's icon,
+          unless that icon is still used somewhere else.
+        </div>
+      </div>
+
+      <p class="footnote">
         Drag elements to move them to a different folder.
       </p>
-      <p>
+      <p class="footnote">
         Empty folders won't be saved.
       </p>
     </div>
@@ -166,9 +176,12 @@ const props: EntityTreeProps = defineProps<EntityTreeProps>();
   display: block;
 }
 
-.note {
+.belowTree {
   margin-top: 48px;
   margin-bottom: 48px;
+}
+
+.footnote {
   font-size: 14px;
 }
 </style>

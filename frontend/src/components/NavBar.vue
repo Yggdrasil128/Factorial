@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { getModelSyncService, type ModelSyncService } from '@/services/model/modelSyncService';
+import { getModelSyncService, type UseModelSyncService } from '@/services/useModelSyncService';
 
 const localTime = ref('');
 
@@ -12,7 +12,7 @@ function updateLocalTime() {
 updateLocalTime();
 setInterval(updateLocalTime, 1000);
 
-const modelSyncService: ModelSyncService = getModelSyncService();
+const modelSyncService: UseModelSyncService = getModelSyncService();
 </script>
 
 <template>

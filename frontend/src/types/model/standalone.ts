@@ -131,6 +131,6 @@ export type Machine = {
   readonly gameId: number;
   name: string;
   iconId: number;
-  machineModifierId: number[];
+  machineModifierIds: number[];
   category: string[];
 }

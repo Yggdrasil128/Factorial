@@ -90,7 +90,6 @@ export function useModelSyncWebsocket(
 
   function onWebsocketMessage(event: MessageEvent): void {
     const message: WebsocketMessage = JSON.parse(event.data);
-    console.log(message);
 
     if (isInitialMessage(message)) {
       messageId.value = message.messageId;

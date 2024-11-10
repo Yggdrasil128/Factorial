@@ -85,16 +85,16 @@ async function submitForm(): Promise<void> {
   isSaving.value = true;
 
   if (route.name === 'newProductionStep') {
-    await productionStepApi.createProductionStep(productionStep.value);
+    await productionStepApi.create(productionStep.value);
   } else {
-    await productionStepApi.editProductionStep(productionStep.value);
+    await productionStepApi.edit(productionStep.value);
   }
 
   await router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
 }
 
 const recipes: ComputedRef<Recipe[]> = computed(() =>
-  recipeStore.getByGameId(currentGameAndSaveStore.game?.id)
+  recipeStore.getByGameId(currentGameAndSaveStore.currentGameId)
 );
 
 const recipe: ComputedRef<Recipe | undefined> = computed(() => {

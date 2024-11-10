@@ -4,7 +4,6 @@ import type { EntityWithOrdinal } from '@/types/model/basic';
 
 export interface SaveApi {
   retrieveAll(): Promise<Save[]>;
-
   reorder(input: EntityWithOrdinal[]): Promise<void>;
 }
 
@@ -21,6 +20,6 @@ export function useSaveApi(): SaveApi {
 
   return {
     retrieveAll,
-    reorder
+    reorder,
   };
 }

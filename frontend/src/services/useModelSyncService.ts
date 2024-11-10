@@ -49,23 +49,27 @@ import { useGameStore } from '@/stores/model/gameStore';
 import { useSaveApi } from '@/api/useSaveApi';
 import { useGameApi } from '@/api/useGameApi';
 import type { Game, Save } from '@/types/model/standalone';
+import { reactive } from 'vue';
+import _ from 'lodash';
 
-export interface ModelSyncService {
+export interface UseModelSyncService {
   setCurrentSaveIdAndLoad: (saveId: number) => Promise<void>;
   setEditingGameIdAndLoad: (gameId: number) => Promise<void>;
   clearEditingGameId: () => void;
   reload: () => Promise<void>;
 }
 
-function useModelSyncService(): ModelSyncService {
+function useModelSyncService(): UseModelSyncService {
   const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 
+  const storedSaveIds: Set<number> = reactive(new Set());
   const saveStore = useSaveStore();
   const changelistStore = useChangelistStore();
   const factoryStore = useFactoryStore();
   const productionStepStore = useProductionStepStore();
   const resourceStore = useResourceStore();
 
+  const storedGameIds: Set<number> = reactive(new Set());
   const gameStore = useGameStore();
   const iconStore = useIconStore();
   const itemStore = useItemStore();
@@ -160,6 +164,74 @@ function useModelSyncService(): ModelSyncService {
     }
   }
 
+  async function updateStores(fullReload?: boolean): Promise<void> {
+    const requiredGameIds: Set<number> = new Set();
+    const requiredSaveIds: Set<number> = new Set();
+
+    if (currentGameAndSaveStore.currentSaveId) {
+      requiredSaveIds.add(currentGameAndSaveStore.currentSaveId);
+    }
+    if (currentGameAndSaveStore.currentGameId) {
+      requiredGameIds.add(currentGameAndSaveStore.currentGameId);
+    }
+    if (currentGameAndSaveStore.editingGameId) {
+      requiredGameIds.add(currentGameAndSaveStore.editingGameId);
+
+      const saves: Save[] = saveStore.getByGameId(currentGameAndSaveStore.editingGameId);
+      for (const save of saves) {
+        requiredSaveIds.add(save.id);
+      }
+    }
+
+    // determine excess/missing games/saves
+
+    const excessGameIds: number[] = _.difference([...storedGameIds], [...requiredGameIds]);
+    const excessSaveIds: number[] = _.difference([...storedSaveIds], [...requiredSaveIds]);
+
+    let missingGameIds: number[];
+    let missingSaveIds: number[];
+
+    if (fullReload) {
+      missingGameIds = [...requiredGameIds];
+      missingSaveIds = [...requiredSaveIds];
+    } else {
+      missingGameIds = _.difference([...requiredGameIds], [...storedGameIds]);
+      missingSaveIds = _.difference([...requiredSaveIds], [...storedSaveIds]);
+    }
+
+    // load missing summaries
+
+    const gameSummaries: GameSummary[] = [];
+    for (const gameId of missingGameIds) {
+      gameSummaries.push(await summaryApi.getGameSummary(gameId));
+    }
+
+    const saveSummaries: SaveSummary[] = [];
+    for (const saveId of missingSaveIds) {
+      saveSummaries.push(await summaryApi.getSaveSummary(saveId));
+    }
+
+    // apply changes
+
+    for (const saveId of excessSaveIds) {
+      clearStoresBySaveId(saveId);
+      storedSaveIds.delete(saveId);
+    }
+    for (const gameId of excessGameIds) {
+      clearStoresByGameId(gameId);
+      storedGameIds.delete(gameId);
+    }
+
+    for (const gameSummary of gameSummaries) {
+      applyGameSummary(gameSummary);
+      storedGameIds.add(gameSummary.game.id);
+    }
+    for (const saveSummary of saveSummaries) {
+      applySaveSummary(saveSummary);
+      storedSaveIds.add(saveSummary.save.id);
+    }
+  }
+
   interface EntityWithOrdinalStore {
     map: Map<number, EntityWithOrdinal>;
   }
@@ -174,101 +246,32 @@ function useModelSyncService(): ModelSyncService {
   }
 
   async function setCurrentSaveIdAndLoad(saveId: number): Promise<void> {
-    const previousSaveId: number | undefined = currentGameAndSaveStore.save?.id;
-    const previousGameId: number | undefined = currentGameAndSaveStore.game?.id;
-
-    const saveSummary: SaveSummary = await summaryApi.getSaveSummary(saveId);
-    const gameSummary: GameSummary = await summaryApi.getGameSummary(saveSummary.save.gameId);
-
-    currentGameAndSaveStore.save = saveSummary.save;
-    currentGameAndSaveStore.game = gameSummary.game;
-    applySaveSummary(saveSummary);
-    applyGameSummary(gameSummary);
-
-    if (previousSaveId !== undefined && previousSaveId !== saveSummary.save.id) {
-      console.log('Current save ID changed, clearing entities from previous save');
-      clearStoresBySaveId(previousSaveId);
+    const save: Save | undefined = saveStore.getById(saveId);
+    if (!save) {
+      console.warn('Save with id ' + saveId + ' not found.');
+      return;
     }
 
-    if (previousGameId !== undefined
-      && previousGameId !== gameSummary.game.id
-      && previousGameId !== currentGameAndSaveStore.editingGame?.id
-    ) {
-      console.log('Current game ID changed, clearing entities from previous game');
-      clearStoresByGameId(previousGameId);
-    }
+    currentGameAndSaveStore.currentSaveId = saveId;
+    currentGameAndSaveStore.currentGameId = save.gameId;
+
+    await updateStores();
   }
 
   async function setEditingGameIdAndLoad(gameId: number): Promise<void> {
-    const previousEditingGameId: number | undefined = currentGameAndSaveStore.editingGame?.id;
+    currentGameAndSaveStore.editingGameId = gameId;
 
-    const gameSummary: GameSummary = await summaryApi.getGameSummary(gameId);
-
-    currentGameAndSaveStore.editingGame = gameSummary.game;
-    applyGameSummary(gameSummary);
-
-    if (previousEditingGameId !== undefined && previousEditingGameId !== gameSummary.game.id && previousEditingGameId !== currentGameAndSaveStore.game?.id) {
-      console.log('Current editing game ID changed, clearing entities from previous game');
-      clearStoresByGameId(previousEditingGameId);
-    }
+    await updateStores();
   }
 
   function clearEditingGameId(): void {
-    if (currentGameAndSaveStore.editingGame === undefined) return;
+    currentGameAndSaveStore.editingGameId = 0;
 
-    if (currentGameAndSaveStore.editingGame.id !== currentGameAndSaveStore.game?.id) {
-      console.log('Current editing game ID changed, clearing entities from previous game');
-      clearStoresByGameId(currentGameAndSaveStore.editingGame.id);
-    }
-
-    currentGameAndSaveStore.editingGame = undefined;
+    void updateStores();
   }
 
   async function reload(): Promise<void> {
-    let saveSummary: SaveSummary | undefined = undefined;
-    if (currentGameAndSaveStore.save) {
-      saveSummary = await summaryApi.getSaveSummary(currentGameAndSaveStore.save.id);
-    }
-
-    let gameSummary: GameSummary | undefined = undefined;
-    if (currentGameAndSaveStore.game) {
-      gameSummary = await summaryApi.getGameSummary(currentGameAndSaveStore.game.id);
-    }
-
-    let editingGameSummary: GameSummary | undefined = undefined;
-    if (currentGameAndSaveStore.editingGame
-      && currentGameAndSaveStore.editingGame.id !== currentGameAndSaveStore.game?.id
-    ) {
-      editingGameSummary = await summaryApi.getGameSummary(currentGameAndSaveStore.editingGame.id);
-    }
-
-    await reloadSavesAndGames();
-
-    changelistStore.map.clear();
-    factoryStore.map.clear();
-    productionStepStore.map.clear();
-    resourceStore.map.clear();
-
-    iconStore.map.clear();
-    itemStore.map.clear();
-    recipeStore.map.clear();
-    recipeModifierStore.map.clear();
-    machineStore.map.clear();
-
-    if (saveSummary) {
-      currentGameAndSaveStore.save = saveSummary.save;
-      applySaveSummary(saveSummary);
-    }
-
-    if (gameSummary) {
-      currentGameAndSaveStore.game = gameSummary.game;
-      applyGameSummary(gameSummary);
-    }
-
-    if (editingGameSummary) {
-      currentGameAndSaveStore.editingGame = editingGameSummary.game;
-      applyGameSummary(editingGameSummary);
-    }
+    await updateStores(true);
   }
 
   async function reloadSavesAndGames(): Promise<void> {
@@ -287,23 +290,31 @@ function useModelSyncService(): ModelSyncService {
   }
 
   function onWebsocketMessage(message: WebsocketMessage) {
-    console.log(message);
     if (isSaveUpdatedMessage(message)) {
       saveStore.map.set(message.save.id, message.save);
-    } else if (isSaveRemovedMessage(message)) {
-      saveStore.map.delete(message.saveId);
     } else if (isSavesReorderedMessage(message)) {
       applyOrder(saveStore, message.order);
+    } else if (isSaveRemovedMessage(message)) {
+      saveStore.map.delete(message.saveId);
+
+      if (currentGameAndSaveStore.currentSaveId === message.saveId) {
+        currentGameAndSaveStore.currentSaveId = 0;
+        currentGameAndSaveStore.currentGameId = 0;
+        void updateStores();
+      }
     } else if (isGameUpdatedMessage(message)) {
       gameStore.map.set(message.game.id, message.game);
-    } else if (isGameRemovedMessage(message)) {
-      gameStore.map.delete(message.gameId);
     } else if (isGamesReorderedMessage(message)) {
       applyOrder(gameStore, message.order);
-    } else if (isSaveRelatedModelChangedMessage(message)) {
-      if (message.saveId !== currentGameAndSaveStore.save?.id) {
-        return;
+    } else if (isGameRemovedMessage(message)) {
+      gameStore.map.delete(message.gameId);
+
+      if (currentGameAndSaveStore.currentGameId === message.gameId) {
+        currentGameAndSaveStore.currentSaveId = 0;
+        currentGameAndSaveStore.currentGameId = 0;
+        void updateStores();
       }
+    } else if (isSaveRelatedModelChangedMessage(message) && storedSaveIds.has(message.saveId)) {
 
       if (isFactoryUpdatedMessage(message)) {
         factoryStore.map.set(message.factory.id, message.factory);
@@ -329,10 +340,7 @@ function useModelSyncService(): ModelSyncService {
         applyOrder(resourceStore, message.order);
       }
 
-    } else if (isGameRelatedModelChangedMessage(message)) {
-      if (message.gameId !== currentGameAndSaveStore.game?.id && message.gameId !== currentGameAndSaveStore.editingGame?.id) {
-        return;
-      }
+    } else if (isGameRelatedModelChangedMessage(message) && storedGameIds.has(message.gameId)) {
 
       if (isIconUpdatedMessage(message)) {
         iconStore.map.set(message.icon.id, message.icon);
@@ -355,6 +363,7 @@ function useModelSyncService(): ModelSyncService {
       } else if (isMachineRemovedMessage(message)) {
         machineStore.map.delete(message.machineId);
       }
+
     }
   }
 
@@ -364,12 +373,12 @@ function useModelSyncService(): ModelSyncService {
     setCurrentSaveIdAndLoad,
     setEditingGameIdAndLoad,
     clearEditingGameId,
-    reload
+    reload,
   };
 }
 
-let modelSyncService: ModelSyncService | null = null;
-export const getModelSyncService: () => ModelSyncService = () => {
+let modelSyncService: UseModelSyncService | null = null;
+export const getModelSyncService: () => UseModelSyncService = () => {
   if (!modelSyncService) modelSyncService = useModelSyncService();
   return modelSyncService;
 };

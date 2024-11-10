@@ -21,12 +21,12 @@ const router = useRouter();
 const route = useRoute();
 
 const changelists: ComputedRef<Changelist[]> = computed(() => {
-  return changelistStore.getBySaveId(currentGameAndSaveStore.save?.id)
+  return changelistStore.getBySaveId(currentGameAndSaveStore.currentSaveId)
     .sort((a, b) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(changelists,
-  (input: EntityWithOrdinal[]) => changelistApi.reorder(currentGameAndSaveStore.save!.id, input)
+  (input: EntityWithOrdinal[]) => changelistApi.reorder(currentGameAndSaveStore.currentSaveId, input),
 );
 
 function newChangelist(): void {
@@ -41,7 +41,7 @@ function editChangelist(changelistId: number): void {
 }
 
 function deleteChangelist(changelistId: number): void {
-  changelistApi.deleteChangelist(changelistId);
+  changelistApi.delete(changelistId);
 }
 
 function setPrimary(changelistId: number): void {
@@ -78,7 +78,7 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
   }
   await changelistApi.apply(changelistId);
   if (!isPrimary && checked.value) {
-    await changelistApi.deleteChangelist(changelistId);
+    await changelistApi.delete(changelistId);
   }
 }
 </script>

@@ -15,5 +15,10 @@ export const useSaveStore
     return !saveId ? undefined : map.get(saveId);
   }
 
-  return { map, getAll, getById };
+  function getByGameId(gameId: number | undefined): Save[] {
+    if (!gameId) return [];
+    return getAll().filter(save => save.gameId === gameId);
+  }
+
+  return { map, getAll, getById, getByGameId };
 });

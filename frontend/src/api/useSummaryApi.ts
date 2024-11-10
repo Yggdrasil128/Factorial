@@ -19,6 +19,6 @@ export function useSummaryApi(): SummaryApi {
 
   return {
     getSaveSummary,
-    getGameSummary
+    getGameSummary,
   };
 }

@@ -20,11 +20,11 @@ const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const saveStore = useSaveStore();
 
 const isCurrentGame: ComputedRef<boolean> = computed(() =>
-  props.game.id === currentGameAndSaveStore.game?.id
+  props.game.id === currentGameAndSaveStore.currentGameId
 );
 
 const numberOfSaves: ComputedRef<number> = computed(() =>
-  saveStore.getAll().filter(save => save.gameId === props.game.id).length
+  saveStore.getByGameId(props.game.id).length
 );
 
 function openEditor(): void {

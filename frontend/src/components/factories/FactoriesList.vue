@@ -25,12 +25,12 @@ const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
 );
 
 const factories: ComputedRef<Factory[]> = computed(() => {
-  return factoryStore.getBySaveId(currentGameAndSaveStore.save?.id)
+  return factoryStore.getBySaveId(currentGameAndSaveStore.currentSaveId)
     .sort((a, b) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(factories,
-  (input: EntityWithOrdinal[]) => factoryApi.reorder(currentGameAndSaveStore.save!.id, input)
+  (input: EntityWithOrdinal[]) => factoryApi.reorder(currentGameAndSaveStore.currentSaveId, input),
 );
 
 function newFactory(): void {
@@ -66,7 +66,7 @@ watch(computed(() => factories.value.length), () => {
 }, { immediate: true });
 
 function deleteFactory(factoryId: number) {
-  factoryApi.deleteFactory(factoryId);
+  factoryApi.delete(factoryId);
 }
 </script>
 

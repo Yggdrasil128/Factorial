@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getModelSyncService } from '@/services/model/modelSyncService';
+import { getModelSyncService } from '@/services/useModelSyncService';
 import {
   onBeforeRouteLeave,
   onBeforeRouteUpdate,

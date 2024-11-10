@@ -55,6 +55,17 @@ export function useApi(): Api {
     get,
     post,
     patch,
-    'delete': delete_
+    delete: delete_,
   };
+}
+
+export interface CrudEntityApi<T> {
+  create: (entity: Partial<T>) => Promise<void>;
+  edit: (entity: Partial<T>) => Promise<void>;
+  delete: (entityId: number) => Promise<void>;
+}
+
+export interface BulkCrudEntityApi<T> extends CrudEntityApi<T> {
+  bulkEdit: (entities: Partial<T>[]) => Promise<void>;
+  bulkDelete: (entityIds: number[]) => Promise<void>;
 }

@@ -4,7 +4,6 @@ import type { EntityWithOrdinal } from '@/types/model/basic';
 
 export interface GameApi {
   retrieveAll(): Promise<Game[]>;
-
   reorder(input: EntityWithOrdinal[]): Promise<void>;
 }
 
@@ -21,6 +20,6 @@ export function useGameApi(): GameApi {
 
   return {
     retrieveAll,
-    reorder
+    reorder,
   };
 }

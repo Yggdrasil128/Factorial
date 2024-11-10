@@ -13,6 +13,6 @@ export function useResourceApi(): ResourceApi {
   }
 
   return {
-    reorder
+    reorder,
   };
 }

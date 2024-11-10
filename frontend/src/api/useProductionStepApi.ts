@@ -4,9 +4,9 @@ import type { ProductionStep } from '@/types/model/standalone';
 import { ElMessage } from 'element-plus';
 
 export interface ProductionStepApi {
-  createProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
-  editProductionStep(productionStep: Partial<ProductionStep>): Promise<void>;
-  deleteProductionStep(productionStepId: number): Promise<void>;
+  create(productionStep: Partial<ProductionStep>): Promise<void>;
+  edit(productionStep: Partial<ProductionStep>): Promise<void>;
+  delete(productionStepId: number): Promise<void>;
   applyPrimaryChangelist(productionStepId: number): Promise<void>;
   updateMachineCount(productionStepId: number, machineCount: Fraction): Promise<void>;
 }
@@ -14,21 +14,21 @@ export interface ProductionStepApi {
 export function useProductionStepApi(): ProductionStepApi {
   const api: Api = useApi();
 
-  async function createProductionStep(productionStep: Partial<ProductionStep>): Promise<void> {
+  async function create(productionStep: Partial<ProductionStep>): Promise<void> {
     return api.post('/api/factory/productionSteps', productionStep, { factoryId: productionStep.factoryId })
       .then(() => {
         ElMessage.success({ message: 'Production step created.' });
       });
   }
 
-  async function editProductionStep(productionStep: Partial<ProductionStep>): Promise<void> {
+  async function edit(productionStep: Partial<ProductionStep>): Promise<void> {
     return api.patch('/api/productionStep', productionStep, { productionStepId: productionStep.id })
       .then(() => {
         ElMessage.success({ message: 'Production step updated.' });
       });
   }
 
-  async function deleteProductionStep(productionStepId: number): Promise<void> {
+  async function delete_(productionStepId: number): Promise<void> {
     return api.delete('/api/productionStep', { productionStepId: productionStepId })
       .then(() => {
         ElMessage.success({ message: 'Production step deleted.' });
@@ -44,10 +44,10 @@ export function useProductionStepApi(): ProductionStepApi {
   }
 
   return {
-    createProductionStep,
-    editProductionStep,
-    deleteProductionStep,
+    create,
+    edit,
+    delete: delete_,
     applyPrimaryChangelist,
-    updateMachineCount
+    updateMachineCount,
   };
 }

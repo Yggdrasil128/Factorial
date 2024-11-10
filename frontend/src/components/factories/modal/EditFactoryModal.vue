@@ -35,7 +35,7 @@ const formRules = reactive({
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
   if (route.name === 'newFactory') {
     factory.value = {
-      saveId: currentGameAndSaveStore.save?.id,
+      saveId: currentGameAndSaveStore.currentSaveId,
       name: '',
       description: '',
       iconId: 0
@@ -72,9 +72,9 @@ async function submitForm(): Promise<void> {
   isSaving.value = true;
 
   if (route.name === 'newFactory') {
-    await factoryApi.createFactory(factory.value);
+    await factoryApi.create(factory.value);
   } else {
-    await factoryApi.editFactory(factory.value);
+    await factoryApi.edit(factory.value);
   }
 
   await router.push({ name: 'factories', params: { factoryId: route.params.factoryId } });
@@ -103,7 +103,7 @@ async function submitForm(): Promise<void> {
 
       <el-form-item label="Icon">
         <CascaderSelect v-model="factory.iconId!"
-                        :options="iconStore.getByGameId(currentGameAndSaveStore.game?.id)"
+                        :options="iconStore.getByGameId(currentGameAndSaveStore.currentGameId)"
                         is-icon-entity
                         clearable
                         style="width: 100%;" />

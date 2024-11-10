@@ -7,7 +7,7 @@ import { ElButton, ElButtonGroup, ElMessage, ElPopconfirm, ElTooltip } from 'ele
 import { useGameStore } from '@/stores/model/gameStore';
 import { computed, type ComputedRef, type Ref, ref } from 'vue';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { getModelSyncService } from '@/services/model/modelSyncService';
+import { getModelSyncService } from '@/services/useModelSyncService';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 
 export interface SaveCardProps {
@@ -20,7 +20,7 @@ const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const gameStore = useGameStore();
 const modelSyncService = getModelSyncService();
 
-const isCurrentSave: ComputedRef<boolean> = computed(() => props.save.id === currentGameAndSaveStore.save?.id);
+const isCurrentSave: ComputedRef<boolean> = computed(() => props.save.id === currentGameAndSaveStore.currentSaveId);
 
 const game: ComputedRef<Game | undefined> = computed(() => gameStore.getById(props.save.gameId));
 

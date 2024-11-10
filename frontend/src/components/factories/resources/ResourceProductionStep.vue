@@ -70,7 +70,7 @@ function editProductionStep(): void {
 }
 
 function deleteProductionStep(): void {
-  productionStepApi.deleteProductionStep(props.productionStep.id);
+  productionStepApi.delete(props.productionStep.id);
 }
 
 </script>

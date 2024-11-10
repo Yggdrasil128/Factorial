@@ -11,6 +11,7 @@ import { useIconStore } from '@/stores/model/iconStore';
 import IconUpload from '@/components/gameEditor/IconUpload.vue';
 import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import { useItemApi } from '@/api/useItemApi';
+import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 
 export interface ItemEditorProps {
   game: Game;
@@ -20,8 +21,8 @@ const props: ItemEditorProps = defineProps<ItemEditorProps>();
 
 const itemStore = useItemStore();
 const iconStore = useIconStore();
-
 const itemApi = useItemApi();
+const entityUsageService = useEntityUsagesService();
 
 const items: ComputedRef<Item[]> = computed(() => itemStore.getByGameId(props.game.id));
 
@@ -48,13 +49,9 @@ const service: EntityTreeService<Item> = useEntityTreeService(
     };
   },
   () => form.value.validate(() => ({})),
-  {
-    createEntity: itemApi.createItem,
-    editEntity: itemApi.editItem,
-    deleteEntity: itemApi.deleteItem,
-    bulkEditEntities: () => Promise.resolve(),
-    bulkDeleteEntities: () => Promise.resolve(),
-  },
+  () => folderForm.value.validate(() => ({})),
+  entityUsageService.findItemUsages,
+  itemApi,
 );
 
 const form = ref();
@@ -77,6 +74,10 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
   ],
 }));
 
+const folderForm = ref();
+const folderFormRules: FormRules = {
+  name: [{ required: true, message: 'Please enter a name for the folder.', trigger: 'change' }],
+};
 
 </script>
 
@@ -170,10 +171,37 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
           </div>
         </template>
         <template v-else-if="service.state.editingFolderPath.value !== undefined">
-
           <div class="formContainer">
-            <h2 v-if="service.state.editingFolderIsNew.value">New folder</h2>
-            <h2 v-else>Edit folder '{{ service.state.editingFolderOriginalName.value }}'</h2>
+            <h2 v-if="service.state.editingFolderOriginalModel.value.name === ''">New folder</h2>
+            <h2 v-else>Edit folder '{{ service.state.editingFolderOriginalModel.value.name }}'</h2>
+
+            <el-form label-width="120px"
+                     :model="service.state.editingFolderModel.value"
+                     ref="folderForm"
+                     :rules="folderFormRules"
+            >
+              <el-form-item label="Folder name" prop="name">
+                <el-input v-model="service.state.editingFolderModel.value.name" />
+              </el-form-item>
+
+              <el-form-item label="Path">
+                {{ service.state.editingEntityDisplayPath.value }}
+                {{ service.state.editingFolderModel.value.name }}
+              </el-form-item>
+
+              <div class="formFooter">
+                <el-button :icon="Close"
+                           :disabled="service.state.isSaving.value"
+                           @click="service.cancel">
+                  Cancel
+                </el-button>
+                <el-button type="primary" :icon="Check"
+                           :loading="service.state.isSaving.value"
+                           @click="service.saveFolder">
+                  Save
+                </el-button>
+              </div>
+            </el-form>
           </div>
         </template>
       </div>

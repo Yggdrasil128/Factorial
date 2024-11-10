@@ -16,6 +16,8 @@ export function useDraggableSupport(list: ComputedRef<EntityWithOrdinal[]>,
   async function onDragEnd(event: DragEndEvent): Promise<void> {
     if (event.newIndex === event.oldIndex) return;
 
+    // TODO fix bug
+
     const list2: EntityWithOrdinal[] = [...list.value];
     const changed: EntityWithOrdinal[] = [];
 
