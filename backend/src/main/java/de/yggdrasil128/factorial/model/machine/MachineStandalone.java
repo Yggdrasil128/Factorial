@@ -12,6 +12,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 public record MachineStandalone(@JsonProperty(access = READ_ONLY) int id,
                                 @JsonProperty(access = READ_ONLY) int gameId,
                                 String name,
+                                String description,
                                 Object iconId,
                                 List<Object> machineModifierIds,
                                 List<String> category) {
@@ -21,7 +22,7 @@ public record MachineStandalone(@JsonProperty(access = READ_ONLY) int id,
     }
 
     public static MachineStandalone of(Machine model, External destination) {
-        return new MachineStandalone(model.getId(), model.getGame().getId(), model.getName(),
+        return new MachineStandalone(model.getId(), model.getGame().getId(), model.getName(), model.getDescription(),
                 NamedModel.resolve(model.getIcon(), destination),
                 NamedModel.resolve(model.getMachineModifiers(), destination), new ArrayList<>(model.getCategory()));
     }

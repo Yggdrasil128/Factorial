@@ -8,6 +8,8 @@ import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class RecipeModifier implements NamedModel {
@@ -31,6 +33,8 @@ public class RecipeModifier implements NamedModel {
     @Column(nullable = false)
     @Convert(converter = FractionConverter.class)
     private Fraction outputQuantityMultiplier = Fraction.ONE;
+    @ElementCollection
+    private List<String> category;
 
     public RecipeModifier() {
     }
@@ -46,6 +50,7 @@ public class RecipeModifier implements NamedModel {
         OptionalInputField.of(standalone.durationMultiplier()).apply(this::setDurationMultiplier);
         OptionalInputField.of(standalone.inputQuantityMultiplier()).apply(this::setInputQuantityMultiplier);
         OptionalInputField.of(standalone.outputQuantityMultiplier()).apply(this::setOutputQuantityMultiplier);
+        OptionalInputField.of(standalone.category()).apply(this::setCategory);
     }
 
     @Override
@@ -116,6 +121,14 @@ public class RecipeModifier implements NamedModel {
 
     public Fraction getOutputSpeedMultiplier() {
         return outputQuantityMultiplier.divide(durationMultiplier);
+    }
+
+    public List<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(List<String> category) {
+        this.category = category;
     }
 
     @Override
