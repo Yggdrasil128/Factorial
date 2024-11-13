@@ -139,7 +139,7 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.recipes = recipeStore.getAll()
-      .filter(recipe => recipe.applicableMachineIds.indexOf(machineId) > 0);
+      .filter(recipe => recipe.applicableMachineIds.includes(machineId));
     usages.productionSteps = productionStepStore.getAll()
       .filter(productionStep => productionStep.machineId === machineId);
 
@@ -159,11 +159,11 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.machines = machineStore.getAll()
-      .filter(machine => machine.machineModifierIds.indexOf(recipeModifierId) > 0);
+      .filter(machine => machine.machineModifierIds.includes(recipeModifierId));
     usages.recipes = recipeStore.getAll()
-      .filter(recipe => recipe.applicableModifierIds.indexOf(recipeModifierId) > 0);
+      .filter(recipe => recipe.applicableModifierIds.includes(recipeModifierId));
     usages.productionSteps = productionStepStore.getAll()
-      .filter(productionStep => productionStep.modifierIds.indexOf(recipeModifierId) > 0);
+      .filter(productionStep => productionStep.modifierIds.includes(recipeModifierId));
 
     return usages;
   }

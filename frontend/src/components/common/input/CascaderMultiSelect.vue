@@ -4,6 +4,7 @@ import { useVModel } from '@vueuse/core';
 import IconImg from '@/components/common/IconImg.vue';
 import { convertToTreeByCategory, type EntityWithCategory, type TreeNode } from '@/utils/treeUtils';
 import type { CascaderProps } from 'element-plus';
+import type Node from 'element-plus/es/components/tree/src/model/node';
 
 export interface CascaderSelectProps {
   modelValue: number[];
@@ -50,6 +51,16 @@ function getLeafCount(node: any) {
 
 const cascaderProps: CascaderProps = { multiple: true };
 
+function onLeafNodeClick(node: Node): void {
+  const id: number = node.data.id;
+  const index: number = model.value.indexOf(id);
+  if (index >= 0) {
+    model.value.splice(index, 1);
+  } else {
+    model.value.push(id);
+  }
+}
+
 </script>
 
 <template>
@@ -65,10 +76,10 @@ const cascaderProps: CascaderProps = { multiple: true };
     :props="cascaderProps">
     <template #default="{ node, data }">
       <template v-if="node.isLeaf">
-        <div style="height: 36px; display: flex;">
-        <span style="margin-right: 8px;">
-          <IconImg :icon="data.iconId" :size="32" />
-        </span>
+        <div style="height: 36px; display: flex;" @click="onLeafNodeClick(node)">
+          <span style="margin-right: 8px;">
+            <IconImg :icon="data.iconId" :size="32" />
+          </span>
           <span>{{ data.label }}</span>
         </div>
       </template>

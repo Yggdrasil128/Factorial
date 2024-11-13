@@ -367,7 +367,7 @@ function useModelSyncService(): UseModelSyncService {
     }
   }
 
-  void reloadSavesAndGames();
+  void reloadSavesAndGames().then(() => updateStores());
 
   return {
     setCurrentSaveIdAndLoad,
