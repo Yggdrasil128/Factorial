@@ -25,7 +25,7 @@ export function useMachineApi(): MachineApi {
   }
 
   async function delete_(machineId: number): Promise<void> {
-    return api.delete('/api/machine', { itemId: machineId })
+    return api.delete('/api/machine', { machineId: machineId })
       .then(() => {
         ElMessage.success({ message: 'Machine deleted.' });
       });

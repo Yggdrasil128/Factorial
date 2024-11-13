@@ -120,7 +120,8 @@ function getRecipeIconId(recipeId: number): number {
                       <el-tooltip :content="service.getButtonTooltip('Delete ' + entityName)"
                                   effect="dark" placement="top" transition="none" :hide-after="0">
                         <el-button type="danger" :icon="Delete"
-                                   :disabled="service.state.editingHasChanges.value" />
+                                   :disabled="service.state.editingHasChanges.value"
+                                   @click="(event: PointerEvent) => service.checkDeleteEntity(data.id, event)" />
                       </el-tooltip>
                     </span>
                   </template>

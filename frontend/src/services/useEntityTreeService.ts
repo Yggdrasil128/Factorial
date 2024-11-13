@@ -51,6 +51,7 @@ export interface EntityTreeService<T extends EntityWithCategory> {
   createNewEntityAtNode: (node: Node) => void;
   editEntity: (id: number) => void;
   deleteEntity: (id: number) => void;
+  checkDeleteEntity: (id: number, event: PointerEvent) => void;
 
   createNewFolderAtRoot: () => void;
   createNewFolderAtNode: (node: Node) => void;
@@ -260,6 +261,18 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     selectedIconOption.value = entity.iconId ? 'select' : 'none';
     editingEntityIconDataBase64.value = '';
+  }
+
+  function checkDeleteEntity(id: number, event: PointerEvent): void {
+    const entityUsages: EntityUsages = findEntityUsages(id);
+    if (entityUsages.hasAnyUsages()) {
+      const entity: T | undefined = entities.value.filter(e => e.id == id)[0];
+      entityUsages.showMessageBox(
+        'Cannot delete ' + entityType.toLowerCase() + ' \'' + (entity?.name ?? '') + '\'.',
+        'The ' + entityType.toLowerCase() + ' is still being used in the following places:',
+      );
+      event.stopPropagation();
+    }
   }
 
   async function deleteEntity(id: number): Promise<void> {
@@ -601,6 +614,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     createNewEntityAtNode,
     editEntity,
     deleteEntity,
+    checkDeleteEntity,
 
     createNewFolderAtRoot,
     createNewFolderAtNode,
