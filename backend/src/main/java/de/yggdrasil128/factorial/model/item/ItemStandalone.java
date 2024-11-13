@@ -9,7 +9,7 @@ import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
-public record ItemStandalone(@JsonProperty(access = READ_ONLY) int id,
+public record ItemStandalone(int id,
                              @JsonProperty(access = READ_ONLY) int gameId,
                              String name,
                              String description,

@@ -8,7 +8,7 @@ import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
-public record ChangelistStandalone(@JsonProperty(access = READ_ONLY) int id,
+public record ChangelistStandalone(int id,
                                    @JsonProperty(access = READ_ONLY) int saveId,
                                    Integer ordinal,
                                    String name,

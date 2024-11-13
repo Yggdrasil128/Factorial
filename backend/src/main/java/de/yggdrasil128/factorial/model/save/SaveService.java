@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class SaveService extends ModelService<Save, SaveRepository> {
+public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRepository> {
 
     private final ApplicationEventPublisher events;
     private final GameService gameService;
@@ -39,15 +39,23 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         this.changelistService = changelistService;
     }
 
-    @Transactional
-    public void create(SaveStandalone standalone, CompletableFuture<Void> result) {
+    @Override
+    protected int getEntityId(Save save) {
+        return save.getId();
+    }
+
+    @Override
+    protected int getStandaloneId(SaveStandalone standalone) {
+        return standalone.id();
+    }
+
+    @Override
+    protected Save prepareCreate(SaveStandalone standalone) {
         Game game = gameService.get((int) standalone.gameId());
         Save save = new Save(game, standalone);
         applyRelations(save, standalone);
-        AsyncHelper.complete(result);
         inferOrdinal(save);
-        save = create(save);
-        events.publishEvent(new SaveUpdatedEvent(save));
+        return save;
     }
 
     private void inferOrdinal(Save save) {
@@ -56,12 +64,40 @@ public class SaveService extends ModelService<Save, SaveRepository> {
         }
     }
 
+    @Override
+    protected void handleBulkCreate(Iterable<Save> saves) {
+        for (Save save : saves) {
+            events.publishEvent(new SaveUpdatedEvent(save));
+        }
+    }
+
+    @Override
+    protected void prepareUpdate(Save game, SaveStandalone standalone) {
+        game.applyBasics(standalone);
+        applyRelations(game, standalone);
+    }
+
+    private void applyRelations(Save save, SaveStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(save::setIcon);
+    }
+
+    @Override
+    protected void handleUpdate(Save save) {
+        events.publishEvent(new SaveUpdatedEvent(save));
+    }
+
+    @Override
+    protected void handleDelete(int id) {
+        events.publishEvent(new SaveRemovedEvent(id));
+    }
+
     @Transactional
     public void doImport(SaveSummary summary, CompletableFuture<Void> result) {
         String gameName = (String) summary.getSave().gameId();
         Game game = gameService.get(gameName).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                 "save requires the game '" + gameName + "' to be installed"));
-        create(Importer.importSave(summary, game));
+        AsyncHelper.complete(result);
+        repository.save(Importer.importSave(summary, game));
     }
 
     @Transactional
@@ -100,27 +136,6 @@ public class SaveService extends ModelService<Save, SaveRepository> {
             }
         }
         events.publishEvent(new SavesReorderedEvent(saves));
-    }
-
-    @Transactional
-    public void update(int id, SaveStandalone standalone, CompletableFuture<Void> result) {
-        Save save = get(id);
-        save.applyBasics(standalone);
-        applyRelations(save, standalone);
-        AsyncHelper.complete(result);
-        update(save);
-        events.publishEvent(new SaveUpdatedEvent(save));
-    }
-
-    private void applyRelations(Save save, SaveStandalone standalone) {
-        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(save::setIcon);
-    }
-
-    @Transactional
-    public void delete(int id, CompletableFuture<Void> result) {
-        AsyncHelper.complete(result);
-        delete(id);
-        events.publishEvent(new SaveRemovedEvent(id));
     }
 
 }

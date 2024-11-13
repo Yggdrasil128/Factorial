@@ -1,10 +1,7 @@
 package de.yggdrasil128.factorial.model.resource;
 
 import de.yggdrasil128.factorial.engine.ResourceContributions;
-import de.yggdrasil128.factorial.model.AsyncHelper;
-import de.yggdrasil128.factorial.model.EntityPosition;
-import de.yggdrasil128.factorial.model.ModelService;
-import de.yggdrasil128.factorial.model.OptionalInputField;
+import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryRepository;
 import de.yggdrasil128.factorial.model.item.ItemService;
@@ -20,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class ResourceService extends ModelService<Resource, ResourceRepository> {
+public class ResourceService extends ParentedModelService<Resource, ResourceStandalone, Factory, ResourceRepository> {
 
     private final ApplicationEventPublisher events;
     private final FactoryRepository factoryRepository;
@@ -35,21 +32,36 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         this.itemService = itemService;
     }
 
-    @Transactional
-    public void create(int factoryId, ResourceStandalone standalone, CompletableFuture<Void> result) {
-        Factory factory = factoryRepository.findById(factoryId).orElseThrow(ModelService::reportNotFound);
-        Resource resource = new Resource(factory, standalone);
-        applyRelations(resource, standalone);
-        AsyncHelper.complete(result);
-        inferOrdinal(factory, resource);
-        resource = create(resource);
-        factory.getResources().add(resource);
-        factoryRepository.save(factory);
-        events.publishEvent(new ResourceUpdatedEvent(resource, false));
+    @Override
+    protected int getEntityId(Resource resource) {
+        return resource.getId();
     }
 
-    private void applyRelations(Resource resource, ResourceStandalone standalone) {
+    @Override
+    protected int getStandaloneId(ResourceStandalone standalone) {
+        return standalone.id();
+    }
+
+    @Override
+    protected Factory getParentEntity(int parentId) {
+        return factoryRepository.findById(parentId).orElseThrow(ModelService::reportNotFound);
+    }
+
+    @Override
+    protected Resource prepareCreate(Factory factory, ResourceStandalone standalone) {
+        Resource resource = new Resource(factory, standalone);
         OptionalInputField.ofId(standalone.itemId(), itemService::get).apply(resource::setItem);
+        inferOrdinal(factory, resource);
+        return resource;
+    }
+
+    @Override
+    protected void handleBulkCreate(Factory factory, Iterable<Resource> resources) {
+        for (Resource resource : resources) {
+            factory.getResources().add(resource);
+            events.publishEvent(new ResourceUpdatedEvent(resource, false));
+        }
+        factoryRepository.save(factory);
     }
 
     public ResourceContributions spawn(int factoryId, int itemId) {
@@ -58,7 +70,7 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         resource.setFactory(factory);
         resource.setItem(itemService.get(itemId));
         inferOrdinal(factory, resource);
-        resource = create(resource);
+        resource = repository.save(resource);
         factory.getResources().add(resource);
         /*
          * We are called exclusively from ProductionLineService#spawn(), which will then take care of further
@@ -78,6 +90,43 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
         return cache.computeIfAbsent(resource.getId(), key -> new ResourceContributions(resource));
     }
 
+    @Override
+    protected void prepareUpdate(Resource resource, ResourceStandalone standalone) {
+        if (null != standalone.itemId() && (int) standalone.itemId() != resource.getItem().getId()) {
+            throw report(HttpStatus.NOT_IMPLEMENTED, "cannot change item of a resource");
+        }
+        resource.applyBasics(standalone);
+    }
+
+    @Override
+    protected void handleUpdate(Resource resource) {
+        events.publishEvent(new ResourceUpdatedEvent(resource, false));
+    }
+
+    public void updateContributions(ResourceContributions contributions) {
+        events.publishEvent(new ResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
+    }
+
+    @Override
+    protected Factory findParentEntity(int id) {
+        Factory factory = factoryRepository.findByResourcesId(id);
+        if (null == factory) {
+            throw report(HttpStatus.CONFLICT, "resource does not belong to a factory");
+        }
+        return factory;
+    }
+
+    @Override
+    protected void handleDelete(Factory factory, int id) {
+        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
+    }
+
+    public void destroy(Factory factory, int id) {
+        repository.deleteById(id);
+        cache.remove(id);
+        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
+    }
+
     @Transactional
     public void reorder(int factoryId, List<EntityPosition> input, CompletableFuture<Void> result) {
         Factory factory = factoryRepository.findById(factoryId).orElseThrow(ModelService::reportNotFound);
@@ -93,28 +142,6 @@ public class ResourceService extends ModelService<Resource, ResourceRepository> 
             }
         }
         events.publishEvent(new ResourcesReorderedEvent(factory.getSave().getId(), resources));
-    }
-
-    public void updateContributions(ResourceContributions contributions) {
-        events.publishEvent(new ResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
-    }
-
-    @Transactional
-    public void update(int id, ResourceStandalone standalone, CompletableFuture<Void> result) {
-        Resource resource = get(id);
-        if (null != standalone.itemId() && (int) standalone.itemId() != resource.getItem().getId()) {
-            throw report(HttpStatus.NOT_IMPLEMENTED, "cannot change item of a resource");
-        }
-        resource.applyBasics(standalone);
-        AsyncHelper.complete(result);
-        resource = update(resource);
-        events.publishEvent(new ResourceUpdatedEvent(resource, false));
-    }
-
-    public void delete(Factory factory, int id) {
-        delete(id);
-        cache.remove(id);
-        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
     }
 
     @EventListener

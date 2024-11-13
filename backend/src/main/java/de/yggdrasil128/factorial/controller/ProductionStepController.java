@@ -36,7 +36,7 @@ public class ProductionStepController {
 
     @PostMapping("/factory/productionSteps")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int factoryId, @RequestBody ProductionStepStandalone input) {
+    public CompletableFuture<Void> create(int factoryId, @RequestBody List<ProductionStepStandalone> input) {
         return asyncHelper.submit(result -> productionStepService.create(factoryId, input, result));
     }
 
@@ -50,16 +50,16 @@ public class ProductionStepController {
         return toOutput(productionStepService.get(productionStepId));
     }
 
-    @PatchMapping("/productionStep")
+    @PatchMapping("/productionSteps")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int productionStepId, @RequestBody ProductionStepStandalone input) {
-        return asyncHelper.submit(result -> productionStepService.update(productionStepId, input, result));
+    public CompletableFuture<Void> update(@RequestBody List<ProductionStepStandalone> input) {
+        return asyncHelper.submit(result -> productionStepService.update(input, result));
     }
 
-    @DeleteMapping("/productionStep")
+    @DeleteMapping("/productionSteps")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int productionStepId) {
-        return asyncHelper.submit(result -> productionStepService.delete(productionStepId, result));
+    public CompletableFuture<Void> delete(List<Integer> productionStepIds) {
+        return asyncHelper.submit(result -> productionStepService.delete(productionStepIds, result));
     }
 
     /**

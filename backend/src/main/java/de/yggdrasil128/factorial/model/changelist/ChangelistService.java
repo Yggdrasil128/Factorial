@@ -22,7 +22,8 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class ChangelistService extends ModelService<Changelist, ChangelistRepository> {
+public class ChangelistService
+        extends ParentedModelService<Changelist, ChangelistStandalone, Save, ChangelistRepository> {
 
     private final ApplicationEventPublisher events;
     private final SaveRepository saveRepository;
@@ -42,25 +43,126 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         this.productionStepService = productionStepService;
     }
 
-    @Transactional
-    public void create(int saveId, ChangelistStandalone standalone, CompletableFuture<Void> result) {
-        Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
+    @Override
+    protected int getEntityId(Changelist changelist) {
+        return changelist.getId();
+    }
+
+    @Override
+    protected int getStandaloneId(ChangelistStandalone standalone) {
+        return standalone.id();
+    }
+
+    @Override
+    protected Save getParentEntity(int parentId) {
+        return saveRepository.findById(parentId).orElseThrow(ModelService::reportNotFound);
+    }
+
+    @Override
+    protected Changelist prepareCreate(Save save, ChangelistStandalone standalone) {
         Changelist changelist = new Changelist(save, standalone);
         applyRelations(changelist, standalone);
         inferOrdinal(save, changelist);
-        changelist = create(changelist);
-        if (changelist.isPrimary()) {
-            handleNewPrimaryChangelist(changelist).forEach(this::publishProductionStepThroughputsChanged);
-        }
-        save.getChangelists().add(changelist);
-        saveRepository.save(save);
-        events.publishEvent(new ChangelistUpdatedEvent(changelist));
+        return changelist;
     }
 
     private static void inferOrdinal(Save save, Changelist changelist) {
         if (0 >= changelist.getOrdinal()) {
             changelist.setOrdinal(save.getChangelists().stream().mapToInt(Changelist::getOrdinal).max().orElse(0) + 1);
         }
+    }
+
+    @Override
+    protected void handleBulkCreate(Save save, Iterable<Changelist> changelists) {
+        for (Changelist changelist : changelists) {
+            if (changelist.isPrimary()) {
+                handleNewPrimaryChangelist(changelist).forEach(this::publishProductionStepThroughputsChanged);
+            }
+            save.getChangelists().add(changelist);
+            events.publishEvent(new ChangelistUpdatedEvent(changelist));
+        }
+        saveRepository.save(save);
+    }
+
+    @Override
+    protected void prepareUpdate(Changelist changelist, ChangelistStandalone standalone) {
+        if (changelist.isPrimary()) {
+            if (Boolean.FALSE.equals(standalone.primary())) {
+                throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
+            }
+            if (Boolean.FALSE.equals(standalone.active())) {
+                throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
+            }
+        }
+        changelist.applyBasics(standalone);
+        applyRelations(changelist, standalone);
+    }
+
+    private void applyRelations(Changelist changelist, ChangelistStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(changelist::setIcon);
+        OptionalInputField.of(standalone.productionStepChanges())
+                .apply(list -> changelist.setProductionStepChanges(list.stream()
+                        .collect(toMap(change -> productionStepService.get((int) change.productionStepId()),
+                                ProductionStepChangeStandalone::change))));
+    }
+
+    @Override
+    protected void handleUpdate(Changelist changelist) {
+        Map<Integer, ProductionStepThroughputs> collectThroughputs = new HashMap<>();
+        if (changelist.isPrimary()) {
+            handleNewPrimaryChangelist(changelist)
+                    .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
+        }
+        ProductionStepChanges changes = cache.remove(changelist.getId());
+        if (null != changes) {
+            changes.undo()
+                    .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
+        }
+        computeProductionStepChanges(changelist, true)
+                .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
+        collectThroughputs.values().forEach(this::publishProductionStepThroughputsChanged);
+        events.publishEvent(new ChangelistUpdatedEvent(changelist));
+    }
+
+    private Collection<ProductionStepThroughputs> handleNewPrimaryChangelist(Changelist changelist) {
+        Changelist oldPrimary = repository.findBySaveIdAndIdNotAndPrimaryIsTrue(changelist.getSave().getId(),
+                changelist.getId());
+        if (null == oldPrimary) {
+            return Collections.emptyList();
+        }
+        ProductionStepChanges changes = computeProductionStepChanges(oldPrimary);
+        oldPrimary.setPrimary(false);
+        repository.save(oldPrimary);
+        events.publishEvent(new ChangelistUpdatedEvent(oldPrimary));
+        return changes.deactivatePrimary();
+    }
+
+    @Override
+    public void delete(List<Integer> ids, CompletableFuture<Void> result) {
+        for (Integer id : ids) {
+            if (repository.existsByIdAndPrimaryIsTrue(id)) {
+                throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
+            }
+        }
+        super.delete(ids, result);
+    }
+
+    @Override
+    protected Save findParentEntity(int id) {
+        Save save = saveRepository.findByChangelistsId(id);
+        if (null == save) {
+            throw report(HttpStatus.CONFLICT, "changelist does not belong to a save");
+        }
+        return save;
+    }
+
+    @Override
+    protected void handleDelete(Save save, int id) {
+        ProductionStepChanges changes = cache.remove(id);
+        if (null != changes) {
+            changes.undo().forEach(this::publishProductionStepThroughputsChanged);
+        }
+        events.publishEvent(new ChangelistRemovedEvent(save.getId(), id));
     }
 
     public ProductionStepChanges computeProductionStepChanges(Changelist changelist) {
@@ -115,6 +217,7 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
     public void reorder(int saveId, List<EntityPosition> input, CompletableFuture<Void> result) {
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
         Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
+        AsyncHelper.complete(result);
         Collection<Changelist> changelists = new ArrayList<>();
         for (Changelist changelist : save.getChangelists()) {
             Integer ordinal = order.get(changelist.getId());
@@ -127,58 +230,6 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         events.publishEvent(new ChangelistsReorderedEvent(save.getId(), changelists));
     }
 
-    @Transactional
-    public void update(int id, ChangelistStandalone standalone, CompletableFuture<Void> result) {
-        Changelist changelist = get(id);
-        if (changelist.isPrimary()) {
-            if (Boolean.FALSE.equals(standalone.primary())) {
-                throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
-            }
-            if (Boolean.FALSE.equals(standalone.active())) {
-                throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
-            }
-        }
-        changelist.applyBasics(standalone);
-        applyRelations(changelist, standalone);
-        AsyncHelper.complete(result);
-        changelist = update(changelist);
-        Map<Integer, ProductionStepThroughputs> collectThroughputs = new HashMap<>();
-        if (changelist.isPrimary()) {
-            handleNewPrimaryChangelist(changelist)
-                    .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
-        }
-        ProductionStepChanges changes = cache.remove(changelist.getId());
-        if (null != changes) {
-            changes.undo()
-                    .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
-        }
-        computeProductionStepChanges(changelist, true)
-                .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
-        collectThroughputs.values().forEach(this::publishProductionStepThroughputsChanged);
-        events.publishEvent(new ChangelistUpdatedEvent(changelist));
-    }
-
-    private void applyRelations(Changelist changelist, ChangelistStandalone standalone) {
-        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(changelist::setIcon);
-        OptionalInputField.of(standalone.productionStepChanges())
-                .apply(list -> changelist.setProductionStepChanges(list.stream()
-                        .collect(toMap(change -> productionStepService.get((int) change.productionStepId()),
-                                ProductionStepChangeStandalone::change))));
-    }
-
-    private Collection<ProductionStepThroughputs> handleNewPrimaryChangelist(Changelist changelist) {
-        Changelist oldPrimary = repository.findBySaveIdAndIdNotAndPrimaryIsTrue(changelist.getSave().getId(),
-                changelist.getId());
-        if (null == oldPrimary) {
-            return Collections.emptyList();
-        }
-        ProductionStepChanges changes = computeProductionStepChanges(oldPrimary);
-        oldPrimary.setPrimary(false);
-        repository.save(oldPrimary);
-        events.publishEvent(new ChangelistUpdatedEvent(oldPrimary));
-        return changes.deactivatePrimary();
-    }
-
     public void reportMachineCount(int changelistId, ProductionStep productionStep, Fraction change) {
         Changelist changelist = get(changelistId);
         if (Fraction.ZERO.equals(change)) {
@@ -188,24 +239,6 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
         }
         repository.save(changelist);
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
-    }
-
-    @Transactional
-    public void delete(int id, CompletableFuture<Void> result) {
-        if (repository.existsByIdAndPrimaryIsTrue(id)) {
-            throw report(HttpStatus.CONFLICT, "cannot delete primary changelist");
-        }
-        Save save = saveRepository.findByChangelistsId(id);
-        if (null == save) {
-            throw report(HttpStatus.CONFLICT, "changelist does not belong to a save");
-        }
-        AsyncHelper.complete(result);
-        delete(id);
-        ProductionStepChanges changes = cache.remove(id);
-        if (null != changes) {
-            changes.undo().forEach(this::publishProductionStepThroughputsChanged);
-        }
-        events.publishEvent(new ChangelistRemovedEvent(save.getId(), id));
     }
 
     private void publishProductionStepThroughputsChanged(ProductionStepThroughputs throughputs) {
@@ -295,8 +328,9 @@ public class ChangelistService extends ModelService<Changelist, ChangelistReposi
             computeProductionStepChanges(changelist).establishLink(event.getThroughputs(), true);
         }
         /*
-         * Currently, we need to signal that we want the factory production line to recalculate its resources, although
-         * we should really try to arrive at causing an invocation to ProductionLine.addContributor to ensue.
+         * Currently, we need to signal that we want the factory production line to recalculate its resources, hence we
+         * arrive at causing an invocation to ProductionLine.updateContribution, although we should really try to arrive
+         * at ProductionLine.addContributor.
          */
         return new ProductionStepThroughputsChangedEvent(event.getProductionStep(), event.getThroughputs(), true);
     }

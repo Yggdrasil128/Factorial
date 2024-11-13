@@ -28,7 +28,7 @@ public class GameController {
 
     @PostMapping("/games")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(@RequestBody GameStandalone input) {
+    public CompletableFuture<Void> create(@RequestBody List<GameStandalone> input) {
         return asyncHelper.submit(result -> gameService.create(input, result));
     }
 
@@ -53,15 +53,15 @@ public class GameController {
         return asyncHelper.submit(() -> gameService.getSummary(gameId, External.FRONTEND));
     }
 
-    @PatchMapping("/game")
+    @PatchMapping("/games")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int gameId, @RequestBody GameStandalone input) {
-        return asyncHelper.submit(result -> gameService.update(gameId, input, result));
+    public CompletableFuture<Void> update(@RequestBody List<GameStandalone> input) {
+        return asyncHelper.submit(result -> gameService.update(input, result));
     }
 
-    @DeleteMapping("/game")
-    public CompletableFuture<Void> delete(int gameId) {
-        return asyncHelper.submit(result -> gameService.delete(gameId, result));
+    @DeleteMapping("/games")
+    public CompletableFuture<Void> delete(List<Integer> gameIds) {
+        return asyncHelper.submit(result -> gameService.delete(gameIds, result));
     }
 
 }

@@ -44,6 +44,7 @@ public class ProductionStepThroughputs implements Production {
     private final int productionStepId;
     private final EffectiveModifiers effectiveModifiers;
 
+    private int recipeId;
     private List<ItemAmount> ingredients;
     private List<ItemAmount> products;
     private Fraction recipeDuration;
@@ -64,18 +65,22 @@ public class ProductionStepThroughputs implements Production {
         return productionStepId;
     }
 
-    public void update(ProductionStep productionStep) {
+    public boolean update(ProductionStep productionStep) {
         effectiveModifiers.applyMachine(productionStep.getMachine());
         effectiveModifiers.applyProductionStep(productionStep);
         effectiveModifiers.applyMachineCount(productionStep.getMachineCount());
-        copyRecipeInfo(productionStep.getRecipe());
+        boolean itemsChanged = copyRecipeInfo(productionStep.getRecipe());
         recompute();
+        return itemsChanged;
     }
 
-    private void copyRecipeInfo(Recipe recipe) {
+    private boolean copyRecipeInfo(Recipe recipe) {
+        boolean itemsChanged = recipeId != recipe.getId();
+        recipeId = recipe.getId();
         ingredients = recipe.getIngredients().stream().map(ItemAmount::new).toList();
         products = recipe.getProducts().stream().map(ItemAmount::new).toList();
         recipeDuration = recipe.getDuration();
+        return itemsChanged;
     }
 
     public void updateMachineCount(ProductionStep productionStep, Fraction machineCount) {

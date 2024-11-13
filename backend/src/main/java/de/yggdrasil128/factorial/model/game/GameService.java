@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
-public class GameService extends ModelService<Game, GameRepository> {
+public class GameService extends OrphanModelService<Game, GameStandalone, GameRepository> {
 
     private final ApplicationEventPublisher events;
     private final IconService iconService;
@@ -27,14 +27,22 @@ public class GameService extends ModelService<Game, GameRepository> {
         this.iconService = iconService;
     }
 
-    @Transactional
-    public void create(GameStandalone standalone, CompletableFuture<Void> result) {
+    @Override
+    protected int getEntityId(Game game) {
+        return game.getId();
+    }
+
+    @Override
+    protected int getStandaloneId(GameStandalone standalone) {
+        return standalone.id();
+    }
+
+    @Override
+    protected Game prepareCreate(GameStandalone standalone) {
         Game game = new Game(standalone);
         applyRelations(game, standalone);
-        AsyncHelper.complete(result);
         inferOrdinal(game);
-        game = create(game);
-        events.publishEvent(new GameUpdatedEvent(game));
+        return game;
     }
 
     private void inferOrdinal(Game game) {
@@ -43,11 +51,38 @@ public class GameService extends ModelService<Game, GameRepository> {
         }
     }
 
+    @Override
+    protected void handleBulkCreate(Iterable<Game> games) {
+        for (Game game : games) {
+            events.publishEvent(new GameUpdatedEvent(game));
+        }
+    }
+
+    @Override
+    protected void prepareUpdate(Game game, GameStandalone standalone) {
+        game.applyBasics(standalone);
+        applyRelations(game, standalone);
+    }
+
+    private void applyRelations(Game game, GameStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(game::setIcon);
+    }
+
+    @Override
+    protected void handleUpdate(Game game) {
+        events.publishEvent(new GameUpdatedEvent(game));
+    }
+
+    @Override
+    protected void handleDelete(int id) {
+        events.publishEvent(new GameRemovedEvent(id));
+    }
+
     @Transactional
     public void doImport(GameSummary summary, CompletableFuture<Void> result) {
         Game game = Importer.importGame(summary);
         AsyncHelper.complete(result);
-        create(game);
+        repository.save(game);
         events.publishEvent(new GameUpdatedEvent(game));
     }
 
@@ -91,27 +126,6 @@ public class GameService extends ModelService<Game, GameRepository> {
             }
         }
         events.publishEvent(new GamesReorderedEvent(games));
-    }
-
-    @Transactional
-    public void update(int id, GameStandalone standalone, CompletableFuture<Void> result) {
-        Game game = get(id);
-        game.applyBasics(standalone);
-        applyRelations(game, standalone);
-        AsyncHelper.complete(result);
-        update(game);
-        events.publishEvent(new GameUpdatedEvent(game));
-    }
-
-    private void applyRelations(Game game, GameStandalone standalone) {
-        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(game::setIcon);
-    }
-
-    @Transactional
-    public void delete(int id, CompletableFuture<Void> result) {
-        AsyncHelper.complete(result);
-        delete(id);
-        events.publishEvent(new GameRemovedEvent(id));
     }
 
 }

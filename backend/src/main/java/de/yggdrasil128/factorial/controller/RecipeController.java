@@ -28,7 +28,7 @@ public class RecipeController {
 
     @PostMapping("/game/recipes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int gameId, @RequestBody RecipeStandalone input) {
+    public CompletableFuture<Void> create(int gameId, @RequestBody List<RecipeStandalone> input) {
         return asyncHelper.submit(result -> recipeService.create(gameId, input, result));
     }
 
@@ -42,16 +42,16 @@ public class RecipeController {
         return RecipeStandalone.of(recipeService.get(recipeId));
     }
 
-    @PatchMapping("/recipe")
+    @PatchMapping("/recipes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int recipeId, @RequestBody RecipeStandalone input) {
-        return asyncHelper.submit(result -> recipeService.update(recipeId, input, result));
+    public CompletableFuture<Void> update(@RequestBody List<RecipeStandalone> input) {
+        return asyncHelper.submit(result -> recipeService.update(input, result));
     }
 
-    @DeleteMapping("/recipe")
+    @DeleteMapping("/recipes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int recipeId) {
-        return asyncHelper.submit(result -> recipeService.delete(recipeId, result));
+    public CompletableFuture<Void> delete(List<Integer> recipeIds) {
+        return asyncHelper.submit(result -> recipeService.delete(recipeIds, result));
     }
 
 }

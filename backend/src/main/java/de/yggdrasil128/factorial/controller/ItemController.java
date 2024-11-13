@@ -28,7 +28,7 @@ public class ItemController {
 
     @PostMapping("/game/items")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int gameId, @RequestBody ItemStandalone input) {
+    public CompletableFuture<Void> create(int gameId, @RequestBody List<ItemStandalone> input) {
         return asyncHelper.submit(result -> itemService.create(gameId, input, result));
     }
 
@@ -42,16 +42,16 @@ public class ItemController {
         return ItemStandalone.of(itemService.get(itemId));
     }
 
-    @PatchMapping("/item")
+    @PatchMapping("/items")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int itemId, @RequestBody ItemStandalone input) {
-        return asyncHelper.submit(result -> itemService.update(itemId, input, result));
+    public CompletableFuture<Void> update(@RequestBody List<ItemStandalone> input) {
+        return asyncHelper.submit(result -> itemService.update(input, result));
     }
 
-    @DeleteMapping("/item")
+    @DeleteMapping("/items")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int itemId) {
-        return asyncHelper.submit(result -> itemService.delete(itemId, result));
+    public CompletableFuture<Void> delete(List<Integer> itemIds) {
+        return asyncHelper.submit(result -> itemService.delete(itemIds, result));
     }
 
 }

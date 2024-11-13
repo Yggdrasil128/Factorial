@@ -1,12 +1,9 @@
 package de.yggdrasil128.factorial.model.game;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.NamedModel;
 
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
-
-public record GameStandalone(@JsonProperty(access = READ_ONLY) int id,
+public record GameStandalone(int id,
                              Integer ordinal,
                              String name,
                              String description,

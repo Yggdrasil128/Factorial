@@ -33,9 +33,11 @@ public class ChangelistController {
 
     @PostMapping("/save/changelists")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int saveId, @RequestBody ChangelistStandalone input) {
-        if (input.primary() && !input.active()) {
-            throw primaryInactive();
+    public CompletableFuture<Void> create(int saveId, @RequestBody List<ChangelistStandalone> input) {
+        for (ChangelistStandalone in : input) {
+            if (in.primary() && !in.active()) {
+                throw primaryInactive();
+            }
         }
         return asyncHelper.submit(result -> changelistService.create(saveId, input, result));
     }
@@ -56,24 +58,26 @@ public class ChangelistController {
         return asyncHelper.submit(result -> changelistService.reorder(saveId, input, result));
     }
 
-    @PatchMapping("/changelist")
+    @PatchMapping("/changelists")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int changelistId, @RequestBody ChangelistStandalone input) {
-        if (null != input.primary() && null != input.active() && input.primary().booleanValue()
-                && !input.active().booleanValue()) {
-            throw primaryInactive();
+    public CompletableFuture<Void> update(@RequestBody List<ChangelistStandalone> input) {
+        for (ChangelistStandalone in : input) {
+            if (null != in.primary() && null != in.active() && in.primary().booleanValue()
+                    && !in.active().booleanValue()) {
+                throw primaryInactive();
+            }
         }
-        return asyncHelper.submit(result -> changelistService.update(changelistId, input, result));
+        return asyncHelper.submit(result -> changelistService.update(input, result));
     }
 
     private static ResponseStatusException primaryInactive() {
         return ModelService.report(HttpStatus.CONFLICT, "cannot set primary changelist to inactive");
     }
 
-    @DeleteMapping("/changelist")
+    @DeleteMapping("/changelists")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int changelistId) {
-        return asyncHelper.submit(result -> changelistService.delete(changelistId, result));
+    public CompletableFuture<Void> delete(List<Integer> changelistIds) {
+        return asyncHelper.submit(result -> changelistService.delete(changelistIds, result));
     }
 
     /**

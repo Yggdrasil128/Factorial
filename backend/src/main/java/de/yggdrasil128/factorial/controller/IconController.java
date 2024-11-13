@@ -31,7 +31,7 @@ public class IconController {
 
     @PostMapping("/game/icons")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int gameId, @RequestBody IconStandalone input) {
+    public CompletableFuture<Void> create(int gameId, @RequestBody List<IconStandalone> input) {
         return asyncHelper.submit(result -> iconService.create(gameId, input, result));
     }
 
@@ -62,16 +62,16 @@ public class IconController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, icon.mimeType()).body(icon.imageData());
     }
 
-    @PatchMapping("/icon")
+    @PatchMapping("/icons")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int iconId, @RequestBody IconStandalone input) {
-        return asyncHelper.submit(result -> iconService.update(iconId, input, result));
+    public CompletableFuture<Void> update(@RequestBody List<IconStandalone> input) {
+        return asyncHelper.submit(result -> iconService.update(input, result));
     }
 
-    @DeleteMapping("/icon")
+    @DeleteMapping("/icons")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int iconId) {
-        return asyncHelper.submit(result -> iconService.delete(iconId, result));
+    public CompletableFuture<Void> delete(List<Integer> iconIds) {
+        return asyncHelper.submit(result -> iconService.delete(iconIds, result));
     }
 
 }

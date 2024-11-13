@@ -1,8 +1,8 @@
 package de.yggdrasil128.factorial.model.icon;
 
-import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.External;
 import de.yggdrasil128.factorial.model.ModelService;
+import de.yggdrasil128.factorial.model.ParentedModelService;
 import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -10,10 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.CompletableFuture;
-
 @Service
-public class IconService extends ModelService<Icon, IconRepository> {
+public class IconService extends ParentedModelService<Icon, IconStandalone, Game, IconRepository> {
 
     private final ApplicationEventPublisher events;
     private final GameRepository gameRepository;
@@ -24,40 +22,62 @@ public class IconService extends ModelService<Icon, IconRepository> {
         this.gameRepository = gameRepository;
     }
 
-    @Transactional
-    public void create(int gameId, IconStandalone standalone, CompletableFuture<Void> result) {
-        Game game = gameRepository.findById(gameId).orElseThrow(ModelService::reportNotFound);
-        Icon icon = new Icon(game, standalone);
-        AsyncHelper.complete(result);
-        icon = create(icon);
-        game.getIcons().add(icon);
+    @Override
+    protected int getEntityId(Icon icon) {
+        return icon.getId();
+    }
+
+    @Override
+    protected int getStandaloneId(IconStandalone standalone) {
+        return standalone.id();
+    }
+
+    @Override
+    protected Game getParentEntity(int parentId) {
+        return gameRepository.findById(parentId).orElseThrow(ModelService::reportNotFound);
+    }
+
+    @Override
+    protected Icon prepareCreate(Game game, IconStandalone standalone) {
+        return new Icon(game, standalone);
+    }
+
+    @Override
+    protected void handleBulkCreate(Game game, Iterable<Icon> icons) {
+        for (Icon icon : icons) {
+            game.getIcons().add(icon);
+            events.publishEvent(new IconUpdatedEvent(icon));
+        }
         gameRepository.save(game);
+    }
+
+    @Override
+    protected void prepareUpdate(Icon icon, IconStandalone standalone) {
+        icon.applyBasics(standalone);
+    }
+
+    @Override
+    protected void handleUpdate(Icon icon) {
         events.publishEvent(new IconUpdatedEvent(icon));
+    }
+
+    @Override
+    protected Game findParentEntity(int id) {
+        Game game = gameRepository.findByIconsId(id);
+        if (null == game) {
+            throw report(HttpStatus.CONFLICT, "icon does not belong to a game");
+        }
+        return game;
+    }
+
+    @Override
+    protected void handleDelete(Game game, int id) {
+        events.publishEvent(new IconRemovedEvent(game.getId(), id));
     }
 
     @Transactional
     public IconStandalone getStandalone(int id) {
         return IconStandalone.of(get(id), External.SAVE_FILE);
-    }
-
-    @Transactional
-    public void update(int id, IconStandalone standalone, CompletableFuture<Void> result) {
-        Icon icon = get(id);
-        icon.applyBasics(standalone);
-        AsyncHelper.complete(result);
-        icon = update(icon);
-        events.publishEvent(new IconUpdatedEvent(icon));
-    }
-
-    @Transactional
-    public void delete(int id, CompletableFuture<Void> result) {
-        Game game = gameRepository.findByIconsId(id);
-        if (null == game) {
-            throw report(HttpStatus.CONFLICT, "icon does not belong to a game");
-        }
-        AsyncHelper.complete(result);
-        delete(id);
-        events.publishEvent(new IconRemovedEvent(game.getId(), id));
     }
 
 }

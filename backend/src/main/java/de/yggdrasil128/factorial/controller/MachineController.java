@@ -28,7 +28,7 @@ public class MachineController {
 
     @PostMapping("/game/machines")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int gameId, @RequestBody MachineStandalone input) {
+    public CompletableFuture<Void> create(int gameId, @RequestBody List<MachineStandalone> input) {
         return asyncHelper.submit(result -> machineService.create(gameId, input, result));
     }
 
@@ -42,16 +42,16 @@ public class MachineController {
         return MachineStandalone.of(machineService.get(machineId));
     }
 
-    @PatchMapping("/machine")
+    @PatchMapping("/machines")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int machineId, @RequestBody MachineStandalone input) {
-        return asyncHelper.submit(result -> machineService.update(machineId, input, result));
+    public CompletableFuture<Void> update(int machineId, @RequestBody List<MachineStandalone> input) {
+        return asyncHelper.submit(result -> machineService.update(input, result));
     }
 
-    @DeleteMapping("/machine")
+    @DeleteMapping("/machines")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int machineId) {
-        return asyncHelper.submit(result -> machineService.delete(machineId, result));
+    public CompletableFuture<Void> delete(List<Integer> machineIds) {
+        return asyncHelper.submit(result -> machineService.delete(machineIds, result));
     }
 
 }

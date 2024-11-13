@@ -31,7 +31,7 @@ public class FactoryController {
 
     @PostMapping("/save/factories")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(int saveId, @RequestBody FactoryStandalone input) {
+    public CompletableFuture<Void> create(int saveId, @RequestBody List<FactoryStandalone> input) {
         return asyncHelper.submit(result -> factoryService.create(saveId, input, result));
     }
 
@@ -51,16 +51,16 @@ public class FactoryController {
         return asyncHelper.submit(result -> factoryService.reorder(saveId, input, result));
     }
 
-    @PatchMapping("/factory")
+    @PatchMapping("/factories")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int factoryId, @RequestBody FactoryStandalone input) {
-        return asyncHelper.submit(result -> factoryService.update(factoryId, input, result));
+    public CompletableFuture<Void> update(@RequestBody List<FactoryStandalone> input) {
+        return asyncHelper.submit(result -> factoryService.update(input, result));
     }
 
-    @DeleteMapping("/factory")
+    @DeleteMapping("/factories")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int factoryId) {
-        return asyncHelper.submit(result -> factoryService.delete(factoryId, result));
+    public CompletableFuture<Void> delete(List<Integer> factoryIds) {
+        return asyncHelper.submit(result -> factoryService.delete(factoryIds, result));
     }
 
     private static FactoryStandalone toOutput(Factory factory) {

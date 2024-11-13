@@ -29,7 +29,7 @@ public class SaveController {
 
     @PostMapping("/saves")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> create(@RequestBody SaveStandalone input) {
+    public CompletableFuture<Void> create(@RequestBody List<SaveStandalone> input) {
         return asyncHelper.submit(result -> saveService.create(input, result));
     }
 
@@ -54,19 +54,21 @@ public class SaveController {
         return asyncHelper.submit(result -> saveService.reorder(input, result));
     }
 
-    @PatchMapping("/save")
+    @PatchMapping("/saves")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int saveId, @RequestBody SaveStandalone input) {
-        if (null != input.gameId()) {
-            throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game of an existing save");
+    public CompletableFuture<Void> update(@RequestBody List<SaveStandalone> input) {
+        for (SaveStandalone in : input) {
+            if (null != in.gameId()) {
+                throw ModelService.report(HttpStatus.NOT_IMPLEMENTED, "cannot update game of an existing save");
+            }
         }
-        return asyncHelper.submit(result -> saveService.update(saveId, input, result));
+        return asyncHelper.submit(result -> saveService.update(input, result));
     }
 
-    @DeleteMapping("/save")
+    @DeleteMapping("/saves")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(int saveId) {
-        return asyncHelper.submit(result -> saveService.delete(saveId, result));
+    public CompletableFuture<Void> delete(List<Integer> saveIds) {
+        return asyncHelper.submit(result -> saveService.delete(saveIds, result));
     }
 
 }

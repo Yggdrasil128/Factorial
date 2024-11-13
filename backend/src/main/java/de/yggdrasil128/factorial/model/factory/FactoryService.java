@@ -26,7 +26,8 @@ import java.util.function.Function;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class FactoryService extends ModelService<Factory, FactoryRepository> implements ProductionLineService {
+public class FactoryService extends ParentedModelService<Factory, FactoryStandalone, Save, FactoryRepository>
+        implements ProductionLineService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FactoryService.class);
 
@@ -48,17 +49,27 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         this.resourceService = resourceService;
     }
 
-    @Transactional
-    public void create(int saveId, FactoryStandalone standalone, CompletableFuture<Void> result) {
-        Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);
+    @Override
+    protected int getEntityId(Factory factory) {
+        return factory.getId();
+    }
+
+    @Override
+    protected int getStandaloneId(FactoryStandalone standalone) {
+        return standalone.id();
+    }
+
+    @Override
+    protected Save getParentEntity(int parentId) {
+        return saveRepository.findById(parentId).orElseThrow(ModelService::reportNotFound);
+    }
+
+    @Override
+    protected Factory prepareCreate(Save save, FactoryStandalone standalone) {
         Factory factory = new Factory(save, standalone);
         applyRelations(factory, standalone);
-        AsyncHelper.complete(result);
         inferOrdinal(save, factory);
-        factory = create(factory);
-        save.getFactories().add(factory);
-        saveRepository.save(save);
-        events.publishEvent(new FactoryProductionLineChangedEvent(factory, initEmptyProductionLine(factory), false));
+        return factory;
     }
 
     private static void inferOrdinal(Save save, Factory factory) {
@@ -67,10 +78,53 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
         }
     }
 
+    @Override
+    protected void handleBulkCreate(Save save, Iterable<Factory> factories) {
+        for (Factory factory : factories) {
+            save.getFactories().add(factory);
+            events.publishEvent(
+                    new FactoryProductionLineChangedEvent(factory, initEmptyProductionLine(factory), false));
+        }
+        saveRepository.save(save);
+    }
+
     private ProductionLine initEmptyProductionLine(Factory factory) {
         ProductionLine productionLine = new ProductionLine(factory.getId(), this);
         cache.put(factory.getId(), productionLine);
         return productionLine;
+    }
+
+    @Override
+    protected void prepareUpdate(Factory factory, FactoryStandalone standalone) {
+        factory.applyBasics(standalone);
+        applyRelations(factory, standalone);
+    }
+
+    private void applyRelations(Factory factory, FactoryStandalone standalone) {
+        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(factory::setIcon);
+    }
+
+    @Override
+    protected void handleUpdate(Factory factory) {
+        events.publishEvent(new FactoryUpdatedEvent(factory));
+    }
+
+    @Override
+    protected Save findParentEntity(int id) {
+        Save save = saveRepository.findByFactoriesId(id);
+        if (null == save) {
+            throw report(HttpStatus.CONFLICT, "factory does not belong to a save");
+        }
+        if (1 == repository.countBySaveId(save.getId())) {
+            throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
+        }
+        return save;
+    }
+
+    @Override
+    protected void handleDelete(Save save, int id) {
+        ProductionLine productionLine = cache.remove(id);
+        events.publishEvent(new FactoryRemovedEvent(save.getId(), id, productionLine));
     }
 
     public ProductionLine
@@ -109,7 +163,7 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
 
     @Override
     public void destroyResource(int id, int resourceId) {
-        resourceService.delete(get(id), resourceId);
+        resourceService.destroy(get(id), resourceId);
     }
 
     public FactorySummary getFactorySummary(Factory factory, External destination,
@@ -157,35 +211,6 @@ public class FactoryService extends ModelService<Factory, FactoryRepository> imp
             }
         }
         events.publishEvent(new FactoriesReorderedEvent(save.getId(), factories));
-    }
-
-    @Transactional
-    public void update(int id, FactoryStandalone standalone, CompletableFuture<Void> result) {
-        Factory factory = get(id);
-        factory.applyBasics(standalone);
-        applyRelations(factory, standalone);
-        AsyncHelper.complete(result);
-        update(factory);
-        events.publishEvent(new FactoryUpdatedEvent(factory));
-    }
-
-    private void applyRelations(Factory factory, FactoryStandalone standalone) {
-        OptionalInputField.ofId(standalone.iconId(), iconService::get).apply(factory::setIcon);
-    }
-
-    @Transactional
-    public void delete(int id, CompletableFuture<Void> result) {
-        Save save = saveRepository.findByFactoriesId(id);
-        if (null == save) {
-            throw report(HttpStatus.CONFLICT, "factory does not belong to a save");
-        }
-        if (1 == repository.countBySaveId(save.getId())) {
-            throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
-        }
-        AsyncHelper.complete(result);
-        delete(id);
-        ProductionLine productionLine = cache.remove(id);
-        events.publishEvent(new FactoryRemovedEvent(save.getId(), id, productionLine));
     }
 
     @EventListener

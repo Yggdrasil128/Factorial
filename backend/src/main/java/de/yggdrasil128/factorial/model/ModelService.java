@@ -2,14 +2,19 @@ package de.yggdrasil128.factorial.model;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-public abstract class ModelService<E, R extends CrudRepository<E, Integer>> {
+public abstract class ModelService<E, S, R extends CrudRepository<E, Integer>> {
 
     protected final R repository;
 
@@ -17,25 +22,39 @@ public abstract class ModelService<E, R extends CrudRepository<E, Integer>> {
         this.repository = repository;
     }
 
-    protected E create(E entity) {
-        return repository.save(entity);
-    }
-
-    public Stream<E> stream() {
-        return StreamSupport.stream(repository.findAll().spliterator(), false);
-    }
-
     public E get(int id) {
         return repository.findById(id).orElseThrow(ModelService::reportNotFound);
     }
 
-    protected E update(E entity) {
-        return repository.save(entity);
+    protected abstract int getEntityId(E entity);
+
+    protected abstract int getStandaloneId(S standalone);
+
+    @Transactional
+    public void update(List<S> standalones, CompletableFuture<Void> result) {
+        Map<Integer, E> entities = StreamSupport
+                .stream(repository.findAllById(standalones.stream().map(this::getStandaloneId).toList()).spliterator(),
+                        false)
+                .collect(toMap(this::getEntityId, Function.identity()));
+        if (entities.size() != standalones.size()) {
+            for (S standalone : standalones) {
+                if (!entities.containsKey(getStandaloneId(standalone))) {
+                    throw reportNotFound();
+                }
+            }
+        }
+        for (S standalone : standalones) {
+            prepareUpdate(entities.get(getStandaloneId(standalone)), standalone);
+        }
+        AsyncHelper.complete(result);
+        for (E entity : repository.saveAll(entities.values())) {
+            handleUpdate(entity);
+        }
     }
 
-    protected void delete(int id) {
-        repository.deleteById(id);
-    }
+    protected abstract void prepareUpdate(E entity, S standalone);
+
+    protected abstract void handleUpdate(E entity);
 
     protected static ResponseStatusException reportNotFound() {
         return report(NOT_FOUND, "");
@@ -49,4 +68,5 @@ public abstract class ModelService<E, R extends CrudRepository<E, Integer>> {
         response.printStackTrace();
         return response;
     }
+
 }

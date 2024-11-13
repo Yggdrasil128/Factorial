@@ -49,10 +49,10 @@ public class ResourceController {
         return asyncHelper.submit(result -> resourceService.reorder(factoryId, input, result));
     }
 
-    @PatchMapping("/resource")
+    @PatchMapping("/resources")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int resourceId, ResourceStandalone input) {
-        return asyncHelper.submit(result -> resourceService.update(resourceId, input, result));
+    public CompletableFuture<Void> update(List<ResourceStandalone> input) {
+        return asyncHelper.submit(result -> resourceService.update(input, result));
     }
 
     private static ResourceStandalone toOutput(Resource resource) {
