@@ -28,7 +28,7 @@ const numberOfSaves: ComputedRef<number> = computed(() =>
 );
 
 function openEditor(): void {
-  router.push({ name: 'gameEditor', params: { editGameId: props.game.id } });
+  router.push({ name: 'gameEditor', params: { editGameId: props.game.id, tab: 'items' } });
 }
 
 function deleteGame(): void {

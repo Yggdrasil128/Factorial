@@ -3,6 +3,9 @@ import IconImg from '@/components/common/IconImg.vue';
 import { Delete, Edit, Folder, Plus } from '@element-plus/icons-vue';
 import { type EntityTreeService } from '@/services/useEntityTreeService';
 import { ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
+import { useRecipeStore } from '@/stores/model/recipeStore';
+import { useItemStore } from '@/stores/model/itemStore';
+import type { Item, Recipe } from '@/types/model/standalone';
 
 export interface EntityTreeProps {
   service: EntityTreeService<any>;
@@ -12,6 +15,20 @@ export interface EntityTreeProps {
 const props: EntityTreeProps = defineProps<EntityTreeProps>();
 
 const service = props.service;
+
+const recipeStore = useRecipeStore();
+const itemStore = useItemStore();
+
+function getRecipeIconId(recipeId: number): number {
+  if (!recipeId) return 0;
+  const recipe: Recipe | undefined = recipeStore.getById(recipeId);
+  if (!recipe) return 0;
+  if (recipe.iconId) return recipe.iconId;
+  if (recipe.products.length === 0) return 0;
+  const item: Item | undefined = itemStore.getById(recipe.products[0].itemId);
+  if (!item) return 0;
+  return item.iconId;
+}
 </script>
 
 <template>
@@ -34,6 +51,8 @@ const service = props.service;
             <el-icon v-if="data.children !== undefined" :size="28" style="margin: 0 2px;">
               <Folder />
             </el-icon>
+            <IconImg v-else-if="entityName === 'recipe' && getRecipeIconId(data.id)" :icon="getRecipeIconId(data.id)"
+                     :size="32" />
             <IconImg v-else-if="data.iconId" :icon="data.iconId" :size="32" />
             <div v-else style="width: 32px;"></div>
           </div>

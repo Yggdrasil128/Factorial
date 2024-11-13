@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type EntityTreeService, type EntityType, iconOptions } from '@/services/useEntityTreeService';
+import { type EntityTreeService, type EntityType, iconOptions, iconOptions2 } from '@/services/useEntityTreeService';
 import { ElButtonGroup, ElFormItem, ElInput, ElTooltip, type FormRules } from 'element-plus';
 import { ref } from 'vue';
 import { Check, Close, Folder, Plus } from '@element-plus/icons-vue';
@@ -14,6 +14,7 @@ export interface EntityEditorProps {
   service: EntityTreeService<any>;
   entityType: EntityType;
   formRules: FormRules;
+  formLabelWidth?: string;
 }
 
 const props: EntityEditorProps = defineProps<EntityEditorProps>();
@@ -70,12 +71,16 @@ defineExpose({ validateForm, validateFolderForm });
             <h2 v-else>Edit {{ entityType.toLowerCase() }} '{{ service.state.editingEntityOriginalModel.value.name
               }}'</h2>
 
-            <el-form label-width="120px"
+            <p v-if="entityType === 'Recipe' && service.state.editingEntityId.value === 0">
+              Tip: After selecting a recipe product, the name for the recipe will be automatically filled in.
+            </p>
+
+            <el-form :label-width="formLabelWidth ?? '120px'"
                      :model="service.state.editingEntityModel.value"
                      ref="form"
                      :rules="formRules"
             >
-              <el-form-item :label="entityType + ' name'" prop="name">
+              <el-form-item label="Name" prop="name">
                 <el-input v-model="service.state.editingEntityModel.value.name" />
               </el-form-item>
 
@@ -84,7 +89,8 @@ defineExpose({ validateForm, validateFolderForm });
               </el-form-item>
 
               <el-form-item label="Icon" prop="iconId">
-                <el-segmented v-model="service.state.selectedIconOption.value" :options="iconOptions">
+                <el-segmented v-model="service.state.selectedIconOption.value"
+                              :options="entityType === 'Recipe' ? iconOptions2 : iconOptions">
                   <template #default="{ item }">
                     <div style="margin: 4px;">
                       <el-icon size="20">
@@ -95,6 +101,12 @@ defineExpose({ validateForm, validateFolderForm });
                   </template>
                 </el-segmented>
 
+                <div v-if="service.state.selectedIconOption.value === 'none' && entityType === 'Recipe'"
+                     style="margin-top: 12px;">
+                  <div style="line-height: 20px;">
+                    When 'Same as product' is selected, the recipe will have the same icon as the (first) product item.
+                  </div>
+                </div>
                 <template v-if="service.state.selectedIconOption.value === 'select'">
                   <CascaderSelect v-model="service.state.editingEntityModel.value.iconId!"
                                   :options="iconStore.getByGameId(game.id)"
@@ -113,6 +125,8 @@ defineExpose({ validateForm, validateFolderForm });
                               style="margin-top: 12px;" />
                 </div>
               </el-form-item>
+
+              <slot name="form"></slot>
 
               <div class="formFooter">
                 <el-button :icon="Close"
@@ -179,7 +193,7 @@ defineExpose({ validateForm, validateFolderForm });
 }
 
 .right {
-  width: 30%;
+  width: 35%;
 }
 
 .right .sticky {

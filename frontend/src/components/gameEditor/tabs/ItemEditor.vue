@@ -25,7 +25,7 @@ const items: ComputedRef<Item[]> = computed(() => itemStore.getByGameId(props.ga
 
 const entityEditor = ref();
 
-const service: EntityTreeService<Item> = useEntityTreeService(
+const service: EntityTreeService<Item> = useEntityTreeService<Item>(
   computed(() => props.game),
   items,
   'Item',

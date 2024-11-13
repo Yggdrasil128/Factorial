@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import type { Game, Machine } from '@/types/model/standalone';
+import type { Game, Machine, RecipeModifier } from '@/types/model/standalone';
 import { computed, type ComputedRef, ref } from 'vue';
 import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
-import { type FormRules } from 'element-plus';
+import { ElFormItem, type FormRules } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
 import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useMachineStore } from '@/stores/model/machineStore';
 import { useMachineApi } from '@/api/useMachineApi';
+import CascaderMultiSelect from '@/components/common/input/CascaderMultiSelect.vue';
+import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 
 export interface MachineEditorProps {
   game: Game;
@@ -17,15 +19,17 @@ export interface MachineEditorProps {
 const props: MachineEditorProps = defineProps<MachineEditorProps>();
 
 const machineStore = useMachineStore();
+const recipeModifierStore = useRecipeModifierStore();
 const iconStore = useIconStore();
 const machineApi = useMachineApi();
 const entityUsageService = useEntityUsagesService();
 
 const machines: ComputedRef<Machine[]> = computed(() => machineStore.getByGameId(props.game.id));
+const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => recipeModifierStore.getByGameId(props.game.id));
 
 const entityEditor = ref();
 
-const service: EntityTreeService<Machine> = useEntityTreeService(
+const service: EntityTreeService<Machine> = useEntityTreeService<Machine>(
   computed(() => props.game),
   machines,
   'Machine',
@@ -34,6 +38,7 @@ const service: EntityTreeService<Machine> = useEntityTreeService(
     name: '',
     iconId: 0,
     // category is set by service
+    machineModifierIds: [],
   }),
   (id: number) => {
     const machine: Machine = machineStore.getById(id)!;
@@ -42,6 +47,7 @@ const service: EntityTreeService<Machine> = useEntityTreeService(
       name: machine.name,
       iconId: machine.iconId,
       category: machine.category,
+      machineModifierIds: [...machine.machineModifierIds],
     };
   },
   () => entityEditor.value?.validateForm(),
@@ -72,7 +78,21 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
 </script>
 
 <template>
-  <EntityEditor ref="entityEditor" :game="game" :service="service" entity-type="Machine" :form-rules="formRules" />
+  <EntityEditor ref="entityEditor"
+                :game="game"
+                :service="service"
+                entity-type="Machine"
+                :form-rules="formRules"
+                form-label-width="150px">
+    <template #form>
+      <el-form-item label="Machine modifier(s)" prop="machineModifierIds">
+        <CascaderMultiSelect style="width: 100%;"
+                             v-model="service.state.editingEntityModel.value.machineModifierIds!"
+                             :options="recipeModifiers"
+                             clearable />
+      </el-form-item>
+    </template>
+  </EntityEditor>
 </template>
 
 <style scoped>

@@ -5,7 +5,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { until } from '@vueuse/core';
 import _ from 'lodash';
 import Node from 'element-plus/es/components/tree/src/model/node';
-import { Close, Menu, UploadFilled } from '@element-plus/icons-vue';
+import { Close, Link, Menu, UploadFilled } from '@element-plus/icons-vue';
 import type { Game, Icon } from '@/types/model/standalone';
 import { ElMessage } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
@@ -613,9 +613,14 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   };
 }
 
-export type IconOptionValue = 'none' | 'select' | 'new';
+export type IconOptionValue = 'none' | 'select' | 'new' | 'item';
 export const iconOptions: { label: string, value: IconOptionValue, icon: Component }[] = [
   { label: 'No icon', value: 'none', icon: Close },
+  { label: 'Select icon', value: 'select', icon: Menu },
+  { label: 'New icon', value: 'new', icon: UploadFilled },
+];
+export const iconOptions2: { label: string, value: IconOptionValue, icon: Component }[] = [
+  { label: 'Same as product', value: 'none', icon: Link },
   { label: 'Select icon', value: 'select', icon: Menu },
   { label: 'New icon', value: 'new', icon: UploadFilled },
 ];

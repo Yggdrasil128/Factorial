@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import type { Game, Item, RecipeModifier } from '@/types/model/standalone';
+import type { Game, RecipeModifier } from '@/types/model/standalone';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import { computed, type ComputedRef, ref } from 'vue';
 import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
-import type { FormRules } from 'element-plus';
+import { ElFormItem, ElInput, type FormRules } from 'element-plus';
 import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useRecipeModifierApi } from '@/api/useRecipeModifierApi';
+import { elFormFractionValidator } from '@/utils/fractionUtils';
+import type { RuleItem } from 'async-validator/dist-types/interface';
 
 export interface RecipeModifierEditorProps {
   game: Game;
@@ -25,7 +27,7 @@ const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => recipeModi
 
 const entityEditor = ref();
 
-const service: EntityTreeService<Item> = useEntityTreeService(
+const service: EntityTreeService<RecipeModifier> = useEntityTreeService<RecipeModifier>(
   computed(() => props.game),
   recipeModifiers,
   'Recipe modifier',
@@ -75,13 +77,38 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
       message: 'An icon with that name already exists.',
     }]),
   ],
+  durationMultiplier: [{
+    required: true, message: 'Please enter a valid duration multiplier', trigger: 'blur',
+    validator: elFormFractionValidator, allowZero: false, allowNegative: false,
+  } as RuleItem],
+  inputQuantityMultiplier: [{
+    required: true, message: 'Please enter a valid input quantity multiplier', trigger: 'blur',
+    validator: elFormFractionValidator, allowZero: true, allowNegative: false,
+  } as RuleItem],
+  outputQuantityMultiplier: [{
+    required: true, message: 'Please enter a valid output quantity multiplier', trigger: 'blur',
+    validator: elFormFractionValidator, allowZero: false, allowNegative: false,
+  } as RuleItem],
 }));
 
 </script>
 
 <template>
   <EntityEditor ref="entityEditor" :game="game" :service="service" entity-type="Recipe modifier"
-                :form-rules="formRules" />
+                :form-rules="formRules">
+    <template #form>
+      <h3>Multipliers</h3>
+      <el-form-item label="Duration" prop="durationMultiplier">
+        <el-input v-model="service.state.editingEntityModel.value.durationMultiplier" />
+      </el-form-item>
+      <el-form-item label="Input Quantity" prop="inputQuantityMultiplier">
+        <el-input v-model="service.state.editingEntityModel.value.inputQuantityMultiplier" />
+      </el-form-item>
+      <el-form-item label="Output Quantity" prop="outputQuantityMultiplier">
+        <el-input v-model="service.state.editingEntityModel.value.outputQuantityMultiplier" />
+      </el-form-item>
+    </template>
+  </EntityEditor>
 </template>
 
 <style scoped>

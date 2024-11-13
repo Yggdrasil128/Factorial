@@ -23,7 +23,7 @@ const icons: ComputedRef<Icon[]> = computed(() => iconStore.getByGameId(props.ga
 
 const entityEditor = ref();
 
-const service: EntityTreeService<Icon> = useEntityTreeService(
+const service: EntityTreeService<Icon> = useEntityTreeService<Icon>(
   computed(() => props.game),
   icons,
   'Icon',

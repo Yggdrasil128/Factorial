@@ -24,7 +24,7 @@ const router = createRouter({
       component: SavesAndGames
     },
     {
-      path: '/gameEditor/:editGameId',
+      path: '/gameEditor/:editGameId/:tab',
       name: 'gameEditor',
       component: GameEditor,
     },
