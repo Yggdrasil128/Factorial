@@ -17,21 +17,21 @@ export function useChangelistApi(): ChangelistApi {
   const api: Api = useApi();
 
   async function create(changelist: Partial<Changelist>): Promise<void> {
-    return api.post('/api/save/changelists', changelist, { saveId: changelist.saveId })
+    return api.post('/api/save/changelists', [ changelist ], { saveId: changelist.saveId })
       .then(() => {
         ElMessage.success({ message: 'Changelist created.' });
       });
   }
 
   async function edit(changelist: Partial<Changelist>): Promise<void> {
-    return api.patch('/api/changelist', changelist, { changelistId: changelist.id })
+    return api.patch('/api/changelists', [ changelist ])
       .then(() => {
         ElMessage.success({ message: 'Changelist updated.' });
       });
   }
 
   async function delete_(changelistId: number): Promise<void> {
-    return api.delete('/api/changelist', { changelistId: changelistId })
+    return api.delete('/api/changelists', { changelistIds: [ changelistId ] })
       .then(() => {
         ElMessage.success({ message: 'Changelist deleted.' });
       });

@@ -14,21 +14,21 @@ export function useFactoryApi(): FactoryApi {
   const api: Api = useApi();
 
   async function create(factory: Partial<Factory>): Promise<void> {
-    return api.post('/api/save/factories', factory, { saveId: factory.saveId })
+    return api.post('/api/save/factories', [ factory ], { saveId: factory.saveId })
       .then(() => {
         ElMessage.success({ message: 'Factory created.' });
       });
   }
 
   async function edit(factory: Partial<Factory>): Promise<void> {
-    return api.patch('/api/factory', factory, { factoryId: factory.id })
+    return api.patch('/api/factories', [ factory ])
       .then(() => {
         ElMessage.success({ message: 'Factory updated.' });
       });
   }
 
   async function delete_(factoryId: number): Promise<void> {
-    return api.delete('/api/factory', { factoryId: factoryId })
+    return api.delete('/api/factories', { factoryIds: [ factoryId ] })
       .then(() => {
         ElMessage.success({ message: 'Factory deleted.' });
       });

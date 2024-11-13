@@ -11,38 +11,38 @@ export function useRecipeModifierApi(): RecipeModifierApi {
   const api: Api = useApi();
 
   async function create(recipeModifier: Partial<RecipeModifier>): Promise<void> {
-    return api.post('/api/game/recipeModifiers', recipeModifier, { gameId: recipeModifier.gameId })
+    return api.post('/api/game/recipeModifiers', [ recipeModifier ], { gameId: recipeModifier.gameId })
       .then(() => {
         ElMessage.success({ message: 'Recipe modifier created.' });
       });
   }
 
   async function edit(recipeModifier: Partial<RecipeModifier>): Promise<void> {
-    return api.patch('/api/recipeModifier', recipeModifier, { recipeModifierId: recipeModifier.id })
+    return api.patch('/api/recipeModifiers', [ recipeModifier ])
       .then(() => {
         ElMessage.success({ message: 'Recipe modifier updated.' });
       });
   }
 
   async function delete_(recipeModifierId: number): Promise<void> {
-    return api.delete('/api/recipeModifier', { recipeModifierId: recipeModifierId })
+    return api.delete('/api/recipeModifiers', { recipeModifierIds: [ recipeModifierId ] })
       .then(() => {
         ElMessage.success({ message: 'Recipe modifier deleted.' });
       });
   }
 
   async function bulkEdit(recipeModifiers: Partial<RecipeModifier>[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const recipeModifier of recipeModifiers) {
-      await edit(recipeModifier);
-    }
+    return api.patch('/api/recipeModifiers', recipeModifiers)
+      .then(() => {
+        ElMessage.success({ message: 'Recipe modifiers updated.' });
+      });
   }
 
   async function bulkDelete(recipeModifierIds: number[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const recipeModifierId of recipeModifierIds) {
-      await delete_(recipeModifierId);
-    }
+    return api.delete('/api/recipeModifiers', { recipeModifierIds: recipeModifierIds })
+      .then(() => {
+        ElMessage.success({ message: 'Recipe modifiers deleted.' });
+      });
   }
 
   return {

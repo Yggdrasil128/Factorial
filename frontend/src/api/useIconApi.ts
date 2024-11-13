@@ -10,38 +10,38 @@ export function useIconApi(): IconApi {
   const api: Api = useApi();
 
   async function create(icon: Partial<Icon>): Promise<void> {
-    return api.post('/api/game/icons', icon, { gameId: icon.gameId })
+    return api.post('/api/game/icons', [ icon ], { gameId: icon.gameId })
       .then(() => {
         ElMessage.success({ message: 'Icon created.' });
       });
   }
 
   async function edit(icon: Partial<Icon>): Promise<void> {
-    return api.patch('/api/icon', icon, { iconId: icon.id })
+    return api.patch('/api/icons', [ icon ])
       .then(() => {
         ElMessage.success({ message: 'Icon updated.' });
       });
   }
 
   async function delete_(iconId: number): Promise<void> {
-    return api.delete('/api/icon', { iconId: iconId })
+    return api.delete('/api/icons', { iconIds: [ iconId ] })
       .then(() => {
         ElMessage.success({ message: 'Icon deleted.' });
       });
   }
 
   async function bulkEdit(icons: Partial<Icon>[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const icon of icons) {
-      await edit(icon);
-    }
+    return api.patch('/api/icons', icons)
+      .then(() => {
+        ElMessage.success({ message: 'Icons updated.' });
+      });
   }
 
   async function bulkDelete(iconIds: number[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const iconId of iconIds) {
-      await delete_(iconId);
-    }
+    return api.delete('/api/icons', { iconIds: iconIds })
+      .then(() => {
+        ElMessage.success({ message: 'Icons deleted.' });
+      });
   }
 
   return {

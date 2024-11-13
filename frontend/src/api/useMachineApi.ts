@@ -11,38 +11,38 @@ export function useMachineApi(): MachineApi {
   const api: Api = useApi();
 
   async function create(machine: Partial<Machine>): Promise<void> {
-    return api.post('/api/game/machines', machine, { gameId: machine.gameId })
+    return api.post('/api/game/machines', [ machine ], { gameId: machine.gameId })
       .then(() => {
         ElMessage.success({ message: 'Machine created.' });
       });
   }
 
   async function edit(machine: Partial<Machine>): Promise<void> {
-    return api.patch('/api/machine', machine, { machineId: machine.id })
+    return api.patch('/api/machines', [ machine ])
       .then(() => {
         ElMessage.success({ message: 'Machine updated.' });
       });
   }
 
   async function delete_(machineId: number): Promise<void> {
-    return api.delete('/api/machine', { itemId: machineId })
+    return api.delete('/api/machines', { machineIds: [ machineId ] })
       .then(() => {
         ElMessage.success({ message: 'Machine deleted.' });
       });
   }
 
   async function bulkEdit(machines: Partial<Machine>[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const machine of machines) {
-      await edit(machine);
-    }
+    return api.patch('/api/machines', machines)
+      .then(() => {
+        ElMessage.success({ message: 'Machines updated.' });
+      });
   }
 
   async function bulkDelete(machineIds: number[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const machineId of machineIds) {
-      await delete_(machineId);
-    }
+    return api.delete('/api/machines', { machineIds: machineIds })
+      .then(() => {
+        ElMessage.success({ message: 'Machines deleted.' });
+      });
   }
 
   return {

@@ -11,38 +11,38 @@ export function useRecipeApi(): RecipeApi {
   const api: Api = useApi();
 
   async function create(recipe: Partial<Recipe>): Promise<void> {
-    return api.post('/api/game/recipes', recipe, { gameId: recipe.gameId })
+    return api.post('/api/game/recipes', [ recipe ], { gameId: recipe.gameId })
       .then(() => {
         ElMessage.success({ message: 'Recipe created.' });
       });
   }
 
   async function edit(recipe: Partial<Recipe>): Promise<void> {
-    return api.patch('/api/recipe', recipe, { recipeId: recipe.id })
+    return api.patch('/api/recipes', recipe, { recipeId: recipe.id })
       .then(() => {
         ElMessage.success({ message: 'Recipe updated.' });
       });
   }
 
   async function delete_(recipeId: number): Promise<void> {
-    return api.delete('/api/recipe', { recipeId: recipeId })
+    return api.delete('/api/recipes', { recipeId: recipeId })
       .then(() => {
         ElMessage.success({ message: 'Recipe deleted.' });
       });
   }
 
   async function bulkEdit(recipes: Partial<Recipe>[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const recipe of recipes) {
-      await edit(recipe);
-    }
+    return api.patch('/api/recipes', recipes)
+      .then(() => {
+        ElMessage.success({ message: 'Recipes updated.' });
+      });
   }
 
   async function bulkDelete(recipeIds: number[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const recipeId of recipeIds) {
-      await delete_(recipeId);
-    }
+    return api.delete('/api/recipes', { recipeIds: recipeIds })
+      .then(() => {
+        ElMessage.success({ message: 'Recipes deleted.' });
+      });
   }
 
   return {

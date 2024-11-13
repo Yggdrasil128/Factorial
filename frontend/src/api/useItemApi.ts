@@ -10,38 +10,38 @@ export function useItemApi(): ItemApi {
   const api: Api = useApi();
 
   async function create(item: Partial<Item>): Promise<void> {
-    return api.post('/api/game/items', item, { gameId: item.gameId })
+    return api.post('/api/game/items', [ item ], { gameId: item.gameId })
       .then(() => {
         ElMessage.success({ message: 'Item created.' });
       });
   }
 
   async function edit(item: Partial<Item>): Promise<void> {
-    return api.patch('/api/item', item, { itemId: item.id })
+    return api.patch('/api/items', [ item ])
       .then(() => {
         ElMessage.success({ message: 'Item updated.' });
       });
   }
 
   async function delete_(itemId: number): Promise<void> {
-    return api.delete('/api/item', { itemId: itemId })
+    return api.delete('/api/items', { itemIds: [ itemId ] })
       .then(() => {
         ElMessage.success({ message: 'Item deleted.' });
       });
   }
 
   async function bulkEdit(items: Partial<Item>[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const item of items) {
-      await edit(item);
-    }
+    return api.patch('/api/items', items)
+      .then(() => {
+        ElMessage.success({ message: 'Items updated.' });
+      });
   }
 
   async function bulkDelete(itemIds: number[]): Promise<void> {
-    // TODO replace this implementation with new endpoint
-    for (const itemId of itemIds) {
-      await delete_(itemId);
-    }
+    return api.delete('/api/items', { itemIds: itemIds })
+      .then(() => {
+        ElMessage.success({ message: 'Item deleted.' });
+      });
   }
 
   return {

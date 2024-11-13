@@ -15,21 +15,21 @@ export function useProductionStepApi(): ProductionStepApi {
   const api: Api = useApi();
 
   async function create(productionStep: Partial<ProductionStep>): Promise<void> {
-    return api.post('/api/factory/productionSteps', productionStep, { factoryId: productionStep.factoryId })
+    return api.post('/api/factory/productionSteps', [ productionStep ], { factoryId: productionStep.factoryId })
       .then(() => {
         ElMessage.success({ message: 'Production step created.' });
       });
   }
 
   async function edit(productionStep: Partial<ProductionStep>): Promise<void> {
-    return api.patch('/api/productionStep', productionStep, { productionStepId: productionStep.id })
+    return api.patch('/api/productionSteps', [ productionStep ])
       .then(() => {
         ElMessage.success({ message: 'Production step updated.' });
       });
   }
 
   async function delete_(productionStepId: number): Promise<void> {
-    return api.delete('/api/productionStep', { productionStepId: productionStepId })
+    return api.delete('/api/productionSteps', { productionStepIds: [ productionStepId ] })
       .then(() => {
         ElMessage.success({ message: 'Production step deleted.' });
       });
