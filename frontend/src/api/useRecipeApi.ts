@@ -18,7 +18,7 @@ export function useRecipeApi(): RecipeApi {
   }
 
   async function edit(recipe: Partial<Recipe>): Promise<void> {
-    return api.patch('/api/recipes', recipe, { recipeId: recipe.id })
+    return api.patch('/api/recipes', [recipe ])
       .then(() => {
         ElMessage.success({ message: 'Recipe updated.' });
       });
