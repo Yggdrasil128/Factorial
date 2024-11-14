@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -70,8 +71,9 @@ public class IconController {
 
     @DeleteMapping("/icons")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> iconIds) {
-        return asyncHelper.submit(result -> iconService.delete(iconIds, result));
+    public CompletableFuture<Void> delete(String iconIds) {
+        List<Integer> iconIdsList = Arrays.stream(iconIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> iconService.delete(iconIdsList, result));
     }
 
 }

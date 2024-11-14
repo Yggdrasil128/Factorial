@@ -6,7 +6,7 @@ import { type EntityTreeService, useEntityTreeService } from '@/services/useEnti
 import { type FormRules } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
 import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
-import { useItemApi } from '@/api/useItemApi';
+import { useItemApi } from '@/api/model/useItemApi';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 

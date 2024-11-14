@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -76,8 +77,9 @@ public class ChangelistController {
 
     @DeleteMapping("/changelists")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> changelistIds) {
-        return asyncHelper.submit(result -> changelistService.delete(changelistIds, result));
+    public CompletableFuture<Void> delete(String changelistIds) {
+        List<Integer> changelistIdsList = Arrays.stream(changelistIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> changelistService.delete(changelistIdsList, result));
     }
 
     /**
@@ -86,7 +88,7 @@ public class ChangelistController {
      * This will apply the {@link Changelist#getProductionStepChanges() changes} to the individual {@link ProductionStep
      * ProductionSteps}, which means that the production step's {@link ProductionStep#getMachineCount() machine count}
      * will be changed by the respective amount. Additionally, the changelist's changes will be cleared.
-     * 
+     *
      * @param changelistId the {@link Changelist#getId() id} of the target {@link Changelist}
      */
     @PostMapping("/changelist/apply")

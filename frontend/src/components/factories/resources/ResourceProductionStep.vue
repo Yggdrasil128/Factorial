@@ -13,7 +13,7 @@ import ResourceProductionEntry from '@/components/factories/resources/ResourcePr
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useProductionStepApi } from '@/api/useProductionStepApi';
+import { useProductionStepApi } from '@/api/model/useProductionStepApi';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;

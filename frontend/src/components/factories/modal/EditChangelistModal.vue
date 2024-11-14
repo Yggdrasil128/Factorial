@@ -3,7 +3,7 @@ import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRout
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useIconStore } from '@/stores/model/iconStore';
-import { useChangelistApi } from '@/api/useChangelistApi';
+import { useChangelistApi } from '@/api/model/useChangelistApi';
 import { computed, reactive, ref, type Ref } from 'vue';
 import type { Changelist } from '@/types/model/standalone';
 import _ from 'lodash';

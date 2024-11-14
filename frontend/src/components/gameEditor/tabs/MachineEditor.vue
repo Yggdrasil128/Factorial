@@ -8,7 +8,7 @@ import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useMachineStore } from '@/stores/model/machineStore';
-import { useMachineApi } from '@/api/useMachineApi';
+import { useMachineApi } from '@/api/model/useMachineApi';
 import CascaderMultiSelect from '@/components/common/input/CascaderMultiSelect.vue';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 

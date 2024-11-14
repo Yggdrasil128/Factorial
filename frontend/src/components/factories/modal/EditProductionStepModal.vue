@@ -16,7 +16,7 @@ import IconImg from '@/components/common/IconImg.vue';
 import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
 import { Minus, Plus } from '@element-plus/icons-vue';
 import type { RuleItem } from 'async-validator/dist-types/interface';
-import { useProductionStepApi } from '@/api/useProductionStepApi';
+import { useProductionStepApi } from '@/api/model/useProductionStepApi';
 
 const router = useRouter();
 const route = useRoute();

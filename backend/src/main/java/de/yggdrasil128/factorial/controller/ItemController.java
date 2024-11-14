@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,8 +51,9 @@ public class ItemController {
 
     @DeleteMapping("/items")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> itemIds) {
-        return asyncHelper.submit(result -> itemService.delete(itemIds, result));
+    public CompletableFuture<Void> delete(String itemIds) {
+        List<Integer> itemIdsList = Arrays.stream(itemIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> itemService.delete(itemIdsList, result));
     }
 
 }

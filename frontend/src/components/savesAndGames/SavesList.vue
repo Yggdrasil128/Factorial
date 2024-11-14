@@ -6,7 +6,7 @@ import { computed, type ComputedRef } from 'vue';
 import type { Save } from '@/types/model/standalone';
 import { ordinalComparator } from '@/utils/utils';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import { useSaveApi } from '@/api/useSaveApi';
+import { useSaveApi } from '@/api/model/useSaveApi';
 import { VueDraggableNext } from 'vue-draggable-next';
 import SaveCard from '@/components/savesAndGames/SaveCard.vue';
 

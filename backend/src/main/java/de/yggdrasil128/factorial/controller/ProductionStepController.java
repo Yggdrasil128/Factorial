@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -58,8 +59,9 @@ public class ProductionStepController {
 
     @DeleteMapping("/productionSteps")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> productionStepIds) {
-        return asyncHelper.submit(result -> productionStepService.delete(productionStepIds, result));
+    public CompletableFuture<Void> delete(String productionStepIds) {
+        List<Integer> productionStepIdsList = Arrays.stream(productionStepIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> productionStepService.delete(productionStepIdsList, result));
     }
 
     /**

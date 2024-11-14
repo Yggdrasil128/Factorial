@@ -7,7 +7,7 @@ import { useIconStore } from '@/stores/model/iconStore';
 import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
-import { useIconApi } from '@/api/useIconApi';
+import { useIconApi } from '@/api/model/useIconApi';
 
 export interface IconEditorProps {
   game: Game;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useChangelistStore } from '@/stores/model/changelistStore';
-import { useChangelistApi } from '@/api/useChangelistApi';
+import { useChangelistApi } from '@/api/model/useChangelistApi';
 import { useRoute, useRouter } from 'vue-router';
 import { computed, type ComputedRef, h, type Ref, ref } from 'vue';
 import type { Changelist } from '@/types/model/standalone';

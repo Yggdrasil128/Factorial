@@ -4,7 +4,7 @@ import { Check, Minus, Plus } from '@element-plus/icons-vue';
 import { ElButtonGroup, ElInput } from 'element-plus';
 import type { Fraction } from '@/types/model/basic';
 import { useVModel } from '@vueuse/core';
-import { useProductionStepApi } from '@/api/useProductionStepApi';
+import { useProductionStepApi } from '@/api/model/useProductionStepApi';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { modifyFraction } from '@/utils/fractionUtils';
 

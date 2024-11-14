@@ -9,10 +9,11 @@ import { Close, Link, Menu, UploadFilled } from '@element-plus/icons-vue';
 import type { Game, Icon } from '@/types/model/standalone';
 import { ElMessage } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
-import { useIconApi } from '@/api/useIconApi';
-import type { BulkCrudEntityApi } from '@/api/useApi';
+import { useIconApi } from '@/api/model/useIconApi';
 import { type EntityUsages, useEntityUsagesService } from '@/services/useEntityUsagesService';
 import type { NodeDropType } from 'element-plus/es/components/tree/src/tree.type';
+
+import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi';
 
 export type EntityTreeServiceState<T extends EntityWithCategory> = {
   entities: ComputedRef<T[]>;
@@ -80,7 +81,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   validateForm: () => Promise<boolean>,
   validateFolderForm: () => Promise<boolean>,
   findEntityUsages: (entityId: number) => EntityUsages,
-  entityApi: BulkCrudEntityApi<T>,
+  entityApi: AbstractBulkCrudEntityApi<T>,
 ): EntityTreeService<T> {
   const iconApi = useIconApi();
   const iconStore = useIconStore();

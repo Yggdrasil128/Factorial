@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -59,8 +60,9 @@ public class FactoryController {
 
     @DeleteMapping("/factories")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> factoryIds) {
-        return asyncHelper.submit(result -> factoryService.delete(factoryIds, result));
+    public CompletableFuture<Void> delete(String factoryIds) {
+        List<Integer> factoryIdsList = Arrays.stream(factoryIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> factoryService.delete(factoryIdsList, result));
     }
 
     private static FactoryStandalone toOutput(Factory factory) {

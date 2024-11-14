@@ -8,7 +8,7 @@ import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus
 import { VueDraggableNext } from 'vue-draggable-next';
 import { Plus } from '@element-plus/icons-vue';
 import FactoryResource from '@/components/factories/resources/FactoryResource.vue';
-import { useResourceApi } from '@/api/useResourceApi';
+import { useResourceApi } from '@/api/model/useResourceApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 

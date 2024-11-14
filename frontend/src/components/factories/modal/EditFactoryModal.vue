@@ -5,7 +5,7 @@ import type { Factory } from '@/types/model/standalone';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import _ from 'lodash';
-import { useFactoryApi } from '@/api/useFactoryApi';
+import { useFactoryApi } from '@/api/model/useFactoryApi';
 import { ElFormItem, ElInput } from 'element-plus';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -51,8 +52,9 @@ public class RecipeModifierController {
 
     @DeleteMapping("/recipeModifiers")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> recipeModifierIds) {
-        return asyncHelper.submit(result -> recipeModifierService.delete(recipeModifierIds, result));
+    public CompletableFuture<Void> delete(String recipeModifierIds) {
+        List<Integer> recipeModifierIdsList = Arrays.stream(recipeModifierIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> recipeModifierService.delete(recipeModifierIdsList, result));
     }
 
 }

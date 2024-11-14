@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGameStore } from '@/stores/model/gameStore';
-import { useGameApi } from '@/api/useGameApi';
+import { useGameApi } from '@/api/model/useGameApi';
 import { computed, type ComputedRef } from 'vue';
 import type { Game } from '@/types/model/standalone';
 import { ordinalComparator } from '@/utils/utils';

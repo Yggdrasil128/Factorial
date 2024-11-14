@@ -8,7 +8,7 @@ import { type EntityTreeService, useEntityTreeService } from '@/services/useEnti
 import { ElFormItem, ElInput, type FormRules } from 'element-plus';
 import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
-import { useRecipeModifierApi } from '@/api/useRecipeModifierApi';
+import { useRecipeModifierApi } from '@/api/model/useRecipeModifierApi';
 import { elFormFractionValidator } from '@/utils/fractionUtils';
 import type { RuleItem } from 'async-validator/dist-types/interface';
 

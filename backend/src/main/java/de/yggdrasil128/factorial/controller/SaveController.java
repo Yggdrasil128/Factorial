@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -67,8 +68,9 @@ public class SaveController {
 
     @DeleteMapping("/saves")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> delete(List<Integer> saveIds) {
-        return asyncHelper.submit(result -> saveService.delete(saveIds, result));
+    public CompletableFuture<Void> delete(String saveIds) {
+        List<Integer> saveIdsList = Arrays.stream(saveIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> saveService.delete(saveIdsList, result));
     }
 
 }

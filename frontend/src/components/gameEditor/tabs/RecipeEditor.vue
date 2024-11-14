@@ -9,7 +9,7 @@ import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useRecipeApi } from '@/api/useRecipeApi';
+import { useRecipeApi } from '@/api/model/useRecipeApi';
 import { elFormFractionValidator, isValidFraction, ParsedFraction } from '@/utils/fractionUtils';
 import ItemQuantityListEditor from '@/components/gameEditor/ItemQuantityListEditor.vue';
 import { useMachineStore } from '@/stores/model/machineStore';

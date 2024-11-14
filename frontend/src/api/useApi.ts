@@ -24,12 +24,12 @@ export function useApi(): Api {
       method: method,
       url: url,
       params: params,
-      data: payload
+      data: payload,
     }).then((response: AxiosResponse<T>) => {
       return response.data;
     }).catch(error => {
       ElMessage.error({
-        message: error.message
+        message: error.message,
       });
       return Promise.reject(error);
     });
@@ -57,15 +57,4 @@ export function useApi(): Api {
     patch,
     delete: delete_,
   };
-}
-
-export interface CrudEntityApi<T> {
-  create: (entity: Partial<T>) => Promise<void>;
-  edit: (entity: Partial<T>) => Promise<void>;
-  delete: (entityId: number) => Promise<void>;
-}
-
-export interface BulkCrudEntityApi<T> extends CrudEntityApi<T> {
-  bulkEdit: (entities: Partial<T>[]) => Promise<void>;
-  bulkDelete: (entityIds: number[]) => Promise<void>;
 }

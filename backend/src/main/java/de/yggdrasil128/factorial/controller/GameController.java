@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -60,8 +61,9 @@ public class GameController {
     }
 
     @DeleteMapping("/games")
-    public CompletableFuture<Void> delete(List<Integer> gameIds) {
-        return asyncHelper.submit(result -> gameService.delete(gameIds, result));
+    public CompletableFuture<Void> delete(String gameIds) {
+        List<Integer> gameIdsList = Arrays.stream(gameIds.split(",")).map(Integer::parseInt).toList();
+        return asyncHelper.submit(result -> gameService.delete(gameIdsList, result));
     }
 
 }
