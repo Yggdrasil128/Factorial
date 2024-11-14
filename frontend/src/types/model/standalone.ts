@@ -91,6 +91,7 @@ export type Icon = {
   mimeType: string;
   imageData: string;
   category: string[];
+  lastUpdated: number;
 }
 
 export type Item = {

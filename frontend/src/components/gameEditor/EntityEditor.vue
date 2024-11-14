@@ -61,7 +61,7 @@ defineExpose({ validateForm, validateFolderForm });
         </el-button-group>
       </div>
 
-      <EntityTree :service="service" :entity-name="entityType.toLowerCase()" />
+      <EntityTree :service="service" :entity-type="entityType" />
     </div>
     <div class="right">
       <div class="sticky">
@@ -88,7 +88,7 @@ defineExpose({ validateForm, validateFolderForm });
                 {{ service.state.editingEntityDisplayPath.value }}
               </el-form-item>
 
-              <el-form-item label="Icon" prop="iconId">
+              <el-form-item v-if="entityType !== 'Icon'" label="Icon" prop="iconId">
                 <el-segmented v-model="service.state.selectedIconOption.value"
                               :options="entityType === 'Recipe' ? iconOptions2 : iconOptions">
                   <template #default="{ item }">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import IconImg from '@/components/common/IconImg.vue';
 import { Delete, Edit, Folder, Plus } from '@element-plus/icons-vue';
-import { type EntityTreeService } from '@/services/useEntityTreeService';
+import { type EntityTreeService, type EntityType } from '@/services/useEntityTreeService';
 import { ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useItemStore } from '@/stores/model/itemStore';
@@ -9,7 +9,7 @@ import type { Item, Recipe } from '@/types/model/standalone';
 
 export interface EntityTreeProps {
   service: EntityTreeService<any>;
-  entityName: string;
+  entityType: EntityType;
 }
 
 const props: EntityTreeProps = defineProps<EntityTreeProps>();
@@ -51,7 +51,7 @@ function getRecipeIconId(recipeId: number): number {
             <el-icon v-if="data.children !== undefined" :size="28" style="margin: 0 2px;">
               <Folder />
             </el-icon>
-            <IconImg v-else-if="entityName === 'recipe' && getRecipeIconId(data.id)" :icon="getRecipeIconId(data.id)"
+            <IconImg v-else-if="entityType === 'Recipe' && getRecipeIconId(data.id)" :icon="getRecipeIconId(data.id)"
                      :size="32" />
             <IconImg v-else-if="data.iconId" :icon="data.iconId" :size="32" />
             <div v-else style="width: 32px;"></div>
@@ -62,7 +62,7 @@ function getRecipeIconId(recipeId: number): number {
           <div class="buttons">
             <template v-if="data.children !== undefined">
               <el-button-group style="margin-right: 8px;" @click.stop>
-                <el-tooltip :content="service.getButtonTooltip('New ' + entityName)"
+                <el-tooltip :content="service.getButtonTooltip('New ' + entityType.toLowerCase())"
                             effect="dark" placement="top" transition="none" :hide-after="0">
                   <el-button type="primary" :icon="Plus"
                              :disabled="service.state.editingHasChanges.value"
@@ -103,7 +103,7 @@ function getRecipeIconId(recipeId: number): number {
             </template>
             <template v-else>
               <el-button-group @click.stop>
-                <el-tooltip :content="service.getButtonTooltip('Edit ' + entityName)"
+                <el-tooltip :content="service.getButtonTooltip('Edit ' + entityType.toLowerCase())"
                             effect="dark" placement="top" transition="none" :hide-after="0">
                   <el-button :icon="Edit"
                              :disabled="service.state.editingHasChanges.value"
@@ -111,13 +111,13 @@ function getRecipeIconId(recipeId: number): number {
                 </el-tooltip>
 
                 <el-popconfirm
-                  :title="'Delete this ' + entityName + '?'"
+                  :title="'Delete this ' + entityType.toLowerCase() + '?'"
                   width="200px"
                   @confirm="service.deleteEntity(data.id)"
                 >
                   <template #reference>
                     <span class="row center tooltipHelperSpan">
-                      <el-tooltip :content="service.getButtonTooltip('Delete ' + entityName)"
+                      <el-tooltip :content="service.getButtonTooltip('Delete ' + entityType.toLowerCase())"
                                   effect="dark" placement="top" transition="none" :hide-after="0">
                         <el-button type="danger" :icon="Delete"
                                    :disabled="service.state.editingHasChanges.value"
@@ -134,14 +134,14 @@ function getRecipeIconId(recipeId: number): number {
     </el-tree>
 
     <div class="belowTree">
-      <div style="margin-bottom: 30px;">
+      <div v-if="entityType !== 'Icon'" style="margin-bottom: 30px;">
         <div style="display: flex; align-items: center; gap:8px;">
           <el-switch v-model="service.state.autoDeleteIcons.value" />
           Auto-delete icons
         </div>
         <div class="footnote">
-          When deleting {{ /^[aeiou]/i.test(entityName) ? 'an' : 'a' }} {{ entityName.toLowerCase() }},
-          this option will also delete the {{ entityName.toLowerCase() }}'s icon,
+          When deleting {{ /^[aeiou]/i.test(entityType) ? 'an' : 'a' }} {{ entityType.toLowerCase() }},
+          this option will also delete the {{ entityType.toLowerCase() }}'s icon,
           unless that icon is still used somewhere else.
         </div>
       </div>

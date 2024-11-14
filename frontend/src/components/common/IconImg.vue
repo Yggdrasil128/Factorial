@@ -26,16 +26,11 @@ const src: ComputedRef<string> = computed(() => {
   if (!icon.value) {
     return '';
   }
-  const iconId: number = typeof props.icon === 'number' ? props.icon : icon.value.id;
-  return 'http://localhost:8080/api/icon/raw?id=' + iconId;
+  return 'http://localhost:8080/api/icon/raw' +
+    '?id=' + icon.value.id +
+    '&lastChange=' + Math.round(icon.value.lastUpdated);
 });
 
-const iconName: ComputedRef<string> = computed(() => {
-  if (!icon.value) {
-    return '';
-  }
-  return icon.value.name;
-});
 </script>
 
 <template>
@@ -45,11 +40,11 @@ const iconName: ComputedRef<string> = computed(() => {
     placement="top-start"
     transition="none"
     :hide-after="0"
-    :content="iconName"
+    :content="icon.name"
   >
     <img
       :src="src"
-      :alt="iconName"
+      :alt="icon.name"
       :style="{ width: size + 'px', height: size + 'px' }"
       v-bind="$attrs"
     />

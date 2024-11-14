@@ -317,47 +317,61 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     try {
       const entity: Partial<T> = editingEntityModel.value;
 
-      if (selectedIconOption.value === 'new' && editingEntityIconDataBase64.value) {
-        // create new icon first
+      if (entityType === 'Icon') {
+        const entityAsIcon: Partial<Icon> = entity as Partial<Icon>;
 
-        const iconData: string = editingEntityIconDataBase64.value;
+        if (editingEntityIconDataBase64.value) {
+          const { mimeType, imageData } = parseImageData(editingEntityIconDataBase64.value);
+          if (!imageData) {
+            ElMessage.error({
+              message: 'Unable to upload icon.',
+            });
+            isSaving.value = false;
+            return;
+          }
 
-        const regexResult = /data:([^;]+);base64,(.*)/.exec(iconData);
-        if (!regexResult) {
-          ElMessage.error({
-            message: 'Unable to upload icon.',
-          });
-          isSaving.value = false;
-          return;
+          entityAsIcon.mimeType = mimeType;
+          entityAsIcon.imageData = imageData;
         }
-        const mimeType = regexResult[1];
-        const base64 = regexResult[2];
+      } else {
+        if (selectedIconOption.value === 'new' && editingEntityIconDataBase64.value) {
+          // create new icon first
 
-        const icon: Partial<Icon> = {
-          name: entity.name,
-          gameId: game.value.id,
-          category: [entityType + 's', ...(entity.category ?? [])],
-          mimeType: mimeType,
-          imageData: base64,
-        };
+          const { mimeType, imageData } = parseImageData(editingEntityIconDataBase64.value);
+          if (!imageData) {
+            ElMessage.error({
+              message: 'Unable to upload icon.',
+            });
+            isSaving.value = false;
+            return;
+          }
 
-        await iconApi.create(icon);
+          const icon: Partial<Icon> = {
+            name: entity.name,
+            gameId: game.value.id,
+            category: [entityType + 's', ...(entity.category ?? [])],
+            mimeType: mimeType,
+            imageData: imageData,
+          };
 
-        const savedIcon: ComputedRef<Icon | undefined> = computed(() =>
-          iconStore.getByGameId(game.value.id).filter(icon => icon.name === entity.name)[0],
-        );
+          await iconApi.create(icon);
 
-        await until(savedIcon).not.toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
+          const savedIcon: ComputedRef<Icon | undefined> = computed(() =>
+            iconStore.getByGameId(game.value.id).filter(icon => icon.name === entity.name)[0],
+          );
 
-        if (!savedIcon.value) {
-          ElMessage.error({
-            message: 'Icon could not be saved.',
-          });
-          isSaving.value = false;
-          return;
+          await until(savedIcon).not.toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
+
+          if (!savedIcon.value) {
+            ElMessage.error({
+              message: 'Icon could not be saved.',
+            });
+            isSaving.value = false;
+            return;
+          }
+
+          entity.iconId = savedIcon.value.id;
         }
-
-        entity.iconId = savedIcon.value.id;
       }
 
       if (editingEntityId.value === 0) {
@@ -373,6 +387,14 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     isSaving.value = false;
     resetForms();
+  }
+
+  function parseImageData(imageData: string): { mimeType: string, imageData: string } {
+    const regexResult = /data:([^;]+);base64,(.*)/.exec(imageData);
+    if (!regexResult) {
+      return { mimeType: '', imageData: '' };
+    }
+    return { mimeType: regexResult[1], imageData: regexResult[2] };
   }
 
   function resetForms(): void {
