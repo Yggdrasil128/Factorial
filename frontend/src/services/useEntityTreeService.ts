@@ -301,6 +301,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
         await iconApi.delete(iconId);
       }
     }
+
+    resetForms();
   }
 
   const isSaving: Ref<boolean> = ref(false);
@@ -478,6 +480,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     }
 
     await iconApi.bulkDelete(iconIdsToDelete);
+
+    resetForms();
   }
 
   async function saveFolder(): Promise<void> {
