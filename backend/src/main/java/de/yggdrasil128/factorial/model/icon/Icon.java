@@ -5,6 +5,7 @@ import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.game.Game;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -24,6 +25,7 @@ public class Icon implements NamedModel {
     private byte[] imageData;
     @Column(nullable = false)
     private String mimeType = "";
+    private Instant lastUpdated;
     @ElementCollection
     private List<String> category;
 
@@ -39,6 +41,7 @@ public class Icon implements NamedModel {
         OptionalInputField.of(standalone.name()).apply(this::setName);
         OptionalInputField.of(standalone.imageData()).apply(this::setImageData);
         OptionalInputField.of(standalone.mimeType()).apply(this::setMimeType);
+        lastUpdated = Instant.now();
         OptionalInputField.of(standalone.category()).apply(this::setCategory);
     }
 
@@ -80,6 +83,14 @@ public class Icon implements NamedModel {
 
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
+    }
+
+    public Instant getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Instant lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     public List<String> getCategory() {
