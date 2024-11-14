@@ -45,7 +45,7 @@ public class MachineController {
 
     @PatchMapping("/machines")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(int machineId, @RequestBody List<MachineStandalone> input) {
+    public CompletableFuture<Void> update(@RequestBody List<MachineStandalone> input) {
         return asyncHelper.submit(result -> machineService.update(input, result));
     }
 

@@ -97,6 +97,7 @@ public class RecipeService extends ParentedModelService<Recipe, RecipeStandalone
         if (null == game) {
             throw report(HttpStatus.CONFLICT, "recipe does not belong to a game");
         }
+        game.getRecipes().remove(get(id));
         return game;
     }
 

@@ -67,6 +67,7 @@ public class IconService extends ParentedModelService<Icon, IconStandalone, Game
         if (null == game) {
             throw report(HttpStatus.CONFLICT, "icon does not belong to a game");
         }
+        game.getIcons().remove(get(id));
         return game;
     }
 

@@ -77,6 +77,7 @@ public class ItemService extends ParentedModelService<Item, ItemStandalone, Game
         if (null == game) {
             throw report(HttpStatus.CONFLICT, "item does not belong to a game");
         }
+        game.getItems().remove(get(id));
         return game;
     }
 

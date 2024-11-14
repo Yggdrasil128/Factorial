@@ -82,6 +82,7 @@ public class MachineService extends ParentedModelService<Machine, MachineStandal
         if (null == game) {
             throw report(HttpStatus.CONFLICT, "machine does not belong to a game");
         }
+        game.getMachines().remove(get(id));
         return game;
     }
 

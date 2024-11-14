@@ -78,6 +78,7 @@ public class RecipeModifierService
         if (null == game) {
             throw report(HttpStatus.CONFLICT, "recipe modifier does not belong to a game");
         }
+        game.getRecipeModifiers().remove(get(id));
         return game;
     }
 

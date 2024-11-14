@@ -153,6 +153,7 @@ public class ChangelistService
         if (null == save) {
             throw report(HttpStatus.CONFLICT, "changelist does not belong to a save");
         }
+        save.getChangelists().remove(get(id));
         return save;
     }
 

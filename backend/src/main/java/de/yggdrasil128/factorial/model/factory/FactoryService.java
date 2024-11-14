@@ -118,6 +118,7 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
         if (1 == repository.countBySaveId(save.getId())) {
             throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
         }
+        save.getFactories().remove(get(id));
         return save;
     }
 

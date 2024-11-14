@@ -99,6 +99,7 @@ public class ProductionStepService
         if (null == factory) {
             throw report(HttpStatus.CONFLICT, "production step does not belong to a factory");
         }
+        factory.getProductionSteps().remove(get(id));
         return factory;
     }
 

@@ -113,6 +113,7 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
         if (null == factory) {
             throw report(HttpStatus.CONFLICT, "resource does not belong to a factory");
         }
+        factory.getResources().remove(get(id));
         return factory;
     }
 
@@ -122,6 +123,7 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
     }
 
     public void destroy(Factory factory, int id) {
+        factory.getResources().remove(get(id));
         repository.deleteById(id);
         cache.remove(id);
         events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
