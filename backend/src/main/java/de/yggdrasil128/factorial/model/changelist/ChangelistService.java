@@ -111,15 +111,14 @@ public class ChangelistService
         Map<Integer, ProductionStepThroughputs> collectThroughputs = new HashMap<>();
         if (changelist.isPrimary()) {
             handleNewPrimaryChangelist(changelist)
-                    .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
+                    .forEach(throughputs -> collectThroughputs.put(throughputs.getEntityId(), throughputs));
         }
         ProductionStepChanges changes = cache.remove(changelist.getId());
         if (null != changes) {
-            changes.undo()
-                    .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
+            changes.undo().forEach(throughputs -> collectThroughputs.put(throughputs.getEntityId(), throughputs));
         }
         computeProductionStepChanges(changelist, true)
-                .forEach(throughputs -> collectThroughputs.put(throughputs.getProductionStepId(), throughputs));
+                .forEach(throughputs -> collectThroughputs.put(throughputs.getEntityId(), throughputs));
         collectThroughputs.values().forEach(this::publishProductionStepThroughputsChanged);
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
     }
@@ -203,7 +202,7 @@ public class ChangelistService
                 ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(entry.getKey(),
                         () -> productionStepChanges.get(entry.getKey().getId()));
                 if (changes.establishLink(throughputs, applyChanges)) {
-                    collectThroughputs.put(throughputs.getProductionStepId(), throughputs);
+                    collectThroughputs.put(throughputs.getEntityId(), throughputs);
                 }
             }
         }
@@ -244,7 +243,7 @@ public class ChangelistService
 
     private void publishProductionStepThroughputsChanged(ProductionStepThroughputs throughputs) {
         events.publishEvent(new ProductionStepThroughputsChangedEvent(
-                productionStepService.get(throughputs.getProductionStepId()), throughputs, false));
+                productionStepService.get(throughputs.getEntityId()), throughputs, false));
     }
 
     public QuantityByChangelist getProductionStepChanges(ProductionStep productionStep) {

@@ -33,15 +33,20 @@ public class ProductionLine implements Production {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProductionLine.class);
 
-    private final int hostId;
+    private final int entityId;
     // key is Item.id, but we must not keep references to the entities here
     private final Map<Integer, ResourceContributions> contributions = new HashMap<>();
     private final ProductionLineService service;
     private boolean hasAlteredResources;
 
-    public ProductionLine(int hostId, ProductionLineService service) {
-        this.hostId = hostId;
+    public ProductionLine(int entityId, ProductionLineService service) {
+        this.entityId = entityId;
         this.service = service;
+    }
+
+    @Override
+    public int getEntityId() {
+        return entityId;
     }
 
     public ResourceContributions getContributions(Resource resource) {
@@ -121,7 +126,7 @@ public class ProductionLine implements Production {
         HashMap<Integer, ResourceContributions> modified = new HashMap<>();
         initContribution(contributor, modified);
         for (ResourceContributions contribution : modified.values()) {
-            service.notifyResourceUpdate(hostId, contribution);
+            service.notifyResourceUpdate(entityId, contribution);
         }
     }
 
@@ -170,8 +175,8 @@ public class ProductionLine implements Production {
 
     private ResourceContributions spawnResource(int itemId) {
         hasAlteredResources = true;
-        LOG.debug("Spawning a new Resource, Production Line {}, Item: {}", hostId, itemId);
-        return service.spawnResource(hostId, itemId);
+        LOG.debug("Spawning a new Resource, Production Line {}, Item: {}", entityId, itemId);
+        return service.spawnResource(entityId, itemId);
     }
 
     /**
@@ -190,7 +195,7 @@ public class ProductionLine implements Production {
         affected.addAll(contributor.getInputs().keySet());
         affected.addAll(contributor.getOutputs().keySet());
         for (Integer itemId : affected) {
-            service.notifyResourceUpdate(hostId, contributions.get(itemId));
+            service.notifyResourceUpdate(entityId, contributions.get(itemId));
         }
     }
 
@@ -225,12 +230,12 @@ public class ProductionLine implements Production {
             ResourceContributions contribution = entry.getValue();
             if (canDestroy(contribution)) {
                 contributions.remove(entry.getKey());
-                LOG.debug("Destroying Resource, Production Line: {}, Resource {}, Item: {}", hostId,
+                LOG.debug("Destroying Resource, Production Line: {}, Resource {}, Item: {}", entityId,
                         entry.getValue().getResourceId(), entry.getKey());
-                service.destroyResource(hostId, contribution.getResourceId());
+                service.destroyResource(entityId, contribution.getResourceId());
                 hasAlteredResources = true;
             } else {
-                service.notifyResourceUpdate(hostId, contribution);
+                service.notifyResourceUpdate(entityId, contribution);
             }
         }
     }
@@ -242,12 +247,12 @@ public class ProductionLine implements Production {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ProductionLine && hostId == ((ProductionLine) obj).hostId;
+        return obj instanceof ProductionLine && entityId == ((ProductionLine) obj).entityId;
     }
 
     @Override
     public int hashCode() {
-        return 31 + Integer.hashCode(hostId);
+        return 31 + Integer.hashCode(entityId);
     }
 
     @Override

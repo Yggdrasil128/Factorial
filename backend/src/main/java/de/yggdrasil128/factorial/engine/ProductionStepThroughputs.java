@@ -22,7 +22,6 @@ import static java.util.stream.Collectors.toMap;
  * To be kept up-to-date, this implementation must be notified about meaningful changes to the production step, namely
  * <ul>
  * <li>{@link #update(ProductionStep)} for checking everything at once</li>
- * <li>{@link #updateMachineCount(ProductionStep, Fraction)} for its local machine count</li>
  * <li>{@link #changeMachineCounts(QuantityByChangelist)} for changes to a {@link Changelist} entry for it</li>
  * </ul>
  * <p>
@@ -61,7 +60,8 @@ public class ProductionStepThroughputs implements Production {
         recompute();
     }
 
-    public int getProductionStepId() {
+    @Override
+    public int getEntityId() {
         return productionStepId;
     }
 
@@ -81,12 +81,6 @@ public class ProductionStepThroughputs implements Production {
         products = recipe.getProducts().stream().map(ItemAmount::new).toList();
         recipeDuration = recipe.getDuration();
         return itemsChanged;
-    }
-
-    public void updateMachineCount(ProductionStep productionStep, Fraction machineCount) {
-        if (effectiveModifiers.applyMachineCount(machineCount)) {
-            recompute();
-        }
     }
 
     public void changeMachineCounts(QuantityByChangelist change) {
@@ -114,20 +108,6 @@ public class ProductionStepThroughputs implements Production {
 
     private Fraction computeRate(Fraction amount, Fraction speed) {
         return amount.divide(recipeDuration).multiply(speed);
-    }
-
-    public void applyGlobalChange(Function<? super QuantityByChangelist, ? extends QuantityByChangelist> change) {
-        for (Map.Entry<Integer, QuantityByChangelist> input : inputs.entrySet()) {
-            applyChange(input, change);
-        }
-        for (Map.Entry<Integer, QuantityByChangelist> output : outputs.entrySet()) {
-            applyChange(output, change);
-        }
-    }
-
-    private static void applyChange(Map.Entry<Integer, QuantityByChangelist> entry,
-                                    Function<? super QuantityByChangelist, ? extends QuantityByChangelist> change) {
-        entry.setValue(change.apply(entry.getValue()));
     }
 
     public QuantityByChangelist getMachineCounts() {

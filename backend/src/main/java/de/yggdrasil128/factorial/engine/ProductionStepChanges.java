@@ -116,15 +116,15 @@ public class ProductionStepChanges {
                 return false;
             }
             LOG.debug("Changing machine counts, Changelist: {}, Production Step: {}, change: {}", changelistId,
-                    throughputs.getProductionStepId(), throughputsChange);
+                    throughputs.getEntityId(), throughputsChange);
             throughputs.changeMachineCounts(throughputsChange);
             return true;
         }
 
         @Override
         public String toString() {
-            return change + (null == throughputs ? " (unlinked)"
-                    : " (linked to PID " + throughputs.getProductionStepId() + ")");
+            return change
+                    + (null == throughputs ? " (unlinked)" : " (linked to PID " + throughputs.getEntityId() + ")");
         }
 
     }
@@ -151,10 +151,10 @@ public class ProductionStepChanges {
     }
 
     public boolean establishLink(ProductionStepThroughputs throughputs, boolean applyChanges) {
-        Link link = links.get(throughputs.getProductionStepId());
+        Link link = links.get(throughputs.getEntityId());
         if (null != link && null == link.getThroughputs()) {
             LOG.debug("Establishing link, Changelist: {}, Production Step: {}", changelistId,
-                    throughputs.getProductionStepId());
+                    throughputs.getEntityId());
             link.setThroughputs(throughputs);
             if (applyChanges) {
                 return link.applyChanges();

@@ -2,7 +2,6 @@ package de.yggdrasil128.factorial.model.resource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.engine.Production;
-import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.NamedModel;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
@@ -28,18 +27,14 @@ public record ResourceStandalone(int id,
 
     public static ResourceStandalone of(Resource model, ResourceContributions contributions) {
         return of(model, External.FRONTEND,
-                contributions.getProducers().stream().map(producer -> resolve(producer)).toList(),
+                contributions.getProducers().stream().map(ResourceStandalone::resolve).toList(),
                 contributions.getProduced(),
-                contributions.getConsumers().stream().map(consumer -> resolve(consumer)).toList(),
+                contributions.getConsumers().stream().map(ResourceStandalone::resolve).toList(),
                 contributions.getConsumed(), contributions.getOverProduced());
     }
 
     private static Object resolve(Production production) {
-        if (production instanceof ProductionStepThroughputs productionStepThroughputs) {
-            return productionStepThroughputs.getProductionStepId();
-        }
-        throw new AssertionError("production not instance of ProductionStepThroughputs, but "
-                + production.getClass().getCanonicalName());
+        return production.getEntityId();
     }
 
     public static ResourceStandalone of(Resource model, External destination) {

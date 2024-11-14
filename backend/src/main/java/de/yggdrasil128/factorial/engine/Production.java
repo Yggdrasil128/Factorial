@@ -11,6 +11,13 @@ import java.util.Map;
 public interface Production {
 
     /**
+     * Returns the id of the described entity.
+     * 
+     * @return the id of the described entity
+     */
+    int getEntityId();
+
+    /**
      * Returns the production inputs.
      * <p>
      * The keys of this mapping are values of {@link Item#getId() Item.id}.
