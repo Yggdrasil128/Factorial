@@ -3,7 +3,6 @@ package de.yggdrasil128.factorial.model.icon;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.model.External;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public record IconStandalone(int id,
                              String name,
                              byte[] imageData,
                              String mimeType,
-                             @JsonProperty(access = READ_ONLY) Instant lastUpdated,
+                             @JsonProperty(access = READ_ONLY) long lastUpdated,
                              List<String> category) {
 
     public static IconStandalone of(Icon model) {
@@ -24,7 +23,7 @@ public record IconStandalone(int id,
     public static IconStandalone of(Icon model, External destination) {
         return new IconStandalone(model.getId(), model.getGame().getId(), model.getName(),
                 External.SAVE_FILE == destination ? model.getImageData() : null, model.getMimeType(),
-                model.getLastUpdated(), new ArrayList<>(model.getCategory()));
+                model.getLastUpdated().toEpochMilli(), new ArrayList<>(model.getCategory()));
     }
 
 }
