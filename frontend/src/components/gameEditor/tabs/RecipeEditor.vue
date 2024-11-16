@@ -189,12 +189,14 @@ watch(() => service.state.editingEntityModel.value.products, () => {
         <CascaderMultiSelect style="width: 100%;"
                              v-model="service.state.editingEntityModel.value.applicableMachineIds!"
                              :options="machines"
+                             placeholder=" "
                              clearable />
       </el-form-item>
       <el-form-item label="Applicable modifiers" prop="applicableModifierIds">
         <CascaderMultiSelect style="width: 100%;"
                              v-model="service.state.editingEntityModel.value.applicableModifierIds!"
                              :options="recipeModifiers"
+                             placeholder=" "
                              clearable />
       </el-form-item>
     </template>

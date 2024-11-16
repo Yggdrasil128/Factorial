@@ -309,7 +309,12 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
   async function save(): Promise<void> {
     editingEntityModel.value.name = editingEntityModel.value.name?.trim();
-    // also trim description
+    if (entityType !== 'Icon') {
+      const editingEntityModelDescription: { description?: string; } = editingEntityModel.value as {
+        description?: string;
+      };
+      editingEntityModelDescription.description = editingEntityModelDescription.description?.trim();
+    }
 
     if (!await validateForm()) {
       return;

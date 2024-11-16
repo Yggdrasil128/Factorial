@@ -88,6 +88,11 @@ defineExpose({ validateForm, validateFolderForm });
                 {{ service.state.editingEntityDisplayPath.value }}
               </el-form-item>
 
+              <el-form-item v-if="entityType !== 'Icon'" label="Description" prop="description">
+                <el-input v-model="service.state.editingEntityModel.value.description"
+                          type="textarea" autosize />
+              </el-form-item>
+
               <el-form-item v-if="entityType !== 'Icon'" label="Icon" prop="iconId">
                 <el-segmented v-model="service.state.selectedIconOption.value"
                               :options="entityType === 'Recipe' ? iconOptions2 : iconOptions">

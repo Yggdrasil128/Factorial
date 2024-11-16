@@ -36,6 +36,7 @@ const service: EntityTreeService<Machine> = useEntityTreeService<Machine>(
   () => ({
     gameId: props.game.id,
     name: '',
+    description: '',
     iconId: 0,
     // category is set by service
     machineModifierIds: [],
@@ -45,6 +46,7 @@ const service: EntityTreeService<Machine> = useEntityTreeService<Machine>(
     return {
       id: machine.id,
       name: machine.name,
+      description: machine.description,
       iconId: machine.iconId,
       category: machine.category,
       machineModifierIds: [...machine.machineModifierIds],
@@ -89,6 +91,7 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
         <CascaderMultiSelect style="width: 100%;"
                              v-model="service.state.editingEntityModel.value.machineModifierIds!"
                              :options="recipeModifiers"
+                             placeholder=" "
                              clearable />
       </el-form-item>
     </template>

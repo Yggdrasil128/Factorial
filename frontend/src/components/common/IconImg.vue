@@ -28,7 +28,7 @@ const src: ComputedRef<string> = computed(() => {
   }
   return 'http://localhost:8080/api/icon/raw' +
     '?id=' + icon.value.id +
-    '&lastUpdated=' + Math.round(icon.value.lastUpdated);
+    '&lastUpdated=' + icon.value.lastUpdated;
 });
 
 </script>
