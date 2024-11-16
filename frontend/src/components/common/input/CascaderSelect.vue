@@ -42,7 +42,7 @@ const cascaderModel: Ref<any> = computed({
 const options: ComputedRef<TreeNode[]> = computed(() => convertToTreeByCategory(props.options));
 
 function filterMethod(node: TreeNode, keyword: string) {
-  return node.label.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+  return node.label.toLowerCase().includes(keyword.toLowerCase());
 }
 
 function getLeafCount(node: any) {

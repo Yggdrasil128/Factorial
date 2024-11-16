@@ -2,7 +2,7 @@
 import { type EntityTreeService, type EntityType, iconOptions, iconOptions2 } from '@/services/useEntityTreeService';
 import { ElButtonGroup, ElFormItem, ElInput, ElTooltip, type FormRules } from 'element-plus';
 import { ref } from 'vue';
-import { Check, Close, Folder, Plus } from '@element-plus/icons-vue';
+import { Check, Close, Folder, Plus, Search } from '@element-plus/icons-vue';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 import IconUpload from '@/components/gameEditor/IconUpload.vue';
 import EntityTree from '@/components/gameEditor/EntityTree.vue';
@@ -44,6 +44,14 @@ defineExpose({ validateForm, validateFolderForm });
     <div class="left">
       <div class="top">
         <h2 class="title">{{ entityType }}s</h2>
+
+        <div class="spacer" />
+
+        <el-input v-model="service.state.filterInputModel.value"
+                  class="search"
+                  placeholder="Search..."
+                  :prefix-icon="Search"
+                  clearable />
 
         <el-button-group class="buttons">
           <el-tooltip :content="service.getButtonTooltip('New ' + entityType.toLowerCase())"
@@ -229,15 +237,29 @@ defineExpose({ validateForm, validateFolderForm });
 
 .top {
   display: flex;
+  gap: 16px;
   align-items: center;
   width: 100%;
 }
 
 .top .title {
-  flex-grow: 1;
+  flex: 0 0 auto;
+}
+
+.top .spacer {
+  flex: 1 0 0;
+}
+
+.top .search {
+  flex: 0 1 160px;
+}
+
+.top .title {
+  flex: 0 0 auto;
 }
 
 .top .buttons {
+  flex: 0 0 auto;
   margin-right: 7px;
 }
 

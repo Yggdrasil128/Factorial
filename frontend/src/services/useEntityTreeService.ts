@@ -24,6 +24,7 @@ export type EntityTreeServiceState<T extends EntityWithCategory> = {
   expandedKeys: Set<string>;
   expandedKeysList: ComputedRef<string[]>;
   currentNodeKey: Ref<string>;
+  filterInputModel: Ref<string>;
 
   editingEntityId: Ref<number | undefined>;
   editingEntityModel: Ref<Partial<T>>;
@@ -50,6 +51,7 @@ export interface EntityTreeService<T extends EntityWithCategory> {
   onTreeNodeCollapsed: (node: TreeNode) => void;
   onCurrentNodeChanged: (node: Node) => void;
   onDragAndDrop: (sourceNode: Node, targetNode: Node, dropType: NodeDropType) => Promise<void>;
+  treeFilterMethod: (keyword: string, data: TreeNode) => boolean;
 
   createNewEntityAtRoot: () => void;
   createNewEntityAtNode: (node: Node) => void;
@@ -93,6 +95,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   const treeRef: Ref<TreeInstance | undefined> = ref();
 
   const currentNodeKey: Ref<string> = ref('');
+
+  const filterInputModel: Ref<string> = ref('');
 
   const categories: Ref<string[][]> = ref([]);
 
@@ -172,6 +176,14 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   function setCurrentTreeNode(key: string | number | undefined) {
     treeRef.value?.setCurrentKey(String(key));
   }
+
+  function treeFilterMethod(keyword: string, data: TreeNode): boolean {
+    return data.label.toLowerCase().includes(keyword);
+  }
+
+  watch(filterInputModel, () => {
+    treeRef.value?.filter(filterInputModel.value.trim().toLowerCase());
+  });
 
   function getButtonTooltip(msg: string): string {
     if (editingHasChanges.value) {
@@ -672,6 +684,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       expandedKeys,
       expandedKeysList,
       currentNodeKey,
+      filterInputModel,
 
       editingEntityId,
       editingEntityModel,
@@ -695,6 +708,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     onTreeNodeCollapsed,
     onCurrentNodeChanged,
     onDragAndDrop,
+    treeFilterMethod,
 
     createNewEntityAtRoot,
     createNewEntityAtNode,

@@ -50,6 +50,7 @@ function getRecipeIconId(recipeId: number): number {
       :draggable="true"
       @node-drop="service.onDragAndDrop"
       v-loading="service.state.treeLoading.value"
+      :filter-node-method="service.treeFilterMethod"
     >
       <!--suppress VueUnrecognizedSlot -->
       <template #default="{ node, data }">
