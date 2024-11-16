@@ -2,10 +2,11 @@
 import IconImg from '@/components/common/IconImg.vue';
 import { Delete, Edit, Folder, Plus } from '@element-plus/icons-vue';
 import { type EntityTreeService, type EntityType } from '@/services/useEntityTreeService';
-import { ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
+import { ElButtonGroup, ElPopconfirm, ElTooltip, type TreeInstance } from 'element-plus';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import type { Item, Recipe } from '@/types/model/standalone';
+import { type Ref } from 'vue';
 
 export interface EntityTreeProps {
   service: EntityTreeService<any>;
@@ -15,6 +16,8 @@ export interface EntityTreeProps {
 const props: EntityTreeProps = defineProps<EntityTreeProps>();
 
 const service = props.service;
+
+const treeRef: Ref<TreeInstance | undefined> = service.state.treeRef;
 
 const recipeStore = useRecipeStore();
 const itemStore = useItemStore();
@@ -35,12 +38,16 @@ function getRecipeIconId(recipeId: number): number {
   <div>
     <el-tree
       class="tree"
+      ref="treeRef"
       node-key="key"
+      highlight-current
       :default-expanded-keys="service.state.expandedKeysList.value"
+      :current-node-key="service.state.currentNodeKey.value"
       :data="service.state.tree.value"
       @node-expand="service.onTreeNodeExpanded"
       @node-collapse="service.onTreeNodeCollapsed"
-      draggable
+      @current-change="service.onCurrentNodeChanged"
+      :draggable="true"
       @node-drop="service.onDragAndDrop"
       v-loading="service.state.treeLoading.value"
     >
@@ -163,6 +170,7 @@ function getRecipeIconId(recipeId: number): number {
 
   --el-tree-node-content-height: 40px;
   --el-fill-color-light: #4b4b4b;
+  --el-color-primary-light-9: #4b4b4b;
 }
 
 .node {

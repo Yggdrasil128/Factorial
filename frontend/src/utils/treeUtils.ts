@@ -44,7 +44,7 @@ export function convertToTreeByCategory<T extends EntityWithCategory>(
     }
     const node: TreeNode = {
       id: element.id,
-      key: key + element.id,
+      key: String(element.id),
       value: element.id,
       iconId: isIconEntity ? element.id : element.iconId,
       label: element.name,

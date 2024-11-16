@@ -7,7 +7,7 @@ import _ from 'lodash';
 import Node from 'element-plus/es/components/tree/src/model/node';
 import { Close, Link, Menu, UploadFilled } from '@element-plus/icons-vue';
 import type { Game, Icon } from '@/types/model/standalone';
-import { ElMessage } from 'element-plus';
+import { ElMessage, type TreeInstance } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useIconApi } from '@/api/model/useIconApi';
 import { type EntityUsages, useEntityUsagesService } from '@/services/useEntityUsagesService';
@@ -18,10 +18,12 @@ import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi
 export type EntityTreeServiceState<T extends EntityWithCategory> = {
   entities: ComputedRef<T[]>;
   tree: Ref<TreeNode[]>;
+  treeRef: Ref<TreeInstance | undefined>;
   treeLoading: Ref<boolean>;
   categories: Ref<string[][]>;
   expandedKeys: Set<string>;
   expandedKeysList: ComputedRef<string[]>;
+  currentNodeKey: Ref<string>;
 
   editingEntityId: Ref<number | undefined>;
   editingEntityModel: Ref<Partial<T>>;
@@ -46,6 +48,7 @@ export interface EntityTreeService<T extends EntityWithCategory> {
 
   onTreeNodeExpanded: (node: TreeNode) => void;
   onTreeNodeCollapsed: (node: TreeNode) => void;
+  onCurrentNodeChanged: (node: Node) => void;
   onDragAndDrop: (sourceNode: Node, targetNode: Node, dropType: NodeDropType) => Promise<void>;
 
   createNewEntityAtRoot: () => void;
@@ -87,6 +90,10 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   const iconStore = useIconStore();
   const entityUsageService = useEntityUsagesService();
 
+  const treeRef: Ref<TreeInstance | undefined> = ref();
+
+  const currentNodeKey: Ref<string> = ref('');
+
   const categories: Ref<string[][]> = ref([]);
 
   const treeUpdatesPaused: Ref<boolean> = ref(false);
@@ -97,6 +104,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
   function updateTree(): void {
     tree.value = _.cloneDeep(computedTree.value);
+
+    void nextTick(() => treeRef.value?.setCurrentKey(currentNodeKey.value));
   }
 
   const tree: Ref<TreeNode[]> = ref([]);
@@ -155,6 +164,14 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     () => addCategoriesFromTree(),
     { deep: true, immediate: true },
   );
+
+  function onCurrentNodeChanged(node: Node): void {
+    currentNodeKey.value = String(node.key);
+  }
+
+  function setCurrentTreeNode(key: string | number | undefined) {
+    treeRef.value?.setCurrentKey(String(key));
+  }
 
   function getButtonTooltip(msg: string): string {
     if (editingHasChanges.value) {
@@ -272,6 +289,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     selectedIconOption.value = entity.iconId ? 'select' : 'none';
     editingEntityIconDataBase64.value = '';
 
+    setCurrentTreeNode(id);
     focusNameInputField();
   }
 
@@ -394,8 +412,18 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
       if (editingEntityId.value === 0) {
         await entityApi.create(entity);
+
+        const savedEntity: ComputedRef<T | undefined> = computed(() =>
+          entities.value.filter(e => e.name === entity.name)[0],
+        );
+
+        await until(savedEntity).not.toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
+
+        setCurrentTreeNode(savedEntity.value?.id);
       } else {
         await entityApi.edit(entity);
+
+        setCurrentTreeNode(entity.id);
       }
 
     } catch {
@@ -518,13 +546,17 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     if (editingFolderOriginalModel.value.name === '') {
       // new folder
-      addCategory([...editingFolderPath.value, editingFolderModel.value.name]);
+      const category: string[] = [...editingFolderPath.value, editingFolderModel.value.name];
+      addCategory(category);
 
       ElMessage.success({
         message: 'Folder created.',
       });
 
       resetForms();
+
+      void nextTick(() => setCurrentTreeNode('/' + category.join('/') + '/'));
+
       return;
     }
 
@@ -551,6 +583,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     treeUpdatesPaused.value = true;
 
     try {
+      addCategory(destination);
+
       await entityApi.bulkEdit(entityUpdates);
 
       const isDone: ComputedRef<boolean> = computed(() => {
@@ -566,6 +600,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       await until(isDone).toBeTruthy({ timeout: waitUntilDoneTimeoutMillis });
 
       removeCategory(source);
+
+      void nextTick(() => setCurrentTreeNode('/' + destination.join('/') + '/'));
 
     } finally {
       treeLoading.value = false;
@@ -630,10 +666,12 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     state: {
       entities,
       tree,
+      treeRef,
       treeLoading,
       categories,
       expandedKeys,
       expandedKeysList,
+      currentNodeKey,
 
       editingEntityId,
       editingEntityModel,
@@ -655,6 +693,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     onTreeNodeExpanded,
     onTreeNodeCollapsed,
+    onCurrentNodeChanged,
     onDragAndDrop,
 
     createNewEntityAtRoot,
