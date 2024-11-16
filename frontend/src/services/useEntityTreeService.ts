@@ -1,7 +1,7 @@
 import type { EntityWithCategory, TreeNode } from '@/utils/treeUtils';
 import { convertToTreeByCategory } from '@/utils/treeUtils';
 import type { Component, ComputedRef, Ref } from 'vue';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { until } from '@vueuse/core';
 import _ from 'lodash';
 import Node from 'element-plus/es/components/tree/src/model/node';
@@ -230,6 +230,13 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     return path;
   }
 
+  function focusNameInputField(): void {
+    void nextTick(() => {
+      const input: HTMLInputElement | null = document.querySelector('#formNameInput');
+      input?.focus();
+    });
+  }
+
   function createNewEntityAtRoot(): void {
     createNewEntity([]);
   }
@@ -249,6 +256,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingEntityOriginalModel.value = _.clone(entity);
 
     editingEntityIconDataBase64.value = '';
+
+    focusNameInputField();
   }
 
   function editEntity(id: number) {
@@ -262,6 +271,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
     selectedIconOption.value = entity.iconId ? 'select' : 'none';
     editingEntityIconDataBase64.value = '';
+
+    focusNameInputField();
   }
 
   function checkDeleteEntity(id: number, event: PointerEvent): void {
@@ -429,6 +440,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingFolderPath.value = parentPath;
     editingFolderModel.value = { name: '' };
     editingFolderOriginalModel.value = { name: '' };
+
+    focusNameInputField();
   }
 
   function editFolder(node: Node): void {
@@ -440,6 +453,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingFolderPath.value = path;
     editingFolderModel.value = { name };
     editingFolderOriginalModel.value = { name };
+
+    focusNameInputField();
   }
 
   async function deleteFolder(node: Node): Promise<void> {

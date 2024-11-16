@@ -79,9 +79,10 @@ defineExpose({ validateForm, validateFolderForm });
                      :model="service.state.editingEntityModel.value"
                      ref="form"
                      :rules="formRules"
+                     @submit.prevent="service.save"
             >
               <el-form-item label="Name" prop="name">
-                <el-input v-model="service.state.editingEntityModel.value.name" />
+                <el-input id="formNameInput" v-model="service.state.editingEntityModel.value.name" />
               </el-form-item>
 
               <el-form-item label="Path">
@@ -157,9 +158,10 @@ defineExpose({ validateForm, validateFolderForm });
                      :model="service.state.editingFolderModel.value"
                      ref="folderForm"
                      :rules="folderFormRules"
+                     @submit.prevent="service.saveFolder"
             >
               <el-form-item label="Folder name" prop="name">
-                <el-input v-model="service.state.editingFolderModel.value.name" />
+                <el-input id="formNameInput" v-model="service.state.editingFolderModel.value.name" />
               </el-form-item>
 
               <el-form-item label="Path">
