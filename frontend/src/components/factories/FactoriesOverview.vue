@@ -2,10 +2,17 @@
 import FactoriesList from '@/components/factories/FactoriesList.vue';
 import ChangelistsList from '@/components/factories/ChangelistsList.vue';
 import FactoryResources from '@/components/factories/resources/FactoryResources.vue';
+import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
+import NoSaveLoaded from '@/components/common/NoSaveLoaded.vue';
+
+const currentGameAndSaveStore = useCurrentGameAndSaveStore();
+
 </script>
 
 <template>
-  <div class="main">
+  <NoSaveLoaded v-if="!currentGameAndSaveStore.currentSaveId" />
+
+  <div v-else class="main">
     <div class="left">
       <factories-list />
       <changelists-list />
