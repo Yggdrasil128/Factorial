@@ -51,6 +51,7 @@ import { useGameApi } from '@/api/model/useGameApi';
 import type { Game, Save } from '@/types/model/standalone';
 import { reactive } from 'vue';
 import _ from 'lodash';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
 
 export interface UseModelSyncService {
   setCurrentSaveIdAndLoad: (saveId: number) => Promise<void>;
@@ -61,6 +62,7 @@ export interface UseModelSyncService {
 
 function useModelSyncService(): UseModelSyncService {
   const currentGameAndSaveStore = useCurrentGameAndSaveStore();
+  const userSettingsStore = useUserSettingsStore();
 
   const storedSaveIds: Set<number> = reactive(new Set());
   const saveStore = useSaveStore();
@@ -82,8 +84,6 @@ function useModelSyncService(): UseModelSyncService {
   const gameApi = useGameApi();
 
   const modelSyncWebsocket: ModelSyncWebsocket = useModelSyncWebsocket(onWebsocketMessage, reload);
-
-  modelSyncWebsocket.connect();
 
   interface GameRelatedEntityStore {
     map: Map<number, GameRelatedEntity>;
@@ -255,6 +255,8 @@ function useModelSyncService(): UseModelSyncService {
     currentGameAndSaveStore.currentSaveId = saveId;
     currentGameAndSaveStore.currentGameId = save.gameId;
 
+    userSettingsStore.lastSaveId = saveId;
+
     await updateStores();
   }
 
@@ -367,7 +369,19 @@ function useModelSyncService(): UseModelSyncService {
     }
   }
 
-  void reloadSavesAndGames().then(() => updateStores());
+  async function init(): Promise<void> {
+    modelSyncWebsocket.connect();
+
+    await reloadSavesAndGames();
+
+    if (userSettingsStore.lastSaveId && saveStore.getById(userSettingsStore.lastSaveId)) {
+      await setCurrentSaveIdAndLoad(userSettingsStore.lastSaveId);
+    } else {
+      await updateStores();
+    }
+  }
+
+  void init();
 
   return {
     setCurrentSaveIdAndLoad,

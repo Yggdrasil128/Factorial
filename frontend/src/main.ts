@@ -6,12 +6,15 @@ import 'element-plus/theme-chalk/dark/css-vars.css';
 import mitt from 'mitt';
 import axios from 'axios';
 import { createPinia } from 'pinia';
+import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
 
 import App from './App.vue';
 
-const app = createApp(App);
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedState);
 
-app.use(createPinia());
+const app = createApp(App);
+app.use(pinia);
 app.use(router);
 app.use(ElementPlus);
 app.provide('globalEventBus', mitt());

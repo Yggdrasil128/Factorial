@@ -12,6 +12,7 @@ import EditFactoryModal from '@/components/factories/modal/EditFactoryModal.vue'
 import EditChangelistModal from '@/components/factories/modal/EditChangelistModal.vue';
 import EditProductionStepModal from '@/components/factories/modal/EditProductionStepModal.vue';
 import GameEditor from '@/components/gameEditor/GameEditor.vue';
+import SettingsPage from '@/components/settings/SettingsPage.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -21,7 +22,7 @@ const router = createRouter({
     {
       path: '/savesAndGames',
       name: 'savesAndGames',
-      component: SavesAndGames
+      component: SavesAndGames,
     },
     {
       path: '/gameEditor/:editGameId/:tab',
@@ -36,37 +37,38 @@ const router = createRouter({
         {
           path: 'new',
           name: 'newFactory',
-          components: { modal: EditFactoryModal }
+          components: { modal: EditFactoryModal },
         },
         {
           path: 'edit/:editFactoryId',
           name: 'editFactory',
-          components: { modal: EditFactoryModal }
+          components: { modal: EditFactoryModal },
         },
         {
           path: 'newChangelist',
           name: 'newChangelist',
-          components: { modal: EditChangelistModal }
+          components: { modal: EditChangelistModal },
         },
         {
           path: 'editChangelist/:editChangelistId',
           name: 'editChangelist',
-          components: { modal: EditChangelistModal }
+          components: { modal: EditChangelistModal },
         },
         {
           path: 'newProductionStep',
           name: 'newProductionStep',
-          components: { modal: EditProductionStepModal }
+          components: { modal: EditProductionStepModal },
         },
         {
           path: 'editProductionStep/:editProductionStepId',
           name: 'editProductionStep',
-          components: { modal: EditProductionStepModal }
-        }
-      ]
+          components: { modal: EditProductionStepModal },
+        },
+      ],
     },
-    { path: '/devtools', component: DevTools }
-  ]
+    { path: '/settings', component: SettingsPage },
+    { path: '/devtools', component: DevTools },
+  ],
 });
 
 export default router;

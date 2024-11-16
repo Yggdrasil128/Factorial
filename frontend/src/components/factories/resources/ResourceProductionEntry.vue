@@ -19,10 +19,10 @@ const item: ComputedRef<Item | undefined> = computed(() => itemStore.getById(pro
 
 <template>
   <div style="vertical-align: central;">
-    <quantity-display :quantity="productionEntry.quantity" />
+    <quantity-display :quantity="productionEntry.quantity" convert-unit />
     <icon-img :icon="item?.iconId" :size="24" style="margin-left: 4px; margin-right: 4px; margin-bottom: -4px;" />
     <span>{{ item?.name }}</span>
-    <quantity-display :quantity="undefined" show-unit />
+    <quantity-display :quantity="undefined" show-unit convert-unit />
   </div>
 </template>
 

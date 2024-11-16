@@ -49,7 +49,7 @@ const productionSteps: ComputedRef<ProductionStep[]> = computed(() => {
           >
             Produced:
           </el-tooltip>
-          <quantity-display :quantity="resource.produced" color="green" show-unit />
+          <quantity-display :quantity="resource.produced" color="green" show-unit convert-unit />
           &emsp;
           <el-tooltip
             effect="dark"
@@ -60,7 +60,7 @@ const productionSteps: ComputedRef<ProductionStep[]> = computed(() => {
           >
             Consumed:
           </el-tooltip>
-          <quantity-display :quantity="resource.consumed" color="red" show-unit />
+          <quantity-display :quantity="resource.consumed" color="red" show-unit convert-unit />
           &emsp;
           <el-tooltip
             effect="dark"
@@ -71,7 +71,7 @@ const productionSteps: ComputedRef<ProductionStep[]> = computed(() => {
           >
             Net:
           </el-tooltip>
-          <quantity-display :quantity="resource.overProduced" color="auto" show-unit />
+          <quantity-display :quantity="resource.overProduced" color="auto" show-unit convert-unit />
         </div>
       </div>
     </div>

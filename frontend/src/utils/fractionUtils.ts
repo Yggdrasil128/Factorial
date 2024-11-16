@@ -82,6 +82,10 @@ export class ParsedFraction {
   divide(that: ParsedFraction): ParsedFraction {
     return this.multiply(that.inverse());
   }
+
+  equals(that: ParsedFraction): boolean {
+    return this.numerator === that.numerator && this.denominator === that.denominator;
+  }
 }
 
 export function gcd(a: bigint, b: bigint): bigint {

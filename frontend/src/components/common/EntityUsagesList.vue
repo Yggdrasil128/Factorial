@@ -54,12 +54,12 @@ const factoryStore = useFactoryStore();
     </li>
     <li v-for="productionStep in entityUsages.productionSteps" :key="productionStep.id">
       Production step,
-      in factory '{{ factoryStore.getById(productionStep.factoryId)?.name }}}',
+      in factory '{{ factoryStore.getById(productionStep.factoryId)?.name }}',
       in save '{{ saveStore.getById(productionStep.saveId)?.name }}'
     </li>
     <li v-for="resource in entityUsages.resources" :key="resource.id">
       Resource,
-      in factory '{{ factoryStore.getById(resource.factoryId)?.name }}}',
+      in factory '{{ factoryStore.getById(resource.factoryId)?.name }}',
       in save '{{ saveStore.getById(resource.saveId)?.name }}'
     </li>
   </ul>
