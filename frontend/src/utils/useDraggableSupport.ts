@@ -16,25 +16,29 @@ export function useDraggableSupport(list: ComputedRef<EntityWithOrdinal[]>,
   async function onDragEnd(event: DragEndEvent): Promise<void> {
     if (event.newIndex === event.oldIndex) return;
 
-    // TODO fix bug
+    let newList: EntityWithOrdinal[];
+    if (event.newIndex < event.oldIndex) {
+      newList = [
+        ...list.value.slice(0, event.newIndex),
+        list.value[event.oldIndex],
+        ...list.value.slice(event.newIndex, event.oldIndex),
+        ...list.value.slice(event.oldIndex + 1),
+      ];
+    } else {
+      newList = [
+        ...list.value.slice(0, event.oldIndex),
+        ...list.value.slice(event.oldIndex + 1, event.newIndex + 1),
+        list.value[event.oldIndex],
+        ...list.value.slice(event.newIndex + 1),
+      ];
+    }
 
-    const list2: EntityWithOrdinal[] = [...list.value];
     const changed: EntityWithOrdinal[] = [];
 
-    list2[event.oldIndex].ordinal = event.newIndex + 1;
-    changed.push({ id: list2[event.oldIndex].id, ordinal: event.newIndex + 1 });
-
-    if (event.newIndex > event.oldIndex) {
-      // entity was moved down
-      for (let i = event.oldIndex + 1; i <= event.newIndex; i++) {
-        list2[i].ordinal = i;
-        changed.push({ id: list2[i].id, ordinal: i });
-      }
-    } else {
-      // entity was moved up
-      for (let i = event.newIndex; i < event.oldIndex; i++) {
-        list2[i].ordinal = i + 2;
-        changed.push({ id: list2[i].id, ordinal: i + 2 });
+    for (let i = 0; i < newList.length; i++) {
+      if (newList[i].ordinal !== i + 1) {
+        newList[i].ordinal = i + 1;
+        changed.push({ id: newList[i].id, ordinal: i + 1 });
       }
     }
 

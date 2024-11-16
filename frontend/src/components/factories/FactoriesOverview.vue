@@ -5,30 +5,34 @@ import FactoryResources from '@/components/factories/resources/FactoryResources.
 </script>
 
 <template>
-  <div class="left">
-    <factories-list />
-    <changelists-list />
-  </div>
-  <div class="right">
-    <factory-resources />
+  <div class="main">
+    <div class="left">
+      <factories-list />
+      <changelists-list />
+    </div>
+    <div class="right">
+      <factory-resources />
+    </div>
   </div>
 
   <router-view name="modal" />
 </template>
 
 <style scoped>
+.main {
+  display: flex;
+  gap: 20px;
+}
+
 .left {
-  width: 30%;
-  float: left;
+  flex: 0 0 calc(30% - 20px);
 }
 
 .left > * {
   min-height: 300px;
-  margin-right: 20px;
 }
 
 .right {
-  width: 70%;
-  float: right;
+  flex: 0 0 70%;
 }
 </style>

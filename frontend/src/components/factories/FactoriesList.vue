@@ -182,6 +182,11 @@ function deleteFactory(factoryId: number) {
   float: right;
   margin-top: 4px;
   margin-right: 8px;
+  display: none;
+}
+
+.list-group-item:hover .buttons {
+  display: block;
 }
 
 .createFactory {
