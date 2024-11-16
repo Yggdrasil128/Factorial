@@ -96,8 +96,9 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         String gameName = (String) summary.getSave().gameId();
         Game game = gameService.get(gameName).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                 "save requires the game '" + gameName + "' to be installed"));
+        Save save = Importer.importSave(summary, game);
         AsyncHelper.complete(result);
-        repository.save(Importer.importSave(summary, game));
+        repository.save(save);
     }
 
     @Transactional

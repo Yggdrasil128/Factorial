@@ -5,7 +5,7 @@ import { computed, type ComputedRef } from 'vue';
 import type { Game } from '@/types/model/standalone';
 import { ordinalComparator } from '@/utils/utils';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import { Plus, UploadFilled } from '@element-plus/icons-vue';
+import { Plus, Upload } from '@element-plus/icons-vue';
 import { VueDraggableNext } from 'vue-draggable-next';
 import GameCard from '@/components/savesAndGames/GameCard.vue';
 import { ElButton } from 'element-plus';
@@ -33,7 +33,7 @@ function importGame(): void {
     <div style="flex-grow: 1;"></div>
     <div style="float: right;">
       <el-button type="primary" :icon="Plus" @click="newGame">New game</el-button>
-      <el-button :icon="UploadFilled" @click="importGame">Import game</el-button>
+      <el-button :icon="Upload" @click="importGame">Import game</el-button>
     </div>
   </div>
 

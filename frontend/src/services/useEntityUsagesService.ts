@@ -67,9 +67,10 @@ export class EntityUsages {
     void ElMessageBox({
       title: title,
       type: 'warning',
+      customStyle: { maxWidth: '800px', width: 'auto' },
       message: () => h('div', null, [
         h('p', null, message),
-        h(EntityUsagesList, { entityUsages: this }),
+        h(EntityUsagesList, { entityUsages: this, style: 'margin-right: 8px;' }),
       ]),
     });
   }

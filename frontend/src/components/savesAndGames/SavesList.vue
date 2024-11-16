@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useSaveStore } from '@/stores/model/saveStore';
-import { Plus, UploadFilled } from '@element-plus/icons-vue';
+import { Plus, Upload } from '@element-plus/icons-vue';
 import { ElButton } from 'element-plus';
 import { computed, type ComputedRef } from 'vue';
 import type { Save } from '@/types/model/standalone';
@@ -33,7 +33,7 @@ function importSave(): void {
     <div style="flex-grow: 1;"></div>
     <div style="float: right;">
       <el-button type="primary" :icon="Plus" @click="newSave">New save</el-button>
-      <el-button :icon="UploadFilled" @click="importSave">Import save</el-button>
+      <el-button :icon="Upload" @click="importSave">Import save</el-button>
     </div>
   </div>
 
