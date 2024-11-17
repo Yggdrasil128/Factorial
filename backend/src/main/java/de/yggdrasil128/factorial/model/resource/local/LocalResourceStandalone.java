@@ -13,17 +13,16 @@ import java.util.List;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public record LocalResourceStandalone(int id,
-                                 @JsonProperty(access = READ_ONLY) int factoryId,
-                                 @JsonProperty(access = READ_ONLY) int saveId,
-                                 Integer ordinal,
-                                 Object itemId,
-                                 boolean imported,
-                                 boolean exported,
-                                 @JsonProperty(access = READ_ONLY) List<Object> producerIds,
-                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist produced,
-                                 @JsonProperty(access = READ_ONLY) List<Object> consumerIds,
-                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed,
-                                 @JsonProperty(access = READ_ONLY) QuantityByChangelist overProduced) {
+                                      @JsonProperty(access = READ_ONLY) int factoryId,
+                                      @JsonProperty(access = READ_ONLY) int saveId,
+                                      Integer ordinal,
+                                      Object itemId,
+                                      boolean importExport,
+                                      @JsonProperty(access = READ_ONLY) List<Object> producerIds,
+                                      @JsonProperty(access = READ_ONLY) QuantityByChangelist produced,
+                                      @JsonProperty(access = READ_ONLY) List<Object> consumerIds,
+                                      @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed,
+                                      @JsonProperty(access = READ_ONLY) QuantityByChangelist overProduced) {
 
     public static LocalResourceStandalone of(LocalResource model, ResourceContributions contributions) {
         return of(model, External.FRONTEND,
@@ -42,11 +41,12 @@ public record LocalResourceStandalone(int id,
     }
 
     private static LocalResourceStandalone of(LocalResource model, External destination, List<Object> producerIds,
-                                         QuantityByChangelist produced, List<Object> consumerIds,
-                                         QuantityByChangelist consumed, QuantityByChangelist overProduced) {
-        return new LocalResourceStandalone(model.getId(), model.getFactory().getId(), model.getFactory().getSave().getId(),
-                model.getOrdinal(), NamedModel.resolve(model.getItem(), destination), model.isImported(),
-                model.isExported(), producerIds, produced, consumerIds, consumed, overProduced);
+                                              QuantityByChangelist produced, List<Object> consumerIds,
+                                              QuantityByChangelist consumed, QuantityByChangelist overProduced) {
+        return new LocalResourceStandalone(model.getId(), model.getFactory().getId(),
+                model.getFactory().getSave().getId(), model.getOrdinal(),
+                NamedModel.resolve(model.getItem(), destination), model.isImportExport(), producerIds, produced,
+                consumerIds, consumed, overProduced);
     }
 
 }

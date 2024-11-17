@@ -16,8 +16,7 @@ public class ResourceContributions {
     // we must not keep references to the respective entities here
     private final int resourceId;
     private final int itemId;
-    private boolean imported;
-    private boolean exported;
+    private boolean importExport;
     private final Set<Production> producers = new HashSet<>();
     private final Set<Production> consumers = new HashSet<>();
 
@@ -38,16 +37,11 @@ public class ResourceContributions {
     }
 
     public void update(LocalResource resource) {
-        imported = resource.isImported();
-        exported = resource.isExported();
+        importExport = resource.isImportExport();
     }
 
-    public boolean isImported() {
-        return imported;
-    }
-
-    public boolean isExported() {
-        return exported;
+    public boolean isImportExport() {
+        return importExport;
     }
 
     public Set<Production> getProducers() {

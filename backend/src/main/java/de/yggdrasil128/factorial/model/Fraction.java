@@ -8,7 +8,7 @@ import java.io.Serial;
 
 @JsonSerialize(using = ToStringSerializer.class)
 @JsonDeserialize(using = FractionDeserializer.class)
-public class Fraction extends Number {
+public class Fraction extends Number implements Comparable<Fraction> {
 
     @Serial
     private static final long serialVersionUID = 8312326480060238103L;
@@ -72,8 +72,16 @@ public class Fraction extends Number {
         denominator /= gcd;
     }
 
+    public boolean isNegative() {
+        return 0 > numerator;
+    }
+
     public boolean isZero() {
         return 0 == numerator;
+    }
+
+    public boolean isPositive() {
+        return 0 < numerator;
     }
 
     public Fraction add(Fraction that) {
@@ -130,6 +138,11 @@ public class Fraction extends Number {
             return String.valueOf(numerator);
         }
         return numerator + "/" + denominator;
+    }
+
+    @Override
+    public int compareTo(Fraction that) {
+        return Long.signum(this.subtract(that).numerator);
     }
 
     @Override

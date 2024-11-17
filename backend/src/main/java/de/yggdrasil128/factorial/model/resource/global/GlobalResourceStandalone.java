@@ -13,14 +13,14 @@ import java.util.List;
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
 public record GlobalResourceStandalone(int id,
-                                     @JsonProperty(access = READ_ONLY) int saveId,
-                                     Integer ordinal,
-                                     Object itemId,
-                                     @JsonProperty(access = READ_ONLY) List<Object> producerIds,
-                                     @JsonProperty(access = READ_ONLY) QuantityByChangelist produced,
-                                     @JsonProperty(access = READ_ONLY) List<Object> consumerIds,
-                                     @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed,
-                                     @JsonProperty(access = READ_ONLY) QuantityByChangelist overProduced) {
+                                       @JsonProperty(access = READ_ONLY) int saveId,
+                                       Integer ordinal,
+                                       Object itemId,
+                                       @JsonProperty(access = READ_ONLY) List<Object> producerIds,
+                                       @JsonProperty(access = READ_ONLY) QuantityByChangelist produced,
+                                       @JsonProperty(access = READ_ONLY) List<Object> consumerIds,
+                                       @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed,
+                                       @JsonProperty(access = READ_ONLY) QuantityByChangelist overProduced) {
 
     public static GlobalResourceStandalone of(GlobalResource model, ResourceContributions contributions) {
         return of(model, External.FRONTEND,
@@ -39,8 +39,8 @@ public record GlobalResourceStandalone(int id,
     }
 
     private static GlobalResourceStandalone of(GlobalResource model, External destination, List<Object> producerIds,
-                                             QuantityByChangelist produced, List<Object> consumerIds,
-                                             QuantityByChangelist consumed, QuantityByChangelist overProduced) {
+                                               QuantityByChangelist produced, List<Object> consumerIds,
+                                               QuantityByChangelist consumed, QuantityByChangelist overProduced) {
         return new GlobalResourceStandalone(model.getId(), model.getSave().getId(), model.getOrdinal(),
                 NamedModel.resolve(model.getItem(), destination), producerIds, produced, consumerIds, consumed,
                 overProduced);

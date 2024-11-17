@@ -13,9 +13,7 @@ public class LocalResource extends Resource {
     @ManyToOne(optional = false)
     private Factory factory;
     @Column(nullable = false)
-    private boolean imported;
-    @Column(nullable = false)
-    private boolean exported;
+    private boolean importExport;
 
     public LocalResource() {
     }
@@ -27,8 +25,7 @@ public class LocalResource extends Resource {
 
     public void applyBasics(LocalResourceStandalone standalone) {
         OptionalInputField.of(standalone.ordinal()).apply(this::setOrdinal);
-        OptionalInputField.of(standalone.imported()).apply(this::setImported);
-        OptionalInputField.of(standalone.exported()).apply(this::setExported);
+        OptionalInputField.of(standalone.importExport()).apply(this::setImportExport);
     }
 
     public Factory getFactory() {
@@ -39,25 +36,17 @@ public class LocalResource extends Resource {
         this.factory = factory;
     }
 
-    public boolean isImported() {
-        return imported;
+    public boolean isImportExport() {
+        return importExport;
     }
 
-    public void setImported(boolean imported) {
-        this.imported = imported;
-    }
-
-    public boolean isExported() {
-        return exported;
-    }
-
-    public void setExported(boolean exported) {
-        this.exported = exported;
+    public void setImportExport(boolean importExport) {
+        this.importExport = importExport;
     }
 
     @Override
     public String toString() {
-        return super.toString() + ", imported=" + imported + ", exported=" + exported;
+        return super.toString() + ", import/export=" + importExport;
     }
 
 }

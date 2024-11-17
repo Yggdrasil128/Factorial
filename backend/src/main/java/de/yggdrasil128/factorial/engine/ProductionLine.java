@@ -1,5 +1,6 @@
 package de.yggdrasil128.factorial.engine;
 
+import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ProductionLineService;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.resource.Resource;
@@ -12,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Manages the computation for a <i>production line</i>, which is some {@link Entity} for which we maintain a list of
@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
  * </ul>
  * <p>
  * As a result of that, a <i>production line</i> computes a set of <i>resources</i>, represented by
- * {@link ResourceContributions}. These can be set to be {@link ResourceContributions#isImported() imported} or
- * {@link ResourceContributions#isExported() exported}, which in turn provides the basis for calculating the inputs and
- * outputs of the production line. Therefore, a <i>production line</i> is also a {@link Production}.
+ * {@link ResourceContributions}. These can be set to be {@linkplain ResourceContributions#isImportExport() imported or
+ * exported}, which in turn provides the basis for calculating the inputs and outputs of the production line. Therefore,
+ * a <i>production line</i> is also a {@link Production}.
  */
 public class ProductionLine implements Production {
 
@@ -70,34 +70,67 @@ public class ProductionLine implements Production {
         return value;
     }
 
+    // we only want positive sub-values, otherwise global resources won't work, for example
+    //
+    // overproduced: { 5 | -4 | 6 }
+    // import:       { 0 |  4 | 0 }
+    // export:       { 5 |  0 | 6 }
+
     @Override
     public Map<Integer, QuantityByChangelist> getInputs() {
-        return contributions.values().stream().filter(ResourceContributions::isImported)
-                .collect(Collectors.toMap(ResourceContributions::getItemId, ResourceContributions::getOverConsumed));
+        Map<Integer, QuantityByChangelist> result = new HashMap<>();
+        for (ResourceContributions contribution : contributions.values()) {
+            if (contribution.isImportExport()) {
+                QuantityByChangelist input = extractThroughput(contribution.getOverConsumed());
+                if (!input.isZero()) {
+                    result.put(contribution.getItemId(), input);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
     public QuantityByChangelist getInput(int itemId) {
         ResourceContributions contribution = contributions.get(itemId);
-        return null != contribution && contribution.isImported() ? contribution.getOverConsumed()
+        return null != contribution && contribution.isImportExport() ? extractThroughput(contribution.getOverConsumed())
                 : QuantityByChangelist.ZERO;
     }
 
     @Override
     public Map<Integer, QuantityByChangelist> getOutputs() {
-        return contributions.values().stream().filter(ResourceContributions::isExported)
-                .collect(Collectors.toMap(ResourceContributions::getItemId, ResourceContributions::getOverProduced));
+        Map<Integer, QuantityByChangelist> result = new HashMap<>();
+        for (ResourceContributions contribution : contributions.values()) {
+            if (contribution.isImportExport()) {
+                QuantityByChangelist output = extractThroughput(contribution.getOverProduced());
+                if (!output.isZero()) {
+                    result.put(contribution.getItemId(), output);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
     public QuantityByChangelist getOutput(int itemId) {
         ResourceContributions contribution = contributions.get(itemId);
-        return null != contribution && contribution.isExported() ? contribution.getOverProduced()
+        return null != contribution && contribution.isImportExport() ? extractThroughput(contribution.getOverProduced())
                 : QuantityByChangelist.ZERO;
     }
 
+    private static QuantityByChangelist extractThroughput(QuantityByChangelist amount) {
+        return new QuantityByChangelist(extractPositiveValue(amount.getCurrent()),
+                extractPositiveValue(amount.getWithPrimaryChangelist()),
+                extractPositiveValue(amount.getWithActiveChangelists()));
+    }
+
+    private static Fraction extractPositiveValue(Fraction amount) {
+        return amount.isPositive() ? amount : Fraction.ZERO;
+    }
+
     /**
-     * Manually adds a {@link LocalResource} for the production line. Has no effect if the resource is already being tracked.
+     * Manually adds a {@link LocalResource} for the production line. Has no effect if the resource is already being
+     * tracked.
      * <p>
      * This method is meant primarily for populating the resources of a production line before any contributors were
      * added (which is optional). Also, this is (currently) required for resources that have no contributors but are
@@ -242,7 +275,7 @@ public class ProductionLine implements Production {
     }
 
     private static boolean canDestroy(ResourceContributions contribution) {
-        return !contribution.isImported() && !contribution.isExported() && contribution.getProducers().isEmpty()
+        return !contribution.isImportExport() && contribution.getProducers().isEmpty()
                 && contribution.getConsumers().isEmpty();
     }
 
