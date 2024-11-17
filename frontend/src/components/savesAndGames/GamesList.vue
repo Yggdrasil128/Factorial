@@ -24,9 +24,8 @@ function newGame(): void {
 }
 
 function importGame(): void {
-
+  router.push({ name: 'importGame' });
 }
-
 </script>
 
 <template>

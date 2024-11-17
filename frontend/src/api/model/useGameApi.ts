@@ -2,6 +2,7 @@ import type { Game } from '@/types/model/standalone';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi';
 import type { GameSummary } from '@/types/model/summary';
+import { ElMessage } from 'element-plus';
 
 export class GameApi extends AbstractBulkCrudEntityApi<Game> {
   constructor() {
@@ -20,7 +21,6 @@ export class GameApi extends AbstractBulkCrudEntityApi<Game> {
     return this.api.delete('/api/games', { gameIds: gameIds.join(',') });
   }
 
-
   public retrieveAll(): Promise<Game[]> {
     return this.api.get('/api/games');
   }
@@ -29,12 +29,16 @@ export class GameApi extends AbstractBulkCrudEntityApi<Game> {
     return this.api.patch('/api/games/order', input);
   }
 
-  public clone(gameId: number, newName: string): Promise<void> {
-    return this.api.post('api/migration/game/clone', undefined, { gameId, newName });
+  public async clone(gameId: number, newName: string): Promise<void> {
+    return this.api.post('api/migration/game/clone', undefined, { gameId, newName }).then(() => {
+      ElMessage.success({ message: 'Game cloned.' });
+    });
   }
 
-  public import(gameSummary: GameSummary): Promise<void> {
-    return this.api.post('api/migration/game', gameSummary);
+  public async import(gameSummary: GameSummary): Promise<void> {
+    return this.api.post('api/migration/game', gameSummary).then(() => {
+      ElMessage.success({ message: 'Game imported.' });
+    });
   }
 
   public export(gameId: number): Promise<GameSummary> {

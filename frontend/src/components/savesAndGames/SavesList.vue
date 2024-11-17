@@ -24,9 +24,8 @@ function newSave(): void {
 }
 
 function importSave(): void {
-
+  router.push({ name: 'importSave' });
 }
-
 </script>
 
 <template>
