@@ -1,1 +1,0 @@
-Taken from https://satisfactory.wiki.gg/wiki/Satisfactory_Wiki.

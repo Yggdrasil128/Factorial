@@ -39,11 +39,12 @@ public class EffectiveModifiers {
     }
 
     public boolean applyMachineCount(Fraction value) {
-        if (machineCounts.getCurrent().equals(value)) {
+        Fraction delta = value.subtract(machineCounts.getCurrent());
+        if (delta.isZero()) {
             return false;
         }
-        machineCounts = new QuantityByChangelist(value, machineCounts.getWithPrimaryChangelist(),
-                machineCounts.getWithActiveChangelists());
+        machineCounts = new QuantityByChangelist(value, machineCounts.getWithPrimaryChangelist().add(delta),
+                machineCounts.getWithActiveChangelists().add(delta));
         recompute();
         return true;
     }
