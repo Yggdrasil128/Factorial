@@ -33,15 +33,33 @@ public class MigrationController {
         return asyncHelper.submit(result -> gameService.doImport(input, result));
     }
 
+    @PostMapping("/game/clone")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> cloneGame(int gameId, String newName) {
+        return asyncHelper.submit(result -> gameService.doClone(gameId, newName, result));
+    }
+
+    @GetMapping("/game")
+    public CompletableFuture<GameSummary> exportGame(int gameId) {
+        return asyncHelper.submit(() -> gameService.getSummary(gameId, External.SAVE_FILE));
+    }
+
     @PostMapping("/save")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public CompletableFuture<Void> importSave(@RequestBody SaveSummary input) {
         return asyncHelper.submit(result -> saveService.doImport(input, result));
     }
 
-    @GetMapping("/game")
-    public CompletableFuture<GameSummary> exportGame(int gameId) {
-        return asyncHelper.submit(() -> gameService.getSummary(gameId, External.SAVE_FILE));
+    @PostMapping("/save/clone")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> cloneSave(int saveId, String newName) {
+        return asyncHelper.submit(result -> saveService.doClone(saveId, newName, result));
+    }
+
+    @PostMapping("/save/migrate")
+    @ResponseStatus(code = HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> migrateSave(int saveId, String newName, int gameId) {
+        return asyncHelper.submit(result -> saveService.migrate(saveId, newName, gameId, result));
     }
 
     @GetMapping("/save")

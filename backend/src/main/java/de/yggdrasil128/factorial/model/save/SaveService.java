@@ -160,37 +160,57 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         Save save = Importer.importSave(summary, game);
         AsyncHelper.complete(result);
         repository.save(save);
+        events.publishEvent(new SaveUpdatedEvent(save));
+    }
+
+    @Transactional
+    public void doClone(int id, String newName, CompletableFuture<Void> result) {
+        Save save = get(id);
+        Game game = save.getGame();
+        copy(save, newName, game, result);
+    }
+
+    @Transactional
+    public void migrate(int id, String newName, int gameId, CompletableFuture<Void> result) {
+        Save save = get(id);
+        Game game = gameService.get(gameId);
+        copy(save, newName, game, result);
+    }
+
+    private void copy(Save save, String newName, Game game, CompletableFuture<Void> result) {
+        SaveSummary temp = Exporter.exportSave(save, External.SAVE_FILE);
+        Save clone = Importer.importSave(temp, game);
+        clone.setName(newName);
+        AsyncHelper.complete(result);
+        repository.save(clone);
+        events.publishEvent(new SaveUpdatedEvent(clone));
     }
 
     @Transactional
     public SaveSummary getSummary(int id, External destination) {
         Save save = get(id);
-        SaveSummary summary = new SaveSummary();
-        summary.setSave(SaveStandalone.of(save, destination));
-        summary.setChangelists(save.getChangelists().stream().map(changelist -> {
-            if (External.FRONTEND == destination) {
-                changelistService.computeProductionStepChanges(changelist);
-            }
-            return ChangelistStandalone.of(changelist, destination);
-        }).toList());
-        summary.setFactories(save.getFactories().stream().map(factory -> factoryService.getFactorySummary(factory,
-                destination, changelistService::getProductionStepChanges)).toList());
         switch (destination) {
         case FRONTEND:
+            SaveSummary summary = new SaveSummary();
+            summary.setSave(SaveStandalone.of(save, destination));
+            summary.setChangelists(save.getChangelists().stream().map(changelist -> {
+                changelistService.computeProductionStepChanges(changelist);
+                return ChangelistStandalone.of(changelist, destination);
+            }).toList());
+            summary.setFactories(
+                    save.getFactories().stream().map(factory -> factoryService.getFrontendFactorySummary(factory,
+                            destination, changelistService::getProductionStepChanges)).toList());
             ProductionLine productionLine = computeProductionLine(save, changelistService::getProductionStepChanges);
             summary.setResources(save.getResources().stream()
                     .map(resource -> GlobalResourceStandalone.of(resource, productionLine.getContributions(resource)))
                     .toList());
-            break;
+            return summary;
         case SAVE_FILE:
-            summary.setResources(save.getResources().stream()
-                    .map(resource -> GlobalResourceStandalone.of(resource, External.SAVE_FILE)).toList());
-            break;
+            return Exporter.exportSave(save, destination);
         default:
             throw new AssertionError(
                     "unexpected enum constant: " + External.class.getCanonicalName() + '.' + destination.name());
         }
-        return summary;
     }
 
     @Transactional

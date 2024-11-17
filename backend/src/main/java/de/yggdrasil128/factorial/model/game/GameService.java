@@ -2,11 +2,6 @@ package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
-import de.yggdrasil128.factorial.model.icon.IconStandalone;
-import de.yggdrasil128.factorial.model.item.ItemStandalone;
-import de.yggdrasil128.factorial.model.machine.MachineStandalone;
-import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,18 +82,20 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
     }
 
     @Transactional
+    public void doClone(int id, String newName, CompletableFuture<Void> result) {
+        Game game = get(id);
+        GameSummary temp = Exporter.exportGame(game, External.SAVE_FILE);
+        Game clone = Importer.importGame(temp);
+        clone.setName(newName);
+        AsyncHelper.complete(result);
+        repository.save(clone);
+        events.publishEvent(new GameUpdatedEvent(clone));
+    }
+
+    @Transactional
     public GameSummary getSummary(int id, External destination) {
         Game game = get(id);
-        GameSummary summary = new GameSummary();
-        summary.setGame(GameStandalone.of(game, destination));
-        summary.setIcons(game.getIcons().stream().map(icon -> IconStandalone.of(icon, destination)).toList());
-        summary.setItems(game.getItems().stream().map(item -> ItemStandalone.of(item, destination)).toList());
-        summary.setRecipes(game.getRecipes().stream().map(recipe -> RecipeStandalone.of(recipe, destination)).toList());
-        summary.setRecipeModifiers(game.getRecipeModifiers().stream()
-                .map(recipeModifier -> RecipeModifierStandalone.of(recipeModifier, destination)).toList());
-        summary.setMachines(
-                game.getMachines().stream().map(machine -> MachineStandalone.of(machine, destination)).toList());
-        return summary;
+        return Exporter.exportGame(game, destination);
     }
 
     public Optional<Game> get(String name) {
