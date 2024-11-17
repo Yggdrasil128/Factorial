@@ -5,7 +5,7 @@ import { computed, type ComputedRef, ref } from 'vue';
 import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
 import { type FormRules } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
-import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
+import { elFormEntityNameUniqueValidator } from '@/utils/utils';
 import { useItemApi } from '@/api/model/useItemApi';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
@@ -56,16 +56,14 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
   name: [
     { required: true, message: 'Please enter a name for the item.', trigger: 'change' },
     {
-      validator: elFormGameEntityNameUniqueValidator,
-      store: itemStore,
-      gameId: props.game.id,
+      validator: elFormEntityNameUniqueValidator,
+      entities: itemStore.getByGameId(props.game.id),
       ownId: service.state.editingEntityId.value,
       message: 'An item with that name already exists.',
     },
     ...(service.state.selectedIconOption.value !== 'new' ? [] : [{
-      validator: elFormGameEntityNameUniqueValidator,
-      store: iconStore,
-      gameId: props.game.id,
+      validator: elFormEntityNameUniqueValidator,
+      entities: iconStore.getByGameId(props.game.id),
       message: 'An icon with that name already exists.',
     }]),
   ],

@@ -2,7 +2,7 @@
 import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
 import { useSaveStore } from '@/stores/model/saveStore';
 import { useGameStore } from '@/stores/model/gameStore';
-import { computed, reactive, type Ref, ref, watch } from 'vue';
+import { computed, type Ref, ref, watch } from 'vue';
 import type { Icon, Save } from '@/types/model/standalone';
 import { useSaveApi } from '@/api/model/useSaveApi';
 import { useIconApi } from '@/api/model/useIconApi';
@@ -11,6 +11,7 @@ import _ from 'lodash';
 import EditModal from '@/components/common/EditModal.vue';
 import { ElFormItem, ElInput } from 'element-plus';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';
+import { elFormEntityNameUniqueValidator } from '@/utils/utils';
 
 const router = useRouter();
 const route = useRoute();
@@ -27,8 +28,16 @@ const hasChanges = computed(() => !_.isEqual(save.value, original.value));
 const isSaving: Ref<boolean> = ref(false);
 const editModal = ref();
 
-const formRules = reactive({
-  name: [{ required: true, message: 'Please enter a name for the save.', trigger: 'blur' }],
+const formRules = computed(() => ({
+  name: [
+    { required: true, message: 'Please enter a name for the save.', trigger: 'blur' },
+    {
+      validator: elFormEntityNameUniqueValidator,
+      entities: saveStore.getAll(),
+      ownId: save.value.id,
+      message: 'A save with that name already exists.',
+    },
+  ],
   gameId: [{
     required: true, message: 'Please select a game.', trigger: 'change',
     validator: (_: any, value: any, callback: any) => {
@@ -38,7 +47,7 @@ const formRules = reactive({
       callback();
     },
   }],
-});
+}));
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
   if (route.name === 'newSave') {
@@ -49,7 +58,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
       gameId: 0,
     };
   } else {
-    const saveId: number = Number(route.params.editSaveId);
+    const saveId: number = Number(route.params.saveId);
     const currentSave: Save | undefined = saveStore.getById(saveId);
     if (!currentSave) {
       console.error('Save with id ' + saveId + ' not found');
@@ -93,7 +102,10 @@ async function submitForm(): Promise<void> {
 const iconOptions: Ref<Icon[]> = ref([]);
 
 watch(() => save.value.gameId, () => {
-  if (!save.value.gameId) return;
+  if (!save.value.gameId) {
+    iconOptions.value = [];
+    return;
+  }
   iconApi.retrieveAllByGameId(save.value.gameId)
     .then((icons: Icon[]) => {
       iconOptions.value = icons;
@@ -133,7 +145,11 @@ watch(() => save.value.gameId, () => {
                     :disabled="route.name !== 'newSave'" />
         <span v-if="route.name !== 'newSave'" style="line-height: 20px; margin-top: 8px;">
           If you want to change this save's game, close this dialog and select
-          'Migrate to another game' from the save's dropdown menu, or click here.
+          'Migrate to another game' from the save's dropdown menu, or click
+          <el-link class="link" type="primary"
+                   @click="router.push({ name: 'migrateSave', params: {saveId: save.id} })">
+            here
+          </el-link>.
         </span>
       </el-form-item>
 
@@ -148,4 +164,8 @@ watch(() => save.value.gameId, () => {
 
 <style scoped>
 
+.link {
+  vertical-align: unset;
+  --el-link-hover-text-color: var(--el-color-primary-dark-2) !important;
+}
 </style>

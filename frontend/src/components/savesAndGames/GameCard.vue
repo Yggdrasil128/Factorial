@@ -5,8 +5,14 @@ import { useSaveStore } from '@/stores/model/saveStore';
 import { computed, type ComputedRef, ref, type Ref } from 'vue';
 import { ArrowDown, CopyDocument, Delete, Download, Edit, EditPen } from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
-import { ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElTooltip } from 'element-plus';
+import { ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessageBox, ElTooltip } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { useEntityUsagesService } from '@/services/useEntityUsagesService';
+import { useGameApi } from '@/api/model/useGameApi';
+import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
+import { useGameStore } from '@/stores/model/gameStore';
+import type { GameSummary } from '@/types/model/summary';
+import { downloadJsonFile } from '@/utils/downloadFileUtil';
 
 export interface GameCardProps {
   game: Game;
@@ -19,6 +25,10 @@ const dropdownMenuOpen: Ref<boolean> = ref(false);
 const router = useRouter();
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const saveStore = useSaveStore();
+const gameStore = useGameStore();
+const gameApi = useGameApi();
+const entityUsagesService = useEntityUsagesService();
+const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 const isCurrentGame: ComputedRef<boolean> = computed(() =>
   props.game.id === currentGameAndSaveStore.currentGameId,
@@ -33,19 +43,45 @@ function openEditor(): void {
 }
 
 function editGame(): void {
-
+  router.push({ name: 'editGame', params: { gameId: props.game.id } });
 }
 
 function cloneGame(): void {
-
+  const gameName = entityCloneNameGeneratorService.generateName(
+    props.game.name,
+    gameStore.getAll(),
+  );
+  gameApi.clone(props.game.id, gameName);
 }
 
-function exportGame(): void {
-
+async function exportGame(): Promise<void> {
+  const gameSummary: GameSummary = await gameApi.export(props.game.id);
+  const data: string = JSON.stringify(gameSummary, undefined, 2);
+  const filename = props.game.name + '.json';
+  downloadJsonFile(data, filename);
 }
 
 function deleteGame(): void {
-
+  const entityUsages = entityUsagesService.findGameUsages(props.game.id);
+  if (entityUsages.hasAnyUsages()) {
+    entityUsages.showMessageBox(
+      'Cannot delete game \'' + props.game.name + '\'.',
+      'The game is still used in the following places:',
+    );
+    return;
+  }
+  ElMessageBox.confirm(
+    'Are you sure you want to delete game \'' + props.game.name + '\'?',
+    'Warning',
+    {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    },
+  ).then(() => {
+    gameApi.delete(props.game.id);
+  }).catch(() => {
+  });
 }
 
 function onDropdownVisibleChange(visible: boolean): void {

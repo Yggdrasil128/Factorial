@@ -6,7 +6,7 @@ import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import { computed, type ComputedRef, ref } from 'vue';
 import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
 import { ElFormItem, ElInput, type FormRules } from 'element-plus';
-import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
+import { elFormEntityNameUniqueValidator } from '@/utils/utils';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useRecipeModifierApi } from '@/api/model/useRecipeModifierApi';
 import { elFormFractionValidator } from '@/utils/fractionUtils';
@@ -64,16 +64,14 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
   name: [
     { required: true, message: 'Please enter a name for the recipe modifier.', trigger: 'change' },
     {
-      validator: elFormGameEntityNameUniqueValidator,
-      store: recipeModifierStore,
-      gameId: props.game.id,
+      validator: elFormEntityNameUniqueValidator,
+      entities: recipeModifierStore.getByGameId(props.game.id),
       ownId: service.state.editingEntityId.value,
       message: 'A recipe modifier with that name already exists.',
     },
     ...(service.state.selectedIconOption.value !== 'new' ? [] : [{
-      validator: elFormGameEntityNameUniqueValidator,
-      store: iconStore,
-      gameId: props.game.id,
+      validator: elFormEntityNameUniqueValidator,
+      entities: iconStore.getByGameId(props.game.id),
       message: 'An icon with that name already exists.',
     }]),
   ],

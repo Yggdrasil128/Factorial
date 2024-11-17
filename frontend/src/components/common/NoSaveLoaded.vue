@@ -4,9 +4,6 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-function onClickLink(): void {
-  router.push({ name: 'savesAndGames' });
-}
 </script>
 
 <template>
@@ -20,7 +17,7 @@ function onClickLink(): void {
       </div>
       <p>
         Go to
-        <el-link class="link" type="primary" @click="onClickLink">
+        <el-link class="link" type="primary" @click="router.push({ name: 'savesAndGames' })">
           Saves / Games
         </el-link>
         and load a save.

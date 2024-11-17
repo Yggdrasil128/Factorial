@@ -18,6 +18,10 @@ import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { getModelSyncService } from '@/services/useModelSyncService';
 import { useRouter } from 'vue-router';
 import { useSaveApi } from '@/api/model/useSaveApi';
+import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
+import { useSaveStore } from '@/stores/model/saveStore';
+import type { SaveSummary } from '@/types/model/summary';
+import { downloadJsonFile } from '@/utils/downloadFileUtil';
 
 export interface SaveCardProps {
   save: Save;
@@ -27,9 +31,11 @@ const props: SaveCardProps = defineProps<SaveCardProps>();
 
 const router = useRouter();
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
+const saveStore = useSaveStore();
 const gameStore = useGameStore();
 const modelSyncService = getModelSyncService();
 const saveApi = useSaveApi();
+const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 const dropdownMenuOpen: Ref<boolean> = ref(false);
 
@@ -52,19 +58,26 @@ function loadSave(): void {
 }
 
 function editSave(): void {
-  router.push({ name: 'editSave', params: { editSaveId: props.save.id } });
+  router.push({ name: 'editSave', params: { saveId: props.save.id } });
 }
 
 function cloneSave(): void {
-
+  const saveName = entityCloneNameGeneratorService.generateName(
+    props.save.name,
+    saveStore.getAll(),
+  );
+  saveApi.clone(props.save.id, saveName);
 }
 
-function exportSave(): void {
-
+async function exportSave(): Promise<void> {
+  const saveSummary: SaveSummary = await saveApi.export(props.save.id);
+  const data: string = JSON.stringify(saveSummary, undefined, 2);
+  const filename = props.save.name + '.json';
+  downloadJsonFile(data, filename);
 }
 
 function migrateSave(): void {
-
+  router.push({ name: 'migrateSave', params: { saveId: props.save.id } });
 }
 
 function deleteSave(): void {

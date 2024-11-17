@@ -5,21 +5,23 @@ export function ordinalComparator(a: EntityWithOrdinal, b: EntityWithOrdinal) {
   return a.ordinal - b.ordinal;
 }
 
-export interface GameEntityNameUniqueValidationSettings {
-  store: { getByGameId: (gameId: number) => { id: number, name: string }[] };
-  gameId: number;
+
+export interface EntityNameUniqueValidationSettings {
+  entities: { id: number, name: string }[];
   ownId: undefined | number;
 }
 
-function elFormGameEntityNameUniqueValidatorFunction(rule: GameEntityNameUniqueValidationSettings,
-                                                     value: any,
-                                                     callback: any): void {
+function elFormEntityNameUniqueValidatorFunction(rule: EntityNameUniqueValidationSettings,
+                                                 value: any,
+                                                 callback: any): void {
   if (!value) {
     callback();
     return;
   }
 
-  for (const entity of rule.store.getByGameId(rule.gameId)) {
+  console.log(rule);
+
+  for (const entity of rule.entities) {
     if (entity.id === rule.ownId) {
       continue;
     }
@@ -31,5 +33,5 @@ function elFormGameEntityNameUniqueValidatorFunction(rule: GameEntityNameUniqueV
   callback();
 }
 
-export const elFormGameEntityNameUniqueValidator: RuleItem['validator'] =
-  elFormGameEntityNameUniqueValidatorFunction as unknown as RuleItem['validator'];
+export const elFormEntityNameUniqueValidator: RuleItem['validator'] =
+  elFormEntityNameUniqueValidatorFunction as unknown as RuleItem['validator'];

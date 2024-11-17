@@ -1,6 +1,8 @@
 import type { Save } from '@/types/model/standalone';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi';
+import type { SaveSummary } from '@/types/model/summary';
+import { ElMessage } from 'element-plus';
 
 export class SaveApi extends AbstractBulkCrudEntityApi<Save> {
   constructor() {
@@ -28,9 +30,29 @@ export class SaveApi extends AbstractBulkCrudEntityApi<Save> {
     return this.api.patch('/api/saves/order', input);
   }
 
-  public migrateToGameId(saveId: number, gameId: number): Promise<void> {
-    console.log('migrateToGameId', saveId, gameId);
-    return Promise.resolve();
+  public async clone(saveId: number, newName: string): Promise<void> {
+    return this.api.post('api/migration/save/clone', undefined, { saveId, newName })
+      .then(() => {
+        ElMessage.success({ message: 'Save cloned.' });
+      });
+  }
+
+  public async migrateToGameId(saveId: number, newName: string, gameId: number): Promise<void> {
+    return this.api.post('api/migration/save/migrate', undefined, { saveId, newName, gameId })
+      .then(() => {
+        ElMessage.success({ message: 'Save migrated.' });
+      });
+  }
+
+  public async import(saveSummary: SaveSummary): Promise<void> {
+    return this.api.post('api/migration/save', saveSummary)
+      .then(() => {
+        ElMessage.success({ message: 'Save imported.' });
+      });
+  }
+
+  public export(saveId: number): Promise<SaveSummary> {
+    return this.api.get('api/migration/save', { saveId });
   }
 }
 

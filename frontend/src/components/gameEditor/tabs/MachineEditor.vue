@@ -4,7 +4,7 @@ import { computed, type ComputedRef, ref } from 'vue';
 import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
 import { ElFormItem, type FormRules } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
-import { elFormGameEntityNameUniqueValidator } from '@/utils/utils';
+import { elFormEntityNameUniqueValidator } from '@/utils/utils';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useMachineStore } from '@/stores/model/machineStore';
@@ -62,16 +62,14 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
   name: [
     { required: true, message: 'Please enter a name for the machine.', trigger: 'change' },
     {
-      validator: elFormGameEntityNameUniqueValidator,
-      store: machineStore,
-      gameId: props.game.id,
+      validator: elFormEntityNameUniqueValidator,
+      entities: machineStore.getByGameId(props.game.id),
       ownId: service.state.editingEntityId.value,
       message: 'A machine with that name already exists.',
     },
     ...(service.state.selectedIconOption.value !== 'new' ? [] : [{
-      validator: elFormGameEntityNameUniqueValidator,
-      store: iconStore,
-      gameId: props.game.id,
+      validator: elFormEntityNameUniqueValidator,
+      entities: iconStore.getByGameId(props.game.id),
       message: 'An icon with that name already exists.',
     }]),
   ],

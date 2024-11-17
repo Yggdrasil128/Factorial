@@ -9,7 +9,9 @@ import { Plus, Upload } from '@element-plus/icons-vue';
 import { VueDraggableNext } from 'vue-draggable-next';
 import GameCard from '@/components/savesAndGames/GameCard.vue';
 import { ElButton } from 'element-plus';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const gameStore = useGameStore();
 const gameApi = useGameApi();
 
@@ -18,7 +20,7 @@ const games: ComputedRef<Game[]> = computed(() => gameStore.getAll().sort(ordina
 const draggableSupport: DraggableSupport = useDraggableSupport(games, gameApi.reorder);
 
 function newGame(): void {
-
+  router.push({ name: 'newGame' });
 }
 
 function importGame(): void {

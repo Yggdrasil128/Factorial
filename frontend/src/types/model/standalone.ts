@@ -96,6 +96,7 @@ export type GlobalResource = {
 export type Game = {
   readonly id: number;
   name: string;
+  description: string;
   iconId: number;
   ordinal: number;
 }

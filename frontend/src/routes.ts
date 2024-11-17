@@ -14,6 +14,8 @@ import EditProductionStepModal from '@/components/factories/modal/EditProduction
 import GameEditor from '@/components/gameEditor/GameEditor.vue';
 import SettingsPage from '@/components/settings/SettingsPage.vue';
 import EditSaveModal from '@/components/savesAndGames/modal/EditSaveModal.vue';
+import MigrateSaveModal from '@/components/savesAndGames/modal/MigrateSaveModal.vue';
+import EditGameModal from '@/components/savesAndGames/modal/EditGameModal.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -31,9 +33,24 @@ const router = createRouter({
           components: { modal: EditSaveModal },
         },
         {
-          path: 'editSave/:editSaveId',
+          path: 'editSave/:saveId',
           name: 'editSave',
           components: { modal: EditSaveModal },
+        },
+        {
+          path: 'migrateSave/:saveId',
+          name: 'migrateSave',
+          components: { modal: MigrateSaveModal },
+        },
+        {
+          path: 'newGame',
+          name: 'newGame',
+          components: { modal: EditGameModal },
+        },
+        {
+          path: 'editGame/:gameId',
+          name: 'editGame',
+          components: { modal: EditGameModal },
         },
       ],
     },
