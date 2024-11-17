@@ -1,7 +1,7 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceStandalone;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public class FactorySummary {
 
     private FactoryStandalone factory;
     private List<ProductionStepStandalone> productionSteps;
-    private List<ResourceStandalone> resources;
+    private List<LocalResourceStandalone> resources;
 
     public FactoryStandalone getFactory() {
         return factory;
@@ -27,11 +27,11 @@ public class FactorySummary {
         this.productionSteps = productionSteps;
     }
 
-    public List<ResourceStandalone> getResources() {
+    public List<LocalResourceStandalone> getResources() {
         return resources;
     }
 
-    public void setResources(List<ResourceStandalone> resources) {
+    public void setResources(List<LocalResourceStandalone> resources) {
         this.resources = resources;
     }
 

@@ -1,12 +1,12 @@
-package de.yggdrasil128.factorial.model.resource;
+package de.yggdrasil128.factorial.model.resource.local;
 
-public class ResourceRemovedEvent {
+public class LocalResourceRemovedEvent {
 
     private final int saveId;
     private final int factoryId;
     private final int resourceId;
 
-    public ResourceRemovedEvent(int saveId, int factoryId, int resourceId) {
+    public LocalResourceRemovedEvent(int saveId, int factoryId, int resourceId) {
         this.saveId = saveId;
         this.factoryId = factoryId;
         this.resourceId = resourceId;

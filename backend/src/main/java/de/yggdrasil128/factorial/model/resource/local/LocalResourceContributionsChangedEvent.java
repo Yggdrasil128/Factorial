@@ -1,12 +1,12 @@
-package de.yggdrasil128.factorial.model.resource;
+package de.yggdrasil128.factorial.model.resource.local;
 
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 
-public class ResourceContributionsChangedEvent extends ResourceUpdatedEvent {
+public class LocalResourceContributionsChangedEvent extends LocalResourceUpdatedEvent {
 
     private final ResourceContributions contributions;
 
-    public ResourceContributionsChangedEvent(Resource resource, ResourceContributions contributions) {
+    public LocalResourceContributionsChangedEvent(LocalResource resource, ResourceContributions contributions) {
         super(resource, true);
         this.contributions = contributions;
     }

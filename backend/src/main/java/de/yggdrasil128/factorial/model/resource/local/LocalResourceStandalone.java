@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.resource;
+package de.yggdrasil128.factorial.model.resource.local;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.yggdrasil128.factorial.engine.Production;
@@ -12,7 +12,7 @@ import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY;
 
-public record ResourceStandalone(int id,
+public record LocalResourceStandalone(int id,
                                  @JsonProperty(access = READ_ONLY) int factoryId,
                                  @JsonProperty(access = READ_ONLY) int saveId,
                                  Integer ordinal,
@@ -25,11 +25,11 @@ public record ResourceStandalone(int id,
                                  @JsonProperty(access = READ_ONLY) QuantityByChangelist consumed,
                                  @JsonProperty(access = READ_ONLY) QuantityByChangelist overProduced) {
 
-    public static ResourceStandalone of(Resource model, ResourceContributions contributions) {
+    public static LocalResourceStandalone of(LocalResource model, ResourceContributions contributions) {
         return of(model, External.FRONTEND,
-                contributions.getProducers().stream().map(ResourceStandalone::resolve).toList(),
+                contributions.getProducers().stream().map(LocalResourceStandalone::resolve).toList(),
                 contributions.getProduced(),
-                contributions.getConsumers().stream().map(ResourceStandalone::resolve).toList(),
+                contributions.getConsumers().stream().map(LocalResourceStandalone::resolve).toList(),
                 contributions.getConsumed(), contributions.getOverProduced());
     }
 
@@ -37,14 +37,14 @@ public record ResourceStandalone(int id,
         return production.getEntityId();
     }
 
-    public static ResourceStandalone of(Resource model, External destination) {
+    public static LocalResourceStandalone of(LocalResource model, External destination) {
         return of(model, destination, Collections.emptyList(), null, Collections.emptyList(), null, null);
     }
 
-    private static ResourceStandalone of(Resource model, External destination, List<Object> producerIds,
+    private static LocalResourceStandalone of(LocalResource model, External destination, List<Object> producerIds,
                                          QuantityByChangelist produced, List<Object> consumerIds,
                                          QuantityByChangelist consumed, QuantityByChangelist overProduced) {
-        return new ResourceStandalone(model.getId(), model.getFactory().getId(), model.getFactory().getSave().getId(),
+        return new LocalResourceStandalone(model.getId(), model.getFactory().getId(), model.getFactory().getSave().getId(),
                 model.getOrdinal(), NamedModel.resolve(model.getItem(), destination), model.isImported(),
                 model.isExported(), producerIds, produced, consumerIds, consumed, overProduced);
     }

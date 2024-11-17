@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = InitialMessage.class, name = "initial"),
-
+@JsonSubTypes({@JsonSubTypes.Type(value = InitialMessage.class, name = "initial"),
         @JsonSubTypes.Type(value = GamesReorderedMessage.class, name = "gamesReordered"),
         @JsonSubTypes.Type(value = GameUpdatedMessage.class, name = "gameUpdated"),
         @JsonSubTypes.Type(value = GameRemovedMessage.class, name = "gameRemoved"),
@@ -31,10 +29,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = ChangelistRemovedMessage.class, name = "changelistRemoved"),
         @JsonSubTypes.Type(value = ProductionStepUpdatedMessage.class, name = "productionStepUpdated"),
         @JsonSubTypes.Type(value = ProductionStepRemovedMessage.class, name = "productionStepRemoved"),
-        @JsonSubTypes.Type(value = ResourcesReorderedMessage.class, name = "resourcesReordered"),
-        @JsonSubTypes.Type(value = ResourceUpdatedMessage.class, name = "resourceUpdated"),
-        @JsonSubTypes.Type(value = ResourceRemovedMessage.class, name = "resourceRemoved"),
-})
+        @JsonSubTypes.Type(value = LocalResourcesReorderedMessage.class, name = "localResourcesReordered"),
+        @JsonSubTypes.Type(value = LocalResourceUpdatedMessage.class, name = "localResourceUpdated"),
+        @JsonSubTypes.Type(value = LocalResourceRemovedMessage.class, name = "localResourceRemoved"),
+        @JsonSubTypes.Type(value = GlobalResourcesReorderedMessage.class, name = "globalResourcesReordered"),
+        @JsonSubTypes.Type(value = GlobalResourceUpdatedMessage.class, name = "globalResourceUpdated"),
+        @JsonSubTypes.Type(value = GlobalResourceRemovedMessage.class, name = "globalResourceRemoved"),})
 public abstract class AbstractMessage {
     private final String runtimeId;
     private final int messageId;

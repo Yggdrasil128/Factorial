@@ -3,6 +3,7 @@ package de.yggdrasil128.factorial.engine;
 import de.yggdrasil128.factorial.model.ProductionLineService;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
 import jakarta.persistence.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,13 +97,13 @@ public class ProductionLine implements Production {
     }
 
     /**
-     * Manually adds a {@link Resource} for the production line. Has no effect if the resource is already being tracked.
+     * Manually adds a {@link LocalResource} for the production line. Has no effect if the resource is already being tracked.
      * <p>
      * This method is meant primarily for populating the resources of a production line before any contributors were
      * added (which is optional). Also, this is (currently) required for resources that have no contributors but are
      * simply for importing/exporting items to/from a factory.
      * 
-     * @param resource the {@link Resource} for which to track contributions
+     * @param resource the {@link LocalResource} for which to track contributions
      */
     public void addResource(Resource resource) {
         /*
@@ -112,7 +113,7 @@ public class ProductionLine implements Production {
         contributions.putIfAbsent(resource.getItem().getId(), new ResourceContributions(resource));
     }
 
-    public void updateResource(Resource resource) {
+    public void updateResource(LocalResource resource) {
         contributions.computeIfAbsent(resource.getItem().getId(), key -> new ResourceContributions(resource))
                 .update(resource);
     }

@@ -1,42 +1,59 @@
 package de.yggdrasil128.factorial.model.save;
 
+import de.yggdrasil128.factorial.engine.ProductionLine;
+import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.changelist.ChangelistStandalone;
+import de.yggdrasil128.factorial.model.factory.Factory;
+import de.yggdrasil128.factorial.model.factory.FactoryProductionLineChangedEvent;
+import de.yggdrasil128.factorial.model.factory.FactoryRemovedEvent;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameService;
 import de.yggdrasil128.factorial.model.icon.IconService;
+import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
+import de.yggdrasil128.factorial.model.resource.global.GlobalResource;
+import de.yggdrasil128.factorial.model.resource.global.GlobalResourceService;
+import de.yggdrasil128.factorial.model.resource.global.GlobalResourceStandalone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRepository> {
+public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRepository>
+        implements ProductionLineService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SaveService.class);
 
     private final ApplicationEventPublisher events;
     private final GameService gameService;
     private final IconService iconService;
     private final FactoryService factoryService;
     private final ChangelistService changelistService;
+    private final GlobalResourceService saveResourceService;
+    private final Map<Integer, ProductionLine> cache = new HashMap<>();
 
     public SaveService(SaveRepository repository, ApplicationEventPublisher events, GameService gameService,
-                       IconService iconService, FactoryService factoryService, ChangelistService changelistService) {
+                       IconService iconService, FactoryService factoryService, ChangelistService changelistService,
+                       GlobalResourceService saveResourceService) {
         super(repository);
         this.events = events;
         this.gameService = gameService;
         this.iconService = iconService;
         this.factoryService = factoryService;
         this.changelistService = changelistService;
+        this.saveResourceService = saveResourceService;
     }
 
     @Override
@@ -67,8 +84,14 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
     @Override
     protected void handleBulkCreate(Iterable<Save> saves) {
         for (Save save : saves) {
-            events.publishEvent(new SaveUpdatedEvent(save));
+            events.publishEvent(new SaveProductionLineChangedEvent(save, initEmptyProductionLine(save), false));
         }
+    }
+
+    private ProductionLine initEmptyProductionLine(Save save) {
+        ProductionLine productionLine = new ProductionLine(save.getId(), this);
+        cache.put(save.getId(), productionLine);
+        return productionLine;
     }
 
     @Override
@@ -88,7 +111,44 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     @Override
     protected void handleDelete(int id) {
+        cache.remove(id);
         events.publishEvent(new SaveRemovedEvent(id));
+    }
+
+    public ProductionLine
+            computeProductionLine(Save save, Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
+        return cache.computeIfAbsent(save.getId(), key -> initProduictionLine(save, changes));
+    }
+
+    private ProductionLine
+            initProduictionLine(Save save, Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
+        ProductionLine productionLine = new ProductionLine(save.getId(), this);
+        for (GlobalResource resource : save.getResources()) {
+            productionLine.addResource(resource);
+        }
+        for (Factory factory : save.getFactories()) {
+            productionLine.addContributor(factoryService.computeProductionLine(factory, changes));
+        }
+        if (productionLine.hasAlteredResources()) {
+            repository.save(save);
+        }
+        events.publishEvent(new SaveProductionLineChangedEvent(save, productionLine, true));
+        return productionLine;
+    }
+
+    @Override
+    public ResourceContributions spawnResource(int id, int itemId) {
+        return saveResourceService.spawn(id, itemId);
+    }
+
+    @Override
+    public void notifyResourceUpdate(int id, ResourceContributions contributions) {
+        saveResourceService.updateContributions(contributions);
+    }
+
+    @Override
+    public void destroyResource(int id, int resourceId) {
+        saveResourceService.destroy(get(id), resourceId);
     }
 
     @Transactional
@@ -114,6 +174,21 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         }).toList());
         summary.setFactories(save.getFactories().stream().map(factory -> factoryService.getFactorySummary(factory,
                 destination, changelistService::getProductionStepChanges)).toList());
+        switch (destination) {
+        case FRONTEND:
+            ProductionLine productionLine = computeProductionLine(save, changelistService::getProductionStepChanges);
+            summary.setResources(save.getResources().stream()
+                    .map(resource -> GlobalResourceStandalone.of(resource, productionLine.getContributions(resource)))
+                    .toList());
+            break;
+        case SAVE_FILE:
+            summary.setResources(save.getResources().stream()
+                    .map(resource -> GlobalResourceStandalone.of(resource, External.SAVE_FILE)).toList());
+            break;
+        default:
+            throw new AssertionError(
+                    "unexpected enum constant: " + External.class.getCanonicalName() + '.' + destination.name());
+        }
         return summary;
     }
 
@@ -138,5 +213,49 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         }
         events.publishEvent(new SavesReorderedEvent(saves));
     }
+
+    @EventListener
+    public SaveProductionLineChangedEvent on(FactoryProductionLineChangedEvent event) {
+        Save save = event.getFactory().getSave();
+        ProductionLine productionLine = cache.get(save.getId());
+        if (null == productionLine) {
+            return null;
+        }
+        boolean itemsChanged = false;
+        if (event.isItemsChanged()) {
+            productionLine.updateContribution(event.getProductionLine());
+            itemsChanged = productionLine.hasAlteredResources();
+            if (itemsChanged) {
+                repository.save(save);
+            }
+        } else {
+            productionLine.updateContributor(productionLine);
+        }
+        return new SaveProductionLineChangedEvent(save, productionLine, itemsChanged);
+    }
+
+    @EventListener
+    public SaveProductionLineChangedEvent on(FactoryRemovedEvent event) {
+        ProductionLine productionLine = cache.get(event.getSaveId());
+        if (null == productionLine) {
+            return null;
+        }
+        if (null != event.getProductionLine()) {
+            productionLine.removeContributor(event.getProductionLine());
+            return new SaveProductionLineChangedEvent(get(event.getSaveId()), productionLine, true);
+        }
+        // TODO find a better solution
+        // we don't have access to the old production line here, so we can only do a full invalidate
+        LOG.warn(
+                "Removed a factory that had no computed production line, doing a full invalidate for Production Line of Save{}",
+                event.getSaveId());
+        cache.remove(event.getSaveId());
+        return null;
+    }
+
+    /*
+     * There is no meaningful update on a SaveResource that would require us to handle it here. Therefore, we do not
+     * have an EventListener on SaveResourceUpdatedEvent, in contrast to FactoryService.
+     */
 
 }

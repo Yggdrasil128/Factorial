@@ -23,8 +23,8 @@ import de.yggdrasil128.factorial.model.recipe.Recipe;
 import de.yggdrasil128.factorial.model.recipe.RecipeStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifier;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
-import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceStandalone;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveStandalone;
 import de.yggdrasil128.factorial.model.save.SaveSummary;
@@ -170,15 +170,15 @@ public class Importer {
 
     private void importResources(FactorySummary summary, Factory factory) {
         int ordinal = 0;
-        for (ResourceStandalone input : summary.getResources()) {
-            Resource resource = importResource(factory, input);
+        for (LocalResourceStandalone input : summary.getResources()) {
+            LocalResource resource = importResource(factory, input);
             ordinal = inferOrdinal(ordinal, resource, input.ordinal());
             factory.getResources().add(resource);
         }
     }
 
-    private Resource importResource(Factory factory, ResourceStandalone input) {
-        Resource resource = new Resource(factory, input);
+    private LocalResource importResource(Factory factory, LocalResourceStandalone input) {
+        LocalResource resource = new LocalResource(factory, input);
         resource.setItem(findItem(input.itemId()));
         return resource;
     }

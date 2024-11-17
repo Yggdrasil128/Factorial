@@ -29,11 +29,9 @@ import de.yggdrasil128.factorial.model.recipe.RecipeUpdatedEvent;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierRemovedEvent;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierUpdatedEvent;
-import de.yggdrasil128.factorial.model.resource.*;
-import de.yggdrasil128.factorial.model.save.Save;
-import de.yggdrasil128.factorial.model.save.SaveStandalone;
-import de.yggdrasil128.factorial.model.save.SaveUpdatedEvent;
-import de.yggdrasil128.factorial.model.save.SavesReorderedEvent;
+import de.yggdrasil128.factorial.model.resource.global.*;
+import de.yggdrasil128.factorial.model.resource.local.*;
+import de.yggdrasil128.factorial.model.save.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -60,6 +58,7 @@ public class WebsocketService extends TextWebSocketHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebsocketService.class);
 
+    private final SaveService saveService;
     private final FactoryService factoryService;
     private final ProductionStepService productionStepService;
     private final ChangelistService changelistService;
@@ -72,8 +71,9 @@ public class WebsocketService extends TextWebSocketHandler {
     private final BlockingQueue<AbstractMessage> outboundMessages = new ArrayBlockingQueue<>(1000);
     private final Thread messageSender = new Thread(this::broadcastMessages, "WebSocketSender");
 
-    public WebsocketService(FactoryService factoryService, ProductionStepService productionStepService,
-                            ChangelistService changelistService) {
+    public WebsocketService(SaveService saveService, FactoryService factoryService,
+                            ProductionStepService productionStepService, ChangelistService changelistService) {
+        this.saveService = saveService;
         this.factoryService = factoryService;
         this.productionStepService = productionStepService;
         this.changelistService = changelistService;
@@ -160,7 +160,7 @@ public class WebsocketService extends TextWebSocketHandler {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOG.debug("Outbound message thread was interrupt, expecting shutdown");
+            LOG.debug("Outbound message thread was interrupted, expecting shutdown");
         }
     }
 
@@ -221,7 +221,7 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void ON(ItemRemovedEvent event) {
+    public void on(ItemRemovedEvent event) {
         enqueue(new ItemRemovedMessage(runtimeId, nextMessageId(), event.getGameId(), event.getItemId()));
     }
 
@@ -324,32 +324,32 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(ResourcesReorderedEvent event) {
+    public void on(LocalResourcesReorderedEvent event) {
         List<EntityPosition> order = event.getResources().stream()
                 .map(resource -> new EntityPosition(resource.getId(), resource.getOrdinal())).toList();
 
-        enqueue(new ResourcesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
+        enqueue(new LocalResourcesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
     }
 
     @EventListener
-    public void on(ResourceUpdatedEvent event) {
+    public void on(LocalResourceUpdatedEvent event) {
         if (event.isComplete()) {
-            Resource resource = event.getResource();
+            LocalResource resource = event.getResource();
             Factory factory = resource.getFactory();
             Save save = factory.getSave();
-            ResourceContributions contributions = event instanceof ResourceContributionsChangedEvent
-                    ? ((ResourceContributionsChangedEvent) event).getContributions()
+            ResourceContributions contributions = event instanceof LocalResourceContributionsChangedEvent
+                    ? ((LocalResourceContributionsChangedEvent) event).getContributions()
                     : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges)
                             .getContributions(resource);
 
-            enqueue(new ResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
-                    ResourceStandalone.of(resource, contributions)));
+            enqueue(new LocalResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                    LocalResourceStandalone.of(resource, contributions)));
         }
     }
 
     @EventListener
-    public void on(ResourceRemovedEvent event) {
-        enqueue(new ResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getResourceId()));
+    public void on(LocalResourceRemovedEvent event) {
+        enqueue(new LocalResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getResourceId()));
     }
 
     @EventListener
@@ -369,6 +369,33 @@ public class WebsocketService extends TextWebSocketHandler {
     @EventListener
     public void on(ChangelistRemovedEvent event) {
         enqueue(new ChangelistRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getChangelistId()));
+    }
+
+    public void on(GlobalResourcesReorderedEvent event) {
+        List<EntityPosition> order = event.getResources().stream()
+                .map(resource -> new EntityPosition(resource.getId(), resource.getOrdinal())).toList();
+
+        enqueue(new GlobalResourcesReorderedMessage(runtimeId, nextMessageId(), event.getSaveId(), order));
+    }
+
+    @EventListener
+    public void on(GlobalResourceUpdatedEvent event) {
+        if (event.isComplete()) {
+            GlobalResource resource = event.getResource();
+            Save save = resource.getSave();
+            ResourceContributions contributions = event instanceof GlobalResourceContributionsChangedEvent
+                    ? ((GlobalResourceContributionsChangedEvent) event).getContributions()
+                    : saveService.computeProductionLine(save, changelistService::getProductionStepChanges)
+                            .getContributions(resource);
+
+            enqueue(new GlobalResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                    GlobalResourceStandalone.of(resource, contributions)));
+        }
+    }
+
+    @EventListener
+    public void on(GlobalResourceRemovedEvent event) {
+        enqueue(new GlobalResourceRemovedMessage(runtimeId, nextMessageId(), event.getSaveId(), event.getResourceId()));
     }
 
     private int nextMessageId() {

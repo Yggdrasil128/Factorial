@@ -5,7 +5,7 @@ import de.yggdrasil128.factorial.model.OptionalInputField;
 import de.yggdrasil128.factorial.model.OrderedModel;
 import de.yggdrasil128.factorial.model.icon.Icon;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
-import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
 import de.yggdrasil128.factorial.model.save.Save;
 import jakarta.persistence.*;
 
@@ -34,7 +34,7 @@ public class Factory implements NamedModel, OrderedModel {
     private List<ProductionStep> productionSteps;
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private List<Resource> resources;
+    private List<LocalResource> resources;
 
     public Factory() {
     }
@@ -108,11 +108,11 @@ public class Factory implements NamedModel, OrderedModel {
         this.productionSteps = productionSteps;
     }
 
-    public List<Resource> getResources() {
+    public List<LocalResource> getResources() {
         return resources;
     }
 
-    public void setResources(List<Resource> resources) {
+    public void setResources(List<LocalResource> resources) {
         this.resources = resources;
     }
 

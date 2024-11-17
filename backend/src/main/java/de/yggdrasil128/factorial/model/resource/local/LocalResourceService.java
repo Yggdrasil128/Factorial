@@ -1,4 +1,4 @@
-package de.yggdrasil128.factorial.model.resource;
+package de.yggdrasil128.factorial.model.resource.local;
 
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
@@ -17,14 +17,14 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class ResourceService extends ParentedModelService<Resource, ResourceStandalone, Factory, ResourceRepository> {
+public class LocalResourceService extends ParentedModelService<LocalResource, LocalResourceStandalone, Factory, LocalResourceRepository> {
 
     private final ApplicationEventPublisher events;
     private final FactoryRepository factoryRepository;
     private final ItemService itemService;
     private final Map<Integer, ResourceContributions> cache = new HashMap<>();
 
-    public ResourceService(ResourceRepository repository, ApplicationEventPublisher events,
+    public LocalResourceService(LocalResourceRepository repository, ApplicationEventPublisher events,
                            FactoryRepository factoryRepository, ItemService itemService) {
         super(repository);
         this.events = events;
@@ -33,12 +33,12 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
     }
 
     @Override
-    protected int getEntityId(Resource resource) {
+    protected int getEntityId(LocalResource resource) {
         return resource.getId();
     }
 
     @Override
-    protected int getStandaloneId(ResourceStandalone standalone) {
+    protected int getStandaloneId(LocalResourceStandalone standalone) {
         return standalone.id();
     }
 
@@ -48,25 +48,25 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
     }
 
     @Override
-    protected Resource prepareCreate(Factory factory, ResourceStandalone standalone) {
-        Resource resource = new Resource(factory, standalone);
+    protected LocalResource prepareCreate(Factory factory, LocalResourceStandalone standalone) {
+        LocalResource resource = new LocalResource(factory, standalone);
         OptionalInputField.ofId(standalone.itemId(), itemService::get).apply(resource::setItem);
         inferOrdinal(factory, resource);
         return resource;
     }
 
     @Override
-    protected void handleBulkCreate(Factory factory, Iterable<Resource> resources) {
-        for (Resource resource : resources) {
+    protected void handleBulkCreate(Factory factory, Iterable<LocalResource> resources) {
+        for (LocalResource resource : resources) {
             factory.getResources().add(resource);
-            events.publishEvent(new ResourceUpdatedEvent(resource, false));
+            events.publishEvent(new LocalResourceUpdatedEvent(resource, false));
         }
         factoryRepository.save(factory);
     }
 
     public ResourceContributions spawn(int factoryId, int itemId) {
         Factory factory = factoryRepository.findById(factoryId).orElseThrow(ModelService::reportNotFound);
-        Resource resource = new Resource();
+        LocalResource resource = new LocalResource();
         resource.setFactory(factory);
         resource.setItem(itemService.get(itemId));
         inferOrdinal(factory, resource);
@@ -80,18 +80,18 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
         return computeContributions(resource);
     }
 
-    private static void inferOrdinal(Factory factory, Resource resource) {
+    private static void inferOrdinal(Factory factory, LocalResource resource) {
         if (0 >= resource.getOrdinal()) {
-            resource.setOrdinal(factory.getResources().stream().mapToInt(Resource::getOrdinal).max().orElse(0) + 1);
+            resource.setOrdinal(factory.getResources().stream().mapToInt(LocalResource::getOrdinal).max().orElse(0) + 1);
         }
     }
 
-    public ResourceContributions computeContributions(Resource resource) {
+    public ResourceContributions computeContributions(LocalResource resource) {
         return cache.computeIfAbsent(resource.getId(), key -> new ResourceContributions(resource));
     }
 
     @Override
-    protected void prepareUpdate(Resource resource, ResourceStandalone standalone) {
+    protected void prepareUpdate(LocalResource resource, LocalResourceStandalone standalone) {
         if (null != standalone.itemId() && (int) standalone.itemId() != resource.getItem().getId()) {
             throw report(HttpStatus.NOT_IMPLEMENTED, "cannot change item of a resource");
         }
@@ -99,12 +99,12 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
     }
 
     @Override
-    protected void handleUpdate(Resource resource) {
-        events.publishEvent(new ResourceUpdatedEvent(resource, false));
+    protected void handleUpdate(LocalResource resource) {
+        events.publishEvent(new LocalResourceUpdatedEvent(resource, false));
     }
 
     public void updateContributions(ResourceContributions contributions) {
-        events.publishEvent(new ResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
+        events.publishEvent(new LocalResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
     }
 
     @Override
@@ -117,16 +117,16 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
         return factory;
     }
 
-    @Override
-    protected void handleDelete(Factory factory, int id) {
-        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
-    }
-
     public void destroy(Factory factory, int id) {
         factory.getResources().remove(get(id));
         repository.deleteById(id);
+        handleDelete(factory, id);
+    }
+
+    @Override
+    protected void handleDelete(Factory factory, int id) {
         cache.remove(id);
-        events.publishEvent(new ResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
+        events.publishEvent(new LocalResourceRemovedEvent(factory.getSave().getId(), factory.getId(), id));
     }
 
     @Transactional
@@ -134,8 +134,8 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
         Factory factory = factoryRepository.findById(factoryId).orElseThrow(ModelService::reportNotFound);
         Map<Integer, Integer> order = input.stream().collect(toMap(EntityPosition::id, EntityPosition::ordinal));
         AsyncHelper.complete(result);
-        Collection<Resource> resources = new ArrayList<>();
-        for (Resource resource : factory.getResources()) {
+        Collection<LocalResource> resources = new ArrayList<>();
+        for (LocalResource resource : factory.getResources()) {
             Integer ordinal = order.get(resource.getId());
             if (null != ordinal) {
                 resource.setOrdinal(ordinal.intValue());
@@ -143,11 +143,11 @@ public class ResourceService extends ParentedModelService<Resource, ResourceStan
                 repository.save(resource);
             }
         }
-        events.publishEvent(new ResourcesReorderedEvent(factory.getSave().getId(), resources));
+        events.publishEvent(new LocalResourcesReorderedEvent(factory.getSave().getId(), resources));
     }
 
     @EventListener
-    public void on(ResourceUpdatedEvent event) {
+    public void on(LocalResourceUpdatedEvent event) {
         ResourceContributions contributions = cache.get(event.getResource().getId());
         if (null != contributions) {
             contributions.update(event.getResource());

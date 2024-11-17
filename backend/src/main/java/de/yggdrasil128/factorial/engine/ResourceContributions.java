@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.engine;
 
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.resource.Resource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -23,7 +24,9 @@ public class ResourceContributions {
     public ResourceContributions(Resource resource) {
         this.resourceId = resource.getId();
         this.itemId = resource.getItem().getId();
-        update(resource);
+        if (resource instanceof LocalResource casted) {
+            update(casted);
+        }
     }
 
     public int getResourceId() {
@@ -34,7 +37,7 @@ public class ResourceContributions {
         return itemId;
     }
 
-    public void update(Resource resource) {
+    public void update(LocalResource resource) {
         imported = resource.isImported();
         exported = resource.isExported();
     }

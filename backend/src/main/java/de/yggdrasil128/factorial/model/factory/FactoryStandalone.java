@@ -17,8 +17,6 @@ public record FactoryStandalone(int id,
                                 String name,
                                 String description,
                                 Object iconId,
-                                List<Object> productionStepIds,
-                                List<Object> resourceIds,
                                 @JsonProperty(access = READ_ONLY) List<ProductionEntryStandalone> inputs,
                                 @JsonProperty(access = READ_ONLY) List<ProductionEntryStandalone> outputs) {
 
@@ -35,13 +33,7 @@ public record FactoryStandalone(int id,
     private static FactoryStandalone of(Factory model, External destination, List<ProductionEntryStandalone> inputs,
                                         List<ProductionEntryStandalone> outputs) {
         return new FactoryStandalone(model.getId(), model.getSave().getId(), model.getOrdinal(), model.getName(),
-                model.getDescription(), NamedModel.resolve(model.getIcon(), destination),
-                External.FRONTEND == destination ? NamedModel.resolve(model.getProductionSteps(), destination,
-                        (productionStep, dest) -> productionStep.getId()) : Collections.emptyList(),
-                External.FRONTEND == destination
-                        ? NamedModel.resolve(model.getResources(), destination, (resource, dest) -> resource.getId())
-                        : Collections.emptyList(),
-                inputs, outputs);
+                model.getDescription(), NamedModel.resolve(model.getIcon(), destination), inputs, outputs);
     }
 
 }

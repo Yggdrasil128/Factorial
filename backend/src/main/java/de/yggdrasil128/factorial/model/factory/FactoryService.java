@@ -5,10 +5,10 @@ import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.*;
-import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceService;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
-import de.yggdrasil128.factorial.model.resource.ResourceUpdatedEvent;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceService;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceStandalone;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceUpdatedEvent;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.slf4j.Logger;
@@ -35,12 +35,12 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
     private final SaveRepository saveRepository;
     private final IconService iconService;
     private final ProductionStepService productionStepService;
-    private final ResourceService resourceService;
+    private final LocalResourceService resourceService;
     private final Map<Integer, ProductionLine> cache = new HashMap<>();
 
     public FactoryService(FactoryRepository repository, ApplicationEventPublisher events, SaveRepository saveRepository,
                           IconService iconService, ProductionStepService productionStepService,
-                          ResourceService resourceService) {
+                          LocalResourceService resourceService) {
         super(repository);
         this.events = events;
         this.saveRepository = saveRepository;
@@ -138,7 +138,7 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
             initProductionLine(Factory factory,
                                Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
         ProductionLine productionLine = new ProductionLine(factory.getId(), this);
-        for (Resource resource : factory.getResources()) {
+        for (LocalResource resource : factory.getResources()) {
             productionLine.addResource(resource);
         }
         for (ProductionStep productionStep : factory.getProductionSteps()) {
@@ -179,7 +179,7 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
                             .toList());
             ProductionLine productionLine = computeProductionLine(factory, changes);
             summary.setResources(factory.getResources().stream()
-                    .map(resource -> ResourceStandalone.of(resource, productionLine.getContributions(resource)))
+                    .map(resource -> LocalResourceStandalone.of(resource, productionLine.getContributions(resource)))
                     .toList());
             summary.setFactory(FactoryStandalone.of(factory, productionLine));
             break;
@@ -188,7 +188,7 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
             summary.setProductionSteps(factory.getProductionSteps().stream()
                     .map(productionStep -> ProductionStepStandalone.of(productionStep, External.SAVE_FILE)).toList());
             summary.setResources(factory.getResources().stream()
-                    .map(resource -> ResourceStandalone.of(resource, External.SAVE_FILE)).toList());
+                    .map(resource -> LocalResourceStandalone.of(resource, External.SAVE_FILE)).toList());
             break;
         default:
             throw new AssertionError(
@@ -216,7 +216,8 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
 
     @EventListener
     public FactoryProductionLineChangedEvent on(ProductionStepThroughputsChangedEvent event) {
-        ProductionLine productionLine = cache.get(event.getProductionStep().getFactory().getId());
+        Factory factory = event.getProductionStep().getFactory();
+        ProductionLine productionLine = cache.get(factory.getId());
         if (null == productionLine) {
             return null;
         }
@@ -225,36 +226,35 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
             productionLine.updateContribution(event.getThroughputs());
             itemsChanged = productionLine.hasAlteredResources();
             if (itemsChanged) {
-                repository.save(event.getProductionStep().getFactory());
+                repository.save(factory);
             }
         } else {
             productionLine.updateContributor(event.getThroughputs());
         }
-        return new FactoryProductionLineChangedEvent(event.getProductionStep().getFactory(), productionLine,
-                itemsChanged);
+        return new FactoryProductionLineChangedEvent(factory, productionLine, itemsChanged);
     }
 
     @EventListener
-    public void on(ProductionStepRemovedEvent event) {
+    public FactoryProductionLineChangedEvent on(ProductionStepRemovedEvent event) {
         ProductionLine productionLine = cache.get(event.getFactoryId());
-        if (null != productionLine) {
-            if (null != event.getThroughputs()) {
-                productionLine.removeContributor(event.getThroughputs());
-                events.publishEvent(
-                        new FactoryProductionLineChangedEvent(get(event.getFactoryId()), productionLine, true));
-            } else {
-                // TODO find a better solution
-                // we don't have access to the old throughputs here, so we can only do a full invalidate
-                LOG.warn(
-                        "Removed a production step that had no computed throughputs, doing a full invalidate for Production Line of Factory {}",
-                        event.getFactoryId());
-                cache.remove(event.getFactoryId());
-            }
+        if (null == productionLine) {
+            return null;
         }
+        if (null != event.getThroughputs()) {
+            productionLine.removeContributor(event.getThroughputs());
+            return new FactoryProductionLineChangedEvent(get(event.getFactoryId()), productionLine, true);
+        }
+        // TODO find a better solution
+        // we don't have access to the old throughputs here, so we can only do a full invalidate
+        LOG.warn(
+                "Removed a production step that had no computed throughputs, doing a full invalidate for Production Line of Factory {}",
+                event.getFactoryId());
+        cache.remove(event.getFactoryId());
+        return null;
     }
 
     @EventListener
-    public FactoryProductionLineChangedEvent on(ResourceUpdatedEvent event) {
+    public FactoryProductionLineChangedEvent on(LocalResourceUpdatedEvent event) {
         if (event.isComplete()) {
             // in that case, the ensuing event is already being propagated otherwise
             return null;

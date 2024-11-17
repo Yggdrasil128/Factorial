@@ -7,6 +7,7 @@ import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.resource.global.GlobalResource;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ public class Save implements NamedModel, OrderedModel {
     @JoinColumn
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Changelist> changelists;
+    @JoinColumn
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private List<GlobalResource> resources;
 
     public Save() {
     }
@@ -115,6 +119,14 @@ public class Save implements NamedModel, OrderedModel {
 
     public void setChangelists(List<Changelist> changelists) {
         this.changelists = changelists;
+    }
+
+    public List<GlobalResource> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<GlobalResource> resources) {
+        this.resources = resources;
     }
 
     @Override

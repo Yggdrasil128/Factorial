@@ -4,11 +4,11 @@ import de.yggdrasil128.factorial.model.EntityPosition;
 
 import java.util.List;
 
-public class ResourcesReorderedMessage extends SaveRelatedModelChangedMessage {
+public class LocalResourcesReorderedMessage extends SaveRelatedModelChangedMessage {
 
     private final List<EntityPosition> order;
 
-    public ResourcesReorderedMessage(String runtimeId, int messageId, int saveId, List<EntityPosition> order) {
+    public LocalResourcesReorderedMessage(String runtimeId, int messageId, int saveId, List<EntityPosition> order) {
         super(runtimeId, messageId, saveId);
         this.order = order;
     }

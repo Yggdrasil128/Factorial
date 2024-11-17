@@ -4,11 +4,10 @@ import de.yggdrasil128.factorial.engine.ProductionLine;
 import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
 import de.yggdrasil128.factorial.model.External;
-import de.yggdrasil128.factorial.model.factory.Factory;
 import de.yggdrasil128.factorial.model.factory.FactoryService;
-import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.ResourceService;
-import de.yggdrasil128.factorial.model.resource.ResourceStandalone;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceService;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceStandalone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,30 +16,31 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Manages {@link Resource Resources}.
+ * Manages {@link LocalResource LocalResources}.
  * <p>
  * In contrast to most other entities, resources cannot be created or deleted explicitly. Instead, they are spawned
  * and/or destroyed when computing a {@link ProductionLine}.
  */
 @RestController
 @RequestMapping("/api")
-public class ResourceController {
+public class LocalResourceController {
 
     private final AsyncHelper asyncHelper;
     private final FactoryService factoryService;
-    private final ResourceService resourceService;
+    private final LocalResourceService resourceService;
 
     @Autowired
-    public ResourceController(AsyncHelper asyncHelper, FactoryService factoryService, ResourceService resourceService) {
+    public LocalResourceController(AsyncHelper asyncHelper, FactoryService factoryService,
+                                   LocalResourceService resourceService) {
         this.asyncHelper = asyncHelper;
         this.factoryService = factoryService;
         this.resourceService = resourceService;
     }
 
     @GetMapping("/factory/resources")
-    public List<ResourceStandalone> retrieveAll(int factoryId) {
-        Factory factory = factoryService.get(factoryId);
-        return factory.getResources().stream().map(ResourceController::toOutput).toList();
+    public List<LocalResourceStandalone> retrieveAll(int factoryId) {
+        return factoryService.get(factoryId).getResources().stream()
+                .map(resource -> LocalResourceStandalone.of(resource, External.FRONTEND)).toList();
     }
 
     @PatchMapping("/factory/resources/order")
@@ -51,12 +51,8 @@ public class ResourceController {
 
     @PatchMapping("/resources")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(List<ResourceStandalone> input) {
+    public CompletableFuture<Void> update(List<LocalResourceStandalone> input) {
         return asyncHelper.submit(result -> resourceService.update(input, result));
-    }
-
-    private static ResourceStandalone toOutput(Resource resource) {
-        return ResourceStandalone.of(resource, External.FRONTEND);
     }
 
 }
