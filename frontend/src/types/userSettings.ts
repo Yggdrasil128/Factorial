@@ -6,4 +6,5 @@ export enum ThroughputUnit {
 export type UserSettings = {
   throughputUnit: ThroughputUnit;
   lastSaveId: number;
+  skipUnsavedChangesWarning: boolean;
 }

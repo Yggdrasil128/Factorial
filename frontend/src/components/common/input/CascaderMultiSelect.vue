@@ -65,6 +65,7 @@ function onLeafNodeClick(node: Node): void {
 
 <template>
   <el-cascader
+    class="cascaderMultiSelect"
     v-model="cascaderModel"
     :options="options"
     :show-all-levels="false"
@@ -90,6 +91,8 @@ function onLeafNodeClick(node: Node): void {
   </el-cascader>
 </template>
 
-<style scoped>
-
+<style>
+.cascaderMultiSelect {
+  --el-cascader-tag-background: var(--el-color-info-light-9);
+}
 </style>

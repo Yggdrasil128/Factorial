@@ -3,10 +3,8 @@ import IconImg from '@/components/common/IconImg.vue';
 import { Delete, Edit, Folder, Plus } from '@element-plus/icons-vue';
 import { type EntityTreeService, type EntityType } from '@/services/useEntityTreeService';
 import { ElButtonGroup, ElPopconfirm, ElTooltip, type TreeInstance } from 'element-plus';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useItemStore } from '@/stores/model/itemStore';
-import type { Item, Recipe } from '@/types/model/standalone';
 import { type Ref } from 'vue';
+import { useRecipeIconService } from '@/services/useRecipeIconService';
 
 export interface EntityTreeProps {
   service: EntityTreeService<any>;
@@ -19,19 +17,8 @@ const service = props.service;
 
 const treeRef: Ref<TreeInstance | undefined> = service.state.treeRef;
 
-const recipeStore = useRecipeStore();
-const itemStore = useItemStore();
+const recipeIconService = useRecipeIconService();
 
-function getRecipeIconId(recipeId: number): number {
-  if (!recipeId) return 0;
-  const recipe: Recipe | undefined = recipeStore.getById(recipeId);
-  if (!recipe) return 0;
-  if (recipe.iconId) return recipe.iconId;
-  if (recipe.products.length === 0) return 0;
-  const item: Item | undefined = itemStore.getById(recipe.products[0].itemId);
-  if (!item) return 0;
-  return item.iconId;
-}
 </script>
 
 <template>
@@ -59,7 +46,8 @@ function getRecipeIconId(recipeId: number): number {
             <el-icon v-if="data.children !== undefined" :size="28" style="margin: 0 2px;">
               <Folder />
             </el-icon>
-            <IconImg v-else-if="entityType === 'Recipe' && getRecipeIconId(data.id)" :icon="getRecipeIconId(data.id)"
+            <IconImg v-else-if="entityType === 'Recipe' && recipeIconService.getRecipeIconId(data.id)"
+                     :icon="recipeIconService.getRecipeIconId(data.id)"
                      :size="32" />
             <IconImg v-else-if="data.iconId" :icon="data.iconId" :size="32" />
             <div v-else style="width: 32px;"></div>

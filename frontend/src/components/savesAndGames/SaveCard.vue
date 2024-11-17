@@ -9,12 +9,15 @@ import {
   ElDropdownItem,
   ElDropdownMenu,
   ElMessage,
+  ElMessageBox,
   ElTooltip,
 } from 'element-plus';
 import { useGameStore } from '@/stores/model/gameStore';
 import { computed, type ComputedRef, type Ref, ref } from 'vue';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { getModelSyncService } from '@/services/useModelSyncService';
+import { useRouter } from 'vue-router';
+import { useSaveApi } from '@/api/model/useSaveApi';
 
 export interface SaveCardProps {
   save: Save;
@@ -22,11 +25,13 @@ export interface SaveCardProps {
 
 const props: SaveCardProps = defineProps<SaveCardProps>();
 
-const dropdownMenuOpen: Ref<boolean> = ref(false);
-
+const router = useRouter();
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const gameStore = useGameStore();
 const modelSyncService = getModelSyncService();
+const saveApi = useSaveApi();
+
+const dropdownMenuOpen: Ref<boolean> = ref(false);
 
 const isCurrentSave: ComputedRef<boolean> = computed(() => props.save.id === currentGameAndSaveStore.currentSaveId);
 
@@ -47,7 +52,7 @@ function loadSave(): void {
 }
 
 function editSave(): void {
-
+  router.push({ name: 'editSave', params: { editSaveId: props.save.id } });
 }
 
 function cloneSave(): void {
@@ -63,7 +68,18 @@ function migrateSave(): void {
 }
 
 function deleteSave(): void {
-
+  ElMessageBox.confirm(
+    'Are you sure you want to delete save \'' + props.save.name + '\'?',
+    'Warning',
+    {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    },
+  ).then(() => {
+    saveApi.delete(props.save.id);
+  }).catch(() => {
+  });
 }
 
 function onDropdownVisibleChange(visible: boolean): void {
@@ -77,64 +93,63 @@ function onDropdownVisibleChange(visible: boolean): void {
 </script>
 
 <template>
-  <div class="card" :class="{current: isCurrentSave, forceShowButtons: dropdownMenuOpen}">
-    <div class="topRow">
-      <div class="left">
-        <IconImg :icon="save.iconId" :size="32" />
-        <div class="name">
-          {{ save.name }}
-        </div>
+  <div class="card row items-center" :class="{current: isCurrentSave, forceShowButtons: dropdownMenuOpen}">
+    <IconImg class="icon" :icon="save.iconId" :size="48" />
+
+    <div class="nameAndInfo">
+      <div class="name">
+        {{ save.name }}
       </div>
-      <div class="right">
-        <div class="buttons">
-          <el-button v-if="!isCurrentSave"
-                     type="primary" :icon="Promotion" :loading="isSaveLoading"
-                     @click="loadSave">
-            Load this save
-          </el-button>
-
-          <el-button-group style="margin-left: 12px;">
-            <el-tooltip content="Edit"
-                        effect="dark" placement="top" transition="none" :hide-after="0">
-              <el-button :icon="Edit" @click="editSave" />
-            </el-tooltip>
-
-            <el-dropdown class="saveDropdown" trigger="click" @visible-change="onDropdownVisibleChange">
-              <el-button :icon="ArrowDown" />
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item :icon="CopyDocument" @click="cloneSave">
-                    Clone
-                  </el-dropdown-item>
-                  <el-dropdown-item :icon="Download" @click="exportSave">
-                    Export
-                  </el-dropdown-item>
-                  <el-dropdown-item :icon="Connection" @click="migrateSave">
-                    Migrate to another game
-                  </el-dropdown-item>
-                  <el-dropdown-item :icon="Delete" @click="deleteSave"
-                                    style="color: var(--el-color-danger);">
-                    Delete
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </el-button-group>
-        </div>
+      <div v-if="game">
+        Using game:
+        <IconImg :icon="game.iconId" :size="16" />
+        {{ game.name }}
       </div>
     </div>
-    <div v-if="game">
-      Using game:
-      <IconImg :icon="game.iconId" :size="16" />
-      {{ game.name }}
+
+    <div class="buttons">
+      <el-button v-if="!isCurrentSave"
+                 type="primary" :icon="Promotion" :loading="isSaveLoading"
+                 @click="loadSave">
+        Load this save
+      </el-button>
+
+      <el-button-group style="margin-left: 12px;">
+        <el-tooltip content="Edit"
+                    effect="dark" placement="top" transition="none" :hide-after="0">
+          <el-button :icon="Edit" @click="editSave" />
+        </el-tooltip>
+
+        <el-dropdown class="saveDropdown" trigger="click" @visible-change="onDropdownVisibleChange">
+          <el-button :icon="ArrowDown" />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item :icon="CopyDocument" @click="cloneSave">
+                Clone
+              </el-dropdown-item>
+              <el-dropdown-item :icon="Download" @click="exportSave">
+                Export
+              </el-dropdown-item>
+              <el-dropdown-item :icon="Connection" @click="migrateSave">
+                Migrate to another game
+              </el-dropdown-item>
+              <el-dropdown-item :icon="Delete" @click="deleteSave"
+                                style="color: var(--el-color-danger);">
+                Delete
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </el-button-group>
     </div>
   </div>
 </template>
 
 <style scoped>
 .card {
-  width: calc(100% - 20px);
-  padding: 10px;
+  --padding: 10px;
+  width: calc(100% - 2 * var(--padding));
+  padding: var(--padding);
   overflow: hidden;
   background-color: #4b4b4b;
   border-radius: 8px;
@@ -144,24 +159,14 @@ function onDropdownVisibleChange(visible: boolean): void {
   background-color: #556e55;
 }
 
-.topRow {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  width: 100%;
-  max-width: 100%;
-}
-
-.topRow .left {
+.nameAndInfo {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.topRow .right {
-  flex: 0 0 auto;
+  margin-left: 6px;
 }
 
 .card .buttons {
+  flex: 0 0 auto;
   display: none;
 }
 
@@ -170,7 +175,6 @@ function onDropdownVisibleChange(visible: boolean): void {
 }
 
 .name {
-  padding-top: 2px;
   font-size: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -25,7 +25,7 @@ const modelEntity: Ref<EntityWithCategory | undefined> = computed({
   },
   set(value: EntityWithCategory | undefined) {
     model.value = value ? value.id : 0;
-  }
+  },
 });
 
 const cascaderModel: Ref<any> = computed({
@@ -37,7 +37,7 @@ const cascaderModel: Ref<any> = computed({
       const array = value as (number | undefined)[];
       model.value = array[array.length - 1] ?? 0;
     }
-  }
+  },
 });
 const options: ComputedRef<TreeNode[]> = computed(() => convertToTreeByCategory(props.options));
 
@@ -59,7 +59,7 @@ function getLeafCount(node: any) {
 </script>
 
 <template>
-  <div style="display: flex; width: 214px;">
+  <div style="display: flex;">
     <IconImg :icon="isIconEntity ? model : modelEntity?.iconId" :size="32" style="margin-right: 8px;" />
 
     <el-cascader
@@ -75,9 +75,9 @@ function getLeafCount(node: any) {
       <template #default="{ node, data }">
         <template v-if="node.isLeaf">
           <div style="height: 36px; display: flex;">
-        <span style="margin-right: 8px;">
-          <IconImg :icon="isIconEntity ? data.id : data.iconId" :size="32" />
-        </span>
+            <span style="margin-right: 8px;">
+              <IconImg :icon="isIconEntity ? data.id : data.iconId" :size="32" />
+            </span>
             <span>{{ data.label }}</span>
           </div>
         </template>

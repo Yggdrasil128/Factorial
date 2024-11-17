@@ -3,6 +3,7 @@ import { type Ref, ref } from 'vue';
 import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { ElMessageBox, type FormRules } from 'element-plus';
 import { Check, Close } from '@element-plus/icons-vue';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
 
 export interface EditModalProps {
   title: string;
@@ -18,6 +19,7 @@ const props: EditModalProps = defineProps<EditModalProps>();
 const emit = defineEmits(['submit']);
 
 const router = useRouter();
+const userSettingsStore = useUserSettingsStore();
 
 const visible: Ref<boolean> = ref(true);
 
@@ -39,7 +41,7 @@ async function checkLeave() {
   if (props.isSaving) {
     return true;
   }
-  if (props.hasChanges) {
+  if (!userSettingsStore.skipUnsavedChangesWarning && props.hasChanges) {
     const answer = await new Promise((r) =>
       ElMessageBox({
         title: 'Warning',
@@ -93,9 +95,11 @@ defineExpose({ validate });
       <slot name="form" />
 
       <div style="margin-top: 10px; float: right;">
-        <el-button :icon="Close" @click="beforeClose">Cancel</el-button>
-        <el-button type="primary" :icon="Check" @click="emit('submit')" :loading="isSaving"
-        >Save
+        <el-button :icon="Close" @click="beforeClose">
+          Cancel
+        </el-button>
+        <el-button type="primary" :icon="Check" @click="emit('submit')" :loading="isSaving">
+          Save
         </el-button>
       </div>
     </el-form>

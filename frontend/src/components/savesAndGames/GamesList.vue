@@ -31,14 +31,14 @@ function importGame(): void {
   <div style="display: flex; align-items: center;">
     <h1 style="">Games ({{ games.length }})</h1>
     <div style="flex-grow: 1;"></div>
-    <div style="float: right;">
+    <div>
       <el-button type="primary" :icon="Plus" @click="newGame">New game</el-button>
       <el-button :icon="Upload" @click="importGame">Import game</el-button>
     </div>
   </div>
 
   <vue-draggable-next :model-value="games" @end="draggableSupport.onDragEnd">
-    <GameCard v-for="game in games" :key="game.id" :game="game" />
+    <GameCard style="margin-bottom: 12px;" v-for="game in games" :key="game.id" :game="game" />
   </vue-draggable-next>
 </template>
 

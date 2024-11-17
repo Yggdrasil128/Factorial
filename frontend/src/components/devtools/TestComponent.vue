@@ -7,13 +7,13 @@ import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 import { useItemStore } from '@/stores/model/itemStore';
 import type { AxiosInstance } from 'axios';
 import CascaderMultiSelect from '@/components/common/input/CascaderMultiSelect.vue';
+import FlatSelect from '@/components/common/input/FlatSelect.vue';
+import FlatMultiSelect from '@/components/common/input/FlatMultiSelect.vue';
 
 const iconStore = useIconStore();
 const itemStore = useItemStore();
 
-const selectedIcon: Ref<number> = ref(4);
 const selectedItem: Ref<number> = ref(0);
-
 const selectedItems: Ref<number[]> = ref([]);
 
 const axios: AxiosInstance = inject('axios') as AxiosInstance;
@@ -33,17 +33,25 @@ async function download(): Promise<void> {
   <icon-img :icon="iconStore.getById(1)" :size="64" />
   <icon-img :icon="2" :size="64" />
 
-  <CascaderSelect v-model="selectedIcon" :options="[...iconStore.getAll()]" is-icon-entity clearable />
-  {{ selectedIcon }}
+  <div>
+    <h2>FlatSelect and CascaderSelect</h2>
 
-  <CascaderSelect v-model="selectedItem" :options="[...itemStore.getAll()]" clearable />
-  {{ selectedItem }}
+    <FlatSelect style="width: 250px;" v-model="selectedItem" :options="[...itemStore.getAll()]" clearable />
+    <br>
+    <CascaderSelect style="width: 250px;" v-model="selectedItem" :options="[...itemStore.getAll()]" clearable />
 
-  <p>
-    Multiselect:
-    <CascaderMultiSelect v-model="selectedItems" :options="[...itemStore.getAll()]" clearable />
-    {{ selectedItems }}
-  </p>
+    <pre>{{ JSON.stringify(selectedItem) }}</pre>
+  </div>
+
+  <div>
+    <h2>FlatMultiSelect and CascaderMultiSelect</h2>
+
+    <FlatMultiSelect style="width: 250px;" v-model="selectedItems" :options="[...itemStore.getAll()]" clearable />
+    <br><br>
+    <CascaderMultiSelect style="width: 250px;" v-model="selectedItems" :options="[...itemStore.getAll()]" clearable />
+
+    <pre>{{ JSON.stringify(selectedItems) }}</pre>
+  </div>
 
   <br />
   <el-button @click="download">Download</el-button>

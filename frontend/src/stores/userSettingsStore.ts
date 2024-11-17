@@ -8,6 +8,7 @@ export const useUserSettingsStore
     return {
       throughputUnit: ThroughputUnit.ItemsPerSecond,
       lastSaveId: 0,
+      skipUnsavedChangesWarning: false,
     } as UserSettings;
   },
   persist: {

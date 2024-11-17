@@ -13,6 +13,7 @@ import EditChangelistModal from '@/components/factories/modal/EditChangelistModa
 import EditProductionStepModal from '@/components/factories/modal/EditProductionStepModal.vue';
 import GameEditor from '@/components/gameEditor/GameEditor.vue';
 import SettingsPage from '@/components/settings/SettingsPage.vue';
+import EditSaveModal from '@/components/savesAndGames/modal/EditSaveModal.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -23,6 +24,18 @@ const router = createRouter({
       path: '/savesAndGames',
       name: 'savesAndGames',
       component: SavesAndGames,
+      children: [
+        {
+          path: 'newSave',
+          name: 'newSave',
+          components: { modal: EditSaveModal },
+        },
+        {
+          path: 'editSave/:editSaveId',
+          name: 'editSave',
+          components: { modal: EditSaveModal },
+        },
+      ],
     },
     {
       path: '/gameEditor/:editGameId/:tab',

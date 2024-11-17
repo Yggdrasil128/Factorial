@@ -16,7 +16,11 @@ const iconStore = useIconStore();
 const icon: ComputedRef<Icon | undefined> = computed(() => {
   if (!props.icon) return undefined;
   if (typeof props.icon === 'number') {
-    return iconStore.getById(props.icon);
+    return iconStore.getById(props.icon) ?? {
+      id: props.icon,
+      name: '',
+      lastUpdated: 0,
+    } as Icon;
   } else {
     return props.icon;
   }
@@ -34,19 +38,11 @@ const src: ComputedRef<string> = computed(() => {
 </script>
 
 <template>
-  <el-tooltip
-    v-if="icon"
-    effect="dark"
-    placement="top-start"
-    transition="none"
-    :hide-after="0"
-    :content="icon.name"
-  >
-    <img
-      :src="src"
-      :alt="icon.name"
-      :style="{ width: size + 'px', height: size + 'px' }"
-      v-bind="$attrs"
+  <el-tooltip v-if="icon" :content="icon.name"
+              effect="dark" placement="top" transition="none" :hide-after="0">
+    <img :src="src" :alt="icon.name"
+         :style="{ width: size + 'px', height: size + 'px' }"
+         v-bind="$attrs"
     />
   </el-tooltip>
 </template>

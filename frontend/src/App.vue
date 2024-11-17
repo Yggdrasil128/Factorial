@@ -38,4 +38,17 @@ body {
 .el-switch__core {
   background-color: #30303080;
 }
+
+.full-width {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row.items-center {
+  align-items: center;
+}
 </style>

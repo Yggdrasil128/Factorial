@@ -12,6 +12,8 @@ import GamesList from '@/components/savesAndGames/GamesList.vue';
       <GamesList />
     </div>
   </div>
+
+  <router-view name="modal" />
 </template>
 
 <style scoped>

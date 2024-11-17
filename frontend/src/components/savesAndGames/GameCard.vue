@@ -59,61 +59,60 @@ function onDropdownVisibleChange(visible: boolean): void {
 </script>
 
 <template>
-  <div class="card" :class="{current: isCurrentGame, forceShowButtons: dropdownMenuOpen}">
-    <div class="topRow">
-      <div class="left">
-        <IconImg :icon="game.iconId" :size="32" />
-        <div class="name">
-          {{ game.name }}
-        </div>
+  <div class="card row items-center" :class="{current: isCurrentGame, forceShowButtons: dropdownMenuOpen}">
+    <IconImg :icon="game.iconId" :size="32" />
+
+    <div class="nameAndInfo">
+      <div class="name">
+        {{ game.name }}
       </div>
-      <div class="right">
-        <div class="buttons">
-          <el-button :icon="EditPen" @click="openEditor">
-            Open editor
-          </el-button>
-
-          <el-button-group style="margin-left: 12px;">
-
-            <el-tooltip content="Edit name / icon"
-                        effect="dark" placement="top" transition="none" :hide-after="0">
-              <el-button :icon="Edit" @click="editGame" />
-            </el-tooltip>
-
-            <el-dropdown class="gameDropdown" trigger="click" @visible-change="onDropdownVisibleChange">
-              <el-button :icon="ArrowDown" />
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item :icon="CopyDocument" @click="cloneGame">
-                    Clone
-                  </el-dropdown-item>
-                  <el-dropdown-item :icon="Download" @click="exportGame">
-                    Export
-                  </el-dropdown-item>
-                  <el-dropdown-item :icon="Delete" @click="deleteGame"
-                                    style="color: var(--el-color-danger);">
-                    Delete
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </el-button-group>
-
-        </div>
+      <div>
+        <template v-if="numberOfSaves === 0">No save is using this game.</template>
+        <template v-else-if="numberOfSaves === 1">1 save is using this game.</template>
+        <template v-else>{{ numberOfSaves }} saves are using this game.</template>
       </div>
     </div>
-    <div>
-      <template v-if="numberOfSaves === 0">No save is using this game.</template>
-      <template v-else-if="numberOfSaves === 1">1 save is using this game.</template>
-      <template v-else>{{ numberOfSaves }} saves are using this game.</template>
+
+    <div class="buttons">
+      <el-button :icon="EditPen" @click="openEditor">
+        Open editor
+      </el-button>
+
+      <el-button-group style="margin-left: 12px;">
+
+        <el-tooltip content="Edit name / icon"
+                    effect="dark" placement="top" transition="none" :hide-after="0">
+          <el-button :icon="Edit" @click="editGame" />
+        </el-tooltip>
+
+        <el-dropdown class="gameDropdown" trigger="click" @visible-change="onDropdownVisibleChange">
+          <el-button :icon="ArrowDown" />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item :icon="CopyDocument" @click="cloneGame">
+                Clone
+              </el-dropdown-item>
+              <el-dropdown-item :icon="Download" @click="exportGame">
+                Export
+              </el-dropdown-item>
+              <el-dropdown-item :icon="Delete" @click="deleteGame"
+                                style="color: var(--el-color-danger);">
+                Delete
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </el-button-group>
+
     </div>
   </div>
 </template>
 
 <style scoped>
 .card {
-  width: calc(100% - 20px);
-  padding: 10px;
+  --padding: 10px;
+  width: calc(100% - 2 * var(--padding));
+  padding: var(--padding);
   overflow: hidden;
   background-color: #4b4b4b;
   border-radius: 8px;
@@ -123,24 +122,14 @@ function onDropdownVisibleChange(visible: boolean): void {
   background-color: #556e55;
 }
 
-.topRow {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  width: 100%;
-  max-width: 100%;
-}
-
-.topRow .left {
+.nameAndInfo {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.topRow .right {
-  flex: 0 0 auto;
+  margin-left: 6px;
 }
 
 .card .buttons {
+  flex: 0 0 auto;
   display: none;
 }
 
@@ -149,7 +138,6 @@ function onDropdownVisibleChange(visible: boolean): void {
 }
 
 .name {
-  padding-top: 2px;
   font-size: 24px;
   text-overflow: ellipsis;
   white-space: nowrap;
