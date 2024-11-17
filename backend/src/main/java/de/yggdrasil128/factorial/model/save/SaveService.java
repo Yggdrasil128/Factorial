@@ -158,6 +158,8 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         Game game = gameService.get(gameName).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                 "save requires the game '" + gameName + "' to be installed"));
         Save save = Importer.importSave(summary, game);
+        save.setOrdinal(0);
+        inferOrdinal(save);
         AsyncHelper.complete(result);
         repository.save(save);
         events.publishEvent(new SaveUpdatedEvent(save));
@@ -181,6 +183,8 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         SaveSummary temp = Exporter.exportSave(save, External.SAVE_FILE);
         Save clone = Importer.importSave(temp, game);
         clone.setName(newName);
+        clone.setOrdinal(0);
+        inferOrdinal(clone);
         AsyncHelper.complete(result);
         repository.save(clone);
         events.publishEvent(new SaveUpdatedEvent(clone));

@@ -76,6 +76,8 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
     @Transactional
     public void doImport(GameSummary summary, CompletableFuture<Void> result) {
         Game game = Importer.importGame(summary);
+        game.setOrdinal(0);
+        inferOrdinal(game);
         AsyncHelper.complete(result);
         repository.save(game);
         events.publishEvent(new GameUpdatedEvent(game));
@@ -87,6 +89,8 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
         GameSummary temp = Exporter.exportGame(game, External.SAVE_FILE);
         Game clone = Importer.importGame(temp);
         clone.setName(newName);
+        clone.setOrdinal(0);
+        inferOrdinal(clone);
         AsyncHelper.complete(result);
         repository.save(clone);
         events.publishEvent(new GameUpdatedEvent(clone));
