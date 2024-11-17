@@ -16,8 +16,6 @@ export type Factory = {
   name: string;
   description: string;
   iconId: number;
-  readonly productionStepIds: number[];
-  readonly resourceIds: number[];
   readonly inputs: ProductionEntry[];
   readonly outputs: ProductionEntry[];
 }
@@ -56,7 +54,7 @@ export type ProductionEntry = {
   quantity: QuantityByChangelist;
 }
 
-export type Resource = {
+export type LocalResource = {
   readonly id: number;
   readonly saveId: number;
   readonly factoryId: number;
@@ -71,6 +69,24 @@ export type Resource = {
   readonly produced: QuantityByChangelist;
   /**
    * ProductionStep IDs
+   */
+  readonly consumerIds: number[];
+  readonly consumed: QuantityByChangelist;
+  readonly overProduced: QuantityByChangelist;
+}
+
+export type GlobalResource = {
+  readonly id: number;
+  readonly saveId: number;
+  ordinal: number;
+  readonly itemId: number;
+  /**
+   * Factory IDs
+   */
+  readonly producerIds: number[];
+  readonly produced: QuantityByChangelist;
+  /**
+   * Factory IDs
    */
   readonly consumerIds: number[];
   readonly consumed: QuantityByChangelist;

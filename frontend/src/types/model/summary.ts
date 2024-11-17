@@ -2,26 +2,28 @@ import type {
   Changelist,
   Factory,
   Game,
+  GlobalResource,
   Icon,
   Item,
+  LocalResource,
   Machine,
   ProductionStep,
   Recipe,
   RecipeModifier,
-  Resource,
-  Save
+  Save,
 } from '@/types/model/standalone';
 
 export type SaveSummary = {
   save: Save;
   factories: FactorySummary[];
   changelists: Changelist[];
+  resources: GlobalResource[];
 }
 
 export type FactorySummary = {
   factory: Factory;
   productionSteps: ProductionStep[];
-  resources: Resource[];
+  resources: LocalResource[];
 }
 
 export type GameSummary = {

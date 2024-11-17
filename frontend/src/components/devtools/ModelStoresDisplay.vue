@@ -2,20 +2,22 @@
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useResourceStore } from '@/stores/model/resourceStore';
+import { useLocalResourceStore } from '@/stores/model/localResourceStore';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useRecipeStore } from '@/stores/model/recipeStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useMachineStore } from '@/stores/model/machineStore';
+import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 
 const changelistStore = useChangelistStore();
 const factoryStore = useFactoryStore();
 const productionStepStore = useProductionStepStore();
-const resourceStore = useResourceStore();
+const localResourceStore = useLocalResourceStore();
+const globalResourceStore = useGlobalResourceStore();
 const iconStore = useIconStore();
 const itemStore = useItemStore();
 const recipeStore = useRecipeStore();
@@ -47,8 +49,13 @@ const machineStore = useMachineStore();
       JSON.stringify(productionStep, null, 2)
     }}</pre>
 
-  <h3>Resources</h3>
-  <pre v-for="resource in resourceStore.getAll()" :key="resource.id">{{
+  <h3>Local resources</h3>
+  <pre v-for="resource in localResourceStore.getAll()" :key="resource.id">{{
+      JSON.stringify(resource, null, 2)
+    }}</pre>
+
+  <h3>Global resources</h3>
+  <pre v-for="resource in globalResourceStore.getAll()" :key="resource.id">{{
       JSON.stringify(resource, null, 2)
     }}</pre>
 

@@ -7,6 +7,7 @@ import type { Icon, Save } from '@/types/model/standalone';
 import { useSaveApi } from '@/api/model/useSaveApi';
 import { useIconApi } from '@/api/model/useIconApi';
 import _ from 'lodash';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
 import { ElFormItem, ElInput } from 'element-plus';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';

@@ -27,6 +27,11 @@ export class SaveApi extends AbstractBulkCrudEntityApi<Save> {
   public reorder(input: EntityWithOrdinal[]): Promise<void> {
     return this.api.patch('/api/saves/order', input);
   }
+
+  public migrateToGameId(saveId: number, gameId: number): Promise<void> {
+    console.log('migrateToGameId', saveId, gameId);
+    return Promise.resolve();
+  }
 }
 
 let instance: SaveApi | undefined = undefined;

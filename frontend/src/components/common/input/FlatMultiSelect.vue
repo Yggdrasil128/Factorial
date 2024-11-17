@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type ComputedRef, type Ref } from 'vue';
+import { type Ref } from 'vue';
 import { useVModel } from '@vueuse/core';
 import { useRecipeIconService } from '@/services/useRecipeIconService';
 import IconImg from '@/components/common/IconImg.vue';
@@ -22,15 +22,6 @@ const emit = defineEmits(['update:modelValue']);
 const model: Ref<number[]> = useVModel(props, 'modelValue', emit);
 
 const recipeIconService = useRecipeIconService();
-
-const selectModel: ComputedRef<number[]> = computed({
-  get() {
-    return [...model.value];
-  },
-  set(value: number[]) {
-    console.log(value);
-  },
-});
 </script>
 
 <template>
