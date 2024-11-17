@@ -70,6 +70,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
     saveName: saveName,
     gameId: 0,
   };
+  original.value = _.clone(formModel.value);
   isSaving.value = false;
 }
 
