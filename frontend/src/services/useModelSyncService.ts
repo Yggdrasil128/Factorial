@@ -161,12 +161,15 @@ function useModelSyncService(): UseModelSyncService {
       for (const productionStep of factorySummary.productionSteps) {
         productionStepStore.map.set(productionStep.id, productionStep);
       }
-      for (const resource of factorySummary.resources) {
-        localResourceStore.map.set(resource.id, resource);
+      for (const localResource of factorySummary.resources) {
+        localResourceStore.map.set(localResource.id, localResource);
       }
     }
     for (const changelist of saveSummary.changelists) {
       changelistStore.map.set(changelist.id, changelist);
+    }
+    for (const globalResource of saveSummary.resources) {
+      globalResourceStore.map.set(globalResource.id, globalResource);
     }
   }
 
