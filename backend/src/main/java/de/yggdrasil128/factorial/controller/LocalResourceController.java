@@ -51,7 +51,7 @@ public class LocalResourceController {
 
     @PatchMapping("/resources")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> update(List<LocalResourceStandalone> input) {
+    public CompletableFuture<Void> update(@RequestBody List<LocalResourceStandalone> input) {
         return asyncHelper.submit(result -> resourceService.update(input, result));
     }
 

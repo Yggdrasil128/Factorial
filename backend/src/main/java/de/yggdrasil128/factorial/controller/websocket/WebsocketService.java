@@ -275,7 +275,7 @@ public class WebsocketService extends TextWebSocketHandler {
     }
 
     @EventListener
-    public void on(SaveRemovedMessage event) {
+    public void on(SaveRemovedEvent event) {
         enqueue(new SaveRemovedMessage(runtimeId, nextMessageId(), event.getSaveId()));
     }
 

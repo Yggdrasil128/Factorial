@@ -213,6 +213,17 @@ public class ChangelistService
         return cache.computeIfAbsent(changelist.getId(), key -> new ProductionStepChanges(changelist));
     }
 
+    public Changelist initDefaultPrimary(Save save) {
+        Changelist changelist = new Changelist();
+        changelist.setSave(save);
+        changelist.setOrdinal(1);
+        changelist.setName("default");
+        changelist.setPrimary(true);
+        changelist.setActive(true);
+        save.getChangelists().add(changelist);
+        return changelist;
+    }
+
     @Transactional
     public void reorder(int saveId, List<EntityPosition> input, CompletableFuture<Void> result) {
         Save save = saveRepository.findById(saveId).orElseThrow(ModelService::reportNotFound);

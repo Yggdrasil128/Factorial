@@ -72,6 +72,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         Save save = new Save(game, standalone);
         applyRelations(save, standalone);
         inferOrdinal(save);
+        changelistService.initDefaultPrimary(save);
         return save;
     }
 
