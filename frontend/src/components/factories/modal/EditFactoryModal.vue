@@ -93,7 +93,8 @@ async function submitForm(): Promise<void> {
     ref="editModal"
   >
     <template #description>
-      Factories allow you to group production steps. Blablabla, more explanation here...
+      Factories allow you to group production steps. They also accumulate their inputs and outputs,
+      showing you how much of each item is produced and consumed.
     </template>
 
     <template #form>

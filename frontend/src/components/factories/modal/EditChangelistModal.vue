@@ -97,7 +97,10 @@ async function submitForm(): Promise<void> {
     @submit="submitForm"
     ref="editModal"
   >
-    <template #description> Insert changelist explanation here...</template>
+    <template #description>
+      Changelists are primarily for planning expansions to your save. With them, you can see the
+      differences that result from changing the machine counts on one or more production steps.
+    </template>
 
     <template #form>
       <el-form-item label="Changelist name" prop="name">

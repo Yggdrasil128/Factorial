@@ -150,7 +150,7 @@ function decrementMachineCount() {
     ref="editModal"
   >
     <template #description>
-      Insert production step description here...
+      An production step is a group of identical machines that are all processing the same recipe.
     </template>
 
     <template #form>
