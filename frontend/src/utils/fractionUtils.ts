@@ -93,7 +93,9 @@ export function gcd(a: bigint, b: bigint): bigint {
   if (b === 0n) {
     return a;
   }
-  return gcd(b, a % b);
+  let modulus: bigint = a % b;
+  if (modulus < 0) modulus += b;
+  return gcd(b, modulus);
 }
 
 export function fractionToNumber(fraction: Fraction): number {
