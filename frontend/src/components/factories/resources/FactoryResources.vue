@@ -2,13 +2,13 @@
 import { useRoute, useRouter } from 'vue-router';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { computed, type ComputedRef } from 'vue';
-import type { Factory, Resource } from '@/types/model/standalone';
-import { useResourceStore } from '@/stores/model/resourceStore';
+import type { Factory, LocalResource } from '@/types/model/standalone';
+import { useLocalResourceStore } from '@/stores/model/localResourceStore';
 import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import { Plus } from '@element-plus/icons-vue';
 import FactoryResource from '@/components/factories/resources/FactoryResource.vue';
-import { useResourceApi } from '@/api/model/useResourceApi';
+import { useLocalResourceApi } from '@/api/model/useLocalResourceApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 
@@ -16,8 +16,8 @@ const route = useRoute();
 const router = useRouter();
 
 const factoryStore = useFactoryStore();
-const resourceStore = useResourceStore();
-const resourceApi = useResourceApi();
+const localResourceStore = useLocalResourceStore();
+const localResourceApi = useLocalResourceApi();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
   route.params.factoryId ? Number(route.params.factoryId) : undefined
@@ -27,13 +27,13 @@ const factory: ComputedRef<Factory> = computed(() =>
   factoryStore.getById(currentFactoryId.value!)!
 );
 
-const resources: ComputedRef<Resource[]> = computed(() =>
-  resourceStore.getByFactoryId(currentFactoryId.value)
+const resources: ComputedRef<LocalResource[]> = computed(() =>
+  localResourceStore.getByFactoryId(currentFactoryId.value)
     .sort((a, b) => a.ordinal - b.ordinal)
 );
 
 const draggableSupport: DraggableSupport = useDraggableSupport(resources,
-  (input: EntityWithOrdinal[]) => resourceApi.reorder(currentFactoryId.value!, input)
+  (input: EntityWithOrdinal[]) => localResourceApi.reorder(currentFactoryId.value!, input),
 );
 
 function newProductionStep() {

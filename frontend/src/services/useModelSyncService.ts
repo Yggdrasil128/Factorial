@@ -12,10 +12,16 @@ import {
   isGameRemovedMessage,
   isGamesReorderedMessage,
   isGameUpdatedMessage,
+  isGlobalResourceRemovedMessage,
+  isGlobalResourcesReorderedMessage,
+  isGlobalResourceUpdatedMessage,
   isIconRemovedMessage,
   isIconUpdatedMessage,
   isItemRemovedMessage,
   isItemUpdatedMessage,
+  isLocalResourceRemovedMessage,
+  isLocalResourcesReorderedMessage,
+  isLocalResourceUpdatedMessage,
   isMachineRemovedMessage,
   isMachineUpdatedMessage,
   isProductionStepRemovedMessage,
@@ -24,9 +30,6 @@ import {
   isRecipeModifierUpdatedMessage,
   isRecipeRemovedMessage,
   isRecipeUpdatedMessage,
-  isResourceRemovedMessage,
-  isResourcesReorderedMessage,
-  isResourceUpdatedMessage,
   isSaveRelatedModelChangedMessage,
   isSaveRemovedMessage,
   isSavesReorderedMessage,
@@ -37,7 +40,7 @@ import { useSummaryApi } from '@/api/useSummaryApi';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useResourceStore } from '@/stores/model/resourceStore';
+import { useLocalResourceStore } from '@/stores/model/localResourceStore';
 import { useIconStore } from '@/stores/model/iconStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useRecipeStore } from '@/stores/model/recipeStore';
@@ -52,6 +55,7 @@ import type { Game, Save } from '@/types/model/standalone';
 import { reactive } from 'vue';
 import _ from 'lodash';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
 
 export interface UseModelSyncService {
   setCurrentSaveIdAndLoad: (saveId: number) => Promise<void>;
@@ -69,7 +73,8 @@ function useModelSyncService(): UseModelSyncService {
   const changelistStore = useChangelistStore();
   const factoryStore = useFactoryStore();
   const productionStepStore = useProductionStepStore();
-  const resourceStore = useResourceStore();
+  const localResourceStore = useLocalResourceStore();
+  const globalResourceStore = useGlobalResourceStore();
 
   const storedGameIds: Set<number> = reactive(new Set());
   const gameStore = useGameStore();
@@ -123,7 +128,8 @@ function useModelSyncService(): UseModelSyncService {
     clearStoreBySaveId(changelistStore, saveId);
     clearStoreBySaveId(factoryStore, saveId);
     clearStoreBySaveId(productionStepStore, saveId);
-    clearStoreBySaveId(resourceStore, saveId);
+    clearStoreBySaveId(localResourceStore, saveId);
+    clearStoreBySaveId(globalResourceStore, saveId);
   }
 
   function applyGameSummary(gameSummary: GameSummary): void {
@@ -156,7 +162,7 @@ function useModelSyncService(): UseModelSyncService {
         productionStepStore.map.set(productionStep.id, productionStep);
       }
       for (const resource of factorySummary.resources) {
-        resourceStore.map.set(resource.id, resource);
+        localResourceStore.map.set(resource.id, resource);
       }
     }
     for (const changelist of saveSummary.changelists) {
@@ -316,6 +322,7 @@ function useModelSyncService(): UseModelSyncService {
         currentGameAndSaveStore.currentGameId = 0;
         void updateStores();
       }
+
     } else if (isSaveRelatedModelChangedMessage(message) && storedSaveIds.has(message.saveId)) {
 
       if (isFactoryUpdatedMessage(message)) {
@@ -334,12 +341,18 @@ function useModelSyncService(): UseModelSyncService {
         productionStepStore.map.set(message.productionStep.id, message.productionStep);
       } else if (isProductionStepRemovedMessage(message)) {
         productionStepStore.map.delete(message.productionStepId);
-      } else if (isResourceUpdatedMessage(message)) {
-        resourceStore.map.set(message.resource.id, message.resource);
-      } else if (isResourceRemovedMessage(message)) {
-        resourceStore.map.delete(message.resourceId);
-      } else if (isResourcesReorderedMessage(message)) {
-        applyOrder(resourceStore, message.order);
+      } else if (isLocalResourceUpdatedMessage(message)) {
+        localResourceStore.map.set(message.localResource.id, message.localResource);
+      } else if (isLocalResourceRemovedMessage(message)) {
+        localResourceStore.map.delete(message.localResourceId);
+      } else if (isLocalResourcesReorderedMessage(message)) {
+        applyOrder(localResourceStore, message.order);
+      } else if (isGlobalResourceUpdatedMessage(message)) {
+        globalResourceStore.map.set(message.globalResource.id, message.globalResource);
+      } else if (isGlobalResourceRemovedMessage(message)) {
+        globalResourceStore.map.delete(message.globalResourceId);
+      } else if (isGlobalResourcesReorderedMessage(message)) {
+        applyOrder(globalResourceStore, message.order);
       }
 
     } else if (isGameRelatedModelChangedMessage(message) && storedGameIds.has(message.gameId)) {

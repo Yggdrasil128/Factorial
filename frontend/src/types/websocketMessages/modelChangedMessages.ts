@@ -2,14 +2,15 @@ import type {
   Changelist,
   Factory,
   Game,
+  GlobalResource,
   Icon,
   Item,
+  LocalResource,
   Machine,
   ProductionStep,
   Recipe,
   RecipeModifier,
-  Resource,
-  Save
+  Save,
 } from '@/types/model/standalone';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 
@@ -24,7 +25,8 @@ export type WebsocketMessageType = 'initial'
   | 'factoryUpdated' | 'factoryRemoved' | 'factoriesReordered'
   | 'changelistUpdated' | 'changelistRemoved' | 'changelistsReordered'
   | 'productionStepUpdated' | 'productionStepRemoved'
-  | 'resourceUpdated' | 'resourceRemoved' | 'resourcesReordered'
+  | 'localResourceUpdated' | 'localResourceRemoved' | 'localResourcesReordered'
+  | 'globalResourceUpdated' | 'globalResourceRemoved' | 'globalResourcesReordered'
 
   | 'gameUpdated' | 'gameRemoved' | 'gamesReordered'
   | 'iconUpdated' | 'iconRemoved'
@@ -146,7 +148,7 @@ export function isChangelistsReorderedMessage(message: WebsocketMessage): messag
   return message.type === 'changelistsReordered';
 }
 
-// Production Step
+// Production step
 
 export type ProductionStepUpdatedMessage = SaveRelatedModelChangedMessage & {
   type: 'productionStepUpdated';
@@ -166,33 +168,62 @@ export function isProductionStepRemovedMessage(message: WebsocketMessage): messa
   return message.type === 'productionStepRemoved';
 }
 
-// Resource
+// Local resource
 
-export type ResourceUpdatedMessage = SaveRelatedModelChangedMessage & {
-  type: 'resourceUpdated';
-  resource: Resource;
+export type LocalResourceUpdatedMessage = SaveRelatedModelChangedMessage & {
+  type: 'localResourceUpdated';
+  localResource: LocalResource;
 }
 
-export function isResourceUpdatedMessage(message: WebsocketMessage): message is ResourceUpdatedMessage {
-  return message.type === 'resourceUpdated';
+export function isLocalResourceUpdatedMessage(message: WebsocketMessage): message is LocalResourceUpdatedMessage {
+  return message.type === 'localResourceUpdated';
 }
 
-export type ResourceRemovedMessage = SaveRelatedModelChangedMessage & {
-  type: 'resourceRemoved';
-  resourceId: number;
+export type LocalResourceRemovedMessage = SaveRelatedModelChangedMessage & {
+  type: 'localResourceRemoved';
+  localResourceId: number;
 }
 
-export function isResourceRemovedMessage(message: WebsocketMessage): message is ResourceRemovedMessage {
-  return message.type === 'resourceRemoved';
+export function isLocalResourceRemovedMessage(message: WebsocketMessage): message is LocalResourceRemovedMessage {
+  return message.type === 'localResourceRemoved';
 }
 
-export type ResourcesReorderedMessage = WebsocketMessage & {
-  type: 'resourcesReordered';
+export type LocalResourcesReorderedMessage = WebsocketMessage & {
+  type: 'localResourcesReordered';
   order: EntityWithOrdinal[];
 }
 
-export function isResourcesReorderedMessage(message: WebsocketMessage): message is ResourcesReorderedMessage {
-  return message.type === 'resourcesReordered';
+export function isLocalResourcesReorderedMessage(message: WebsocketMessage): message is LocalResourcesReorderedMessage {
+  return message.type === 'localResourcesReordered';
+}
+
+// Global resource
+
+export type GlobalResourceUpdatedMessage = SaveRelatedModelChangedMessage & {
+  type: 'globalResourceUpdated';
+  globalResource: GlobalResource;
+}
+
+export function isGlobalResourceUpdatedMessage(message: WebsocketMessage): message is GlobalResourceUpdatedMessage {
+  return message.type === 'globalResourceUpdated';
+}
+
+export type GlobalResourceRemovedMessage = SaveRelatedModelChangedMessage & {
+  type: 'globalResourceRemoved';
+  globalResourceId: number;
+}
+
+export function isGlobalResourceRemovedMessage(message: WebsocketMessage): message is GlobalResourceRemovedMessage {
+  return message.type === 'globalResourceRemoved';
+}
+
+export type GlobalResourcesReorderedMessage = WebsocketMessage & {
+  type: 'globalResourcesReordered';
+  order: EntityWithOrdinal[];
+}
+
+export function isGlobalResourcesReorderedMessage(message: WebsocketMessage): message is GlobalResourcesReorderedMessage {
+  return message.type === 'globalResourcesReordered';
 }
 
 // --- GAME RELATED MESSAGES ---

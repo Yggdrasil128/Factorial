@@ -4,18 +4,18 @@ import type {
   Game,
   Icon,
   Item,
+  LocalResource,
   Machine,
   ProductionStep,
   Recipe,
   RecipeModifier,
-  Resource,
   Save,
 } from '@/types/model/standalone';
 import { useSaveStore } from '@/stores/model/saveStore';
 import { useChangelistStore } from '@/stores/model/changelistStore';
 import { useFactoryStore } from '@/stores/model/factoryStore';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useResourceStore } from '@/stores/model/resourceStore';
+import { useLocalResourceStore } from '@/stores/model/localResourceStore';
 import { useGameStore } from '@/stores/model/gameStore';
 import { useItemStore } from '@/stores/model/itemStore';
 import { useRecipeStore } from '@/stores/model/recipeStore';
@@ -46,7 +46,7 @@ export class EntityUsages {
   factories: Factory[] = [];
   changelists: Changelist[] = [];
   productionSteps: ProductionStep[] = [];
-  resources: Resource[] = [];
+  resources: LocalResource[] = [];
 
   public hasAnyUsages(): boolean {
     return this.games.length > 0
@@ -88,7 +88,7 @@ export function useEntityUsagesService(): EntityUsagesService {
   const factoryStore = useFactoryStore();
   const changelistStore = useChangelistStore();
   const productionStepStore = useProductionStepStore();
-  const resourceStore = useResourceStore();
+  const localResourceStore = useLocalResourceStore();
 
 
   function findGameUsages(gameId: number): EntityUsages {
@@ -130,7 +130,7 @@ export function useEntityUsagesService(): EntityUsagesService {
       return false;
     });
 
-    usages.resources = resourceStore.getAll()
+    usages.resources = localResourceStore.getAll()
       .filter(resource => resource.itemId === itemId);
 
     return usages;

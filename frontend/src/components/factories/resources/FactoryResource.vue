@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Item, ProductionStep, Resource } from '@/types/model/standalone';
+import type { Item, LocalResource, ProductionStep } from '@/types/model/standalone';
 import { ElTooltip } from 'element-plus';
 import IconImg from '@/components/common/IconImg.vue';
 import { useItemStore } from '@/stores/model/itemStore';
@@ -10,7 +10,7 @@ import { useProductionStepStore } from '@/stores/model/productionStepStore';
 import ResourceProductionStep from '@/components/factories/resources/ResourceProductionStep.vue';
 
 export interface FactoryResourceProps {
-  resource: Resource;
+  resource: LocalResource;
 }
 
 const props: FactoryResourceProps = defineProps<FactoryResourceProps>();
