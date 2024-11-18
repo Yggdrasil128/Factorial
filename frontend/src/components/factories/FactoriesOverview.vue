@@ -32,7 +32,8 @@ const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 }
 
 .left {
-  flex: 0 0 calc(30% - 20px);
+  width: calc(30% - 20px);
+  flex: 0 0 auto;
 }
 
 .left > * {
@@ -40,6 +41,7 @@ const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 }
 
 .right {
-  flex: 0 0 70%;
+  width: 70%;
+  flex: 0 0 auto;
 }
 </style>

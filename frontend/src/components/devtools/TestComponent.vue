@@ -9,6 +9,7 @@ import type { AxiosInstance } from 'axios';
 import CascaderMultiSelect from '@/components/common/input/CascaderMultiSelect.vue';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';
 import FlatMultiSelect from '@/components/common/input/FlatMultiSelect.vue';
+import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
 
 const iconStore = useIconStore();
 const itemStore = useItemStore();
@@ -55,6 +56,16 @@ async function download(): Promise<void> {
 
   <br />
   <el-button @click="download">Download</el-button>
+
+  <br />
+  <br />
+  <div style="width: fit-content;">
+    <ProductionsStepsDisplayChooser />
+  </div>
+  <br />
+  <div style="width: fit-content;">
+    <ProductionsStepsDisplayChooser global />
+  </div>
 </template>
 
 <style scoped>

@@ -60,8 +60,7 @@ export type LocalResource = {
   readonly factoryId: number;
   ordinal: number;
   readonly itemId: number;
-  imported: boolean;
-  exported: boolean;
+  importExport: boolean;
   /**
    * ProductionStep IDs
    */

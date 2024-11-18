@@ -11,6 +11,8 @@ import FactoryResource from '@/components/factories/resources/FactoryResource.vu
 import { useLocalResourceApi } from '@/api/model/useLocalResourceApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
+import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
+import IconImg from '@/components/common/IconImg.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -53,11 +55,15 @@ function newEgress() {
 
 <template>
   <template v-if="factory">
-    <div style="overflow: auto;">
-      <div style="float: left;">
-        <h2>Factory name: {{ factory.name }}</h2>
+    <div class="row items-center full-width" style="gap: 24px; margin-bottom: 12px;">
+      <IconImg :icon="factory.iconId" :size="48" style="margin-right: -16px;" />
+      <div class="" style="min-width: 0; flex: 1 1 auto;">
+        <h2 class="ellipsis">{{ factory.name }}</h2>
       </div>
-      <div style="float: right; margin-top: 16px;">
+      <div style="flex: 0 0 auto;">
+        <ProductionsStepsDisplayChooser />
+      </div>
+      <div style="flex: 0 0 auto;">
         <el-dropdown split-button type="primary" @click="newProductionStep">
           <el-icon class="el-icon--left">
             <plus />

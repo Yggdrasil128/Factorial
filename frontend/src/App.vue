@@ -51,4 +51,28 @@ body {
 .row.items-center {
   align-items: center;
 }
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.column.items-center {
+  align-items: center;
+}
+
+.row > .grow, .column > .grow {
+  flex-grow: 1;
+}
+
+.row > .shrink, .column > .shrink {
+  flex-shrink: 1;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
 </style>

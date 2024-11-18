@@ -8,6 +8,8 @@ import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vu
 import _ from 'lodash';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
 import ResourceProductionStep from '@/components/factories/resources/ResourceProductionStep.vue';
+import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { VisibleResourceContributors } from '@/types/userSettings';
 
 export interface FactoryResourceProps {
   resource: LocalResource;
@@ -17,14 +19,29 @@ const props: FactoryResourceProps = defineProps<FactoryResourceProps>();
 
 const itemStore = useItemStore();
 const productionStepStore = useProductionStepStore();
+const userSettingsStore = useUserSettingsStore();
 
 const item: ComputedRef<Item> = computed(() =>
-  itemStore.getById(props.resource.itemId)!
+  itemStore.getById(props.resource.itemId)!,
 );
 
 const productionSteps: ComputedRef<ProductionStep[]> = computed(() => {
-  // TODO: add options to show consumers and/or producers
-  const productionStepIds: number[] = _.uniq([...props.resource.producerIds]);
+  let productionStepIds: number[];
+  switch (userSettingsStore.visibleLocalResourceContributors) {
+    case VisibleResourceContributors.None:
+      productionStepIds = [];
+      break;
+    case VisibleResourceContributors.Producers:
+      productionStepIds = _.uniq([...props.resource.producerIds]);
+      break;
+    case VisibleResourceContributors.Consumers:
+      productionStepIds = _.uniq([...props.resource.consumerIds]);
+      break;
+    case VisibleResourceContributors.All:
+      productionStepIds = _.uniq([...props.resource.producerIds, ...props.resource.consumerIds]);
+      break;
+  }
+
   return productionStepIds
     .map(productionStepId => productionStepStore.getById(productionStepId))
     .filter(productionStep => !!productionStep) as ProductionStep[];
