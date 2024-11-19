@@ -333,18 +333,16 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(LocalResourceUpdatedEvent event) {
-        if (event.isComplete()) {
-            LocalResource resource = event.getResource();
-            Factory factory = resource.getFactory();
-            Save save = factory.getSave();
-            ResourceContributions contributions = event instanceof LocalResourceContributionsChangedEvent
-                    ? ((LocalResourceContributionsChangedEvent) event).getContributions()
-                    : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges)
-                            .getContributions(resource);
+        LocalResource resource = event.getResource();
+        Factory factory = resource.getFactory();
+        Save save = factory.getSave();
+        ResourceContributions contributions = event instanceof LocalResourceContributionsChangedEvent
+                ? ((LocalResourceContributionsChangedEvent) event).getContributions()
+                : factoryService.computeProductionLine(factory, changelistService::getProductionStepChanges)
+                        .getContributions(resource);
 
-            enqueue(new LocalResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
-                    LocalResourceStandalone.of(resource, contributions)));
-        }
+        enqueue(new LocalResourceUpdatedMessage(runtimeId, nextMessageId(), save.getId(),
+                LocalResourceStandalone.of(resource, contributions)));
     }
 
     @EventListener

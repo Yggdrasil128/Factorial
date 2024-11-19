@@ -36,8 +36,10 @@ public class ResourceContributions {
         return itemId;
     }
 
-    public void update(LocalResource resource) {
+    public boolean update(LocalResource resource) {
+        boolean result = importExport != resource.isImportExport();
         importExport = resource.isImportExport();
+        return result;
     }
 
     public boolean isImportExport() {

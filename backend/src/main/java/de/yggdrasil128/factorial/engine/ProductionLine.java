@@ -4,7 +4,6 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ProductionLineService;
 import de.yggdrasil128.factorial.model.QuantityByChangelist;
 import de.yggdrasil128.factorial.model.resource.Resource;
-import de.yggdrasil128.factorial.model.resource.local.LocalResource;
 import jakarta.persistence.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Manages the computation for a <i>production line</i>, which is some {@link Entity} for which we maintain a list of
@@ -129,39 +129,32 @@ public class ProductionLine implements Production {
     }
 
     /**
-     * Manually adds a {@link LocalResource} for the production line. Has no effect if the resource is already being
-     * tracked.
+     * Manually adds a {@link Resource} for the production line. Has no effect if the resource is already being tracked.
      * <p>
      * This method is meant primarily for populating the resources of a production line before any contributors were
      * added (which is optional). Also, this is (currently) required for resources that have no contributors but are
      * simply for importing/exporting items to/from a factory.
      * 
-     * @param resource the {@link LocalResource} for which to track contributions
+     * @param resource the {@link Resource} for which to track contributions
      */
-    public void addResource(Resource resource) {
+    public void addResource(Resource resource, Supplier<? extends ResourceContributions> contribution) {
         /*
          * The 'ResourceContributions' constructor is (in contrast to most other engine-objects) light-weight, so this
          * has no side-effects, if the 'Resource' is already present in 'contributions'.
          */
-        contributions.putIfAbsent(resource.getItem().getId(), new ResourceContributions(resource));
-    }
-
-    public void updateResource(LocalResource resource) {
-        contributions.computeIfAbsent(resource.getItem().getId(), key -> new ResourceContributions(resource))
-                .update(resource);
+        contributions.putIfAbsent(resource.getItem().getId(), contribution.get());
     }
 
     /**
      * Notifies of an addition of a contributor. This generally necessitates a recalculation of contributions.
+     * <p>
+     * This does <b>not</b> invoke {@link ProductionLineService#notifyResourceUpdate(int, ResourceContributions)}.
      * 
      * @param contributor the contributor that was added
      */
     public void addContributor(Production contributor) {
         HashMap<Integer, ResourceContributions> modified = new HashMap<>();
         initContribution(contributor, modified);
-        for (ResourceContributions contribution : modified.values()) {
-            service.notifyResourceUpdate(entityId, contribution);
-        }
     }
 
     /**

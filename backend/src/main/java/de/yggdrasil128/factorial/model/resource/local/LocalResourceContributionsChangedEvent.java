@@ -6,8 +6,9 @@ public class LocalResourceContributionsChangedEvent extends LocalResourceUpdated
 
     private final ResourceContributions contributions;
 
-    public LocalResourceContributionsChangedEvent(LocalResource resource, ResourceContributions contributions) {
-        super(resource, true);
+    public LocalResourceContributionsChangedEvent(LocalResource resource, boolean importExportChanged,
+                                                  ResourceContributions contributions) {
+        super(resource, importExportChanged);
         this.contributions = contributions;
     }
 

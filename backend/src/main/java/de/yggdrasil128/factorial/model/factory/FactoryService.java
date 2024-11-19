@@ -5,10 +5,7 @@ import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.*;
-import de.yggdrasil128.factorial.model.resource.local.LocalResource;
-import de.yggdrasil128.factorial.model.resource.local.LocalResourceService;
-import de.yggdrasil128.factorial.model.resource.local.LocalResourceStandalone;
-import de.yggdrasil128.factorial.model.resource.local.LocalResourceUpdatedEvent;
+import de.yggdrasil128.factorial.model.resource.local.*;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.slf4j.Logger;
@@ -139,7 +136,7 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
                                Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
         ProductionLine productionLine = new ProductionLine(factory.getId(), this);
         for (LocalResource resource : factory.getResources()) {
-            productionLine.addResource(resource);
+            productionLine.addResource(resource, () -> resourceService.computeContributions(resource));
         }
         for (ProductionStep productionStep : factory.getProductionSteps()) {
             productionLine.addContributor(
@@ -148,7 +145,6 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
         if (productionLine.hasAlteredResources()) {
             repository.save(factory);
         }
-        events.publishEvent(new FactoryProductionLineChangedEvent(factory, productionLine, true));
         return productionLine;
     }
 
@@ -241,17 +237,24 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
 
     @EventListener
     public FactoryProductionLineChangedEvent on(LocalResourceUpdatedEvent event) {
-        if (event.isComplete()) {
-            // in that case, the ensuing event is already being propagated otherwise
+        Factory factory = event.getResource().getFactory();
+        if (!event.isImportExportChanged()) {
+            /*
+             * We are just trying to propagate this to the enclosing save. If import/export has not changed, the
+             * enclosing save will be unaffected, so we can just stop here.
+             */
             return null;
         }
-        ProductionLine productionLine = cache.get(event.getResource().getFactory().getId());
+        ProductionLine productionLine = cache.get(factory.getId());
         if (null == productionLine) {
+            // TODO fix this
+            LOG.error(
+                    "Some Resource import/export was changed, but the Production Line for Factory {} is not computed, aborting event sequence",
+                    factory);
             return null;
         }
-        productionLine.updateResource(event.getResource());
         // TODO we might want to distinguish between the Factory ProductionLine and the Factory Production
-        return new FactoryProductionLineChangedEvent(event.getResource().getFactory(), productionLine, false);
+        return new FactoryProductionLineChangedEvent(factory, productionLine, true);
     }
 
 }

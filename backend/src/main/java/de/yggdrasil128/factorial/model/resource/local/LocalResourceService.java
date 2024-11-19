@@ -17,7 +17,8 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.stream.Collectors.toMap;
 
 @Service
-public class LocalResourceService extends ParentedModelService<LocalResource, LocalResourceStandalone, Factory, LocalResourceRepository> {
+public class LocalResourceService
+        extends ParentedModelService<LocalResource, LocalResourceStandalone, Factory, LocalResourceRepository> {
 
     private final ApplicationEventPublisher events;
     private final FactoryRepository factoryRepository;
@@ -25,7 +26,7 @@ public class LocalResourceService extends ParentedModelService<LocalResource, Lo
     private final Map<Integer, ResourceContributions> cache = new HashMap<>();
 
     public LocalResourceService(LocalResourceRepository repository, ApplicationEventPublisher events,
-                           FactoryRepository factoryRepository, ItemService itemService) {
+                                FactoryRepository factoryRepository, ItemService itemService) {
         super(repository);
         this.events = events;
         this.factoryRepository = factoryRepository;
@@ -55,6 +56,11 @@ public class LocalResourceService extends ParentedModelService<LocalResource, Lo
         return resource;
     }
 
+    /*
+     * Note that direct resource creation is not supported by the enclosing controller. It also is a bit problematic in
+     * that we cannot validate whether we might clash with another resource in the enclosing production line, since we
+     * don't have access to it at this point.
+     */
     @Override
     protected void handleBulkCreate(Factory factory, Iterable<LocalResource> resources) {
         for (LocalResource resource : resources) {
@@ -82,7 +88,8 @@ public class LocalResourceService extends ParentedModelService<LocalResource, Lo
 
     private static void inferOrdinal(Factory factory, LocalResource resource) {
         if (0 >= resource.getOrdinal()) {
-            resource.setOrdinal(factory.getResources().stream().mapToInt(LocalResource::getOrdinal).max().orElse(0) + 1);
+            resource.setOrdinal(
+                    factory.getResources().stream().mapToInt(LocalResource::getOrdinal).max().orElse(0) + 1);
         }
     }
 
@@ -100,11 +107,19 @@ public class LocalResourceService extends ParentedModelService<LocalResource, Lo
 
     @Override
     protected void handleUpdate(LocalResource resource) {
-        events.publishEvent(new LocalResourceUpdatedEvent(resource, false));
+        ResourceContributions contributions = cache.get(resource.getId());
+        if (null == contributions) {
+            events.publishEvent(new LocalResourceUpdatedEvent(resource, true));
+        } else {
+            boolean importExportChanged = contributions.update(resource);
+            events.publishEvent(
+                    new LocalResourceContributionsChangedEvent(resource, importExportChanged, contributions));
+        }
     }
 
     public void updateContributions(ResourceContributions contributions) {
-        events.publishEvent(new LocalResourceContributionsChangedEvent(get(contributions.getResourceId()), contributions));
+        events.publishEvent(
+                new LocalResourceContributionsChangedEvent(get(contributions.getResourceId()), false, contributions));
     }
 
     @Override

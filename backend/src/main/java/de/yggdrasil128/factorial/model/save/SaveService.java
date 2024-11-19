@@ -41,7 +41,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
     private final IconService iconService;
     private final FactoryService factoryService;
     private final ChangelistService changelistService;
-    private final GlobalResourceService saveResourceService;
+    private final GlobalResourceService resourceService;
     private final Map<Integer, ProductionLine> cache = new HashMap<>();
 
     public SaveService(SaveRepository repository, ApplicationEventPublisher events, GameService gameService,
@@ -53,7 +53,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         this.iconService = iconService;
         this.factoryService = factoryService;
         this.changelistService = changelistService;
-        this.saveResourceService = saveResourceService;
+        this.resourceService = saveResourceService;
     }
 
     @Override
@@ -125,7 +125,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
             initProduictionLine(Save save, Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
         ProductionLine productionLine = new ProductionLine(save.getId(), this);
         for (GlobalResource resource : save.getResources()) {
-            productionLine.addResource(resource);
+            productionLine.addResource(resource, () -> resourceService.computeContributions(resource));
         }
         for (Factory factory : save.getFactories()) {
             productionLine.addContributor(factoryService.computeProductionLine(factory, changes));
@@ -133,23 +133,22 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         if (productionLine.hasAlteredResources()) {
             repository.save(save);
         }
-        events.publishEvent(new SaveProductionLineChangedEvent(save, productionLine, true));
         return productionLine;
     }
 
     @Override
     public ResourceContributions spawnResource(int id, int itemId) {
-        return saveResourceService.spawn(id, itemId);
+        return resourceService.spawn(id, itemId);
     }
 
     @Override
     public void notifyResourceUpdate(int id, ResourceContributions contributions) {
-        saveResourceService.updateContributions(contributions);
+        resourceService.updateContributions(contributions);
     }
 
     @Override
     public void destroyResource(int id, int resourceId) {
-        saveResourceService.destroy(get(id), resourceId);
+        resourceService.destroy(get(id), resourceId);
     }
 
     @Transactional
@@ -244,6 +243,10 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         Save save = event.getFactory().getSave();
         ProductionLine productionLine = cache.get(save.getId());
         if (null == productionLine) {
+            // TODO fix this
+            LOG.error(
+                    "Some Factory import/export was changed, but the Production Line for Save {} is not computed, aborting event sequence",
+                    save);
             return null;
         }
         boolean itemsChanged = false;
@@ -280,7 +283,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     /*
      * There is no meaningful update on a SaveResource that would require us to handle it here. Therefore, we do not
-     * have an EventListener on SaveResourceUpdatedEvent, in contrast to FactoryService.
+     * have an EventListener on GlobalResourceUpdatedEvent, in contrast to FactoryService.
      */
 
 }

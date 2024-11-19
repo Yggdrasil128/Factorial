@@ -3,19 +3,19 @@ package de.yggdrasil128.factorial.model.resource.local;
 public class LocalResourceUpdatedEvent {
 
     private final LocalResource resource;
-    private final boolean complete;
+    private final boolean importExportChanged;
 
-    public LocalResourceUpdatedEvent(LocalResource resource, boolean complete) {
+    public LocalResourceUpdatedEvent(LocalResource resource, boolean importExportChanged) {
         this.resource = resource;
-        this.complete = complete;
+        this.importExportChanged = importExportChanged;
     }
 
     public LocalResource getResource() {
         return resource;
     }
 
-    public boolean isComplete() {
-        return complete;
+    public boolean isImportExportChanged() {
+        return importExportChanged;
     }
 
 }
