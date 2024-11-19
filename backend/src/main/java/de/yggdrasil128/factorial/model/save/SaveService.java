@@ -257,7 +257,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
                 repository.save(save);
             }
         } else {
-            productionLine.updateContributor(productionLine);
+            productionLine.updateContributor(event.getProductionLine());
         }
         return new SaveProductionLineChangedEvent(save, productionLine, itemsChanged);
     }
