@@ -4,8 +4,20 @@ import ChangelistsList from '@/components/factories/ChangelistsList.vue';
 import FactoryResources from '@/components/factories/resources/FactoryResources.vue';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import NoSaveLoaded from '@/components/common/NoSaveLoaded.vue';
+import { useRoute } from 'vue-router';
+import { computed, type ComputedRef } from 'vue';
+import ExportImportOverview from '@/components/factories/exportImportOverview/ExportImportOverview.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
+const route = useRoute();
+
+const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
+  route.params.factoryId ? Number(route.params.factoryId) : undefined,
+);
+
+const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
+  route.params.factoryId === 'exportImportOverview',
+);
 
 </script>
 
@@ -18,7 +30,8 @@ const currentGameAndSaveStore = useCurrentGameAndSaveStore();
       <changelists-list />
     </div>
     <div class="right">
-      <factory-resources />
+      <export-import-overview v-if="showingExportImportOverview" />
+      <factory-resources v-else-if="currentFactoryId" :factory-id="currentFactoryId" />
     </div>
   </div>
 

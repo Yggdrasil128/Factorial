@@ -14,6 +14,12 @@ import type { EntityWithOrdinal } from '@/types/model/basic';
 import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
 import IconImg from '@/components/common/IconImg.vue';
 
+export interface FactoryResourcesProps {
+  factoryId: number;
+}
+
+const props: FactoryResourcesProps = defineProps<FactoryResourcesProps>();
+
 const route = useRoute();
 const router = useRouter();
 
@@ -21,21 +27,17 @@ const factoryStore = useFactoryStore();
 const localResourceStore = useLocalResourceStore();
 const localResourceApi = useLocalResourceApi();
 
-const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
-  route.params.factoryId ? Number(route.params.factoryId) : undefined
-);
-
 const factory: ComputedRef<Factory> = computed(() =>
-  factoryStore.getById(currentFactoryId.value!)!
+  factoryStore.getById(props.factoryId)!
 );
 
 const resources: ComputedRef<LocalResource[]> = computed(() =>
-  localResourceStore.getByFactoryId(currentFactoryId.value)
+  localResourceStore.getByFactoryId(props.factoryId)
     .sort((a, b) => a.ordinal - b.ordinal)
 );
 
 const draggableSupport: DraggableSupport = useDraggableSupport(resources,
-  (input: EntityWithOrdinal[]) => localResourceApi.reorder(currentFactoryId.value!, input),
+  (input: EntityWithOrdinal[]) => localResourceApi.reorder(props.factoryId, input),
 );
 
 function newProductionStep() {

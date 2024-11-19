@@ -5,7 +5,7 @@ import { computed, type ComputedRef, watch } from 'vue';
 import { type RouteLocationAsRelativeGeneric, useRoute, useRouter } from 'vue-router';
 import type { Factory } from '@/types/model/standalone';
 import { Delete, Edit, Plus, Switch } from '@element-plus/icons-vue';
-import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
+import { ElButton, ElButtonGroup, ElPopconfirm } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import IconImg from '@/components/common/IconImg.vue';
 import { type FactoryApi, useFactoryApi } from '@/api/model/useFactoryApi';
@@ -13,6 +13,7 @@ import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggable
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
+import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const factoryStore = useFactoryStore();
@@ -24,6 +25,10 @@ const route = useRoute();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
   route.params.factoryId ? Number(route.params.factoryId) : undefined,
+);
+
+const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
+  route.params.factoryId === 'exportImportOverview',
 );
 
 const factories: ComputedRef<Factory[]> = computed(() => {
@@ -61,8 +66,12 @@ function viewFactory(factoryId: number, replace?: boolean): void {
   }
 }
 
+function viewExportImportOverview(): void {
+  router.push({ name: 'factories', params: { factoryId: 'exportImportOverview' } });
+}
+
 watch(computed(() => factories.value.length), () => {
-  if (factories.value.length > 0 && !currentFactoryId.value) {
+  if (factories.value.length > 0 && !currentFactoryId.value && !showingExportImportOverview.value) {
     viewFactory(factories.value[0].id, true);
   }
 }, { immediate: true });
@@ -79,7 +88,9 @@ const hasGlobalResources: ComputedRef<boolean> = computed(() =>
 
 <template>
   <div class="factoryList">
-    <div v-if="hasGlobalResources || true" class="card exportImportOverview">
+    <div v-if="hasGlobalResources || true"
+         class="card exportImportOverview" :class="{active: showingExportImportOverview}"
+         @click="viewExportImportOverview">
       <el-icon class="icon" :size="32" style="margin: 4px;">
         <Switch />
       </el-icon>
@@ -96,44 +107,30 @@ const hasGlobalResources: ComputedRef<boolean> = computed(() =>
     </div>
 
     <vue-draggable-next :model-value="factories" @end="draggableSupport.onDragEnd">
-      <div
-        v-for="factory in factories"
-        :key="factory.id"
-        class="card"
-        :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
-      >
+      <div v-for="factory in factories"
+           :key="factory.id"
+           class="card" :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
+           @click="viewFactory(factory.id)">
         <icon-img class="icon" :icon="factory.iconId" :size="40" />
-        <div class="name" @click="viewFactory(factory.id)">
+
+        <div class="name">
           {{ factory.name }}
         </div>
-        <div class="buttons">
-          <el-button-group>
-            <el-tooltip
-              effect="dark"
-              placement="top-start"
-              transition="none"
-              :hide-after="0"
-              content="Edit"
-            >
-              <bgc-el-button :icon="Edit" @click="editFactory(factory.id)" />
-            </el-tooltip>
 
-            <el-popconfirm
-              title="Delete this factory?"
-              width="200px"
-              @confirm="deleteFactory(factory.id)"
-            >
+        <div class="buttons" @click.stop>
+          <el-button-group>
+            <custom-el-tooltip content="Edit">
+              <bgc-el-button :icon="Edit" @click.stop="editFactory(factory.id)" />
+            </custom-el-tooltip>
+
+            <el-popconfirm title="Delete this factory?"
+                           width="200px"
+                           @confirm="deleteFactory(factory.id)">
               <template #reference>
                   <span class="row center tooltipHelperSpan">
-                    <el-tooltip
-                      effect="dark"
-                      placement="top-start"
-                      transition="none"
-                      :hide-after="0"
-                      content="Delete"
-                    >
+                    <custom-el-tooltip content="Delete">
                       <el-button type="danger" :icon="Delete" :disabled="factories.length === 1" />
-                    </el-tooltip>
+                    </custom-el-tooltip>
                   </span>
               </template>
             </el-popconfirm>
