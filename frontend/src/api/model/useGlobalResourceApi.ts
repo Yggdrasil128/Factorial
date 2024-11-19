@@ -5,7 +5,7 @@ export interface GlobalResourceApi {
   reorder(factoryId: number, input: EntityWithOrdinal[]): Promise<void>;
 }
 
-export function useLocalResourceApi(): GlobalResourceApi {
+export function useGlobalResourceApi(): GlobalResourceApi {
   const api: Api = useApi();
 
   async function reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void> {

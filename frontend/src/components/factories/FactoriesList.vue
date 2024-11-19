@@ -4,7 +4,7 @@ import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import { computed, type ComputedRef, watch } from 'vue';
 import { type RouteLocationAsRelativeGeneric, useRoute, useRouter } from 'vue-router';
 import type { Factory } from '@/types/model/standalone';
-import { Delete, Edit, Plus } from '@element-plus/icons-vue';
+import { Delete, Edit, Plus, Switch } from '@element-plus/icons-vue';
 import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import IconImg from '@/components/common/IconImg.vue';
@@ -12,16 +12,18 @@ import { type FactoryApi, useFactoryApi } from '@/api/model/useFactoryApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
+import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const factoryStore = useFactoryStore();
 const factoryApi: FactoryApi = useFactoryApi();
+const globalResourceStore = useGlobalResourceStore();
 
 const router = useRouter();
 const route = useRoute();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
-  route.params.factoryId ? Number(route.params.factoryId) : undefined
+  route.params.factoryId ? Number(route.params.factoryId) : undefined,
 );
 
 const factories: ComputedRef<Factory[]> = computed(() => {
@@ -40,7 +42,7 @@ function newFactory(): void {
 function editFactory(editFactoryId: number): void {
   router.push({
     name: 'editFactory',
-    params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId }
+    params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId },
   });
 }
 
@@ -68,21 +70,39 @@ watch(computed(() => factories.value.length), () => {
 function deleteFactory(factoryId: number) {
   factoryApi.delete(factoryId);
 }
+
+const hasGlobalResources: ComputedRef<boolean> = computed(() =>
+  globalResourceStore.getBySaveId(currentGameAndSaveStore.currentSaveId).length > 0,
+);
+
 </script>
 
 <template>
   <div class="factoryList">
-    <h2>Factories</h2>
+    <div v-if="hasGlobalResources || true" class="card exportImportOverview">
+      <el-icon class="icon" :size="32" style="margin: 4px;">
+        <Switch />
+      </el-icon>
+      <div class="name">
+        Export / Import overview
+      </div>
+    </div>
+
+    <div class="row items-center">
+      <h2 style="flex: 1 1 auto;">Factories</h2>
+      <div class="createFactory">
+        <el-button type="primary" :icon="Plus" @click="newFactory()">New factory</el-button>
+      </div>
+    </div>
+
     <vue-draggable-next :model-value="factories" @end="draggableSupport.onDragEnd">
       <div
         v-for="factory in factories"
         :key="factory.id"
-        class="list-group-item"
+        class="card"
         :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
       >
-        <div class="icon" @click="viewFactory(factory.id)" v-if="factory.iconId">
-          <icon-img :icon="factory.iconId" :size="40" />
-        </div>
+        <icon-img class="icon" :icon="factory.iconId" :size="40" />
         <div class="name" @click="viewFactory(factory.id)">
           {{ factory.name }}
         </div>
@@ -121,78 +141,56 @@ function deleteFactory(factoryId: number) {
         </div>
       </div>
     </vue-draggable-next>
-
-    <div class="createFactory">
-      <el-button type="primary" :icon="Plus" @click="newFactory()">New factory</el-button>
-    </div>
   </div>
 </template>
 
-<!--suppress CssUnusedSymbol -->
 <style scoped>
-.list-group-item {
-  width: 100%;
-  overflow: hidden;
-  font-size: 20px;
+.card {
+  --padding-left-right: 8px;
+  width: calc(100% - 2 * var(--padding-left-right));
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background-color: #4b4b4b;
   border-radius: 8px;
+  padding: 2px var(--padding-left-right);
 }
 
-.list-group-item.active {
-  background-color: #556e55;
+.card:not(.active) {
+  cursor: pointer;
 }
 
-.list-group-item + .list-group-item {
+.card + .card {
   margin-top: 10px;
 }
 
-.icon,
-.name {
-  float: left;
-  margin-left: 8px;
+.card.active {
+  background-color: #556e55;
 }
 
-.icon,
-.icon img {
-  width: 40px;
-  height: 40px;
-  cursor: grab;
+.card .name {
+  font-size: 20px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  margin: 2px 0;
 }
 
-.name {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  cursor: pointer;
-  width: 280px;
-}
-
-.list-group-item.active .name {
-  cursor: default;
-}
-
-.list-group-item:not(.hasIcon) .name {
-  margin-left: 16px;
-}
-
-.active .name {
+.card.active .name {
   font-weight: bold;
 }
 
-.buttons {
-  float: right;
-  margin-top: 4px;
-  margin-right: 8px;
-  display: none;
+.card .buttons {
+  flex: 0 0 auto;
+  opacity: 0;
 }
 
-.list-group-item:hover .buttons {
-  display: block;
+.card:hover .buttons {
+  opacity: 1;
 }
 
-.createFactory {
-  width: 100%;
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
+.exportImportOverview {
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 </style>
