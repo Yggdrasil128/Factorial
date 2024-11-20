@@ -9,6 +9,7 @@ import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import IconImg from '@/components/common/IconImg.vue';
+import SaveResourceFactory from '@/components/factories/exportImportOverview/SaveResourceFactory.vue';
 
 export interface SaveResourceProps {
   resource: GlobalResource;
@@ -68,14 +69,14 @@ const factories: ComputedRef<Factory[]> = computed(() => {
           </div>
 
           <div>
-            <custom-el-tooltip content="The amount being exported">
+            <custom-el-tooltip content="The total amount being exported">
               Exported:
             </custom-el-tooltip>
             <quantity-display :quantity="resource.produced" color="green" show-unit convert-unit />
           </div>
 
           <div>
-            <custom-el-tooltip content="The amount being imported">
+            <custom-el-tooltip content="The total amount being imported">
               Imported:
             </custom-el-tooltip>
             <quantity-display :quantity="resource.consumed" color="red" show-unit convert-unit />
@@ -83,19 +84,40 @@ const factories: ComputedRef<Factory[]> = computed(() => {
         </div>
       </div>
     </div>
-    <!--    <resource-production-step-->
-    <!--      v-for="productionStep in productionSteps"-->
-    <!--      :key="productionStep.id"-->
-    <!--      :production-step="productionStep"-->
-    <!--    />-->
-    <ul>
-      <li v-for="factory in factories" :key="factory.id">
-        {{ factory.name }}
-      </li>
-    </ul>
+    <save-resource-factory
+      v-for="factory in factories"
+      :key="factory.id"
+      :factory="factory"
+      :item="item"
+    />
   </div>
 </template>
 
 <style scoped>
+.item {
+  background-color: #4b4b4b;
+  border-radius: 24px;
+  padding: 8px;
+  margin-bottom: 24px;
+}
 
+.itemIcon {
+  float: left;
+}
+
+.itemInfo {
+  float: left;
+  margin-left: 16px;
+  margin-top: 5px;
+  vertical-align: top;
+  overflow: auto;
+}
+
+.itemName {
+  font-size: 24px;
+}
+
+.itemBalance {
+  margin-top: 4px;
+}
 </style>
