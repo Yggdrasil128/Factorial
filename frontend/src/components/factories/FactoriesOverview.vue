@@ -3,13 +3,14 @@ import FactoriesList from '@/components/factories/FactoriesList.vue';
 import ChangelistsList from '@/components/factories/ChangelistsList.vue';
 import FactoryResources from '@/components/factories/resources/FactoryResources.vue';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import NoSaveLoaded from '@/components/common/NoSaveLoaded.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { computed, type ComputedRef } from 'vue';
 import ExportImportOverview from '@/components/factories/exportImportOverview/ExportImportOverview.vue';
+import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const route = useRoute();
+const router = useRouter();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
   route.params.factoryId ? Number(route.params.factoryId) : undefined,
@@ -22,7 +23,16 @@ const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
 </script>
 
 <template>
-  <NoSaveLoaded v-if="!currentGameAndSaveStore.currentSaveId" />
+  <PlaceholderHelpBox v-if="!currentGameAndSaveStore.currentSaveId" show-only-when-ready
+                      title="You don't have any save loaded at the moment.">
+    <p>
+      Go to
+      <el-link type="primary" @click="router.push({ name: 'savesAndGames' })">
+        Saves / Games
+      </el-link>
+      and load a save.
+    </p>
+  </PlaceholderHelpBox>
 
   <div v-else class="main">
     <div class="left">

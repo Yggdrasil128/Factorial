@@ -10,6 +10,7 @@ import { VueDraggableNext } from 'vue-draggable-next';
 import GameCard from '@/components/savesAndGames/GameCard.vue';
 import { ElButton } from 'element-plus';
 import { useRouter } from 'vue-router';
+import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
 const router = useRouter();
 const gameStore = useGameStore();
@@ -38,7 +39,26 @@ function importGame(): void {
     </div>
   </div>
 
-  <vue-draggable-next :model-value="games" @end="draggableSupport.onDragEnd">
+  <PlaceholderHelpBox v-if="games.length === 0" show-only-when-ready
+                      title="You don't have any games at the moment.">
+    <p>
+      <el-link type="primary" @click="newGame">
+        Create
+      </el-link>
+      or
+      <el-link type="primary" @click="newGame">
+        import
+      </el-link>
+      a game to get started.
+    </p>
+    <p>
+      A game contains information about all available items, machines, recipes, etc.<br>
+      Multiple saves can share the same game, and you can migrate saves from one game to another,
+      for example, if the game updates and you want to use new recipes in your save.
+    </p>
+  </PlaceholderHelpBox>
+
+  <vue-draggable-next v-else :model-value="games" @end="draggableSupport.onDragEnd">
     <GameCard style="margin-bottom: 12px;" v-for="game in games" :key="game.id" :game="game" />
   </vue-draggable-next>
 </template>

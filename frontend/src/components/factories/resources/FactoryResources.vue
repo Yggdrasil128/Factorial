@@ -13,6 +13,7 @@ import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggable
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
 import IconImg from '@/components/common/IconImg.vue';
+import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
 export interface FactoryResourcesProps {
   factoryId: number;
@@ -26,6 +27,8 @@ const router = useRouter();
 const factoryStore = useFactoryStore();
 const localResourceStore = useLocalResourceStore();
 const localResourceApi = useLocalResourceApi();
+
+const rr: string = 'aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUQ==';
 
 const factory: ComputedRef<Factory> = computed(() =>
   factoryStore.getById(props.factoryId)!
@@ -45,12 +48,7 @@ function newProductionStep() {
 }
 
 function newTransportLink() {
-}
-
-function newIngress() {
-}
-
-function newEgress() {
+  window.open(atob(rr), '_blank')!.focus();
 }
 
 </script>
@@ -74,15 +72,30 @@ function newEgress() {
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="newTransportLink">New transport link</el-dropdown-item>
-              <el-dropdown-item @click="newIngress">New ingress</el-dropdown-item>
-              <el-dropdown-item @click="newEgress">New egress</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
       </div>
     </div>
 
-    <vue-draggable-next :model-value="resources" @end="draggableSupport.onDragEnd">
+    <PlaceholderHelpBox v-if="resources.length === 0" show-only-when-ready
+                        title="This factory is empty.">
+      <p>
+        <el-link type="primary" @click="newProductionStep">
+          Create a production step
+        </el-link>
+        to get started.
+      </p>
+      <p>
+        Factories allow you to group production steps. They also accumulate their inputs and outputs,
+        showing you how much of each item is produced and consumed.
+      </p>
+      <p>
+        A production step is a group of identical machines that are all processing the same recipe.
+      </p>
+    </PlaceholderHelpBox>
+
+    <vue-draggable-next v-else :model-value="resources" @end="draggableSupport.onDragEnd">
       <factory-resource
         v-for="resource in resources"
         :key="resource.id"

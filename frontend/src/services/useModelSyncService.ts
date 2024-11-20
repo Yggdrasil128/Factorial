@@ -52,19 +52,25 @@ import { useGameStore } from '@/stores/model/gameStore';
 import { useSaveApi } from '@/api/model/useSaveApi';
 import { useGameApi } from '@/api/model/useGameApi';
 import type { Game, Save } from '@/types/model/standalone';
-import { reactive } from 'vue';
+import { reactive, ref, type Ref } from 'vue';
 import _ from 'lodash';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
 import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
 
-export interface UseModelSyncService {
+export interface ModelSyncService {
+  state: ModelSyncServiceState;
+
   setCurrentSaveIdAndLoad: (saveId: number) => Promise<void>;
   setEditingGameIdAndLoad: (gameId: number) => Promise<void>;
   clearEditingGameId: () => void;
   reload: () => Promise<void>;
 }
 
-function useModelSyncService(): UseModelSyncService {
+export type ModelSyncServiceState = {
+  loading: Ref<boolean>;
+}
+
+function useModelSyncService(): ModelSyncService {
   const currentGameAndSaveStore = useCurrentGameAndSaveStore();
   const userSettingsStore = useUserSettingsStore();
 
@@ -89,6 +95,8 @@ function useModelSyncService(): UseModelSyncService {
   const gameApi = useGameApi();
 
   const modelSyncWebsocket: ModelSyncWebsocket = useModelSyncWebsocket(onWebsocketMessage, reload);
+
+  const loading: Ref<boolean> = ref(true);
 
   interface GameRelatedEntityStore {
     map: Map<number, GameRelatedEntity>;
@@ -282,7 +290,9 @@ function useModelSyncService(): UseModelSyncService {
   }
 
   async function reload(): Promise<void> {
+    loading.value = true;
     await updateStores(true);
+    loading.value = false;
   }
 
   async function reloadSavesAndGames(): Promise<void> {
@@ -386,6 +396,8 @@ function useModelSyncService(): UseModelSyncService {
   }
 
   async function init(): Promise<void> {
+    loading.value = true;
+
     modelSyncWebsocket.connect();
 
     await reloadSavesAndGames();
@@ -395,11 +407,17 @@ function useModelSyncService(): UseModelSyncService {
     } else {
       await updateStores();
     }
+
+    loading.value = false;
   }
 
   void init();
 
   return {
+    state: {
+      loading,
+    },
+
     setCurrentSaveIdAndLoad,
     setEditingGameIdAndLoad,
     clearEditingGameId,
@@ -407,8 +425,8 @@ function useModelSyncService(): UseModelSyncService {
   };
 }
 
-let modelSyncService: UseModelSyncService | null = null;
-export const getModelSyncService: () => UseModelSyncService = () => {
+let modelSyncService: ModelSyncService | null = null;
+export const getModelSyncService: () => ModelSyncService = () => {
   if (!modelSyncService) modelSyncService = useModelSyncService();
   return modelSyncService;
 };

@@ -39,6 +39,11 @@ body {
   background-color: #30303080;
 }
 
+.el-link {
+  vertical-align: unset;
+  --el-link-hover-text-color: var(--el-color-primary-dark-2) !important;
+}
+
 .full-width {
   width: 100%;
 }

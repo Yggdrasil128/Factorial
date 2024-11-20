@@ -98,7 +98,19 @@ async function setResourceImportExport(value: boolean): Promise<void> {
             <custom-el-tooltip content="The production surplus (if positive), or deficit (if negative)">
               Net:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.overProduced" color="auto" show-unit convert-unit />
+            <quantity-display :quantity="resource.overProduced" :color="resource.importExport ? 'none' : 'auto'"
+                              show-unit convert-unit />
+            <template v-if="resource.importExport">
+              <span v-if="resource.overProduced.current === '0'">
+                (no import/export)
+              </span>
+              <span v-if="resource.overProduced.current.startsWith('-')">
+                (imported)
+              </span>
+              <span v-else>
+                (exported)
+              </span>
+            </template>
           </div>
 
           <div>

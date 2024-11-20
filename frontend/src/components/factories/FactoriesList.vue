@@ -12,13 +12,12 @@ import { type FactoryApi, useFactoryApi } from '@/api/model/useFactoryApi';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
-import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
+import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const factoryStore = useFactoryStore();
 const factoryApi: FactoryApi = useFactoryApi();
-const globalResourceStore = useGlobalResourceStore();
 
 const router = useRouter();
 const route = useRoute();
@@ -80,16 +79,11 @@ function deleteFactory(factoryId: number) {
   factoryApi.delete(factoryId);
 }
 
-const hasGlobalResources: ComputedRef<boolean> = computed(() =>
-  globalResourceStore.getBySaveId(currentGameAndSaveStore.currentSaveId).length > 0,
-);
-
 </script>
 
 <template>
   <div class="factoryList">
-    <div v-if="hasGlobalResources || true"
-         class="card exportImportOverview" :class="{active: showingExportImportOverview}"
+    <div class="card exportImportOverview" :class="{active: showingExportImportOverview}"
          @click="viewExportImportOverview">
       <el-icon class="icon" :size="32" style="margin: 4px;">
         <Switch />
@@ -100,13 +94,23 @@ const hasGlobalResources: ComputedRef<boolean> = computed(() =>
     </div>
 
     <div class="row items-center">
-      <h2 style="flex: 1 1 auto;">Factories</h2>
+      <h2 style="flex: 1 1 auto;">Factories ({{ factories.length }})</h2>
       <div class="createFactory">
         <el-button type="primary" :icon="Plus" @click="newFactory()">New factory</el-button>
       </div>
     </div>
 
-    <vue-draggable-next :model-value="factories" @end="draggableSupport.onDragEnd">
+    <PlaceholderHelpBox v-if="factories.length === 0" show-only-when-ready
+                        title="You don't have any factories at the moment.">
+      <p>
+        <el-link type="primary" @click="newFactory">
+          Create your first factory
+        </el-link>
+        to get started.
+      </p>
+    </PlaceholderHelpBox>
+
+    <vue-draggable-next v-else :model-value="factories" @end="draggableSupport.onDragEnd">
       <div v-for="factory in factories"
            :key="factory.id"
            class="card" :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
@@ -144,13 +148,14 @@ const hasGlobalResources: ComputedRef<boolean> = computed(() =>
 <style scoped>
 .card {
   --padding-left-right: 8px;
+  padding: 2px var(--padding-left-right);
   width: calc(100% - 2 * var(--padding-left-right));
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: 8px;
   background-color: #4b4b4b;
   border-radius: 8px;
-  padding: 2px var(--padding-left-right);
 }
 
 .card:not(.active) {
