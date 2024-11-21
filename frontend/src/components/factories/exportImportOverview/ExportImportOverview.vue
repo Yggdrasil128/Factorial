@@ -12,13 +12,14 @@ import type { EntityWithOrdinal } from '@/types/model/basic';
 import { VueDraggableNext } from 'vue-draggable-next';
 import SaveResource from '@/components/factories/exportImportOverview/SaveResource.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
+import { ordinalComparator } from '@/utils/utils';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const globalResourceStore = useGlobalResourceStore();
 const globalResourceApi = useGlobalResourceApi();
 
 const resources: ComputedRef<GlobalResource[]> = computed(() =>
-  globalResourceStore.getBySaveId(currentGameAndSaveStore.currentSaveId),
+  globalResourceStore.getBySaveId(currentGameAndSaveStore.currentSaveId).sort(ordinalComparator),
 );
 
 const draggableSupport: DraggableSupport = useDraggableSupport(resources,
