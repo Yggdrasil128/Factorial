@@ -7,6 +7,7 @@ import { useVModel } from '@vueuse/core';
 import { useProductionStepApi } from '@/api/model/useProductionStepApi';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { modifyFraction } from '@/utils/fractionUtils';
+import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 
 export interface MachineCountInputProps {
   modelValue: Fraction;
@@ -107,12 +108,14 @@ async function apply(): Promise<void> {
       :loading="minusButtonLoading"
       :disabled="buttonsDisabled || modelCache === '0'"
     />
-    <bgc-el-button
-      :icon="Check"
-      @click="apply"
-      :loading="checkButtonLoading"
-      :disabled="buttonsDisabled"
-    />
+    <custom-el-tooltip content="Apply changes">
+      <bgc-el-button
+        :icon="Check"
+        @click="apply"
+        :loading="checkButtonLoading"
+        :disabled="buttonsDisabled"
+      />
+    </custom-el-tooltip>
   </el-button-group>
 </template>
 

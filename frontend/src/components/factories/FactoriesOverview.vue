@@ -42,6 +42,11 @@ const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
     <div class="right">
       <export-import-overview v-if="showingExportImportOverview" />
       <factory-resources v-else-if="currentFactoryId" :factory-id="currentFactoryId" />
+      <PlaceholderHelpBox v-else title="No factory selected." style="margin-top: 12px;">
+        <p>
+          Select a factory on the left to view it here.
+        </p>
+      </PlaceholderHelpBox>
     </div>
   </div>
 

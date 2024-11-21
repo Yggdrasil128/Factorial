@@ -2,7 +2,8 @@
 import type { Factory, Item, ProductionEntry } from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
-import { computed, type ComputedRef } from 'vue';
+import { computed, type ComputedRef, onMounted, type Ref, ref } from 'vue';
+import { onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter } from 'vue-router';
 
 export interface SaveResourceFactoryProps {
   factory: Factory;
@@ -10,6 +11,9 @@ export interface SaveResourceFactoryProps {
 }
 
 const props: SaveResourceFactoryProps = defineProps<SaveResourceFactoryProps>();
+
+const route = useRoute();
+const router = useRouter();
 
 const imports: ComputedRef<ProductionEntry[]> = computed(() =>
   props.factory.inputs.filter(entry => entry.itemId === props.item.id),
@@ -19,27 +23,63 @@ const exports: ComputedRef<ProductionEntry[]> = computed(() =>
   props.factory.outputs.filter(entry => entry.itemId === props.item.id),
 );
 
+function goToFactory(): void {
+  router.push({
+    name: 'factories',
+    params: { factoryId: props.factory.id },
+  });
+}
+
+function goToFactoryItem(): void {
+  router.push({
+    name: 'factories',
+    params: { factoryId: props.factory.id },
+    hash: '#item' + props.item.id,
+  });
+}
+
+const mainDiv = ref<HTMLDivElement>();
+const id: ComputedRef<string> = computed(() =>
+  'item' + props.item.id + '-factory' + props.factory.id,
+);
+const highlight: Ref<boolean> = ref(false);
+
+function onUpdateRoute(to: RouteLocationNormalizedGeneric): void {
+  if (to.hash !== ('#' + id.value)) return;
+
+  setTimeout(() => {
+    mainDiv.value?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 100);
+
+  highlight.value = true;
+  setTimeout(() => highlight.value = false, 800);
+}
+
+onBeforeRouteUpdate(onUpdateRoute);
+
+onMounted(() => onUpdateRoute(route));
+
 </script>
 
 <template>
-  <div class="factory row">
+  <div class="factory row" :class="{highlight: highlight}" :id="id">
     <IconImg :icon="factory.iconId" :size="40" />
     <div style="margin-left: 4px;">
       <div style="margin-bottom: 4px;">
-        <b>{{ factory.name }}</b>
+        <span class="factoryName link" @click="goToFactory">{{ factory.name }}</span>
       </div>
       <div v-for="(input, index) in imports" :key="index" class="row items-center">
         Imports
         <quantity-display :quantity="input.quantity" color="red" convert-unit />
         <icon-img :icon="item.iconId" :size="24" />
-        <span>{{ item.name }}</span>
+        <span class="link" @click="goToFactoryItem">{{ item.name }}</span>
         <quantity-display :quantity="undefined" show-unit convert-unit />
       </div>
       <div v-for="(output, index) in exports" :key="index" class="row items-center">
         Exports
         <quantity-display :quantity="output.quantity" color="green" convert-unit />
         <icon-img :icon="item.iconId" :size="24" />
-        <span>{{ item.name }}</span>
+        <span class="link" @click="goToFactoryItem">{{ item.name }}</span>
         <quantity-display :quantity="undefined" show-unit convert-unit />
       </div>
     </div>
@@ -48,11 +88,22 @@ const exports: ComputedRef<ProductionEntry[]> = computed(() =>
 
 <style scoped>
 .factory {
-  margin-left: 80px;
   background-color: #555555;
   border-radius: 16px;
   padding: 8px;
-  margin-top: 4px;
-  margin-bottom: 4px;
+  transition: background-color 0.3s;
+}
+
+.factory.highlight {
+  background-color: #556e55;
+}
+
+.factoryName {
+  font-weight: bold;
+}
+
+.link:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>

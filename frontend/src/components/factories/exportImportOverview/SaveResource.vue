@@ -84,12 +84,15 @@ const factories: ComputedRef<Factory[]> = computed(() => {
         </div>
       </div>
     </div>
-    <save-resource-factory
-      v-for="factory in factories"
-      :key="factory.id"
-      :factory="factory"
-      :item="item"
-    />
+
+    <div class="column" style="margin-left: 80px;">
+      <save-resource-factory
+        v-for="factory in factories"
+        :key="factory.id"
+        :factory="factory"
+        :item="item"
+      />
+    </div>
   </div>
 </template>
 

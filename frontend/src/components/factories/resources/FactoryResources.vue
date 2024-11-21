@@ -31,12 +31,12 @@ const localResourceApi = useLocalResourceApi();
 const rr: string = 'aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUQ==';
 
 const factory: ComputedRef<Factory> = computed(() =>
-  factoryStore.getById(props.factoryId)!
+  factoryStore.getById(props.factoryId)!,
 );
 
 const resources: ComputedRef<LocalResource[]> = computed(() =>
   localResourceStore.getByFactoryId(props.factoryId)
-    .sort((a, b) => a.ordinal - b.ordinal)
+    .sort((a, b) => a.ordinal - b.ordinal),
 );
 
 const draggableSupport: DraggableSupport = useDraggableSupport(resources,

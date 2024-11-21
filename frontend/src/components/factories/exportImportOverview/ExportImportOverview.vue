@@ -13,6 +13,7 @@ import { VueDraggableNext } from 'vue-draggable-next';
 import SaveResource from '@/components/factories/exportImportOverview/SaveResource.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 import { ordinalComparator } from '@/utils/utils';
+import HelpPopover from '@/components/common/HelpPopover.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const globalResourceStore = useGlobalResourceStore();
@@ -33,8 +34,25 @@ const draggableSupport: DraggableSupport = useDraggableSupport(resources,
     <el-icon :size="32" style="margin-right: -16px;">
       <Switch />
     </el-icon>
-    <div class="" style="min-width: 0; flex: 1 1 auto;">
+    <div class="row items-center" style="min-width: 0; flex: 1 1 auto;">
       <h2 class="ellipsis">Export / Import overview</h2>
+      <HelpPopover v-if="resources.length > 0">
+        <p style="margin-top: 0;">
+          To enable automatic export or import of a resource, go to a factory and toggle the
+          <el-switch size="large" :active-icon="Switch" :inactive-icon="Switch" inline-prompt :model-value="false" />
+          switch next to a resource.
+        </p>
+        <p>
+          That resource will then show up here in this list. If the factory has any surplus of that resource
+          (i.e. if more of the resource is produced than consumed), the resource will count as exported,
+          and the surplus will show up here. Otherwise, the resource will count as imported, and the deficit
+          will show up here instead.
+        </p>
+        <p style="margin-bottom: 0;">
+          Factories will always export or import their full surplus or deficit of a resource when activated.
+          You can visit this page to see if the needs of your factories are satisfied.
+        </p>
+      </HelpPopover>
     </div>
     <div style="flex: 0 0 auto;">
       <ProductionsStepsDisplayChooser global />

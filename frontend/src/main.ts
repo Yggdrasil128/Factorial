@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import ElementPlus from 'element-plus';
-import router from './routes';
+import router from './router';
 import 'element-plus/dist/index.css';
 import 'element-plus/theme-chalk/dark/css-vars.css';
 import mitt from 'mitt';

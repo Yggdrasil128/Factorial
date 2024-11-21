@@ -2,7 +2,7 @@
 import type { Item, LocalResource, ProductionStep } from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
 import { useItemStore } from '@/stores/model/itemStore';
-import { computed, type ComputedRef, type Ref, ref } from 'vue';
+import { computed, type ComputedRef, onMounted, type Ref, ref } from 'vue';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import _ from 'lodash';
 import { useProductionStepStore } from '@/stores/model/productionStepStore';
@@ -14,6 +14,7 @@ import { Switch } from '@element-plus/icons-vue';
 import HelpPopover from '@/components/common/HelpPopover.vue';
 import { useLocalResourceApi } from '@/api/model/useLocalResourceApi';
 import { until } from '@vueuse/core';
+import { onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter } from 'vue-router';
 
 export interface FactoryResourceProps {
   resource: LocalResource;
@@ -21,6 +22,8 @@ export interface FactoryResourceProps {
 
 const props: FactoryResourceProps = defineProps<FactoryResourceProps>();
 
+const route = useRoute();
+const router = useRouter();
 const itemStore = useItemStore();
 const productionStepStore = useProductionStepStore();
 const userSettingsStore = useUserSettingsStore();
@@ -64,10 +67,38 @@ async function setResourceImportExport(value: boolean): Promise<void> {
   }
 }
 
+function goToExportImportOverview(): void {
+  const hash: string = '#item' + props.resource.itemId + '-factory' + props.resource.factoryId;
+  router.push({
+    name: 'factories',
+    params: { factoryId: 'exportImportOverview' },
+    hash: hash,
+  });
+}
+
+const mainDiv = ref<HTMLDivElement>();
+const id: ComputedRef<string> = computed(() => 'item' + props.resource.itemId);
+const highlight: Ref<boolean> = ref(false);
+
+function onUpdateRoute(to: RouteLocationNormalizedGeneric): void {
+  if (to.hash !== ('#' + id.value)) return;
+
+  setTimeout(() => {
+    mainDiv.value?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 100);
+
+  highlight.value = true;
+  setTimeout(() => highlight.value = false, 800);
+}
+
+onBeforeRouteUpdate(onUpdateRoute);
+
+onMounted(() => onUpdateRoute(route));
+
 </script>
 
 <template>
-  <div v-if="item" class="item">
+  <div v-if="item" class="item" :class="{highlight: highlight}" ref="mainDiv" :id="id">
     <div style="overflow: auto;">
       <div class="itemIcon">
         <icon-img :icon="item.iconId" :size="64" />
@@ -100,17 +131,17 @@ async function setResourceImportExport(value: boolean): Promise<void> {
             </custom-el-tooltip>
             <quantity-display :quantity="resource.overProduced" :color="resource.importExport ? 'none' : 'auto'"
                               show-unit convert-unit />
-            <template v-if="resource.importExport">
-              <span v-if="resource.overProduced.current === '0'">
+            <span v-if="resource.importExport" class="link" @click="goToExportImportOverview">
+              <template v-if="resource.overProduced.current === '0'">
                 (no import/export)
-              </span>
-              <span v-if="resource.overProduced.current.startsWith('-')">
+              </template>
+              <template v-if="resource.overProduced.current.startsWith('-')">
                 (imported)
-              </span>
-              <span v-else>
+              </template>
+              <template v-else>
                 (exported)
-              </span>
-            </template>
+              </template>
+            </span>
           </div>
 
           <div>
@@ -128,13 +159,15 @@ async function setResourceImportExport(value: boolean): Promise<void> {
           </div>
         </div>
       </div>
-
     </div>
-    <resource-production-step
-      v-for="productionStep in productionSteps"
-      :key="productionStep.id"
-      :production-step="productionStep"
-    />
+
+    <div class="column" style="margin-left: 80px;">
+      <resource-production-step
+        v-for="productionStep in productionSteps"
+        :key="productionStep.id"
+        :production-step="productionStep"
+      />
+    </div>
   </div>
 </template>
 
@@ -144,6 +177,11 @@ async function setResourceImportExport(value: boolean): Promise<void> {
   border-radius: 24px;
   padding: 8px;
   margin-bottom: 24px;
+  transition: background-color 0.3s;
+}
+
+.item.highlight {
+  background-color: #556e55;
 }
 
 .itemIcon {
@@ -164,5 +202,10 @@ async function setResourceImportExport(value: boolean): Promise<void> {
 
 .itemBalance {
   margin-top: 4px;
+}
+
+.link:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>

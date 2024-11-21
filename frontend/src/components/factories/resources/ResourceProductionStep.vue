@@ -9,11 +9,11 @@ import IconImg from '@/components/common/IconImg.vue';
 import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
-import ResourceProductionEntry from '@/components/factories/resources/ResourceProductionEntry.vue';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductionStepApi } from '@/api/model/useProductionStepApi';
+import ProductionEntriesTable from '@/components/factories/resources/ProductionEntriesTable.vue';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -64,8 +64,8 @@ function editProductionStep(): void {
   router.push({
     name: 'editProductionStep', params: {
       factoryId: route.params.factoryId,
-      editProductionStepId: props.productionStep.id
-    }
+      editProductionStepId: props.productionStep.id,
+    },
   });
 }
 
@@ -77,48 +77,30 @@ function deleteProductionStep(): void {
 
 <template>
   <div class="step">
-    <div style="overflow: auto">
-      <div class="stepIcon">
-        <icon-img :icon="machine?.iconId" :size="48" />
-        <div style="vertical-align: top; display: inline; line-height: 48px">
-          x
-          <quantity-display :quantity="productionStep.machineCounts" color="none" />
-          &emsp;
-        </div>
-        <icon-img :icon="recipeIconId" :size="48" />
+    <div class="row items-center">
+      <icon-img :icon="machine?.iconId" :size="48" />
+      <div style="flex: 0 0 auto; margin-right: 12px;">
+        ✕
+        <quantity-display :quantity="productionStep.machineCounts" color="none" />
       </div>
-      <div class="stepInfo">
-        <div class="stepName">
-          Recipe: {{ recipeName }}
-          <template v-if="recipeModifiers.length > 0">
-            (
-            <template v-for="(recipeModifier, index) in recipeModifiers" :key="recipeModifier.id">
-              <icon-img :icon="recipeModifier.iconId" :size="24" />
-              {{ recipeModifier.name }}
-              <template v-if="index < recipeModifiers.length - 1">
-                ,
-              </template>
+      <icon-img :icon="recipeIconId" :size="48" />
+
+      <div style="font-size: 20px; flex: 1 1 auto;">
+        {{ recipeName }}
+        <template v-if="recipeModifiers.length > 0">
+          (
+          <template v-for="(recipeModifier, index) in recipeModifiers" :key="recipeModifier.id">
+            <icon-img :icon="recipeModifier.iconId" :size="24" />
+            {{ recipeModifier.name }}
+            <template v-if="index < recipeModifiers.length - 1">
+              ,
             </template>
-            )
           </template>
-        </div>
-        <div class="stepThroughput">
-          <div>
-            <resource-production-entry v-for="(output, index) in productionStep.outputs" :key="index"
-                                       :production-entry="output" />
-            <div v-if="productionStep.outputs.length === 0" class="nothing">(nothing)</div>
-          </div>
-          <el-icon :size="24" style="margin: 0 8px;">
-            <CaretLeft />
-          </el-icon>
-          <div>
-            <resource-production-entry v-for="(input, index) in productionStep.inputs" :key="index"
-                                       :production-entry="input" />
-            <div v-if="productionStep.inputs.length === 0" class="nothing">(nothing)</div>
-          </div>
-        </div>
+          )
+        </template>
       </div>
-      <div class="stepActions">
+
+      <div style="flex: 0 0 auto;">
         <machine-count-input :model-value="productionStep.machineCounts.withPrimaryChangelist"
                              :production-step-id="productionStep.id" />
         &ensp;
@@ -152,53 +134,28 @@ function deleteProductionStep(): void {
         </el-button-group>
       </div>
     </div>
+
+    <div class="row" style="margin-top: 8px;">
+      <div>
+        <div v-if="productionStep.outputs.length === 0" class="nothing">(nothing)</div>
+        <ProductionEntriesTable v-else :production-entries="productionStep.outputs" />
+      </div>
+      <el-icon :size="24">
+        <CaretLeft />
+      </el-icon>
+      <div>
+        <div v-if="productionStep.inputs.length === 0" class="nothing">(nothing)</div>
+        <ProductionEntriesTable v-else :production-entries="productionStep.inputs" />
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .step {
-  margin-left: 80px;
   background-color: #555555;
   border-radius: 16px;
-  padding: 8px 8px 0;
-  margin-top: 4px;
-  margin-bottom: 4px;
-}
-
-.stepIcon {
-  float: left;
-}
-
-.stepInfo {
-  float: left;
-  margin-left: 16px;
-  margin-top: 2px;
-  vertical-align: top;
-  overflow: auto;
-}
-
-.stepName {
-  font-size: 16px;
-}
-
-.stepThroughput {
-  margin-top: 4px;
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 700px;
-}
-
-.stepThroughput > div {
-  display: inline;
-}
-
-.stepThroughput span {
-  line-height: 24px;
-  vertical-align: top;
-}
-
-.stepThroughput span:not(:first-child) {
-  margin-left: 5px;
+  padding: 8px;
 }
 
 .nothing {
@@ -206,9 +163,4 @@ function deleteProductionStep(): void {
   margin-top: 6px;
 }
 
-.stepActions {
-  float: right;
-  padding: 8px 8px 0;
-  margin-bottom: 8px;
-}
 </style>
