@@ -62,7 +62,7 @@ onMounted(() => onUpdateRoute(route));
 </script>
 
 <template>
-  <div class="factory row" :class="{highlight: highlight}" :id="id">
+  <div class="factory row" :class="{highlight: highlight}" :id="id" ref="mainDiv">
     <IconImg :icon="factory.iconId" :size="40" />
     <div style="margin-left: 4px;">
       <div style="margin-bottom: 4px;">
