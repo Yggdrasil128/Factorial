@@ -78,6 +78,7 @@ defineExpose({ validate });
     :before-close="beforeClose"
     width="500px"
     :title="title"
+    :close-on-click-modal="false"
   >
     <p style="margin-top: 0; margin-bottom: 30px;">
       <slot name="description">Insert description here...</slot>

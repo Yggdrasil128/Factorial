@@ -1,0 +1,45 @@
+Term
+ = head:Additive tail:(('+' / '-') Additive)* {
+    return {
+        head: head,
+        tail: tail.map(element => ({
+            operation: element[0],
+            operand: element[1]
+        }))
+    }
+ }
+
+Additive
+ = head:Multiplicative tail:(('*' / '/') Multiplicative)* {
+    return {
+        head: head,
+        tail: tail.map(element => ({
+            operation: element[0],
+            operand: element[1]
+        }))
+    }
+ }
+
+Multiplicative
+ = MultiplicativeTerm / MultiplicativeNumber
+
+MultiplicativeNumber
+ = number:Number { return {number: number} }
+
+MultiplicativeTerm
+ = term:('(' Term ')') { return {term: term[1]} }
+
+Number
+ = negative:'-'? digitsBeforeDecimal:Digit* tail:(DecimalPoint Digit*)? {
+    return {
+        isNegative: !!negative,
+        digitsBeforeDecimal: digitsBeforeDecimal.join(''),
+        digitsAfterDecimal: tail ? tail[1].join('') : ''
+    }
+ }
+
+Digit
+ = [0-9]
+
+DecimalPoint
+ = '.' / ','
