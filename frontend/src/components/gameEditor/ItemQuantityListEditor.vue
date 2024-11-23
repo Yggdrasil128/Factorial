@@ -9,6 +9,7 @@ import { Delete, Plus } from '@element-plus/icons-vue';
 import type { RuleItem } from 'async-validator/dist-types/interface';
 import { elFormFractionValidator } from '@/utils/fractionUtils';
 import type { FormItemInstance } from 'element-plus';
+import FractionInput from '@/components/common/input/FractionInput.vue';
 
 export interface ItemQuantityListEditorProps {
   modelValue: ItemQuantity[];
@@ -77,7 +78,7 @@ const itemRules: RuleItem[] = [
   <div class="main">
     <div v-for="(itemQuantity, index) in model" :key="index" class="row">
       <el-form-item class="quantity" :prop="type + '.' + index + '.quantity'" :rules="quantityRules">
-        <el-input v-model="itemQuantity.quantity" placeholder="Quantity" />
+        <fraction-input v-model:fraction="itemQuantity.quantity" placeholder="Quantity" />
       </el-form-item>
       <el-form-item class="item" :prop="type + '.' + index + '.itemId'" :rules="itemRules" ref="formItemsForItemId">
         <CascaderSelect style="width: 100%;" v-model="itemQuantity.itemId" :options="items" placeholder="Item" />

@@ -46,7 +46,7 @@ function importGame(): void {
         Create
       </el-link>
       or
-      <el-link type="primary" @click="newGame">
+      <el-link type="primary" @click="importGame">
         import
       </el-link>
       a game to get started.

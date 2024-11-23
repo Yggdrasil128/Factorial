@@ -4,7 +4,7 @@ import { useProductionStepStore } from '@/stores/model/productionStepStore';
 import { computed, type ComputedRef, reactive, ref, type Ref, watch } from 'vue';
 import type { Machine, ProductionStep, Recipe, RecipeModifier } from '@/types/model/standalone';
 import _ from 'lodash';
-import { ElFormItem, ElInput, type FormRules } from 'element-plus';
+import { ElFormItem, type FormRules } from 'element-plus';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
@@ -13,10 +13,11 @@ import { useMachineStore } from '@/stores/model/machineStore';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
 import IconImg from '@/components/common/IconImg.vue';
-import { elFormFractionValidator, isValidFraction, modifyFraction } from '@/utils/fractionUtils';
+import { elFormFractionValidator, ParsedFraction } from '@/utils/fractionUtils';
 import { Minus, Plus } from '@element-plus/icons-vue';
 import type { RuleItem } from 'async-validator/dist-types/interface';
 import { useProductionStepApi } from '@/api/model/useProductionStepApi';
+import FractionInput from '@/components/common/input/FractionInput.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -41,8 +42,8 @@ const formRules: FormRules = reactive({
   machineId: [{ required: true, message: 'Please select a machine', trigger: 'blur' }],
   machineCount: [{
     required: true, message: 'Please enter a valid machine count', trigger: 'blur',
-    validator: elFormFractionValidator, allowZero: true, allowNegative: false
-  } as RuleItem]
+    validator: elFormFractionValidator, allowZero: true, allowNegative: false,
+  } as RuleItem],
 });
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
@@ -52,7 +53,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
       machineId: 0,
       recipeId: 0,
       modifierIds: [],
-      machineCount: '1'
+      machineCount: '1',
     };
   } else {
     const productionStepId: number = Number(route.params.editProductionStepId);
@@ -67,7 +68,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
       machineId: currentProductionStep.machineId,
       recipeId: currentProductionStep.recipeId,
       modifierIds: [...currentProductionStep.modifierIds],
-      machineCount: currentProductionStep.machineCount
+      machineCount: currentProductionStep.machineCount,
     };
   }
   original.value = _.clone(productionStep.value);
@@ -94,7 +95,7 @@ async function submitForm(): Promise<void> {
 }
 
 const recipes: ComputedRef<Recipe[]> = computed(() =>
-  recipeStore.getByGameId(currentGameAndSaveStore.currentGameId)
+  recipeStore.getByGameId(currentGameAndSaveStore.currentGameId),
 );
 
 const recipe: ComputedRef<Recipe | undefined> = computed(() => {
@@ -126,14 +127,29 @@ watch(() => productionStep.value.recipeId, () => {
   productionStep.value.machineId = recipe.value.applicableMachineIds[0];
 });
 
+const machineCountParsedFraction: Ref<ParsedFraction | undefined> = computed({
+  get() {
+    return productionStep.value.machineCount ? ParsedFraction.of(productionStep.value.machineCount) : undefined;
+  },
+  set(value: ParsedFraction | undefined) {
+    productionStep.value.machineCount = value ? value.toFraction() : '';
+  },
+});
+
 function incrementMachineCount() {
-  if (!isValidFraction(productionStep.value.machineCount!, { allowZero: true })) return;
-  productionStep.value.machineCount = modifyFraction(productionStep.value.machineCount!, 1);
+  if (machineCountParsedFraction.value) {
+    machineCountParsedFraction.value = machineCountParsedFraction.value.add(ParsedFraction.ONE);
+  }
 }
 
 function decrementMachineCount() {
-  if (!isValidFraction(productionStep.value.machineCount!, { allowZero: true })) return;
-  productionStep.value.machineCount = modifyFraction(productionStep.value.machineCount!, -1);
+  if (machineCountParsedFraction.value) {
+    let newValue: ParsedFraction = machineCountParsedFraction.value.subtract(ParsedFraction.ONE);
+    if (newValue.isLessThanZero()) {
+      newValue = ParsedFraction.ZERO;
+    }
+    machineCountParsedFraction.value = newValue;
+  }
 }
 
 </script>
@@ -186,8 +202,8 @@ function decrementMachineCount() {
 
       <el-form-item label="Machine count" prop="machineCount">
         <div style="display: flex; width: 100%; gap: 4px;">
-          <el-input v-model="productionStep.machineCount"
-                    style="flex-grow: 1;" />
+          <fraction-input v-model:parsed-fraction="machineCountParsedFraction"
+                          style="flex-grow: 1;" />
           <el-button :icon="Plus" @click="incrementMachineCount" />
           <el-button :icon="Minus" @click="decrementMachineCount"
                      :disabled="productionStep.machineCount === '0'"

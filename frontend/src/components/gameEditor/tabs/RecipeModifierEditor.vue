@@ -5,12 +5,13 @@ import { useIconStore } from '@/stores/model/iconStore';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
 import { computed, type ComputedRef, ref } from 'vue';
 import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
-import { ElFormItem, ElInput, type FormRules } from 'element-plus';
+import { ElFormItem, type FormRules } from 'element-plus';
 import { elFormEntityNameUniqueValidator } from '@/utils/utils';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
 import { useRecipeModifierApi } from '@/api/model/useRecipeModifierApi';
 import { elFormFractionValidator } from '@/utils/fractionUtils';
 import type { RuleItem } from 'async-validator/dist-types/interface';
+import FractionInput from '@/components/common/input/FractionInput.vue';
 
 export interface RecipeModifierEditorProps {
   game: Game;
@@ -97,13 +98,13 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
     <template #form>
       <h3>Multipliers</h3>
       <el-form-item label="Duration" prop="durationMultiplier">
-        <el-input v-model="service.state.editingEntityModel.value.durationMultiplier" />
+        <fraction-input v-model:fraction="service.state.editingEntityModel.value.durationMultiplier" />
       </el-form-item>
       <el-form-item label="Input Quantity" prop="inputQuantityMultiplier">
-        <el-input v-model="service.state.editingEntityModel.value.inputQuantityMultiplier" />
+        <fraction-input v-model:fraction="service.state.editingEntityModel.value.inputQuantityMultiplier" />
       </el-form-item>
       <el-form-item label="Output Quantity" prop="outputQuantityMultiplier">
-        <el-input v-model="service.state.editingEntityModel.value.outputQuantityMultiplier" />
+        <fraction-input v-model:fraction="service.state.editingEntityModel.value.outputQuantityMultiplier" />
       </el-form-item>
     </template>
   </EntityEditor>
