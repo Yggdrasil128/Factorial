@@ -8,12 +8,12 @@ import { CaretLeft, Delete, Edit } from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
 import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
-import MachineCountInput from '@/components/factories/resources/MachineCountInput.vue';
 import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductionStepApi } from '@/api/model/useProductionStepApi';
 import ProductionEntriesTable from '@/components/factories/resources/ProductionEntriesTable.vue';
+import ProductionStepMachineCountInput from '@/components/factories/resources/ProductionStepMachineCountInput.vue';
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -101,8 +101,9 @@ function deleteProductionStep(): void {
       </div>
 
       <div style="flex: 0 0 auto;">
-        <machine-count-input :model-value="productionStep.machineCounts.withPrimaryChangelist"
-                             :production-step-id="productionStep.id" />
+        <!--        <machine-count-input :model-value="productionStep.machineCounts.withPrimaryChangelist"-->
+        <!--                             :production-step-id="productionStep.id" />-->
+        <ProductionStepMachineCountInput :production-step="productionStep" />
         &ensp;
         <el-button-group>
           <el-tooltip

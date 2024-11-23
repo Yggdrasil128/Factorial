@@ -86,6 +86,18 @@ export class ParsedFraction {
   equals(that: ParsedFraction): boolean {
     return this.numerator === that.numerator && this.denominator === that.denominator;
   }
+
+  isZero(): boolean {
+    return this.numerator === 0n;
+  }
+
+  isLessThanZero(): boolean {
+    return this.numerator < 0n;
+  }
+
+  isGreaterThanZero(): boolean {
+    return this.numerator > 0n;
+  }
 }
 
 export function gcd(a: bigint, b: bigint): bigint {

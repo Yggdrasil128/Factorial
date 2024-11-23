@@ -1,24 +1,35 @@
 <script setup lang="ts">
-import { type Ref, ref, watch } from 'vue';
+import { computed, type Ref, ref } from 'vue';
 import { Check, Minus, Plus } from '@element-plus/icons-vue';
-import { ElButtonGroup, ElInput } from 'element-plus';
-import type { Fraction } from '@/types/model/basic';
-import { useVModel } from '@vueuse/core';
+import { ElButtonGroup } from 'element-plus';
+import { until } from '@vueuse/core';
 import { useProductionStepApi } from '@/api/model/useProductionStepApi';
 import BgcElButton from '@/components/common/input/BgcElButton.vue';
-import { modifyFraction } from '@/utils/fractionUtils';
+import { ParsedFraction } from '@/utils/fractionUtils';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
+import type { ProductionStep } from '@/types/model/standalone';
+import FractionInput from '@/components/common/input/FractionInput.vue';
 
 export interface MachineCountInputProps {
-  modelValue: Fraction;
-  productionStepId: number;
+  productionStep: ProductionStep;
 }
 
 const props: MachineCountInputProps = defineProps<MachineCountInputProps>();
-const emit = defineEmits(['update:modelValue']);
-const model: Ref<Fraction> = useVModel(props, 'modelValue', emit);
-const modelCache: Ref<Fraction> = ref(model.value);
-watch(model, () => modelCache.value = model.value);
+const parsedFraction: Ref<ParsedFraction> = computed({
+  get() {
+    return ParsedFraction.of(props.productionStep.machineCounts.withPrimaryChangelist);
+  },
+  set(value: ParsedFraction) {
+    if (!value) {
+      return;
+    }
+    buttonsDisabled.value = true;
+    productionStepApi.updateMachineCount(props.productionStep.id, value.toFraction())
+      .finally(() => {
+        buttonsDisabled.value = false;
+      });
+  },
+});
 
 const productionStepApi = useProductionStepApi();
 
@@ -27,74 +38,39 @@ const minusButtonLoading: Ref<boolean> = ref(false);
 const checkButtonLoading: Ref<boolean> = ref(false);
 const buttonsDisabled: Ref<boolean> = ref(false);
 
-let submitTimeoutHandle: NodeJS.Timeout | null = null;
-const inputSubmitDelayMs: number = 1000;
-
-function clearSubmitTimeout(): void {
-  if (submitTimeoutHandle != null) {
-    clearTimeout(submitTimeoutHandle);
-    submitTimeoutHandle = null;
-  }
-}
-
-function setSubmitTimeout(): void {
-  clearSubmitTimeout();
-  submitTimeoutHandle = setTimeout(onSubmitTimeout, inputSubmitDelayMs);
-}
-
-function onSubmitTimeout(): void {
-  submitTimeoutHandle = null;
-  updateMachineCount();
-}
-
-function onInputUpdate(): void {
-  setSubmitTimeout();
-}
-
-async function updateMachineCount(): Promise<void> {
-  buttonsDisabled.value = true;
-  await productionStepApi.updateMachineCount(props.productionStepId, modelCache.value)
-    .finally(() => {
-      buttonsDisabled.value = false;
-    });
-}
-
 async function plusOne(): Promise<void> {
-  modelCache.value = modifyFraction(modelCache.value, 1);
-  clearSubmitTimeout();
+  parsedFraction.value = parsedFraction.value.add(ParsedFraction.ONE);
   plusButtonLoading.value = true;
-  updateMachineCount()
+  until(buttonsDisabled).toBe(false, { timeout: 5000 })
     .finally(() => plusButtonLoading.value = false);
 }
 
 async function minusOne(): Promise<void> {
-  modelCache.value = modifyFraction(modelCache.value, -1);
-  clearSubmitTimeout();
+  let newValue = parsedFraction.value.subtract(ParsedFraction.ONE);
+  if (newValue.isLessThanZero()) {
+    newValue = ParsedFraction.ZERO;
+  }
+  parsedFraction.value = newValue;
   minusButtonLoading.value = true;
-  updateMachineCount()
-    .finally(() => minusButtonLoading.value = false);
+  until(buttonsDisabled).toBe(false)
+    .then(() => minusButtonLoading.value = false);
 }
 
 async function apply(): Promise<void> {
   checkButtonLoading.value = true;
-  if (submitTimeoutHandle != null) {
-    clearSubmitTimeout();
-    await updateMachineCount();
-  }
   buttonsDisabled.value = true;
-  await productionStepApi.applyPrimaryChangelist(props.productionStepId)
+  await productionStepApi.applyPrimaryChangelist(props.productionStep.id)
     .finally(() => buttonsDisabled.value = checkButtonLoading.value = false);
 }
 </script>
 
 <template>
-  <el-input
-    v-model="modelCache"
+  <FractionInput
+    v-model:parsed-fraction="parsedFraction"
     style="width: 80px;"
     class="mciInput"
-    @update:model-value="onInputUpdate"
   >
-  </el-input>
+  </FractionInput>
   <el-button-group class="mciButtonGroup">
     <bgc-el-button
       :icon="Plus"
@@ -106,7 +82,7 @@ async function apply(): Promise<void> {
       :icon="Minus"
       @click="minusOne"
       :loading="minusButtonLoading"
-      :disabled="buttonsDisabled || modelCache === '0'"
+      :disabled="buttonsDisabled || parsedFraction.isZero()"
     />
     <custom-el-tooltip content="Apply changes">
       <bgc-el-button
