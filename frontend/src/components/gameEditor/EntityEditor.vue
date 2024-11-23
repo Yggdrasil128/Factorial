@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { type EntityTreeService, type EntityType, iconOptions, iconOptions2 } from '@/services/useEntityTreeService';
+import {
+  type EntityTreeService,
+  type EntityType,
+  iconOptions,
+  iconOptionsForRecipe,
+} from '@/services/useEntityTreeService';
 import { ElButtonGroup, ElFormItem, ElInput, ElTooltip, type FormRules } from 'element-plus';
 import { ref } from 'vue';
 import { Check, Close, Folder, Plus, Search } from '@element-plus/icons-vue';
@@ -104,10 +109,14 @@ defineExpose({ validateForm, validateFolderForm });
 
               <el-form-item v-if="entityType !== 'Icon'" label="Icon" prop="iconId">
                 <el-segmented v-model="service.state.selectedIconOption.value"
-                              :options="entityType === 'Recipe' ? iconOptions2 : iconOptions">
+                              :options="entityType === 'Recipe' ? iconOptionsForRecipe : iconOptions">
                   <template #default="{ item }">
                     <div style="margin: 4px;">
-                      <el-icon size="20">
+                      <div v-if="typeof item.icon === 'string'" class="maskIcon"
+                           style="width: 20px; height: 20px;"
+                           :style="{mask: 'url(\'' + item.icon + '\') center/contain'}">
+                      </div>
+                      <el-icon v-else size="20">
                         <component :is="item.icon" />
                       </el-icon>
                       <div>{{ item.label }}</div>
@@ -115,29 +124,36 @@ defineExpose({ validateForm, validateFolderForm });
                   </template>
                 </el-segmented>
 
-                <div v-if="service.state.selectedIconOption.value === 'none' && entityType === 'Recipe'"
-                     style="margin-top: 12px;">
-                  <div style="line-height: 20px;">
+                <template v-if="service.state.selectedIconOption.value === 'none' && entityType === 'Recipe'">
+                  <div style="margin-top: 12px; line-height: 20px;">
                     When 'Same as product' is selected, the recipe will have the same icon as the (first) product item.
                   </div>
-                </div>
+                </template>
                 <template v-if="service.state.selectedIconOption.value === 'select'">
                   <CascaderSelect v-model="service.state.editingEntityModel.value.iconId!"
                                   :options="iconStore.getByGameId(game.id)"
                                   is-icon-entity
                                   style="margin-top: 12px; width: 100%;" />
                 </template>
-                <div v-else-if="service.state.selectedIconOption.value === 'new'" style="margin-top: 12px;">
-                  <div style="line-height: 20px;">
-                    The new icon will have the same name as this {{ entityType.toLowerCase() }}, and it will be created
-                    at the path:<br>
-                    <div style="margin-top: 4px;">
-                      / {{ entityType }}s {{ service.state.editingEntityDisplayPath.value }}
+                <template v-else-if="service.state.selectedIconOption.value === 'new'">
+                  <div style="margin-top: 12px;">
+                    <div style="line-height: 20px;">
+                      The new icon will have the same name as this {{ entityType.toLowerCase() }}, and it will be
+                      created
+                      at the path:<br>
+                      <div style="margin-top: 4px;">
+                        / {{ entityType }}s {{ service.state.editingEntityDisplayPath.value }}
+                      </div>
+                      <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value"
+                                  style="margin-top: 12px;" />
                     </div>
                   </div>
-                  <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value"
-                              style="margin-top: 12px;" />
-                </div>
+                </template>
+                <template v-else-if="service.state.selectedIconOption.value === 'url'">
+                  <div class="full-width" style="margin-top: 12px;">
+                    <el-input v-model="service.state.editingEntityIconDataUrl.value" placeholder="Enter icon URL" />
+                  </div>
+                </template>
               </el-form-item>
 
               <slot name="form"></slot>
@@ -208,7 +224,7 @@ defineExpose({ validateForm, validateFolderForm });
 }
 
 .right {
-  width: 35%;
+  width: 40%;
 }
 
 .right .sticky {
@@ -263,4 +279,16 @@ defineExpose({ validateForm, validateFolderForm });
   margin-right: 7px;
 }
 
+.maskIcon {
+  background-color: var(--el-segmented-color);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3px;
+}
+</style>
+
+<style>
+.el-segmented__item:hover .maskIcon {
+  background-color: var(--el-segmented-item-hover-color);
+}
 </style>

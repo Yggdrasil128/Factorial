@@ -30,6 +30,7 @@ export type EntityTreeServiceState<T extends EntityWithCategory> = {
   editingEntityModel: Ref<Partial<T>>;
   editingEntityOriginalModel: Ref<Partial<T>>;
   editingEntityIconDataBase64: Ref<string>;
+  editingEntityIconDataUrl: Ref<string>;
   editingEntityDisplayPath: ComputedRef<string>;
   selectedIconOption: Ref<IconOptionValue>;
 
@@ -237,8 +238,9 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     return '/ ' + _.join(editingEntityModel.value.category, ' / ') + ' /';
   });
 
-  const selectedIconOption: Ref<IconOptionValue> = ref('none');
+  const selectedIconOption: Ref<IconOptionValue> = ref(entityType === 'Icon' ? 'new' : 'none');
   const editingEntityIconDataBase64: Ref<string> = ref('');
+  const editingEntityIconDataUrl: Ref<string> = ref('');
 
   watch(selectedIconOption, () => {
     if (selectedIconOption.value !== 'select') {
@@ -246,6 +248,9 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     }
     if (selectedIconOption.value !== 'new') {
       editingEntityIconDataBase64.value = '';
+    }
+    if (selectedIconOption.value !== 'url') {
+      editingEntityIconDataUrl.value = '';
     }
   });
 
@@ -298,7 +303,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingEntityModel.value = entity;
     editingEntityOriginalModel.value = _.clone(entity);
 
-    selectedIconOption.value = entity.iconId ? 'select' : 'none';
+    selectedIconOption.value = entityType === 'Icon' ? 'new' : entity.iconId ? 'select' : 'none';
     editingEntityIconDataBase64.value = '';
 
     setCurrentTreeNode(id);
@@ -382,9 +387,10 @@ export function useEntityTreeService<T extends EntityWithCategory>(
           entityAsIcon.imageData = imageData;
         }
       } else {
-        if (selectedIconOption.value === 'new' && editingEntityIconDataBase64.value) {
-          // create new icon first
+        // create new icon first
+        let icon: Partial<Icon> | undefined = undefined;
 
+        if (selectedIconOption.value === 'new' && editingEntityIconDataBase64.value) {
           const { mimeType, imageData } = parseImageData(editingEntityIconDataBase64.value);
           if (!imageData) {
             ElMessage.error({
@@ -394,14 +400,23 @@ export function useEntityTreeService<T extends EntityWithCategory>(
             return;
           }
 
-          const icon: Partial<Icon> = {
+          icon = {
             name: entity.name,
             gameId: game.value.id,
             category: [entityType + 's', ...(entity.category ?? [])],
             mimeType: mimeType,
             imageData: imageData,
           };
+        } else if (selectedIconOption.value === 'url' && editingEntityIconDataUrl.value) {
+          icon = {
+            name: entity.name,
+            gameId: game.value.id,
+            category: [entityType + 's', ...(entity.category ?? [])],
+            imageUrl: editingEntityIconDataUrl.value,
+          };
+        }
 
+        if (icon) {
           await iconApi.create(icon);
 
           const savedIcon: ComputedRef<Icon | undefined> = computed(() =>
@@ -460,6 +475,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     editingEntityModel.value = {};
     editingEntityOriginalModel.value = {};
     editingEntityIconDataBase64.value = '';
+    editingEntityIconDataUrl.value = '';
 
     editingFolderPath.value = undefined;
     editingFolderModel.value = { name: '' };
@@ -690,6 +706,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       editingEntityModel,
       editingEntityOriginalModel,
       editingEntityIconDataBase64,
+      editingEntityIconDataUrl,
       editingEntityDisplayPath,
       selectedIconOption,
 
@@ -727,14 +744,20 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   };
 }
 
-export type IconOptionValue = 'none' | 'select' | 'new' | 'item';
-export const iconOptions: { label: string, value: IconOptionValue, icon: Component }[] = [
-  { label: 'No icon', value: 'none', icon: Close },
-  { label: 'Select icon', value: 'select', icon: Menu },
-  { label: 'New icon', value: 'new', icon: UploadFilled },
-];
-export const iconOptions2: { label: string, value: IconOptionValue, icon: Component }[] = [
-  { label: 'Same as product', value: 'none', icon: Link },
-  { label: 'Select icon', value: 'select', icon: Menu },
-  { label: 'New icon', value: 'new', icon: UploadFilled },
-];
+export type IconOptionValue = 'none' | 'select' | 'new' | 'url';
+export type IconOption = {
+  label: string;
+  value: IconOptionValue;
+  icon: Component | string;
+}
+
+const iconOptionNone: IconOption = { label: 'No icon', value: 'none', icon: Close };
+const iconOptionSameAsProduct: IconOption = { label: 'Same as product', value: 'none', icon: Link };
+const iconOptionSelect: IconOption = { label: 'Select icon', value: 'select', icon: Menu };
+const iconOptionNew: IconOption = { label: 'New icon', value: 'new', icon: UploadFilled };
+const iconOptionUpload: IconOption = { label: 'Upload file', value: 'new', icon: UploadFilled };
+const iconOptionUrl: IconOption = { label: 'From URL', value: 'url', icon: '/img/icons/freepik/globe.png' };
+
+export const iconOptions: IconOption[] = [iconOptionNone, iconOptionSelect, iconOptionNew, iconOptionUrl];
+export const iconOptionsForRecipe: IconOption[] = [iconOptionSameAsProduct, iconOptionSelect, iconOptionNew, iconOptionUrl];
+export const iconOptionsForIcon: IconOption[] = [iconOptionUpload, iconOptionUrl];

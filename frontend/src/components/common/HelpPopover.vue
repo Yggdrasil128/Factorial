@@ -6,7 +6,7 @@
   <el-popover :width="500" :show-after="200">
     <slot />
     <template #reference>
-      <img class="helpIcon" src="/img/question.png" alt="Help" />
+      <img class="helpIcon" src="/img/icons/freepik/question.png" alt="Help" />
     </template>
   </el-popover>
 </template>

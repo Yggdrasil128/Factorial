@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Game, Icon } from '@/types/model/standalone';
-import { computed, type ComputedRef, ref } from 'vue';
-import { type EntityTreeService, useEntityTreeService } from '@/services/useEntityTreeService';
-import { ElFormItem, type FormRules } from 'element-plus';
+import { computed, type ComputedRef, ref, watch } from 'vue';
+import { type EntityTreeService, iconOptionsForIcon, useEntityTreeService } from '@/services/useEntityTreeService';
+import { ElFormItem, ElInput, type FormItemInstance, type FormRules } from 'element-plus';
 import { useIconStore } from '@/stores/model/iconStore';
 import { elFormEntityNameUniqueValidator } from '@/utils/utils';
 import { useEntityUsagesService } from '@/services/useEntityUsagesService';
@@ -60,41 +60,78 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
   ],
   ...(service.state.editingEntityId.value !== 0 ? {} : {
     imageData: [{
-      required: true, message: 'Please select an image file to upload.',
+      required: true,
+      message: service.state.selectedIconOption.value === 'new'
+        ? 'Please select an image file to upload.'
+        : 'Please enter a URL',
       validator(_, __, callback) {
-        if (!service.state.editingEntityIconDataBase64.value) {
-          callback(new Error());
-        } else {
+        if (service.state.selectedIconOption.value === 'new' && service.state.editingEntityIconDataBase64.value) {
           callback();
+        } else if (service.state.selectedIconOption.value === 'url' && service.state.editingEntityIconDataUrl.value) {
+          callback();
+        } else {
+          callback(new Error());
         }
       },
     }],
   }),
 }));
 
+const formItemImageData = ref<FormItemInstance>();
+
+watch(() => service.state.selectedIconOption.value, async () => {
+  setTimeout(() => formItemImageData.value?.clearValidate(), 50);
+});
+
 </script>
 
 <template>
   <EntityEditor ref="entityEditor" :game="game" :service="service" entity-type="Icon" :form-rules="formRules">
     <template #form>
-      <template v-if="service.state.editingEntityId.value === 0">
-        <el-form-item label="Upload image" prop="imageData">
-          <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value" />
-        </el-form-item>
-      </template>
-      <template v-else>
-        <el-form-item label="Current image">
-          <IconImg :icon="service.state.editingEntityId.value" :size="64" />
-        </el-form-item>
+      <el-form-item v-if="service.state.editingEntityId.value" label="Current image">
+        <IconImg :icon="service.state.editingEntityId.value" :size="64" />
+      </el-form-item>
 
-        <el-form-item label="Replace image">
-          <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value" />
-        </el-form-item>
-      </template>
+      <el-form-item :label="service.state.editingEntityId.value ? 'Replace image' : 'Upload image'"
+                    :prop="service.state.editingEntityId.value ? undefined : 'imageData'"
+                    ref="formItemImageData">
+
+        <el-segmented v-model="service.state.selectedIconOption.value"
+                      :options="iconOptionsForIcon">
+          <template #default="{ item }">
+            <div style="margin: 4px;">
+              <div v-if="typeof item.icon === 'string'" class="maskIcon"
+                   style="width: 20px; height: 20px;"
+                   :style="{mask: 'url(\'' + item.icon + '\') center/contain'}">
+              </div>
+              <el-icon v-else size="20">
+                <component :is="item.icon" />
+              </el-icon>
+              <div>{{ item.label }}</div>
+            </div>
+          </template>
+        </el-segmented>
+
+        <template v-if="service.state.selectedIconOption.value === 'new'">
+          <div class="full-width" style="margin-top: 12px;">
+            <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value" />
+          </div>
+        </template>
+        <template v-if="service.state.selectedIconOption.value === 'url'">
+          <div class="full-width" style="margin-top: 12px;">
+            <el-input v-model="service.state.editingEntityIconDataUrl.value" placeholder="Enter icon URL" />
+          </div>
+        </template>
+      </el-form-item>
     </template>
   </EntityEditor>
 </template>
 
 <style scoped>
-
+.maskIcon {
+  background-color: var(--el-segmented-color);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3px;
+}
 </style>

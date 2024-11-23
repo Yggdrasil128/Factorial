@@ -106,6 +106,7 @@ export type Icon = {
   name: string;
   mimeType: string;
   imageData: string;
+  imageUrl: string;
   category: string[];
   lastUpdated: number;
 }
