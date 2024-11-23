@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class Item implements NamedModel {
@@ -19,11 +21,12 @@ public class Item implements NamedModel {
     private Game game;
     @Column(nullable = false)
     private String name = "";
+    @Column(length = 2000)
     private String description = "";
     @ManyToOne
     private Icon icon;
     @ElementCollection
-    private List<String> category;
+    private List<String> category = emptyList();
 
     public Item() {
     }

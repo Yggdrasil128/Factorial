@@ -1,6 +1,7 @@
 package de.yggdrasil128.factorial.model.game;
 
 import de.yggdrasil128.factorial.model.*;
+import de.yggdrasil128.factorial.model.icon.IconDownloader;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,14 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     private final ApplicationEventPublisher events;
     private final IconService iconService;
+    private final IconDownloader iconDownloader;
 
-    public GameService(GameRepository repository, ApplicationEventPublisher events, IconService iconService) {
+    public GameService(GameRepository repository, ApplicationEventPublisher events, IconService iconService,
+                       IconDownloader iconDownloader) {
         super(repository);
         this.events = events;
         this.iconService = iconService;
+        this.iconDownloader = iconDownloader;
     }
 
     @Override
@@ -75,7 +79,7 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Transactional
     public void doImport(GameSummary summary, CompletableFuture<Void> result) {
-        Game game = Importer.importGame(summary);
+        Game game = Importer.importGame(summary, iconDownloader);
         game.setOrdinal(0);
         inferOrdinal(game);
         AsyncHelper.complete(result);
@@ -87,7 +91,7 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
     public void doClone(int id, String newName, CompletableFuture<Void> result) {
         Game game = get(id);
         GameSummary temp = Exporter.exportGame(game, External.SAVE_FILE);
-        Game clone = Importer.importGame(temp);
+        Game clone = Importer.importGame(temp, iconDownloader);
         clone.setName(newName);
         clone.setOrdinal(0);
         inferOrdinal(clone);

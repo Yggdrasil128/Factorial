@@ -26,6 +26,7 @@ public class Save implements NamedModel, OrderedModel {
     // TODO validate uniqueness in service operations
     @Column(unique = true, nullable = false)
     private String name = "";
+    @Column(length = 2000)
     private String description = "";
     @ManyToOne
     private Icon icon;

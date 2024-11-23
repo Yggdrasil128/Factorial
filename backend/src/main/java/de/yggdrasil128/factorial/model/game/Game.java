@@ -23,6 +23,7 @@ public class Game implements NamedModel, OrderedModel {
     private int ordinal;
     @Column(nullable = false, unique = true)
     private String name = "";
+    @Column(length = 2000)
     private String description = "";
     @ManyToOne
     private Icon icon;

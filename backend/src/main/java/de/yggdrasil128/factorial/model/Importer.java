@@ -10,6 +10,7 @@ import de.yggdrasil128.factorial.model.game.Game;
 import de.yggdrasil128.factorial.model.game.GameStandalone;
 import de.yggdrasil128.factorial.model.game.GameSummary;
 import de.yggdrasil128.factorial.model.icon.Icon;
+import de.yggdrasil128.factorial.model.icon.IconDownloader;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
 import de.yggdrasil128.factorial.model.item.Item;
 import de.yggdrasil128.factorial.model.item.ItemStandalone;
@@ -31,11 +32,13 @@ import de.yggdrasil128.factorial.model.save.SaveSummary;
 import org.springframework.http.HttpStatus;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 
 public class Importer {
 
-    public static Game importGame(GameSummary summary) {
+    public static Game importGame(GameSummary summary, IconDownloader iconDownloader) {
         Importer importer = new Importer();
         GameStandalone input = summary.getGame();
         Game game = new Game(input);
@@ -44,7 +47,7 @@ public class Importer {
          * 'importer' instance's mappings, which are then used in the later loops.
          */
         for (IconStandalone icon : summary.getIcons()) {
-            game.getIcons().add(importer.importIcon(game, icon));
+            game.getIcons().add(importer.importIcon(game, icon, iconDownloader));
         }
         for (ItemStandalone item : summary.getItems()) {
             game.getItems().add(importer.importItem(game, item));
@@ -102,8 +105,9 @@ public class Importer {
         }
     }
 
-    private Icon importIcon(Game game, IconStandalone input) {
+    private Icon importIcon(Game game, IconStandalone input, IconDownloader iconDownloader) {
         Icon icon = new Icon(game, input);
+        iconDownloader.downloadIcon(icon, input);
         icons.put(icon.getName(), icon);
         return icon;
     }
@@ -235,25 +239,24 @@ public class Importer {
         return null == standalones ? new ArrayList<>()
                 : standalones.stream()
                         .map(standalone -> new ItemQuantity(findItem(standalone.itemId()), standalone.quantity()))
-                        .filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
+                        .filter(Objects::nonNull).collect(toCollection(ArrayList::new));
     }
 
     private List<RecipeModifier> findRecipeModifiers(List<Object> names) {
         return null == names ? new ArrayList<>()
                 : names.stream().map(this::findRecipeModifier).filter(Objects::nonNull)
-                        .collect(Collectors.toCollection(ArrayList::new));
+                        .collect(toCollection(ArrayList::new));
     }
 
     private List<Machine> findMachines(List<Object> names) {
         return null == names ? new ArrayList<>()
-                : names.stream().map(this::findMachine).filter(Objects::nonNull)
-                        .collect(Collectors.toCollection(ArrayList::new));
+                : names.stream().map(this::findMachine).filter(Objects::nonNull).collect(toCollection(ArrayList::new));
     }
 
     private static Map<ProductionStep, Fraction>
             findProductionStepChanges(Save save, List<ProductionStepChangeStandalone> standalones) {
         // During import, production steps do not have an id, so we cannot use a normal HashMap here.
-        return null == standalones ? new HashMap<>() : standalones.stream().collect(Collectors.toMap(standalone -> {
+        return null == standalones ? new HashMap<>() : standalones.stream().collect(toMap(standalone -> {
             // TODO error handling
             String[] parts = ((String) standalone.productionStepId()).split("\\.");
             return save.getFactories().get(Integer.parseInt(parts[0])).getProductionSteps()

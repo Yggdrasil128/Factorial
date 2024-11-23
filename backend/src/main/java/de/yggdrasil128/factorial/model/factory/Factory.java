@@ -26,6 +26,7 @@ public class Factory implements NamedModel, OrderedModel {
     private int ordinal;
     @Column(nullable = false)
     private String name = "";
+    @Column(length = 2000)
     private String description = "";
     @ManyToOne
     private Icon icon;

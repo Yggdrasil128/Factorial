@@ -15,11 +15,14 @@ public class IconService extends ParentedModelService<Icon, IconStandalone, Game
 
     private final ApplicationEventPublisher events;
     private final GameRepository gameRepository;
+    private final IconDownloader iconDownloader;
 
-    public IconService(IconRepository repository, ApplicationEventPublisher events, GameRepository gameRepository) {
+    public IconService(IconRepository repository, ApplicationEventPublisher events, GameRepository gameRepository,
+                       IconDownloader iconDownloader) {
         super(repository);
         this.events = events;
         this.gameRepository = gameRepository;
+        this.iconDownloader = iconDownloader;
     }
 
     @Override
@@ -39,7 +42,9 @@ public class IconService extends ParentedModelService<Icon, IconStandalone, Game
 
     @Override
     protected Icon prepareCreate(Game game, IconStandalone standalone) {
-        return new Icon(game, standalone);
+        Icon icon = new Icon(game, standalone);
+        iconDownloader.downloadIcon(icon, standalone);
+        return icon;
     }
 
     @Override

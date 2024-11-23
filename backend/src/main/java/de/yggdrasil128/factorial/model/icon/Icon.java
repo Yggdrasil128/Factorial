@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 
 @Entity
@@ -27,7 +28,7 @@ public class Icon implements NamedModel {
     private String mimeType = "";
     private Instant lastUpdated;
     @ElementCollection
-    private List<String> category;
+    private List<String> category = emptyList();
 
     public Icon() {
     }

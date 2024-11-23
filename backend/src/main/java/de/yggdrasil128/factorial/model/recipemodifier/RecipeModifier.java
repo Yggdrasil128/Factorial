@@ -10,6 +10,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class RecipeModifier implements NamedModel {
@@ -21,6 +23,7 @@ public class RecipeModifier implements NamedModel {
     private Game game;
     @Column(nullable = false)
     private String name = "";
+    @Column(length = 2000)
     private String description = "";
     @OneToOne
     private Icon icon;
@@ -34,7 +37,7 @@ public class RecipeModifier implements NamedModel {
     @Convert(converter = FractionConverter.class)
     private Fraction outputQuantityMultiplier = Fraction.ONE;
     @ElementCollection
-    private List<String> category;
+    private List<String> category = emptyList();
 
     public RecipeModifier() {
     }

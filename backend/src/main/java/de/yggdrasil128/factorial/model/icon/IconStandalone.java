@@ -12,6 +12,7 @@ public record IconStandalone(int id,
                              @JsonProperty(access = READ_ONLY) int gameId,
                              String name,
                              byte[] imageData,
+                             String imageUrl,
                              String mimeType,
                              @JsonProperty(access = READ_ONLY) long lastUpdated,
                              List<String> category) {
@@ -22,7 +23,7 @@ public record IconStandalone(int id,
 
     public static IconStandalone of(Icon model, External destination) {
         return new IconStandalone(model.getId(), model.getGame().getId(), model.getName(),
-                External.SAVE_FILE == destination ? model.getImageData() : null, model.getMimeType(),
+                External.SAVE_FILE == destination ? model.getImageData() : null, null, model.getMimeType(),
                 model.getLastUpdated().toEpochMilli(), new ArrayList<>(model.getCategory()));
     }
 

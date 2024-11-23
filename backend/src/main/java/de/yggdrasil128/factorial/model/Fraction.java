@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import java.io.Serial;
+import java.math.BigDecimal;
 
 @JsonSerialize(using = ToStringSerializer.class)
 @JsonDeserialize(using = FractionDeserializer.class)
@@ -18,6 +19,13 @@ public class Fraction extends Number implements Comparable<Fraction> {
 
     private long numerator;
     private long denominator;
+
+    public static Fraction of(BigDecimal value) {
+        if (9 < value.scale()) {
+            throw new ArithmeticException("BigInteger out of fraction range");
+        }
+        return new Fraction(value.unscaledValue().longValueExact(), (int) Math.pow(10, value.scale()));
+    }
 
     public static Fraction of(long value) {
         return new Fraction(value);
