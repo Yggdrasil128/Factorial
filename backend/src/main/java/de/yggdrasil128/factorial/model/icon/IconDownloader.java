@@ -18,7 +18,7 @@ public class IconDownloader {
 
     public void downloadIcon(Icon icon, IconStandalone input) {
         if (null != input.imageUrl()) {
-            LOG.debug("downloading image data for {} from {}", input.name(), input.imageUrl());
+            LOG.debug("Downloading image data for icon {} from {}", input.name(), input.imageUrl());
             RequestEntity<Void> request = RequestEntity.get(URI.create(input.imageUrl())).build();
             ResponseEntity<byte[]> response = httpClient.exchange(request, byte[].class);
             icon.setMimeType(response.getHeaders().getContentType().toString());
