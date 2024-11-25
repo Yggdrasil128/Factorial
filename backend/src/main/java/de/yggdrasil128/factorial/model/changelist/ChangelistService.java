@@ -241,17 +241,6 @@ public class ChangelistService
         events.publishEvent(new ChangelistsReorderedEvent(save.getId(), changelists));
     }
 
-    public void reportMachineCount(int changelistId, ProductionStep productionStep, Fraction change) {
-        Changelist changelist = get(changelistId);
-        if (Fraction.ZERO.equals(change)) {
-            changelist.getProductionStepChanges().remove(productionStep);
-        } else {
-            changelist.getProductionStepChanges().put(productionStep, change);
-        }
-        repository.save(changelist);
-        events.publishEvent(new ChangelistUpdatedEvent(changelist));
-    }
-
     private void publishProductionStepThroughputsChanged(ProductionStepThroughputs throughputs) {
         events.publishEvent(new ProductionStepThroughputsChangedEvent(
                 productionStepService.get(throughputs.getEntityId()), throughputs, false));
@@ -264,6 +253,7 @@ public class ChangelistService
                 .reduce(QuantityByChangelist.ZERO, QuantityByChangelist::add);
     }
 
+    @Transactional
     public void apply(int id) {
         Changelist changelist = get(id);
         if (!changelist.getProductionStepChanges().isEmpty()) {
@@ -288,16 +278,7 @@ public class ChangelistService
         ProductionStep productionStep = productionStepService.get(productionStepId);
         AsyncHelper.complete(result);
         Changelist changelist = findPrimaryChangelist(productionStepId);
-        Fraction change = machineCount.subtract(productionStep.getMachineCount());
-        ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
-                () -> getProductionStepChanges(productionStep));
-        ProductionStepChanges changes = computeProductionStepChanges(changelist);
-        if (changes.setChange(productionStepId, throughputs, change)) {
-            events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
-        }
-        changelist.getProductionStepChanges().put(productionStep, change);
-        repository.save(changelist);
-        events.publishEvent(new ChangelistUpdatedEvent(changelist));
+        setMachineCount(changelist, productionStep, machineCount);
     }
 
     @Transactional
@@ -305,7 +286,46 @@ public class ChangelistService
         ProductionStep productionStep = productionStepService.get(productionStepId);
         AsyncHelper.complete(result);
         Changelist changelist = findPrimaryChangelist(productionStepId);
-        ProductionStepChanges.Link link = computeProductionStepChanges(changelist).getLink(productionStepId);
+        applyChange(changelist, productionStep);
+    }
+
+    private Changelist findPrimaryChangelist(int productionStepId) {
+        Factory factory = factoryRepository.findByProductionStepsId(productionStepId);
+        Save save = saveRepository.findByFactoriesId(factory.getId());
+        return repository.findBySaveIdAndPrimaryIsTrue(save.getId());
+    }
+
+    @Transactional
+    public void setMachineCount(int id, int productionStepId, Fraction machineCount, CompletableFuture<Void> result) {
+        Changelist changelist = get(id);
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        AsyncHelper.complete(result);
+        setMachineCount(changelist, productionStep, machineCount);
+    }
+
+    @Transactional
+    public void applyChange(int id, int productionStepId, CompletableFuture<Void> result) {
+        Changelist changelist = get(id);
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        AsyncHelper.complete(result);
+        applyChange(changelist, productionStep);
+    }
+
+    private void setMachineCount(Changelist changelist, ProductionStep productionStep, Fraction machineCount) {
+        Fraction change = machineCount.subtract(productionStep.getMachineCount());
+        ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
+                () -> getProductionStepChanges(productionStep));
+        ProductionStepChanges changes = computeProductionStepChanges(changelist);
+        if (changes.setChange(productionStep.getId(), throughputs, change)) {
+            events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
+        }
+        changelist.getProductionStepChanges().put(productionStep, change);
+        repository.save(changelist);
+        events.publishEvent(new ChangelistUpdatedEvent(changelist));
+    }
+
+    private void applyChange(Changelist changelist, ProductionStep productionStep) {
+        ProductionStepChanges.Link link = computeProductionStepChanges(changelist).getLink(productionStep.getId());
         if (null != link) {
             Fraction change = link.getChange();
             if (link.applyChange()) {
@@ -316,12 +336,6 @@ public class ChangelistService
         changelist.getProductionStepChanges().remove(productionStep);
         repository.save(changelist);
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
-    }
-
-    private Changelist findPrimaryChangelist(int productionStepId) {
-        Factory factory = factoryRepository.findByProductionStepsId(productionStepId);
-        Save save = saveRepository.findByFactoriesId(factory.getId());
-        return repository.findBySaveIdAndPrimaryIsTrue(save.getId());
     }
 
     /**

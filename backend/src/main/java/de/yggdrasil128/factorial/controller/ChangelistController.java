@@ -2,6 +2,7 @@ package de.yggdrasil128.factorial.controller;
 
 import de.yggdrasil128.factorial.model.AsyncHelper;
 import de.yggdrasil128.factorial.model.EntityPosition;
+import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.ModelService;
 import de.yggdrasil128.factorial.model.changelist.Changelist;
 import de.yggdrasil128.factorial.model.changelist.ChangelistService;
@@ -95,6 +96,34 @@ public class ChangelistController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void apply(int changelistId) {
         changelistService.apply(changelistId);
+    }
+
+    /**
+     * Applies the change from the target {@link Changelist} to the target {@link ProductionStep}.
+     * 
+     * @param changelistId {@link Changelist#getId() id} of the target {@link Changelist}
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     */
+    @PatchMapping("/changelist/change/apply")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> applyChange(int changelistId, int productionStepId) {
+        return asyncHelper.submit(result -> changelistService.applyChange(changelistId, productionStepId, result));
+    }
+
+    /**
+     * Sets the change for the target {@link ProductionStep} in the target {@link Changelist}. Setting the change to a
+     * value of {@code 0} (zero) will implicitly remove it.
+     * 
+     * @param changelistId {@link Changelist#getId() id} of the target {@link Changelist}
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     * @param machineCountChange the change of machineCount to record
+     */
+    @PatchMapping("/changelist/change/machineCount")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> updateMachineCount(int changelistId, int productionStepId,
+                                                      String machineCountChange) {
+        return asyncHelper.submit(result -> changelistService.setMachineCount(changelistId, productionStepId,
+                Fraction.of(machineCountChange), result));
     }
 
 }
