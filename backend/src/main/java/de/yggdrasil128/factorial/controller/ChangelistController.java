@@ -122,7 +122,7 @@ public class ChangelistController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CompletableFuture<Void> updateMachineCount(int changelistId, int productionStepId,
                                                       String machineCountChange) {
-        return asyncHelper.submit(result -> changelistService.setMachineCount(changelistId, productionStepId,
+        return asyncHelper.submit(result -> changelistService.setMachineCountChange(changelistId, productionStepId,
                 Fraction.of(machineCountChange), result));
     }
 

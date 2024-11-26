@@ -278,7 +278,8 @@ public class ChangelistService
         ProductionStep productionStep = productionStepService.get(productionStepId);
         AsyncHelper.complete(result);
         Changelist changelist = findPrimaryChangelist(productionStepId);
-        setMachineCount(changelist, productionStep, machineCount);
+        Fraction change = machineCount.subtract(productionStep.getMachineCount());
+        setChange(changelist, productionStep, change);
     }
 
     @Transactional
@@ -296,11 +297,12 @@ public class ChangelistService
     }
 
     @Transactional
-    public void setMachineCount(int id, int productionStepId, Fraction machineCount, CompletableFuture<Void> result) {
+    public void setMachineCountChange(int id, int productionStepId, Fraction machineCountChange,
+                                      CompletableFuture<Void> result) {
         Changelist changelist = get(id);
         ProductionStep productionStep = productionStepService.get(productionStepId);
         AsyncHelper.complete(result);
-        setMachineCount(changelist, productionStep, machineCount);
+        setChange(changelist, productionStep, machineCountChange);
     }
 
     @Transactional
@@ -311,15 +313,18 @@ public class ChangelistService
         applyChange(changelist, productionStep);
     }
 
-    private void setMachineCount(Changelist changelist, ProductionStep productionStep, Fraction machineCount) {
-        Fraction change = machineCount.subtract(productionStep.getMachineCount());
+    private void setChange(Changelist changelist, ProductionStep productionStep, Fraction change) {
         ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
                 () -> getProductionStepChanges(productionStep));
         ProductionStepChanges changes = computeProductionStepChanges(changelist);
         if (changes.setChange(productionStep.getId(), throughputs, change)) {
             events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep, throughputs, false));
         }
-        changelist.getProductionStepChanges().put(productionStep, change);
+        if (change.isZero()) {
+            changelist.getProductionStepChanges().remove(productionStep);
+        } else {
+            changelist.getProductionStepChanges().put(productionStep, change);
+        }
         repository.save(changelist);
         events.publishEvent(new ChangelistUpdatedEvent(changelist));
     }
