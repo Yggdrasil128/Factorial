@@ -5,13 +5,21 @@ import { useChangelistApi } from '@/api/model/useChangelistApi';
 import { useRoute, useRouter } from 'vue-router';
 import { computed, type ComputedRef, h, type Ref, ref } from 'vue';
 import type { Changelist } from '@/types/model/standalone';
-import { Check, Delete, Edit, Plus, Star } from '@element-plus/icons-vue';
+import { ArrowDown, Check, Delete, Edit, Hide, Plus, Star, View } from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
-import { ElButton, ElButtonGroup, ElMessageBox, ElPopconfirm, ElSwitch, ElTooltip } from 'element-plus';
+import {
+  ElButton,
+  ElButtonGroup,
+  ElDropdown,
+  ElDropdownItem,
+  ElDropdownMenu,
+  ElMessageBox,
+  ElSwitch,
+} from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next';
 import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
 import type { EntityWithOrdinal } from '@/types/model/basic';
-import BgcElButton from '@/components/common/input/BgcElButton.vue';
+import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
 const changelistStore = useChangelistStore();
@@ -36,12 +44,31 @@ function newChangelist(): void {
 function editChangelist(changelistId: number): void {
   router.push({
     name: 'editChangelist',
-    params: { factoryId: route.params.factoryId, editChangelistId: changelistId }
+    params: { factoryId: route.params.factoryId, editChangelistId: changelistId },
+  });
+}
+
+function viewChangelist(changelistId: number): void {
+  router.push({
+    name: 'viewChangelist',
+    params: { factoryId: route.params.factoryId, changelistId: changelistId },
   });
 }
 
 function deleteChangelist(changelistId: number): void {
-  changelistApi.delete(changelistId);
+  const changelist: Changelist | undefined = changelistStore.getById(changelistId);
+  ElMessageBox.confirm(
+    'Are you sure you want to delete changelist \'' + changelist?.name + '\'?',
+    'Warning',
+    {
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    },
+  ).then(() => {
+    changelistApi.delete(changelistId);
+  }).catch(() => {
+  });
 }
 
 function setPrimary(changelistId: number): void {
@@ -65,13 +92,13 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
           h(ElSwitch, {
             disabled: isPrimary,
             modelValue: checked.value,
-            'onUpdate:modelValue': (val) => (checked.value = Boolean(val))
+            'onUpdate:modelValue': (val) => (checked.value = Boolean(val)),
           }),
-          h('span', { style: 'margin-left: 10px;' }, 'Delete changelist afterwards')
-        ])
+          h('span', { style: 'margin-left: 10px;' }, 'Delete changelist afterwards'),
+        ]),
     })
       .then(() => r(true))
-      .catch(() => r(false))
+      .catch(() => r(false)),
   );
   if (!confirm) {
     return;
@@ -81,18 +108,50 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
     await changelistApi.delete(changelistId);
   }
 }
+
+const dropdownMenuOpenChangelistId: Ref<number> = ref(0);
+let dropdownMenuOpenResetTimeout: NodeJS.Timeout | null = null;
+
+function onDropdownVisibleChange(changelistId: number, visible: boolean): void {
+  if (dropdownMenuOpenResetTimeout) {
+    clearTimeout(dropdownMenuOpenResetTimeout);
+    dropdownMenuOpenResetTimeout = null;
+  }
+
+  if (visible) {
+    dropdownMenuOpenChangelistId.value = changelistId;
+  } else {
+    dropdownMenuOpenResetTimeout = setTimeout(onDropdownMenuOpenResetTimer, 150);
+  }
+}
+
+function onDropdownMenuOpenResetTimer(): void {
+  dropdownMenuOpenResetTimeout = null;
+  dropdownMenuOpenChangelistId.value = 0;
+}
+
 </script>
 
 <template>
   <div class="changelists">
-    <h2>Changelists</h2>
+    <div class="full-width row items-center">
+      <h2 style="flex: 1 1 auto;">Changelists ({{ changelists.length }})</h2>
+      <div>
+        <el-button type="primary" :icon="Plus" @click="newChangelist()">New changelist</el-button>
+      </div>
+    </div>
+
     <vue-draggable-next :model-value="changelists" @end="draggableSupport.onDragEnd">
       <div
         v-for="changelist in changelists"
         :key="changelist.id"
         class="list-group-item"
-        :class="{ active: changelist.active, primary: changelist.primary, hasIcon: !!changelist.iconId }"
-      >
+        :class="{
+          active: changelist.active,
+          primary: changelist.primary,
+          hasIcon: !!changelist.iconId,
+          forceShowButtons: dropdownMenuOpenChangelistId === changelist.id,
+        }">
         <div class="left">
           <div class="icon" v-if="changelist.iconId">
             <icon-img :icon="changelist.iconId" :size="80" v-if="changelist.iconId" />
@@ -107,86 +166,56 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
           </div>
           <div class="buttons">
             <div style="float: right;">
-              <el-tooltip
-                effect="dark"
-                placement="top-start"
-                transition="none"
-                :hide-after="0"
-                content="Set active"
-              >
+              <custom-el-tooltip content="Set active">
                 <el-switch
                   v-model="changelist.active"
                   :disabled="changelist.primary"
+                  :active-icon="View"
+                  :inactive-icon="Hide"
+                  inline-prompt
                   style="margin-right: 8px;"
                   @update:model-value="(val) => setActive(changelist.id, Boolean(val))"
                 />
-              </el-tooltip>
+              </custom-el-tooltip>
+
+              <custom-el-tooltip v-if="!changelist.primary" content="Set primary">
+                <el-button style="margin-right: 8px;" :icon="Star" @click="setPrimary(changelist.id)" />
+              </custom-el-tooltip>
 
               <el-button-group>
-                <el-tooltip
-                  effect="dark"
-                  placement="top-start"
-                  transition="none"
-                  :hide-after="0"
-                  content="Set primary"
-                  v-if="!changelist.primary"
-                >
-                  <bgc-el-button :icon="Star" @click="setPrimary(changelist.id)" />
-                </el-tooltip>
-                <el-tooltip
-                  effect="dark"
-                  placement="top-start"
-                  transition="none"
-                  :hide-after="0"
-                  content="Apply all changes"
-                >
-                  <bgc-el-button
+                <custom-el-tooltip content="Apply all changes">
+                  <el-button
                     :icon="Check"
                     @click="askApplyChangelist(changelist.id, changelist.primary)"
                   />
-                </el-tooltip>
-                <el-tooltip
-                  effect="dark"
-                  placement="top-start"
-                  transition="none"
-                  :hide-after="0"
-                  content="Edit"
-                >
-                  <bgc-el-button :icon="Edit" @click="editChangelist(changelist.id)" />
-                </el-tooltip>
-                <el-popconfirm
-                  title="Delete this changelist?"
-                  width="200px"
-                  @confirm="deleteChangelist(changelist.id)"
-                >
-                  <template #reference>
-                    <span class="row center tooltipHelperSpan">
-                      <el-tooltip
-                        effect="dark"
-                        placement="top-start"
-                        transition="none"
-                        :hide-after="0"
-                        content="Delete"
-                      >
-                        <el-button
-                          type="danger"
-                          :icon="Delete"
-                          :disabled="changelists.length === 1 || changelist.primary"
-                        />
-                      </el-tooltip>
-                    </span>
+                </custom-el-tooltip>
+
+                <el-dropdown class="buttonDropdown" trigger="click"
+                             @visible-change="(visible: boolean) => onDropdownVisibleChange(changelist.id, visible)">
+                  <el-button :icon="ArrowDown" />
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item :icon="View" @click="viewChangelist(changelist.id)">
+                        View changes
+                      </el-dropdown-item>
+                      <el-dropdown-item :icon="Edit" @click="editChangelist(changelist.id)">
+                        Edit
+                      </el-dropdown-item>
+                      <el-dropdown-item :icon="Delete" @click="deleteChangelist(changelist.id)"
+                                        class="deleteOption"
+                                        :class="{disabled: changelists.length === 1 || changelist.primary}"
+                                        :disabled="changelists.length === 1 || changelist.primary">
+                        Delete
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
                   </template>
-                </el-popconfirm>
+                </el-dropdown>
               </el-button-group>
             </div>
           </div>
         </div>
       </div>
     </vue-draggable-next>
-
-    <div class="createChangelist">
-      <el-button type="primary" :icon="Plus" @click="newChangelist()">New changelist</el-button>
-    </div>
   </div>
 </template>
 
@@ -260,11 +289,11 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
   overflow: auto;
 }
 
-.createChangelist {
-  width: 100%;
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
+/*noinspection CssUnusedSymbol*/
+.buttonDropdown > .el-button {
+  --el-button-divide-border-color: #60606080;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 </style>
 
@@ -289,5 +318,13 @@ async function askApplyChangelist(changelistId: number, isPrimary: boolean): Pro
 
 .tooltipHelperSpan button:active {
   border-right-color: var(--el-color-danger-dark-2) !important;
+}
+
+.deleteOption {
+  color: var(--el-color-danger) !important;
+}
+
+.deleteOption.disabled {
+  color: var(--el-color-danger-light-5) !important;
 }
 </style>

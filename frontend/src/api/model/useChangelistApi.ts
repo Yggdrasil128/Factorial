@@ -1,5 +1,5 @@
 import type { Changelist } from '@/types/model/standalone';
-import type { EntityWithOrdinal } from '@/types/model/basic';
+import type { EntityWithOrdinal, Fraction } from '@/types/model/basic';
 import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi';
 
 export class ChangelistApi extends AbstractBulkCrudEntityApi<Changelist> {
@@ -35,12 +35,25 @@ export class ChangelistApi extends AbstractBulkCrudEntityApi<Changelist> {
     });
   }
 
-  public async apply(changelistId: number): Promise<void> {
-    return this.api.post('/api/changelist/apply', undefined, { changelistId: changelistId });
+  public async reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void> {
+    return this.api.patch('/api/save/changelists/order', input, { saveId });
   }
 
-  public async reorder(saveId: number, input: EntityWithOrdinal[]): Promise<void> {
-    return this.api.patch('/api/save/changelists/order', input, { saveId: saveId });
+  public async apply(changelistId: number): Promise<void> {
+    return this.api.post('/api/changelist/apply', undefined, { changelistId });
+  }
+
+  public async applyChange(changelistId: number, productionStepId: number): Promise<void> {
+    return this.api.patch('/api/changelist/change/apply', undefined, { changelistId, productionStepId });
+  }
+
+  public async updateMachineCountChange(changelistId: number, productionStepId: number, machineCountChange: Fraction): Promise<void> {
+    return this.api.patch('/api/changelist/change/machineCount', undefined,
+      { changelistId, productionStepId, machineCountChange });
+  }
+
+  public async deleteChange(changelistId: number, productionStepId: number): Promise<void> {
+    return this.updateMachineCountChange(changelistId, productionStepId, '0');
   }
 }
 

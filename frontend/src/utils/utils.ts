@@ -19,8 +19,6 @@ function elFormEntityNameUniqueValidatorFunction(rule: EntityNameUniqueValidatio
     return;
   }
 
-  console.log(rule);
-
   for (const entity of rule.entities) {
     if (entity.id === rule.ownId) {
       continue;
@@ -35,3 +33,13 @@ function elFormEntityNameUniqueValidatorFunction(rule: EntityNameUniqueValidatio
 
 export const elFormEntityNameUniqueValidator: RuleItem['validator'] =
   elFormEntityNameUniqueValidatorFunction as unknown as RuleItem['validator'];
+
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+
+export function isTruthy(value: any): boolean {
+  return !!value;
+}

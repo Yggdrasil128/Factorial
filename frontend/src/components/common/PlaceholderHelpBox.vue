@@ -6,6 +6,7 @@ export interface PlaceholderHelpBoxProps {
   title?: string;
   width?: number;
   showOnlyWhenReady?: boolean;
+  backgroundColor?: string;
 }
 
 defineProps<PlaceholderHelpBoxProps>();
@@ -16,7 +17,7 @@ const modelSyncService = getModelSyncService();
 
 <template>
   <div class="main" v-if="!showOnlyWhenReady || !modelSyncService.state.loading.value">
-    <div class="box" :style="{width: (width ?? 500) + 'px'}">
+    <div class="box" :style="{width: (width ?? 500) + 'px', backgroundColor}">
       <div class="headline">
         <slot name="title">
           <el-icon :size="32">

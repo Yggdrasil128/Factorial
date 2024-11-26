@@ -64,8 +64,8 @@ const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
   flex: 0 0 auto;
 }
 
-.left > * {
-  min-height: 300px;
+.left > *:nth-child(n + 2) {
+  margin-top: 32px;
 }
 
 .right {

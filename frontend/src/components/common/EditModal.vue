@@ -4,6 +4,7 @@ import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { ElMessageBox, type FormRules } from 'element-plus';
 import { Check, Close } from '@element-plus/icons-vue';
 import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import { sleep } from '@/utils/utils';
 
 export interface EditModalProps {
   title: string;
@@ -57,7 +58,7 @@ async function checkLeave() {
     if (!answer) return false;
   }
   visible.value = false;
-  await new Promise((r) => setTimeout(r, 200));
+  await sleep(200);
   return true;
 }
 

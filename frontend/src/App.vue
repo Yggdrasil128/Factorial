@@ -35,6 +35,10 @@ body {
   --el-fill-color-blank: #00000030;
 }
 
+#app {
+  padding-bottom: 100px;
+}
+
 .el-switch__core {
   background-color: #30303080;
 }
@@ -79,5 +83,13 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.el-button.destructive {
+  color: var(--el-color-danger);
+}
+
+.el-button.destructive:hover, .el-button.destructive.is-disabled {
+  color: var(--el-color-danger-light-3);
 }
 </style>

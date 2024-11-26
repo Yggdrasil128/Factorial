@@ -18,6 +18,7 @@ import MigrateSaveModal from '@/components/savesAndGames/modal/MigrateSaveModal.
 import EditGameModal from '@/components/savesAndGames/modal/EditGameModal.vue';
 import ImportSaveModal from '@/components/savesAndGames/modal/ImportSaveModal.vue';
 import ImportGameModal from '@/components/savesAndGames/modal/ImportGameModal.vue';
+import ViewChangelistModal from '@/components/factories/modal/ViewChangelistModal.vue';
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -95,6 +96,11 @@ const router = createRouter({
           path: 'editChangelist/:editChangelistId',
           name: 'editChangelist',
           components: { modal: EditChangelistModal },
+        },
+        {
+          path: 'viewChangelist/:changelistId',
+          name: 'viewChangelist',
+          components: { modal: ViewChangelistModal },
         },
         {
           path: 'newProductionStep',
