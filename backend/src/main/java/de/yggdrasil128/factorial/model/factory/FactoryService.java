@@ -5,7 +5,10 @@ import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.*;
-import de.yggdrasil128.factorial.model.resource.local.*;
+import de.yggdrasil128.factorial.model.resource.local.LocalResource;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceService;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceStandalone;
+import de.yggdrasil128.factorial.model.resource.local.LocalResourceUpdatedEvent;
 import de.yggdrasil128.factorial.model.save.Save;
 import de.yggdrasil128.factorial.model.save.SaveRepository;
 import org.slf4j.Logger;
@@ -63,6 +66,7 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
 
     @Override
     protected Factory prepareCreate(Save save, FactoryStandalone standalone) {
+        ensureUniqueName(save, standalone);
         Factory factory = new Factory(save, standalone);
         applyRelations(factory, standalone);
         inferOrdinal(save, factory);
@@ -93,8 +97,15 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
 
     @Override
     protected void prepareUpdate(Factory factory, FactoryStandalone standalone) {
+        ensureUniqueName(factory.getSave(), standalone);
         factory.applyBasics(standalone);
         applyRelations(factory, standalone);
+    }
+
+    private void ensureUniqueName(Save save, FactoryStandalone standalone) {
+        if (null != standalone.name() && repository.existsBySaveIdAndName(save.getId(), standalone.name())) {
+            throw report(HttpStatus.CONFLICT, "A Factory with that name already exists");
+        }
     }
 
     private void applyRelations(Factory factory, FactoryStandalone standalone) {
@@ -111,9 +122,6 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
         Save save = saveRepository.findByFactoriesId(id);
         if (null == save) {
             throw report(HttpStatus.CONFLICT, "factory does not belong to a save");
-        }
-        if (1 == repository.countBySaveId(save.getId())) {
-            throw report(HttpStatus.CONFLICT, "cannot delete the last factory of a save");
         }
         save.getFactories().remove(get(id));
         return save;

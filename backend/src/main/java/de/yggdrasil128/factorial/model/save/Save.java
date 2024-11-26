@@ -23,7 +23,6 @@ public class Save implements NamedModel, OrderedModel {
     private Game game;
     @Column(nullable = false)
     private int ordinal;
-    // TODO validate uniqueness in service operations
     @Column(unique = true, nullable = false)
     private String name = "";
     @Column(length = 2000)

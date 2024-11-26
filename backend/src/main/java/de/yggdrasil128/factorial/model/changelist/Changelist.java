@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"save_id", "name"}))
 public class Changelist implements NamedModel, OrderedModel {
 
     @Id

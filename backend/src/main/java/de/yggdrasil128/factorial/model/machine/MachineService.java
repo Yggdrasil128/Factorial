@@ -45,6 +45,7 @@ public class MachineService extends ParentedModelService<Machine, MachineStandal
 
     @Override
     protected Machine prepareCreate(Game game, MachineStandalone standalone) {
+        ensureUniqueName(game, standalone);
         Machine machine = new Machine(game, standalone);
         applyRelations(machine, standalone);
         return machine;
@@ -61,8 +62,15 @@ public class MachineService extends ParentedModelService<Machine, MachineStandal
 
     @Override
     protected void prepareUpdate(Machine machine, MachineStandalone standalone) {
+        ensureUniqueName(machine.getGame(), standalone);
         machine.applyBasics(standalone);
         applyRelations(machine, standalone);
+    }
+
+    private void ensureUniqueName(Game game, MachineStandalone standalone) {
+        if (null != standalone.name() && repository.existsByGameIdAndName(game.getId(), standalone.name())) {
+            throw report(HttpStatus.CONFLICT, "A MAchine with that name already exists");
+        }
     }
 
     private void applyRelations(Machine machine, MachineStandalone standalone) {

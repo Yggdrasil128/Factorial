@@ -43,6 +43,7 @@ public class RecipeModifierService
 
     @Override
     protected RecipeModifier prepareCreate(Game game, RecipeModifierStandalone standalone) {
+        ensureUniqueName(game, standalone);
         RecipeModifier recipeModifier = new RecipeModifier(game, standalone);
         applyRelations(recipeModifier, standalone);
         return recipeModifier;
@@ -59,8 +60,15 @@ public class RecipeModifierService
 
     @Override
     protected void prepareUpdate(RecipeModifier recipeModifier, RecipeModifierStandalone standalone) {
+        ensureUniqueName(recipeModifier.getGame(), standalone);
         recipeModifier.applyBasics(standalone);
         applyRelations(recipeModifier, standalone);
+    }
+
+    private void ensureUniqueName(Game game, RecipeModifierStandalone standalone) {
+        if (null != standalone.name() && repository.existsByGameIdAndName(game.getId(), standalone.name())) {
+            throw report(HttpStatus.CONFLICT, "A Recipe Modifier with that name already exists");
+        }
     }
 
     private void applyRelations(RecipeModifier recipeModifier, RecipeModifierStandalone standalone) {

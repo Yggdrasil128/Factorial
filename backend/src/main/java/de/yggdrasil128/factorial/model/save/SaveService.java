@@ -68,6 +68,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     @Override
     protected Save prepareCreate(SaveStandalone standalone) {
+        ensureUniqueName(standalone);
         Game game = gameService.get((int) standalone.gameId());
         Save save = new Save(game, standalone);
         applyRelations(save, standalone);
@@ -97,8 +98,15 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     @Override
     protected void prepareUpdate(Save game, SaveStandalone standalone) {
+        ensureUniqueName(standalone);
         game.applyBasics(standalone);
         applyRelations(game, standalone);
+    }
+
+    private void ensureUniqueName(SaveStandalone standalone) {
+        if (null != standalone.name()) {
+            ensureUniqueName(standalone.name());
+        }
     }
 
     private void applyRelations(Save save, SaveStandalone standalone) {
@@ -153,6 +161,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     @Transactional
     public void doImport(SaveSummary summary, CompletableFuture<Void> result) {
+        ensureUniqueName(summary.getSave());
         String gameName = (String) summary.getSave().gameId();
         Game game = gameService.get(gameName).orElseThrow(() -> ModelService.report(HttpStatus.CONFLICT,
                 "save requires the game '" + gameName + "' to be installed"));
@@ -179,6 +188,7 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
     }
 
     private void copy(Save save, String newName, Game game, CompletableFuture<Void> result) {
+        ensureUniqueName(newName);
         SaveSummary temp = Exporter.exportSave(save, External.SAVE_FILE);
         Save clone = Importer.importSave(temp, game);
         clone.setName(newName);
@@ -187,6 +197,12 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
         AsyncHelper.complete(result);
         repository.save(clone);
         events.publishEvent(new SaveUpdatedEvent(clone));
+    }
+
+    private void ensureUniqueName(String name) {
+        if (repository.existsByName(name)) {
+            throw report(HttpStatus.CONFLICT, "A Save with that name already exists");
+        }
     }
 
     @Transactional

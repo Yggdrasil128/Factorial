@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChangelistRepository extends CrudRepository<Changelist, Integer> {
 
+    boolean existsBySaveIdAndName(int saveId, String name);
+
     boolean existsByIdAndPrimaryIsTrue(int changelistId);
 
     Changelist findBySaveIdAndPrimaryIsTrue(int saveId);

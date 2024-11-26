@@ -42,6 +42,7 @@ public class IconService extends ParentedModelService<Icon, IconStandalone, Game
 
     @Override
     protected Icon prepareCreate(Game game, IconStandalone standalone) {
+        ensureUniqueName(game, standalone);
         Icon icon = new Icon(game, standalone);
         iconDownloader.downloadIcon(icon, standalone);
         return icon;
@@ -58,7 +59,14 @@ public class IconService extends ParentedModelService<Icon, IconStandalone, Game
 
     @Override
     protected void prepareUpdate(Icon icon, IconStandalone standalone) {
+        ensureUniqueName(icon.getGame(), standalone);
         icon.applyBasics(standalone);
+    }
+
+    private void ensureUniqueName(Game game, IconStandalone standalone) {
+        if (null != standalone.name() && repository.existsByGameIdAndName(game.getId(), standalone.name())) {
+            throw report(HttpStatus.CONFLICT, "An Icon with that name already exists");
+        }
     }
 
     @Override

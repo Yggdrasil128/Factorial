@@ -12,6 +12,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"game_version_id", "name"}))
 public class Icon implements NamedModel {
 
     @Id

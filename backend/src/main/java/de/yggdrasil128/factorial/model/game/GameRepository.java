@@ -8,6 +8,8 @@ import java.util.Optional;
 @Repository
 public interface GameRepository extends CrudRepository<Game, Integer> {
 
+    boolean existsByName(String name);
+
     Optional<Game> findByName(String name);
 
     Game findByIconsId(int id);

@@ -60,6 +60,7 @@ public class ChangelistService
 
     @Override
     protected Changelist prepareCreate(Save save, ChangelistStandalone standalone) {
+        ensureUniqueName(save, standalone);
         Changelist changelist = new Changelist(save, standalone);
         applyRelations(changelist, standalone);
         inferOrdinal(save, changelist);
@@ -86,6 +87,7 @@ public class ChangelistService
 
     @Override
     protected void prepareUpdate(Changelist changelist, ChangelistStandalone standalone) {
+        ensureUniqueName(changelist.getSave(), standalone);
         if (changelist.isPrimary()) {
             if (Boolean.FALSE.equals(standalone.primary())) {
                 throw report(HttpStatus.CONFLICT, "cannot set primary changelist to non-primary");
@@ -96,6 +98,12 @@ public class ChangelistService
         }
         changelist.applyBasics(standalone);
         applyRelations(changelist, standalone);
+    }
+
+    private void ensureUniqueName(Save save, ChangelistStandalone standalone) {
+        if (null != standalone.name() && repository.existsBySaveIdAndName(save.getId(), standalone.name())) {
+            throw report(HttpStatus.CONFLICT, "A Changelist with that name already exists");
+        }
     }
 
     private void applyRelations(Changelist changelist, ChangelistStandalone standalone) {

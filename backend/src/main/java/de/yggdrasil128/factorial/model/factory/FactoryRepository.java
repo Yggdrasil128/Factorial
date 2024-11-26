@@ -4,7 +4,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface FactoryRepository extends CrudRepository<Factory, Integer> {
 
-    int countBySaveId(int saveId);
+    boolean existsBySaveIdAndName(int saveId, String name);
 
     Factory findByProductionStepsId(int id);
 

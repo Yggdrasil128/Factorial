@@ -4,6 +4,7 @@ import de.yggdrasil128.factorial.model.*;
 import de.yggdrasil128.factorial.model.icon.IconDownloader;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Override
     protected Game prepareCreate(GameStandalone standalone) {
+        ensureUniqueName(standalone);
         Game game = new Game(standalone);
         applyRelations(game, standalone);
         inferOrdinal(game);
@@ -59,8 +61,15 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Override
     protected void prepareUpdate(Game game, GameStandalone standalone) {
+        ensureUniqueName(standalone);
         game.applyBasics(standalone);
         applyRelations(game, standalone);
+    }
+
+    private void ensureUniqueName(GameStandalone standalone) {
+        if (null != standalone.name()) {
+            ensureUniqueName(standalone.name());
+        }
     }
 
     private void applyRelations(Game game, GameStandalone standalone) {
@@ -79,6 +88,7 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Transactional
     public void doImport(GameSummary summary, CompletableFuture<Void> result) {
+        ensureUniqueName(summary.getGame());
         Game game = Importer.importGame(summary, iconDownloader);
         game.setOrdinal(0);
         inferOrdinal(game);
@@ -89,6 +99,7 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Transactional
     public void doClone(int id, String newName, CompletableFuture<Void> result) {
+        ensureUniqueName(newName);
         Game game = get(id);
         GameSummary temp = Exporter.exportGame(game, External.SAVE_FILE);
         Game clone = Importer.importGame(temp, iconDownloader);
@@ -98,6 +109,12 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
         AsyncHelper.complete(result);
         repository.save(clone);
         events.publishEvent(new GameUpdatedEvent(clone));
+    }
+
+    private void ensureUniqueName(String name) {
+        if (repository.existsByName(name)) {
+            throw report(HttpStatus.CONFLICT, "A Save with that name already exists");
+        }
     }
 
     @Transactional

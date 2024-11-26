@@ -42,6 +42,7 @@ public class ItemService extends ParentedModelService<Item, ItemStandalone, Game
 
     @Override
     protected Item prepareCreate(Game game, ItemStandalone standalone) {
+        ensureUniqueName(game, standalone);
         Item item = new Item(game, standalone);
         applyRelations(item, standalone);
         return item;
@@ -58,8 +59,15 @@ public class ItemService extends ParentedModelService<Item, ItemStandalone, Game
 
     @Override
     protected void prepareUpdate(Item item, ItemStandalone standalone) {
+        ensureUniqueName(item.getGame(), standalone);
         item.applyBasics(standalone);
         applyRelations(item, standalone);
+    }
+
+    private void ensureUniqueName(Game game, ItemStandalone standalone) {
+        if (null != standalone.name() && repository.existsByGameIdAndName(game.getId(), standalone.name())) {
+            throw report(HttpStatus.CONFLICT, "An Item with that name already exists");
+        }
     }
 
     private void applyRelations(Item item, ItemStandalone standalone) {
