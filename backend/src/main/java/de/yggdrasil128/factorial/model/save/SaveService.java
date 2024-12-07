@@ -68,6 +68,9 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     @Override
     protected Save prepareCreate(SaveStandalone standalone) {
+        if (null == standalone.name()) {
+            throw report(HttpStatus.BAD_REQUEST, "'name' is required");
+        }
         ensureUniqueName(standalone);
         Game game = gameService.get((int) standalone.gameId());
         Save save = new Save(game, standalone);
@@ -98,15 +101,15 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     @Override
     protected void prepareUpdate(Save game, SaveStandalone standalone) {
-        ensureUniqueName(standalone);
+        if (!game.getName().equals(standalone.name())) {
+            ensureUniqueName(standalone);
+        }
         game.applyBasics(standalone);
         applyRelations(game, standalone);
     }
 
     private void ensureUniqueName(SaveStandalone standalone) {
-        if (null != standalone.name()) {
-            ensureUniqueName(standalone.name());
-        }
+        ensureUniqueName(standalone.name());
     }
 
     private void applyRelations(Save save, SaveStandalone standalone) {

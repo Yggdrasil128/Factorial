@@ -52,6 +52,9 @@ public class RecipeService extends ParentedModelService<Recipe, RecipeStandalone
 
     @Override
     protected Recipe prepareCreate(Game game, RecipeStandalone standalone) {
+        if (null == standalone.name()) {
+            throw report(HttpStatus.BAD_REQUEST, "'name' is required");
+        }
         ensureUniqueName(game, standalone);
         Recipe recipe = new Recipe(game, standalone);
         applyRelations(recipe, standalone);
@@ -69,13 +72,15 @@ public class RecipeService extends ParentedModelService<Recipe, RecipeStandalone
 
     @Override
     protected void prepareUpdate(Recipe recipe, RecipeStandalone standalone) {
-        ensureUniqueName(recipe.getGame(), standalone);
+        if (!recipe.getName().equals(standalone.name())) {
+            ensureUniqueName(recipe.getGame(), standalone);
+        }
         recipe.applyBasics(standalone);
         applyRelations(recipe, standalone);
     }
 
     private void ensureUniqueName(Game game, RecipeStandalone standalone) {
-        if (null != standalone.name() && repository.existsByGameIdAndName(game.getId(), standalone.name())) {
+        if (repository.existsByGameIdAndName(game.getId(), standalone.name())) {
             throw report(HttpStatus.CONFLICT, "An Recipe with that name already exists");
         }
     }

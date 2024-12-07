@@ -39,6 +39,9 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Override
     protected Game prepareCreate(GameStandalone standalone) {
+        if (null == standalone.name()) {
+            throw report(HttpStatus.BAD_REQUEST, "'name' is required");
+        }
         ensureUniqueName(standalone);
         Game game = new Game(standalone);
         applyRelations(game, standalone);
@@ -61,15 +64,15 @@ public class GameService extends OrphanModelService<Game, GameStandalone, GameRe
 
     @Override
     protected void prepareUpdate(Game game, GameStandalone standalone) {
-        ensureUniqueName(standalone);
+        if (!game.getName().equals(standalone.name())) {
+            ensureUniqueName(standalone);
+        }
         game.applyBasics(standalone);
         applyRelations(game, standalone);
     }
 
     private void ensureUniqueName(GameStandalone standalone) {
-        if (null != standalone.name()) {
-            ensureUniqueName(standalone.name());
-        }
+        ensureUniqueName(standalone.name());
     }
 
     private void applyRelations(Game game, GameStandalone standalone) {

@@ -43,6 +43,9 @@ public class RecipeModifierService
 
     @Override
     protected RecipeModifier prepareCreate(Game game, RecipeModifierStandalone standalone) {
+        if (null == standalone.name()) {
+            throw report(HttpStatus.BAD_REQUEST, "'name' is required");
+        }
         ensureUniqueName(game, standalone);
         RecipeModifier recipeModifier = new RecipeModifier(game, standalone);
         applyRelations(recipeModifier, standalone);
@@ -60,13 +63,15 @@ public class RecipeModifierService
 
     @Override
     protected void prepareUpdate(RecipeModifier recipeModifier, RecipeModifierStandalone standalone) {
-        ensureUniqueName(recipeModifier.getGame(), standalone);
+        if (!recipeModifier.getName().equals(standalone.name())) {
+            ensureUniqueName(recipeModifier.getGame(), standalone);
+        }
         recipeModifier.applyBasics(standalone);
         applyRelations(recipeModifier, standalone);
     }
 
     private void ensureUniqueName(Game game, RecipeModifierStandalone standalone) {
-        if (null != standalone.name() && repository.existsByGameIdAndName(game.getId(), standalone.name())) {
+        if (repository.existsByGameIdAndName(game.getId(), standalone.name())) {
             throw report(HttpStatus.CONFLICT, "A Recipe Modifier with that name already exists");
         }
     }

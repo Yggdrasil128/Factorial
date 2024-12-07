@@ -66,6 +66,9 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
 
     @Override
     protected Factory prepareCreate(Save save, FactoryStandalone standalone) {
+        if (null == standalone.name()) {
+            throw report(HttpStatus.BAD_REQUEST, "'name' is required");
+        }
         ensureUniqueName(save, standalone);
         Factory factory = new Factory(save, standalone);
         applyRelations(factory, standalone);
@@ -97,13 +100,15 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
 
     @Override
     protected void prepareUpdate(Factory factory, FactoryStandalone standalone) {
-        ensureUniqueName(factory.getSave(), standalone);
+        if (!factory.getName().equals(standalone.name())) {
+            ensureUniqueName(factory.getSave(), standalone);
+        }
         factory.applyBasics(standalone);
         applyRelations(factory, standalone);
     }
 
     private void ensureUniqueName(Save save, FactoryStandalone standalone) {
-        if (null != standalone.name() && repository.existsBySaveIdAndName(save.getId(), standalone.name())) {
+        if (repository.existsBySaveIdAndName(save.getId(), standalone.name())) {
             throw report(HttpStatus.CONFLICT, "A Factory with that name already exists");
         }
     }
