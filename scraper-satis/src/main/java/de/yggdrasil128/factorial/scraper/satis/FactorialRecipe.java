@@ -54,8 +54,7 @@ public record FactorialRecipe(String name,
                         source.className());
                 return Optional.empty();
             }
-            Fraction amount = amount(item, Integer.parseInt(node.get("Amount").asText()));
-            ingredients.add(new FactorialItemQuantity(item, amount));
+            ingredients.add(amount(item, Integer.parseInt(node.get("Amount").asText())));
         }
         List<FactorialItemQuantity> products = new ArrayList<>();
         for (StringStructs.Node node : source.products().root()) {
@@ -66,8 +65,7 @@ public record FactorialRecipe(String name,
                         source.className());
                 return Optional.empty();
             }
-            Fraction amount = amount(item, Integer.parseInt(node.get("Amount").asText()));
-            products.add(new FactorialItemQuantity(item, amount));
+            products.add( amount(item, Integer.parseInt(node.get("Amount").asText())));
         }
         Fraction duration = Fraction.of(source.duration());
         return Optional.of(new FactorialRecipe(source.displayName(), "", ingredients, products, duration, emptyList(),
@@ -103,8 +101,8 @@ public record FactorialRecipe(String name,
         List<FactorialItemQuantity> products = Collections.singletonList(new FactorialItemQuantity(item, amount));
         // adjusted via the individual machine modifiers
         Fraction duration = Fraction.ONE;
-        return Optional.of(new FactorialRecipe(resource.displayName(), "", ingredients, products, duration, emptyList(),
-                applicableMachines));
+        return Optional.of(new FactorialRecipe(resource.displayName(), "", ingredients, products, duration,
+                FactorialGame.getResourceExtractionModifiers(), applicableMachines));
     }
 
     /**
@@ -125,7 +123,7 @@ public record FactorialRecipe(String name,
                     fuelGenerator.className());
             return Optional.empty();
         }
-        ingredients.add(new FactorialItemQuantity(fuelItem, Fraction.of(fuelGenerator.fuelLoadAmount())));
+        ingredients.add(amount(fuelItem, fuelGenerator.fuelLoadAmount()));
         if (fuelGenerator.requiresSupplementalResource()) {
             FactorialItem supplementalItem = context.getItems().get(fuel.supplementalResourceClass());
             if (null == supplementalItem) {
@@ -133,8 +131,7 @@ public record FactorialRecipe(String name,
                         fuel.supplementalResourceClass(), fuelGenerator.className());
                 return Optional.empty();
             }
-            ingredients.add(new FactorialItemQuantity(supplementalItem,
-                    amount(supplementalItem, fuelGenerator.supplementalLoadAmount())));
+            ingredients.add(amount(supplementalItem, fuelGenerator.supplementalLoadAmount()));
         }
         List<FactorialItemQuantity> products = new ArrayList<>(1);
         if (!fuel.byproduct().isEmpty()) {
@@ -144,15 +141,16 @@ public record FactorialRecipe(String name,
                         fuelGenerator.className());
                 return Optional.empty();
             }
-            products.add(new FactorialItemQuantity(byproductItem, amount(byproductItem, fuel.byproductAmount())));
+            products.add(amount(byproductItem, fuel.byproductAmount()));
         }
         Fraction duration = fuelItem.energy().divide(Fraction.of(fuelGenerator.powerProduction()));
         return Optional.of(new FactorialRecipe("Burn " + fuelItem.name(), "", ingredients, products, duration,
                 emptyList(), singletonList(machine)));
     }
 
-    private static Fraction amount(FactorialItem item, int base) {
-        return ResourceForm.RF_SOLID == item.form() ? Fraction.of(base) : Fraction.of(base / 1000);
+    private static FactorialItemQuantity amount(FactorialItem item, int base) {
+        return new FactorialItemQuantity(item,
+                ResourceForm.RF_SOLID == item.form() ? Fraction.of(base) : Fraction.of(base / 1000));
     }
 
     public RecipeStandalone toStandalone() {

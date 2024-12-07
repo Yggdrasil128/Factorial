@@ -4,7 +4,6 @@ import de.yggdrasil128.factorial.model.Fraction;
 import de.yggdrasil128.factorial.model.game.GameStandalone;
 import de.yggdrasil128.factorial.model.game.GameSummary;
 import de.yggdrasil128.factorial.model.icon.IconStandalone;
-import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierStandalone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +12,26 @@ import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class FactorialGame {
 
     private static final Logger LOG = LoggerFactory.getLogger(FactorialGame.class);
 
-    public static FactorialGame from(SatisGame source) {
+    private static final Collection<FactorialRecipeModifier> RESOURCE_EXTRACTION_MODIFIERS = List.of(
+            new FactorialRecipeModifier("Impure Node", "", Fraction.ONE, Fraction.ONE, Fraction.of(1, 2)),
+            new FactorialRecipeModifier("Normal Node", "", Fraction.ONE, Fraction.ONE, Fraction.ONE),
+            new FactorialRecipeModifier("Pure Node", "", Fraction.ONE, Fraction.ONE, Fraction.of(2)));
 
+    /**
+     * Modifiers for representing the different resources nodes that are in the game. Since this is a property of the
+     * individual nodes on the game map, we do not find this in the community sources.
+     */
+    public static Collection<FactorialRecipeModifier> getResourceExtractionModifiers() {
+        return RESOURCE_EXTRACTION_MODIFIERS;
+    }
+
+    public static FactorialGame from(SatisGame source) {
         FactorialGame result = new FactorialGame(source.getName());
 
         for (SatisItem item : source.getItems().values()) {
@@ -96,13 +106,6 @@ public class FactorialGame {
         return machines;
     }
 
-    private static RecipeModifierStandalone IMPURE_NODE = new RecipeModifierStandalone(0, 0, "Impure Node", "", null,
-            Fraction.ONE, Fraction.ONE, Fraction.of(1, 2), emptyList());
-    private static RecipeModifierStandalone NORMAL_NODE = new RecipeModifierStandalone(0, 0, "Normal Node", "", null,
-            Fraction.ONE, Fraction.ONE, Fraction.ONE, emptyList());
-    private static RecipeModifierStandalone PURE_NODE = new RecipeModifierStandalone(0, 0, "Pure Node", "", null,
-            Fraction.ONE, Fraction.ONE, Fraction.of(2), emptyList());
-
     public GameSummary toSummary() throws IOException {
         try {
             LOG.debug("Scraping wiki for icons");
@@ -113,8 +116,9 @@ public class FactorialGame {
             summary.setItems(items.values().stream()
                     .map(item -> item.toStandalone(loadIcon(wikiIconPages, icons, item.name(), "items"))).toList());
             summary.setRecipes(recipes.values().stream().map(FactorialRecipe::toStandalone).toList());
-            summary.setRecipeModifiers(Stream.concat(Stream.of(IMPURE_NODE, NORMAL_NODE, PURE_NODE),
-                    recipeModifiers.values().stream().map(FactorialRecipeModifier::toStandalone)).toList());
+            summary.setRecipeModifiers(
+                    Stream.concat(RESOURCE_EXTRACTION_MODIFIERS.stream(), recipeModifiers.values().stream())
+                            .map(FactorialRecipeModifier::toStandalone).toList());
             summary.setMachines(machines.values().stream()
                     .map(machine -> machine.toStandalone(loadIcon(wikiIconPages, icons, machine.name(), "machines")))
                     .toList());
