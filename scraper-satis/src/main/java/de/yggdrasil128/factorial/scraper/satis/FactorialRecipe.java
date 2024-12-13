@@ -45,6 +45,16 @@ public record FactorialRecipe(String name,
             LOG.trace("Could not associate recipe {} with a machine", source.className());
             return Optional.empty();
         }
+        List<FactorialRecipeModifier> applicableModifiers = new ArrayList<>();
+        for (FactorialMachine machine : applicableMachines) {
+            if (!machine.recipeModifiers().isEmpty()) {
+                if (!applicableModifiers.isEmpty()) {
+                    LOG.error("Could not infer recipe modifiers for recipe {}, because multiple machines provide them");
+                    return Optional.empty();
+                }
+                applicableModifiers.addAll(machine.recipeModifiers());
+            }
+        }
         List<FactorialItemQuantity> ingredients = new ArrayList<>();
         for (StringStructs.Node node : source.ingredients().root()) {
             QualifiedClass ingredient = QualifiedClass.of(node.get("ItemClass").asText());
@@ -65,11 +75,11 @@ public record FactorialRecipe(String name,
                         source.className());
                 return Optional.empty();
             }
-            products.add( amount(item, Integer.parseInt(node.get("Amount").asText())));
+            products.add(amount(item, Integer.parseInt(node.get("Amount").asText())));
         }
         Fraction duration = Fraction.of(source.duration());
-        return Optional.of(new FactorialRecipe(source.displayName(), "", ingredients, products, duration, emptyList(),
-                applicableMachines));
+        return Optional.of(new FactorialRecipe(source.displayName(), "", ingredients, products, duration,
+                applicableModifiers, applicableMachines));
     }
 
     /**
@@ -144,8 +154,9 @@ public record FactorialRecipe(String name,
             products.add(amount(byproductItem, fuel.byproductAmount()));
         }
         Fraction duration = fuelItem.energy().divide(Fraction.of(fuelGenerator.powerProduction()));
-        return Optional.of(new FactorialRecipe("Burn " + fuelItem.name(), "", ingredients, products, duration,
-                emptyList(), singletonList(machine)));
+        return Optional.of(new FactorialRecipe("Burn " + fuelItem.name(),
+                "Inferred by Factorial: Represents burning " + fuelItem.name() + " in " + machine.name(), ingredients,
+                products, duration, emptyList(), singletonList(machine)));
     }
 
     private static FactorialItemQuantity amount(FactorialItem item, int base) {

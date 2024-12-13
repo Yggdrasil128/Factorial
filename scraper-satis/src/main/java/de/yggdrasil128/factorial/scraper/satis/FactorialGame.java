@@ -19,9 +19,15 @@ public class FactorialGame {
     private static final Logger LOG = LoggerFactory.getLogger(FactorialGame.class);
 
     private static final Collection<FactorialRecipeModifier> RESOURCE_EXTRACTION_MODIFIERS = List.of(
-            new FactorialRecipeModifier("Impure Node", "", Fraction.ONE, Fraction.ONE, Fraction.of(1, 2)),
-            new FactorialRecipeModifier("Normal Node", "", Fraction.ONE, Fraction.ONE, Fraction.ONE),
-            new FactorialRecipeModifier("Pure Node", "", Fraction.ONE, Fraction.ONE, Fraction.of(2)));
+            new FactorialRecipeModifier("Impure Node",
+                    "Provided by Factorial: Represents placing a Miner or Resource Well Extractor on an Impure Node",
+                    Fraction.of(2), Fraction.ONE, Fraction.ONE),
+            new FactorialRecipeModifier("Normal Node",
+                    "Provided by Factorial: Represents placing a Miner or Resource Well Extractor on a Normal Node",
+                    Fraction.ONE, Fraction.ONE, Fraction.ONE),
+            new FactorialRecipeModifier("Pure Node",
+                    "Provided by Factorial: Represents placing a Miner or Resource Well Extractor on a Pure Node",
+                    Fraction.of(1, 2), Fraction.ONE, Fraction.ONE));
 
     /**
      * Modifiers for representing the different resources nodes that are in the game. Since this is a property of the
@@ -57,7 +63,11 @@ public class FactorialGame {
             result.getMachines().put(resourceExtractor.className(), machine);
         }
         for (SatisManufacturer manufacturer : source.getManufacturers().values()) {
-            result.getMachines().put(manufacturer.className(), FactorialMachine.from(manufacturer));
+            FactorialMachine machine = FactorialMachine.from(manufacturer);
+            for (FactorialRecipeModifier recipeModifier : machine.recipeModifiers()) {
+                result.getRecipeModifiers().put(recipeModifier.name(), recipeModifier);
+            }
+            result.getMachines().put(manufacturer.className(), machine);
         }
         for (SatisFuelGenerator fuelGenerator : source.getFuelGenerators().values()) {
             result.getMachines().put(fuelGenerator.className(), FactorialMachine.from(fuelGenerator));
