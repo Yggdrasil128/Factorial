@@ -18,4 +18,8 @@ public class DevToolsService {
         // noinspection ResultOfMethodCallIgnored
         FactorialApplication.restart(databaseFile::delete);
     }
+
+    public void shutdown() {
+        FactorialApplication.stop();
+    }
 }

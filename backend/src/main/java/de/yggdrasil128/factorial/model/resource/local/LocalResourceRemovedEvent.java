@@ -1,19 +1,16 @@
 package de.yggdrasil128.factorial.model.resource.local;
 
-public class LocalResourceRemovedEvent {
+import de.yggdrasil128.factorial.model.save.SaveRelatedEntityRemovedEvent;
 
-    private final int saveId;
+public class LocalResourceRemovedEvent extends SaveRelatedEntityRemovedEvent {
+
     private final int factoryId;
     private final int resourceId;
 
     public LocalResourceRemovedEvent(int saveId, int factoryId, int resourceId) {
-        this.saveId = saveId;
+        super(saveId);
         this.factoryId = factoryId;
         this.resourceId = resourceId;
-    }
-
-    public int getSaveId() {
-        return saveId;
     }
 
     public int getFactoryId() {

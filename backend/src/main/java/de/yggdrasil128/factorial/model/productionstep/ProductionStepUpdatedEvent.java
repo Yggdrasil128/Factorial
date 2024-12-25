@@ -1,6 +1,8 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
-public class ProductionStepUpdatedEvent {
+import de.yggdrasil128.factorial.model.save.SaveRelatedEvent;
+
+public class ProductionStepUpdatedEvent implements SaveRelatedEvent {
 
     private final ProductionStep productionStep;
     private final boolean itemsChanged;
@@ -8,6 +10,11 @@ public class ProductionStepUpdatedEvent {
     public ProductionStepUpdatedEvent(ProductionStep productionStep, boolean itemsChanged) {
         this.productionStep = productionStep;
         this.itemsChanged = itemsChanged;
+    }
+
+    @Override
+    public int getSaveId() {
+        return productionStep.getFactory().getSave().getId();
     }
 
     public ProductionStep getProductionStep() {

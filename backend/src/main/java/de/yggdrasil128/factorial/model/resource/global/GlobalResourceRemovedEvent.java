@@ -1,17 +1,14 @@
 package de.yggdrasil128.factorial.model.resource.global;
 
-public class GlobalResourceRemovedEvent {
+import de.yggdrasil128.factorial.model.save.SaveRelatedEntityRemovedEvent;
 
-    private final int saveId;
+public class GlobalResourceRemovedEvent extends SaveRelatedEntityRemovedEvent {
+
     private final int resourceId;
 
     public GlobalResourceRemovedEvent(int saveId, int resourceId) {
-        this.saveId = saveId;
+        super(saveId);
         this.resourceId = resourceId;
-    }
-
-    public int getSaveId() {
-        return saveId;
     }
 
     public int getResourceId() {

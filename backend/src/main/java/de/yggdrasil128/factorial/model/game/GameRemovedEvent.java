@@ -1,15 +1,9 @@
 package de.yggdrasil128.factorial.model.game;
 
-public class GameRemovedEvent {
-
-    private final int gameId;
+public class GameRemovedEvent extends GameRelatedEntityRemovedEvent {
 
     public GameRemovedEvent(int gameId) {
-        this.gameId = gameId;
-    }
-
-    public int getGameId() {
-        return gameId;
+        super(gameId);
     }
 
 }

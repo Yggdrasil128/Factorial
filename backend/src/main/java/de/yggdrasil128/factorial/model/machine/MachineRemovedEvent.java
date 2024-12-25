@@ -1,17 +1,14 @@
 package de.yggdrasil128.factorial.model.machine;
 
-public class MachineRemovedEvent {
+import de.yggdrasil128.factorial.model.game.GameRelatedEntityRemovedEvent;
 
-    private final int gameId;
+public class MachineRemovedEvent extends GameRelatedEntityRemovedEvent {
+
     private final int machineId;
 
     public MachineRemovedEvent(int gameId, int machineId) {
-        this.gameId = gameId;
+        super(gameId);
         this.machineId = machineId;
-    }
-
-    public int getGameId() {
-        return gameId;
     }
 
     public int getMachineId() {

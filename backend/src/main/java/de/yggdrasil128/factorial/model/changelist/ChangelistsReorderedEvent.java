@@ -1,8 +1,10 @@
 package de.yggdrasil128.factorial.model.changelist;
 
+import de.yggdrasil128.factorial.model.save.SaveRelatedEvent;
+
 import java.util.Collection;
 
-public class ChangelistsReorderedEvent {
+public class ChangelistsReorderedEvent implements SaveRelatedEvent {
 
     private final int saveId;
     private final Collection<Changelist> changelists;
@@ -12,6 +14,7 @@ public class ChangelistsReorderedEvent {
         this.changelists = changelists;
     }
 
+    @Override
     public int getSaveId() {
         return saveId;
     }

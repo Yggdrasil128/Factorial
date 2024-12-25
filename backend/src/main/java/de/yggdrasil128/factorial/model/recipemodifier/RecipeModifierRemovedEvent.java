@@ -1,17 +1,14 @@
 package de.yggdrasil128.factorial.model.recipemodifier;
 
-public class RecipeModifierRemovedEvent {
+import de.yggdrasil128.factorial.model.game.GameRelatedEntityRemovedEvent;
 
-    private final int gameId;
+public class RecipeModifierRemovedEvent extends GameRelatedEntityRemovedEvent {
+
     private final int recipeModifierId;
 
     public RecipeModifierRemovedEvent(int gameId, int recipeModifierId) {
-        this.gameId = gameId;
+        super(gameId);
         this.recipeModifierId = recipeModifierId;
-    }
-
-    public int getGameId() {
-        return gameId;
     }
 
     public int getRecipeModifierId() {

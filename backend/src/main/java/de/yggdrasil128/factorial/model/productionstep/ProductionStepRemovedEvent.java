@@ -1,24 +1,20 @@
 package de.yggdrasil128.factorial.model.productionstep;
 
 import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
+import de.yggdrasil128.factorial.model.save.SaveRelatedEntityRemovedEvent;
 
-public class ProductionStepRemovedEvent {
+public class ProductionStepRemovedEvent extends SaveRelatedEntityRemovedEvent {
 
-    private final int saveId;
     private final int factoryId;
     private final int productionStepId;
     private final ProductionStepThroughputs throughputs;
 
     public ProductionStepRemovedEvent(int saveId, int factoryId, int productionStepId,
                                       ProductionStepThroughputs throughputs) {
-        this.saveId = saveId;
+        super(saveId);
         this.factoryId = factoryId;
         this.productionStepId = productionStepId;
         this.throughputs = throughputs;
-    }
-
-    public int getSaveId() {
-        return saveId;
     }
 
     public int getFactoryId() {

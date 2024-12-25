@@ -1,6 +1,6 @@
 package de.yggdrasil128.factorial.model.game;
 
-public class GameUpdatedEvent {
+public class GameUpdatedEvent implements GameRelatedEvent {
 
     private final Game game;
 
@@ -10,6 +10,11 @@ public class GameUpdatedEvent {
 
     public Game getGame() {
         return game;
+    }
+
+    @Override
+    public int getGameId() {
+        return game.getId();
     }
 
 }

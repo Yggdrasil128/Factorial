@@ -32,4 +32,8 @@ public class FactorialApplication {
         thread.setDaemon(false);
         thread.start();
     }
+
+    public static void stop() {
+        new Thread(context::close).run();
+    }
 }

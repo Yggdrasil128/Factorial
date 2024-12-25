@@ -1,8 +1,10 @@
 package de.yggdrasil128.factorial.model.resource.local;
 
+import de.yggdrasil128.factorial.model.save.SaveRelatedEvent;
+
 import java.util.Collection;
 
-public class LocalResourcesReorderedEvent {
+public class LocalResourcesReorderedEvent implements SaveRelatedEvent {
 
     private final int saveId;
     private final Collection<LocalResource> resources;
@@ -12,6 +14,7 @@ public class LocalResourcesReorderedEvent {
         this.resources = resources;
     }
 
+    @Override
     public int getSaveId() {
         return saveId;
     }

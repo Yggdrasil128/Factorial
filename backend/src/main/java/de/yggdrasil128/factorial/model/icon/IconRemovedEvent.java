@@ -1,17 +1,14 @@
 package de.yggdrasil128.factorial.model.icon;
 
-public class IconRemovedEvent {
+import de.yggdrasil128.factorial.model.game.GameRelatedEntityRemovedEvent;
 
-    private final int gameId;
+public class IconRemovedEvent extends GameRelatedEntityRemovedEvent {
+
     private final int iconId;
 
     public IconRemovedEvent(int gameId, int iconId) {
-        this.gameId = gameId;
+        super(gameId);
         this.iconId = iconId;
-    }
-
-    public int getGameId() {
-        return gameId;
     }
 
     public int getIconId() {

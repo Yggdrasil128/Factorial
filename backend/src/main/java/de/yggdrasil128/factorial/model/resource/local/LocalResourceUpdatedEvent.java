@@ -1,6 +1,8 @@
 package de.yggdrasil128.factorial.model.resource.local;
 
-public class LocalResourceUpdatedEvent {
+import de.yggdrasil128.factorial.model.save.SaveRelatedEvent;
+
+public class LocalResourceUpdatedEvent implements SaveRelatedEvent {
 
     private final LocalResource resource;
     private final boolean importExportChanged;
@@ -8,6 +10,11 @@ public class LocalResourceUpdatedEvent {
     public LocalResourceUpdatedEvent(LocalResource resource, boolean importExportChanged) {
         this.resource = resource;
         this.importExportChanged = importExportChanged;
+    }
+
+    @Override
+    public int getSaveId() {
+        return resource.getFactory().getSave().getId();
     }
 
     public LocalResource getResource() {

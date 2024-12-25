@@ -1,17 +1,14 @@
 package de.yggdrasil128.factorial.model.changelist;
 
-public class ChangelistRemovedEvent {
+import de.yggdrasil128.factorial.model.save.SaveRelatedEntityRemovedEvent;
 
-    private final int saveId;
+public class ChangelistRemovedEvent extends SaveRelatedEntityRemovedEvent {
+
     private final int changelistId;
 
     public ChangelistRemovedEvent(int saveId, int changelistId) {
-        this.saveId = saveId;
+        super(saveId);
         this.changelistId = changelistId;
-    }
-
-    public int getSaveId() {
-        return saveId;
     }
 
     public int getChangelistId() {

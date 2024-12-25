@@ -205,7 +205,7 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(IconUpdatedEvent event) {
-        enqueue(new IconUpdatedMessage(runtimeId, nextMessageId(), event.getIcon().getGame().getId(),
+        enqueue(new IconUpdatedMessage(runtimeId, nextMessageId(), event.getGameId(),
                 IconStandalone.of(event.getIcon())));
     }
 
@@ -216,7 +216,7 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(ItemUpdatedEvent event) {
-        enqueue(new ItemUpdatedMessage(runtimeId, nextMessageId(), event.getItem().getGame().getId(),
+        enqueue(new ItemUpdatedMessage(runtimeId, nextMessageId(), event.getGameId(),
                 ItemStandalone.of(event.getItem())));
     }
 
@@ -227,7 +227,7 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(RecipeUpdatedEvent event) {
-        enqueue(new RecipeUpdatedMessage(runtimeId, nextMessageId(), event.getRecipe().getGame().getId(),
+        enqueue(new RecipeUpdatedMessage(runtimeId, nextMessageId(), event.getGameId(),
                 RecipeStandalone.of(event.getRecipe())));
     }
 
@@ -250,7 +250,7 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(MachineUpdatedEvent event) {
-        enqueue(new MachineUpdatedMessage(runtimeId, nextMessageId(), event.getMachine().getGame().getId(),
+        enqueue(new MachineUpdatedMessage(runtimeId, nextMessageId(), event.getGameId(),
                 MachineStandalone.of(event.getMachine())));
     }
 
@@ -360,7 +360,7 @@ public class WebsocketService extends TextWebSocketHandler {
 
     @EventListener
     public void on(ChangelistUpdatedEvent event) {
-        enqueue(new ChangelistUpdatedMessage(runtimeId, nextMessageId(), event.getChangelist().getSave().getId(),
+        enqueue(new ChangelistUpdatedMessage(runtimeId, nextMessageId(), event.getSaveId(),
                 ChangelistStandalone.of(event.getChangelist())));
     }
 

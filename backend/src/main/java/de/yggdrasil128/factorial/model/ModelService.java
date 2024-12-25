@@ -22,6 +22,10 @@ public abstract class ModelService<E, S, R extends CrudRepository<E, Integer>> {
         this.repository = repository;
     }
 
+    public boolean has(int id) {
+        return repository.existsById(id);
+    }
+
     public E get(int id) {
         return repository.findById(id).orElseThrow(ModelService::reportNotFound);
     }

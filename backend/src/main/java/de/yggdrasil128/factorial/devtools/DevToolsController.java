@@ -19,4 +19,9 @@ public class DevToolsController {
     public void wipeDatabaseAndRestart() {
         devToolsService.wipeDatabaseAndRestart();
     }
+
+    @GetMapping("/shutdown")
+    public void shutdown() {
+        devToolsService.shutdown();
+    }
 }

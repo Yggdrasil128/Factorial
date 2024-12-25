@@ -1,6 +1,8 @@
 package de.yggdrasil128.factorial.model.resource.global;
 
-public class GlobalResourceUpdatedEvent {
+import de.yggdrasil128.factorial.model.save.SaveRelatedEvent;
+
+public class GlobalResourceUpdatedEvent implements SaveRelatedEvent {
 
     private final GlobalResource resource;
     private final boolean complete;
@@ -8,6 +10,11 @@ public class GlobalResourceUpdatedEvent {
     public GlobalResourceUpdatedEvent(GlobalResource resource, boolean complete) {
         this.resource = resource;
         this.complete = complete;
+    }
+
+    @Override
+    public int getSaveId() {
+        return resource.getSave().getId();
     }
 
     public GlobalResource getResource() {
