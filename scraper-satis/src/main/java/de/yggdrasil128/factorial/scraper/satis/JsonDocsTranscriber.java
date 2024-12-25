@@ -15,7 +15,7 @@ public class JsonDocsTranscriber {
     public static void main(String[] args) {
         Path dir = Paths.get(args[0]);
         try {
-            transcribe(dir.resolve("origin.json"), "Satisfactory 1.0", dir.resolve("Satisfactory1.0.json"));
+            transcribe(dir.resolve("en-US.json"), "Satisfactory 1.0", dir.resolve("Satisfactory1.0.json"));
         } catch (IOException exc) {
             exc.printStackTrace();
         }

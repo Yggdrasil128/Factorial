@@ -39,6 +39,9 @@ public class SatisGame {
                 } else if (SatisFuelGenerator.SCRIPT_CLASSES.contains(nativeClass.name().qualified())) {
                     handleClasses(mapper, rootEntry, SatisFuelGenerator.class,
                             fuelGenerator -> game.getFuelGenerators().put(fuelGenerator.className(), fuelGenerator));
+                } else if (SatisSimpleProducer.SCRIPT_CLASS.equals(nativeClass.name().qualified())) {
+                    handleClasses(mapper, rootEntry, SatisSimpleProducer.class, simpleProducer -> game
+                            .getSimpleProducers().put(simpleProducer.className(), simpleProducer));
                 } else if (SatisRecipe.SCRIPT_CLASS.equals(nativeClass.name().qualified())) {
                     handleClasses(mapper, rootEntry, SatisRecipe.class,
                             recipe -> game.getRecipes().put(recipe.className(), recipe));
@@ -62,6 +65,7 @@ public class SatisGame {
     private final Map<String, SatisResourceExtractor> resourceExtractors = new HashMap<>();
     private final Map<String, SatisManufacturer> manufacturers = new HashMap<>();
     private final Map<String, SatisFuelGenerator> fuelGenerators = new HashMap<>();
+    private final Map<String, SatisSimpleProducer> simpleProducers = new HashMap<>();
     private final Map<String, SatisRecipe> recipes = new HashMap<>();
 
     public SatisGame(String name) {
@@ -90,6 +94,10 @@ public class SatisGame {
 
     public Map<String, SatisFuelGenerator> getFuelGenerators() {
         return fuelGenerators;
+    }
+
+    public Map<String, SatisSimpleProducer> getSimpleProducers() {
+        return simpleProducers;
     }
 
     public Map<String, SatisRecipe> getRecipes() {

@@ -57,6 +57,11 @@ public record FactorialMachine(String name,
         return new FactorialMachine(fuelGenerator.displayName(), fuelGenerator.description(), emptyList(), emptyList());
     }
 
+    public static FactorialMachine from(SatisSimpleProducer simpleProducer) {
+        return new FactorialMachine(simpleProducer.displayName(), simpleProducer.description(), emptyList(),
+                emptyList());
+    }
+
     public MachineStandalone toStandalone(IconStandalone icon) {
         return new MachineStandalone(0, 0, name, description, null == icon ? null : icon.name(),
                 machineModifiers.stream().map(FactorialRecipeModifier::name).map(Object.class::cast).toList(),

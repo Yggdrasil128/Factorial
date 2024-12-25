@@ -72,6 +72,9 @@ public class FactorialGame {
         for (SatisFuelGenerator fuelGenerator : source.getFuelGenerators().values()) {
             result.getMachines().put(fuelGenerator.className(), FactorialMachine.from(fuelGenerator));
         }
+        for (SatisSimpleProducer simpleProducer : source.getSimpleProducers().values()) {
+            result.getMachines().put(simpleProducer.className(), FactorialMachine.from(simpleProducer));
+        }
 
         for (SatisRecipe recipe : source.getRecipes().values()) {
             FactorialRecipe.from(result, recipe).ifPresent(r -> result.getRecipes().put(recipe.className(), r));
@@ -85,6 +88,9 @@ public class FactorialGame {
                 FactorialRecipe.from(result, fuelGenerator, fuel)
                         .ifPresent(r -> result.getRecipes().put("Burn_" + fuel.fuelClass(), r));
             }
+        }
+        for (SatisSimpleProducer simpleProducer : source.getSimpleProducers().values()) {
+            FactorialRecipe.from(result, simpleProducer).ifPresent(r -> result.getRecipes().put(r.name(), r));
         }
 
         return result;

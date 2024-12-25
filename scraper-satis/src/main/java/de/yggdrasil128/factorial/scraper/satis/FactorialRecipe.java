@@ -164,6 +164,21 @@ public record FactorialRecipe(String name,
                 ResourceForm.RF_SOLID == item.form() ? Fraction.of(base) : Fraction.of(base / 1000));
     }
 
+    public static Optional<FactorialRecipe> from(FactorialGame context, SatisSimpleProducer simpleProducer) {
+        FactorialMachine machine = context.getMachines().get(simpleProducer.className());
+        FactorialItem product = context.getItems().get(SatisSimpleProducer.PRODUCED_ITEM);
+        if (null == product) {
+            LOG.error("Could not associate ingredient {} of {} with an item", SatisSimpleProducer.PRODUCED_ITEM,
+                    simpleProducer);
+            return Optional.empty();
+        }
+        List<FactorialItemQuantity> products = singletonList(new FactorialItemQuantity(product, Fraction.ONE));
+        Fraction duration = Fraction.of(simpleProducer.timeToProduceItem());
+        return Optional.of(new FactorialRecipe(product.name(),
+                "Inferred by Factorial: Represents the FICSMAS Gift Tree producing FICSMAS Gifts out of thin air",
+                emptyList(), products, duration, emptyList(), singletonList(machine)));
+    }
+
     public RecipeStandalone toStandalone() {
         return new RecipeStandalone(0, 0, name, description, null,
                 ingredients.stream().map(FactorialItemQuantity::toStandalone).toList(),
