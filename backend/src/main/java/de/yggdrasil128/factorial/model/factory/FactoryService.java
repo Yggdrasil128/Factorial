@@ -1,8 +1,10 @@
 package de.yggdrasil128.factorial.model.factory;
 
 import de.yggdrasil128.factorial.engine.ProductionLine;
+import de.yggdrasil128.factorial.engine.ProductionStepThroughputs;
 import de.yggdrasil128.factorial.engine.ResourceContributions;
 import de.yggdrasil128.factorial.model.*;
+import de.yggdrasil128.factorial.model.changelist.ChangelistService;
 import de.yggdrasil128.factorial.model.icon.IconService;
 import de.yggdrasil128.factorial.model.productionstep.*;
 import de.yggdrasil128.factorial.model.resource.local.LocalResource;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
@@ -36,17 +39,19 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
     private final IconService iconService;
     private final ProductionStepService productionStepService;
     private final LocalResourceService resourceService;
+    private final ChangelistService changelistService;
     private final Map<Integer, ProductionLine> cache = new HashMap<>();
 
     public FactoryService(FactoryRepository repository, ApplicationEventPublisher events, SaveRepository saveRepository,
                           IconService iconService, ProductionStepService productionStepService,
-                          LocalResourceService resourceService) {
+                          LocalResourceService resourceService, ChangelistService changelistService) {
         super(repository);
         this.events = events;
         this.saveRepository = saveRepository;
         this.iconService = iconService;
         this.productionStepService = productionStepService;
         this.resourceService = resourceService;
+        this.changelistService = changelistService;
     }
 
     @Override
@@ -207,6 +212,48 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
             }
         }
         events.publishEvent(new FactoriesReorderedEvent(save.getId(), factories));
+    }
+
+    @Transactional
+    public void satisfyConsumption(int resourceId, int productionStepId,
+                                   Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
+                                   CompletableFuture<Void> result) {
+        satisfyDifference(resourceId, productionStepId, ProductionStepThroughputs::getOutput,
+                ResourceContributions::getOverConsumed, changes, result);
+    }
+
+    @Transactional
+    public void satisfyProduction(int resourceId, int productionStepId,
+                                  Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
+                                  CompletableFuture<Void> result) {
+        satisfyDifference(resourceId, productionStepId, ProductionStepThroughputs::getInput,
+                ResourceContributions::getOverProduced, changes, result);
+    }
+
+    private void satisfyDifference(int resourceId, int productionStepId,
+                                   BiFunction<ProductionStepThroughputs, Integer, QuantityByChangelist> throughput0,
+                                   Function<ResourceContributions, QuantityByChangelist> difference0,
+                                   Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
+                                   CompletableFuture<Void> result) {
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
+                () -> changes.apply(productionStep));
+        ResourceContributions contributions = computeProductionLine(productionStep.getFactory(), changes)
+                .getContributions(resourceService.get(resourceId));
+
+        Fraction currentMachineCount = throughputs.getMachineCounts().getWithPrimaryChangelist();
+        Fraction throughput = throughput0.apply(throughputs, contributions.getItemId()).getWithPrimaryChangelist();
+        Fraction difference = difference0.apply(contributions).getWithPrimaryChangelist();
+
+        // both sides describe the effective throughput of a single machine
+        // throughput / currentMachineCount = (throughput + difference) / newMachineCount
+        // sort to one side
+        // newMachineCount = currentMachineCount * (throughput + difference) / throughput
+        // push 'throughput' down into the braced term
+        // newMachineCount = currentMachineCount * (1 + difference / throughput)
+        Fraction newMachineCount = currentMachineCount.multiply(Fraction.ONE.add(difference.divide(throughput)));
+
+        changelistService.setPrimaryMachineCount(productionStepId, newMachineCount, result);
     }
 
     @EventListener

@@ -9,6 +9,7 @@ import de.yggdrasil128.factorial.model.factory.FactoryService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStep;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepService;
 import de.yggdrasil128.factorial.model.productionstep.ProductionStepStandalone;
+import de.yggdrasil128.factorial.model.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +61,8 @@ public class ProductionStepController {
     @DeleteMapping("/productionSteps")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CompletableFuture<Void> delete(String productionStepIds) {
-        List<Integer> productionStepIdsList = Arrays.stream(productionStepIds.split(",")).map(Integer::parseInt).toList();
+        List<Integer> productionStepIdsList = Arrays.stream(productionStepIds.split(",")).map(Integer::parseInt)
+                .toList();
         return asyncHelper.submit(result -> productionStepService.delete(productionStepIdsList, result));
     }
 
@@ -82,8 +84,8 @@ public class ProductionStepController {
     /**
      * Sets the machine count of the target {@link ProductionStep} to {@code machineCount}.
      * <p>
-     * This will <b>not</b> change the production step's current machine count but rather add a corresponding
-     * {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
+     * This will <b>not</b> change the production step's current machine count but rather add (or update) a
+     * corresponding {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
      * 
      * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
      * @param machineCount the new machine count
@@ -93,6 +95,40 @@ public class ProductionStepController {
     public CompletableFuture<Void> updateMachineCount(int productionStepId, String machineCount) {
         return asyncHelper.submit(result -> changelistService.setPrimaryMachineCount(productionStepId,
                 Fraction.of(machineCount), result));
+    }
+
+    /**
+     * Sets the machine count of the target {@link ProductionStep} to a value that satisfies the over-consumption of the
+     * given {@link Resource}.
+     * <p>
+     * This will <b>not</b> change the production step's current machine count but rather add (or update) a
+     * corresponding {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
+     * 
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}
+     */
+    @PatchMapping("/productionStep/satisfyConsumption")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> satisfyConsumption(int productionStepId, int resourceId) {
+        return asyncHelper.submit(result -> factoryService.satisfyConsumption(resourceId, productionStepId,
+                changelistService::getProductionStepChanges, result));
+    }
+
+    /**
+     * Sets the machine count of the target {@link ProductionStep} to a value that satisfies the over-production of the
+     * given {@link Resource}.
+     * <p>
+     * This will <b>not</b> change the production step's current machine count but rather add (or update) a
+     * corresponding {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
+     * 
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}
+     */
+    @PatchMapping("/productionStep/satisfyProduction")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> satisfyProduction(int productionStepId, int resourceId) {
+        return asyncHelper.submit(result -> factoryService.satisfyProduction(resourceId, productionStepId,
+                changelistService::getProductionStepChanges, result));
     }
 
     private ProductionStepStandalone toOutput(ProductionStep productionStep) {
