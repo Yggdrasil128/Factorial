@@ -215,6 +215,39 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
     }
 
     @Transactional
+    public void satisfy(int resourceId, int productionStepId,
+                        Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
+                        CompletableFuture<Void> result) {
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
+                () -> changes.apply(productionStep));
+        ResourceContributions contributions = computeProductionLine(productionStep.getFactory(), changes)
+                .getContributions(resourceService.get(resourceId));
+        Fraction difference = contributions.getOverConsumed().getWithPrimaryChangelist();
+
+        if (difference.isZero()) {
+            return;
+        }
+
+        Fraction produced = Optional.ofNullable(throughputs.getOutput(contributions.getItemId()))
+                .orElse(QuantityByChangelist.ZERO).getWithPrimaryChangelist();
+        Fraction consumed = Optional.ofNullable(throughputs.getInput(contributions.getItemId()))
+                .orElse(QuantityByChangelist.ZERO).getWithPrimaryChangelist();
+        Fraction throughput = produced.subtract(consumed);
+
+        Fraction currentMachineCount = throughputs.getMachineCounts().getWithPrimaryChangelist();
+        // both sides describe the effective throughput of a single machine
+        // throughput / currentMachineCount = (throughput + difference) / newMachineCount
+        // sort to one side
+        // newMachineCount = currentMachineCount * (throughput + difference) / throughput
+        // push 'throughput' down into the braced term
+        // newMachineCount = currentMachineCount * (1 + difference / throughput)
+        Fraction newMachineCount = currentMachineCount.multiply(Fraction.ONE.add(difference.divide(throughput)));
+
+        changelistService.setPrimaryMachineCount(productionStepId, newMachineCount, result);
+    }
+
+    @Transactional
     public void satisfyConsumption(int resourceId, int productionStepId,
                                    Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
                                    CompletableFuture<Void> result) {

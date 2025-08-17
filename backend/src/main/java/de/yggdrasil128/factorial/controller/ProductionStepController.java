@@ -98,8 +98,8 @@ public class ProductionStepController {
     }
 
     /**
-     * Sets the machine count of the target {@link ProductionStep} to a value that satisfies the over-consumption of the
-     * given {@link Resource}.
+     * Sets the machine count of the target {@link ProductionStep} to a value that satisfies the over-consumption or
+     * -production of the given {@link Resource}.
      * <p>
      * This will <b>not</b> change the production step's current machine count but rather add (or update) a
      * corresponding {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
@@ -107,27 +107,10 @@ public class ProductionStepController {
      * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
      * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}
      */
-    @PatchMapping("/productionStep/satisfyConsumption")
+    @PatchMapping("/productionStep/satisfy")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> satisfyConsumption(int productionStepId, int resourceId) {
-        return asyncHelper.submit(result -> factoryService.satisfyConsumption(resourceId, productionStepId,
-                changelistService::getProductionStepChanges, result));
-    }
-
-    /**
-     * Sets the machine count of the target {@link ProductionStep} to a value that satisfies the over-production of the
-     * given {@link Resource}.
-     * <p>
-     * This will <b>not</b> change the production step's current machine count but rather add (or update) a
-     * corresponding {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
-     * 
-     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
-     * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}
-     */
-    @PatchMapping("/productionStep/satisfyProduction")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> satisfyProduction(int productionStepId, int resourceId) {
-        return asyncHelper.submit(result -> factoryService.satisfyProduction(resourceId, productionStepId,
+    public CompletableFuture<Void> satisfy(int productionStepId, int resourceId) {
+        return asyncHelper.submit(result -> factoryService.satisfy(resourceId, productionStepId,
                 changelistService::getProductionStepChanges, result));
     }
 
