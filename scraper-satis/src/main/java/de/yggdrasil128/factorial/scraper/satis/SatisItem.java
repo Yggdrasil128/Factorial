@@ -11,6 +11,8 @@ public record SatisItem(@JsonAlias("ClassName") String className,
                         @JsonAlias("mStackSize") StackSize stackSize,
                         @JsonAlias("mEnergyValue") BigDecimal energyValue, // MJ
                         @JsonAlias("mForm") ResourceForm form,
+                        @JsonAlias("mFluidColor") StringStruct fluidColor,
+                        @JsonAlias("mGasColor") StringStruct gasColor,
                         @JsonAlias("mResourceSinkPoints") int resourceSinkPoints) {
     public static final Set<String> SCRIPT_CLASSES = Set.of("/Script/FactoryGame.FGItemDescriptor",
             "/Script/FactoryGame.FGItemDescriptorNuclearFuel", "/Script/FactoryGame.FGAmmoTypeProjectile",

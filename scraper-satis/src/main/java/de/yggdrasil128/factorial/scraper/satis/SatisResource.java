@@ -10,6 +10,8 @@ public record SatisResource(@JsonAlias("ClassName") String className,
                             @JsonAlias("mStackSize") StackSize stackSize,
                             @JsonAlias("mEnergyValue") BigDecimal energyValue, // MJ
                             @JsonAlias("mForm") ResourceForm form,
+                            @JsonAlias("mFluidColor") StringStruct fluidColor,
+                            @JsonAlias("mGasColor") StringStruct gasColor,
                             @JsonAlias("mResourceSinkPoints") int resourceSinkPoints) {
     public static final String SCRIPT_CLASS = "/Script/FactoryGame.FGResourceDescriptor";
 }
