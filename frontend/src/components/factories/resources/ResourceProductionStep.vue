@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import type { Item, Machine, ProductionStep, Recipe, RecipeModifier } from '@/types/model/standalone';
-import { computed, type ComputedRef } from 'vue';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useItemStore } from '@/stores/model/itemStore';
-import { useMachineStore } from '@/stores/model/machineStore';
-import { CaretLeft, Delete, Edit } from '@element-plus/icons-vue';
+import type {Item, Machine, ProductionStep, Recipe, RecipeModifier} from '@/types/model/standalone';
+import {computed, type ComputedRef} from 'vue';
+import {useRecipeStore} from '@/stores/model/recipeStore';
+import {useItemStore} from '@/stores/model/itemStore';
+import {useMachineStore} from '@/stores/model/machineStore';
+import {CaretLeft, Delete, Edit} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
-import { ElButton, ElButtonGroup, ElPopconfirm, ElTooltip } from 'element-plus';
+import {ElButton, ElButtonGroup, ElPopconfirm, ElTooltip} from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
-import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import BgcElButton from '@/components/common/input/BgcElButton.vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useProductionStepApi } from '@/api/model/useProductionStepApi';
+import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {useRoute, useRouter} from 'vue-router';
+import {useProductionStepApi} from '@/api/model/useProductionStepApi';
 import ProductionEntriesTable from '@/components/factories/resources/ProductionEntriesTable.vue';
 import ProductionStepMachineCountInput from '@/components/factories/resources/ProductionStepMachineCountInput.vue';
+import CustomElTooltip from "@/components/common/CustomElTooltip.vue";
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -56,8 +56,8 @@ const recipeName: ComputedRef<string> = computed(() => {
 
 const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
   return props.productionStep.modifierIds
-    .map(recipeModifierId => recipeModifierStore.getById(recipeModifierId))
-    .filter(recipeModifier => recipeModifier !== undefined) as RecipeModifier[];
+      .map(recipeModifierId => recipeModifierStore.getById(recipeModifierId))
+      .filter(recipeModifier => recipeModifier !== undefined) as RecipeModifier[];
 });
 
 function editProductionStep(): void {
@@ -78,19 +78,19 @@ function deleteProductionStep(): void {
 <template>
   <div class="step">
     <div class="row items-center">
-      <icon-img :icon="machine?.iconId" :size="48" />
+      <icon-img :icon="machine?.iconId" :size="48"/>
       <div style="flex: 0 0 auto; margin-right: 12px;">
         ✕
-        <quantity-display :quantity="productionStep.machineCounts" color="none" />
+        <quantity-display :quantity="productionStep.machineCounts" color="none"/>
       </div>
-      <icon-img :icon="recipeIconId" :size="48" />
+      <icon-img :icon="recipeIconId" :size="48"/>
 
       <div style="font-size: 20px; flex: 1 1 auto;">
         {{ recipeName }}
         <template v-if="recipeModifiers.length > 0">
           (
           <template v-for="(recipeModifier, index) in recipeModifiers" :key="recipeModifier.id">
-            <icon-img :icon="recipeModifier.iconId" :size="24" />
+            <icon-img :icon="recipeModifier.iconId" :size="24"/>
             {{ recipeModifier.name }}
             <template v-if="index < recipeModifiers.length - 1">
               ,
@@ -103,31 +103,26 @@ function deleteProductionStep(): void {
       <div style="flex: 0 0 auto;">
         <!--        <machine-count-input :model-value="productionStep.machineCounts.withPrimaryChangelist"-->
         <!--                             :production-step-id="productionStep.id" />-->
-        <ProductionStepMachineCountInput :production-step="productionStep" />
+        <ProductionStepMachineCountInput :production-step="productionStep"/>
         &ensp;
         <el-button-group>
-          <el-tooltip
-            effect="dark"
-            placement="top-start"
-            transition="none"
-            :hide-after="0"
-            content="Edit">
-            <bgc-el-button :icon="Edit" @click="editProductionStep" />
-          </el-tooltip>
+          <custom-el-tooltip content="Edit">
+            <el-button :icon="Edit" @click="editProductionStep"/>
+          </custom-el-tooltip>
 
           <el-popconfirm
-            title="Delete this production step?"
-            width="200px"
-            @confirm="deleteProductionStep">
+              title="Delete this production step?"
+              width="200px"
+              @confirm="deleteProductionStep">
             <template #reference>
               <span class="row center tooltipHelperSpan">
                 <el-tooltip
-                  effect="dark"
-                  placement="top-start"
-                  transition="none"
-                  :hide-after="0"
-                  content="Delete">
-                  <el-button type="danger" :icon="Delete" />
+                    effect="dark"
+                    placement="top-start"
+                    transition="none"
+                    :hide-after="0"
+                    content="Delete">
+                  <el-button type="danger" :icon="Delete"/>
                 </el-tooltip>
               </span>
             </template>
@@ -139,14 +134,14 @@ function deleteProductionStep(): void {
     <div class="row" style="margin-top: 8px;">
       <div>
         <div v-if="productionStep.outputs.length === 0" class="nothing">(nothing)</div>
-        <ProductionEntriesTable v-else :production-entries="productionStep.outputs" />
+        <ProductionEntriesTable v-else :production-entries="productionStep.outputs"/>
       </div>
       <el-icon :size="24">
-        <CaretLeft />
+        <CaretLeft/>
       </el-icon>
       <div>
         <div v-if="productionStep.inputs.length === 0" class="nothing">(nothing)</div>
-        <ProductionEntriesTable v-else :production-entries="productionStep.inputs" />
+        <ProductionEntriesTable v-else :production-entries="productionStep.inputs"/>
       </div>
     </div>
   </div>

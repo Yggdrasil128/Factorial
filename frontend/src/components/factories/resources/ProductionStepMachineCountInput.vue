@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, type Ref, ref } from 'vue';
-import { Check, Minus, Plus } from '@element-plus/icons-vue';
-import { ElButtonGroup } from 'element-plus';
-import { until } from '@vueuse/core';
-import { useProductionStepApi } from '@/api/model/useProductionStepApi';
-import BgcElButton from '@/components/common/input/BgcElButton.vue';
-import { ParsedFraction } from '@/utils/fractionUtils';
+import {computed, type Ref, ref} from 'vue';
+import {Check, Minus, Plus} from '@element-plus/icons-vue';
+import {ElButtonGroup} from 'element-plus';
+import {until} from '@vueuse/core';
+import {useProductionStepApi} from '@/api/model/useProductionStepApi';
+import {ParsedFraction} from '@/utils/fractionUtils';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
-import type { ProductionStep } from '@/types/model/standalone';
+import type {ProductionStep} from '@/types/model/standalone';
 import FractionInput from '@/components/common/input/FractionInput.vue';
 
 export interface MachineCountInputProps {
@@ -25,9 +24,9 @@ const parsedFraction: Ref<ParsedFraction> = computed({
     }
     buttonsDisabled.value = true;
     productionStepApi.updateMachineCount(props.productionStep.id, value.toFraction())
-      .finally(() => {
-        buttonsDisabled.value = false;
-      });
+        .finally(() => {
+          buttonsDisabled.value = false;
+        });
   },
 });
 
@@ -41,8 +40,8 @@ const buttonsDisabled: Ref<boolean> = ref(false);
 async function plusOne(): Promise<void> {
   parsedFraction.value = parsedFraction.value.add(ParsedFraction.ONE);
   plusButtonLoading.value = true;
-  until(buttonsDisabled).toBe(false, { timeout: 5000 })
-    .finally(() => plusButtonLoading.value = false);
+  until(buttonsDisabled).toBe(false, {timeout: 5000})
+      .finally(() => plusButtonLoading.value = false);
 }
 
 async function minusOne(): Promise<void> {
@@ -53,43 +52,43 @@ async function minusOne(): Promise<void> {
   parsedFraction.value = newValue;
   minusButtonLoading.value = true;
   until(buttonsDisabled).toBe(false)
-    .then(() => minusButtonLoading.value = false);
+      .then(() => minusButtonLoading.value = false);
 }
 
 async function apply(): Promise<void> {
   checkButtonLoading.value = true;
   buttonsDisabled.value = true;
   await productionStepApi.applyPrimaryChangelist(props.productionStep.id)
-    .finally(() => buttonsDisabled.value = checkButtonLoading.value = false);
+      .finally(() => buttonsDisabled.value = checkButtonLoading.value = false);
 }
 </script>
 
 <template>
   <FractionInput
-    v-model:parsed-fraction="parsedFraction"
-    style="width: 80px;"
-    class="mciInput"
+      v-model:parsed-fraction="parsedFraction"
+      style="width: 80px;"
+      class="mciInput"
   >
   </FractionInput>
   <el-button-group class="mciButtonGroup">
-    <bgc-el-button
-      :icon="Plus"
-      @click="plusOne"
-      :loading="plusButtonLoading"
-      :disabled="buttonsDisabled"
+    <el-button
+        :icon="Plus"
+        @click="plusOne"
+        :loading="plusButtonLoading"
+        :disabled="buttonsDisabled"
     />
-    <bgc-el-button
-      :icon="Minus"
-      @click="minusOne"
-      :loading="minusButtonLoading"
-      :disabled="buttonsDisabled || parsedFraction.isZero()"
+    <el-button
+        :icon="Minus"
+        @click="minusOne"
+        :loading="minusButtonLoading"
+        :disabled="buttonsDisabled || parsedFraction.isZero()"
     />
     <custom-el-tooltip content="Apply changes">
-      <bgc-el-button
-        :icon="Check"
-        @click="apply"
-        :loading="checkButtonLoading"
-        :disabled="buttonsDisabled"
+      <el-button
+          :icon="Check"
+          @click="apply"
+          :loading="checkButtonLoading"
+          :disabled="buttonsDisabled"
       />
     </custom-el-tooltip>
   </el-button-group>

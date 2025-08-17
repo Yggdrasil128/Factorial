@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { useFactoryStore } from '@/stores/model/factoryStore';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { computed, type ComputedRef, watch } from 'vue';
-import { type RouteLocationAsRelativeGeneric, useRoute, useRouter } from 'vue-router';
-import type { Factory } from '@/types/model/standalone';
-import { Delete, Edit, Plus, Switch } from '@element-plus/icons-vue';
-import { ElButton, ElButtonGroup, ElPopconfirm } from 'element-plus';
-import { VueDraggableNext } from 'vue-draggable-next';
+import {useFactoryStore} from '@/stores/model/factoryStore';
+import {useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {computed, type ComputedRef, watch} from 'vue';
+import {type RouteLocationAsRelativeGeneric, useRoute, useRouter} from 'vue-router';
+import type {Factory} from '@/types/model/standalone';
+import {Delete, Edit, Plus, Switch} from '@element-plus/icons-vue';
+import {ElButton, ElButtonGroup, ElPopconfirm} from 'element-plus';
+import {VueDraggableNext} from 'vue-draggable-next';
 import IconImg from '@/components/common/IconImg.vue';
-import { type FactoryApi, useFactoryApi } from '@/api/model/useFactoryApi';
-import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import type { EntityWithOrdinal } from '@/types/model/basic';
-import BgcElButton from '@/components/common/input/BgcElButton.vue';
+import {type FactoryApi, useFactoryApi} from '@/api/model/useFactoryApi';
+import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSupport';
+import type {EntityWithOrdinal} from '@/types/model/basic';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
@@ -23,30 +22,30 @@ const router = useRouter();
 const route = useRoute();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
-  route.params.factoryId ? Number(route.params.factoryId) : undefined,
+    route.params.factoryId ? Number(route.params.factoryId) : undefined,
 );
 
 const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
-  route.params.factoryId === 'exportImportOverview',
+    route.params.factoryId === 'exportImportOverview',
 );
 
 const factories: ComputedRef<Factory[]> = computed(() => {
   return factoryStore.getBySaveId(currentGameAndSaveStore.currentSaveId)
-    .sort((a, b) => a.ordinal - b.ordinal);
+      .sort((a, b) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(factories,
-  (input: EntityWithOrdinal[]) => factoryApi.reorder(currentGameAndSaveStore.currentSaveId, input),
+    (input: EntityWithOrdinal[]) => factoryApi.reorder(currentGameAndSaveStore.currentSaveId, input),
 );
 
 function newFactory(): void {
-  router.push({ name: 'newFactory', params: { factoryId: route.params.factoryId } });
+  router.push({name: 'newFactory', params: {factoryId: route.params.factoryId}});
 }
 
 function editFactory(editFactoryId: number): void {
   router.push({
     name: 'editFactory',
-    params: { factoryId: route.params.factoryId, editFactoryId: editFactoryId },
+    params: {factoryId: route.params.factoryId, editFactoryId: editFactoryId},
   });
 }
 
@@ -56,7 +55,7 @@ function viewFactory(factoryId: number, replace?: boolean): void {
   }
 
   const toRoute: RouteLocationAsRelativeGeneric =
-    { name: 'factories', params: { factoryId: factoryId } };
+      {name: 'factories', params: {factoryId: factoryId}};
 
   if (replace) {
     router.replace(toRoute);
@@ -66,14 +65,14 @@ function viewFactory(factoryId: number, replace?: boolean): void {
 }
 
 function viewExportImportOverview(): void {
-  router.push({ name: 'factories', params: { factoryId: 'exportImportOverview' } });
+  router.push({name: 'factories', params: {factoryId: 'exportImportOverview'}});
 }
 
 watch(computed(() => factories.value.length), () => {
   if (factories.value.length > 0 && !currentFactoryId.value && !showingExportImportOverview.value) {
     viewFactory(factories.value[0].id, true);
   }
-}, { immediate: true });
+}, {immediate: true});
 
 function deleteFactory(factoryId: number) {
   factoryApi.delete(factoryId);
@@ -86,7 +85,7 @@ function deleteFactory(factoryId: number) {
     <div class="card exportImportOverview" :class="{active: showingExportImportOverview}"
          @click="viewExportImportOverview">
       <el-icon class="icon" :size="32" style="margin: 4px;">
-        <Switch />
+        <Switch/>
       </el-icon>
       <div class="name">
         Export / Import overview
@@ -115,7 +114,7 @@ function deleteFactory(factoryId: number) {
            :key="factory.id"
            class="card" :class="{ active: factory.id === currentFactoryId, hasIcon: !!factory.iconId }"
            @click="viewFactory(factory.id)">
-        <icon-img class="icon" :icon="factory.iconId" :size="40" />
+        <icon-img class="icon" :icon="factory.iconId" :size="40"/>
 
         <div class="name">
           {{ factory.name }}
@@ -124,7 +123,7 @@ function deleteFactory(factoryId: number) {
         <div class="buttons" @click.stop>
           <el-button-group>
             <custom-el-tooltip content="Edit">
-              <bgc-el-button :icon="Edit" @click.stop="editFactory(factory.id)" />
+              <el-button :icon="Edit" @click.stop="editFactory(factory.id)"/>
             </custom-el-tooltip>
 
             <el-popconfirm title="Delete this factory?"
@@ -133,7 +132,7 @@ function deleteFactory(factoryId: number) {
               <template #reference>
                   <span class="row center tooltipHelperSpan">
                     <custom-el-tooltip content="Delete">
-                      <el-button type="danger" :icon="Delete" :disabled="factories.length === 1" />
+                      <el-button type="danger" :icon="Delete" :disabled="factories.length === 1"/>
                     </custom-el-tooltip>
                   </span>
               </template>
