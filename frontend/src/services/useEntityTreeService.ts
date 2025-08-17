@@ -1,19 +1,19 @@
-import type { EntityWithCategory, TreeNode } from '@/utils/treeUtils';
-import { convertToTreeByCategory } from '@/utils/treeUtils';
-import type { Component, ComputedRef, Ref } from 'vue';
-import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { until } from '@vueuse/core';
+import type {EntityWithCategory, TreeNode} from '@/utils/treeUtils';
+import {convertToTreeByCategory} from '@/utils/treeUtils';
+import type {Component, ComputedRef, Ref} from 'vue';
+import {computed, nextTick, reactive, ref, watch} from 'vue';
+import {until} from '@vueuse/core';
 import _ from 'lodash';
 import Node from 'element-plus/es/components/tree/src/model/node';
-import { Close, Link, Menu, UploadFilled } from '@element-plus/icons-vue';
-import type { Game, Icon } from '@/types/model/standalone';
-import { ElMessage, type TreeInstance } from 'element-plus';
-import { useIconStore } from '@/stores/model/iconStore';
-import { useIconApi } from '@/api/model/useIconApi';
-import { type EntityUsages, useEntityUsagesService } from '@/services/useEntityUsagesService';
-import type { NodeDropType } from 'element-plus/es/components/tree/src/tree.type';
+import {Close, Link, Menu, UploadFilled} from '@element-plus/icons-vue';
+import type {Game, Icon} from '@/types/model/standalone';
+import {ElMessage, type TreeInstance} from 'element-plus';
+import {useIconStore} from '@/stores/model/iconStore';
+import {useIconApi} from '@/api/model/useIconApi';
+import {type EntityUsages, useEntityUsagesService} from '@/services/useEntityUsagesService';
+import type {NodeDropType} from 'element-plus/es/components/tree/src/tree.type';
 
-import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi';
+import {AbstractBulkCrudEntityApi} from '@/api/model/abstractBulkCrudEntityApi';
 
 export type EntityTreeServiceState<T extends EntityWithCategory> = {
   entities: ComputedRef<T[]>;
@@ -259,6 +259,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     const level = node.level;
     for (let i = 0; i < level; i++) {
       path.unshift(node.data.label);
+        if (!node.parent) break;
       node = node.parent;
     }
     return path;
@@ -642,7 +643,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     updateTree();
 
     if (dropType !== 'inner') {
-      targetNode = targetNode.parent;
+        targetNode = targetNode.parent!;
     }
 
     const sourceIsFolder: boolean = sourceNode.data.id === undefined;
@@ -653,7 +654,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       // thus we need to parse the sourcePath from sourceNode.data.key
       const sourceKey: string = sourceNode.data.key;
       const sourcePath: string[] = sourceKey.slice(1, sourceKey.length - 1).split('/');
-      const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent);
+        const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent!);
       targetPath.push(sourcePath[sourcePath.length - 1]);
 
       if (!_.isEqual(sourcePath, targetPath)) {
@@ -663,7 +664,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     }
 
     const sourceId: number = sourceNode.data.id;
-    const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent);
+      const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent!);
 
     const entity: ComputedRef<T> = computed(() => entities.value.filter(e => e.id === sourceId)[0]!);
 
