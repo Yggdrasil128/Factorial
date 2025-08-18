@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, type ComputedRef, reactive, ref, type Ref } from 'vue';
-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
-import { sleep } from '@/utils/utils';
-import { useChangelistStore } from '@/stores/model/changelistStore';
-import type { Changelist, Factory, ProductionStep } from '@/types/model/standalone';
-import type { Fraction } from '@/types/model/basic';
-import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useFactoryStore } from '@/stores/model/factoryStore';
+import {computed, type ComputedRef, reactive, ref, type Ref} from 'vue';
+import {onBeforeRouteLeave, useRoute, useRouter} from 'vue-router';
+import {sleep} from '@/utils/utils';
+import {useChangelistStore} from '@/stores/model/changelistStore';
+import type {Changelist, Factory, ProductionStep} from '@/types/model/standalone';
+import type {Fraction} from '@/types/model/basic';
+import {useProductionStepStore} from '@/stores/model/productionStepStore';
+import {useFactoryStore} from '@/stores/model/factoryStore';
 import ViewChangelistModalFactory from '@/components/factories/modal/ViewChangelistModalFactory.vue';
-import { useChangelistApi } from '@/api/model/useChangelistApi';
+import {useChangelistApi} from '@/api/model/useChangelistApi';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
+import {ElPopconfirm} from "element-plus";
 
 const router = useRouter();
 const route = useRoute();
@@ -32,7 +33,7 @@ async function close(): Promise<void> {
   await Promise.all([
     sleep(200),
     ...[...productionStepIdsToClear.values()]
-      .map(productionStepId => changelistApi.deleteChange(changelistId.value, productionStepId)),
+        .map(productionStepId => changelistApi.deleteChange(changelistId.value, productionStepId)),
   ]);
   await sleep(200);
 }
@@ -45,11 +46,11 @@ const changelistApi = useChangelistApi();
 const productionStepIdsToClear: Set<number> = reactive(new Set());
 
 const changelistId: ComputedRef<number> = computed(() =>
-  Number(route.params.changelistId),
+    Number(route.params.changelistId),
 );
 
 const changelist: ComputedRef<Changelist | undefined> = computed(() =>
-  changelistStore.getById(changelistId.value),
+    changelistStore.getById(changelistId.value),
 );
 
 export interface ProductionStepChangesByFactory {
@@ -93,16 +94,23 @@ const changesByFactory: ComputedRef<ProductionStepChangesByFactory[]> = computed
   return result;
 });
 
+async function clearChangelist(): Promise<void> {
+  await changelistApi.clear(changelistId.value);
+  await sleep(200);
+  await close();
+  router.back();
+}
+
 </script>
 
 <template>
   <el-dialog
-    :model-value="visible"
-    :before-close="beforeClose"
-    width="600px"
-    style="padding-right: 8px;"
-    :title="'Changes in changelist \'' + changelist?.name + '\''"
-    :close-on-click-modal="true"
+      :model-value="visible"
+      :before-close="beforeClose"
+      width="600px"
+      style="padding-right: 8px;"
+      :title="'Changes in changelist \'' + changelist?.name + '\''"
+      :close-on-click-modal="true"
   >
     <div v-if="changelist" class="dialogContent column">
       <PlaceholderHelpBox v-if="changesByFactory.length === 0"
@@ -121,7 +129,20 @@ const changesByFactory: ComputedRef<ProductionStepChangesByFactory[]> = computed
                                   :changelist="changelist"
                                   :changes="changes"
                                   :production-step-ids-to-clear="productionStepIdsToClear"
-                                  style="flex: 0 0 auto;" />
+                                  style="flex: 0 0 auto;"/>
+
+      <div style="margin-top: 24px;">
+
+        <el-popconfirm title="Clear all changes in this changelist?"
+                       width="200px"
+                       @confirm="clearChangelist()">
+          <template #reference>
+            <el-button type="danger" plain :disabled="changelist.productionStepChanges.length === 0">
+              Clear all changes
+            </el-button>
+          </template>
+        </el-popconfirm>
+      </div>
     </div>
   </el-dialog>
 </template>

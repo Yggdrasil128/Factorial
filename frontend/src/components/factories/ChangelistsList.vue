@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useChangelistStore } from '@/stores/model/changelistStore';
-import { useChangelistApi } from '@/api/model/useChangelistApi';
-import { useRoute, useRouter } from 'vue-router';
-import { computed, type ComputedRef, h, type Ref, ref } from 'vue';
-import type { Changelist } from '@/types/model/standalone';
-import { ArrowDown, Check, Delete, Edit, Hide, Plus, Star, View } from '@element-plus/icons-vue';
+import {useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {useChangelistStore} from '@/stores/model/changelistStore';
+import {useChangelistApi} from '@/api/model/useChangelistApi';
+import {useRoute, useRouter} from 'vue-router';
+import {computed, type ComputedRef, h, type Ref, ref} from 'vue';
+import type {Changelist} from '@/types/model/standalone';
+import {ArrowDown, Delete, Edit, Finished, Hide, Plus, Remove, Star, View} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
 import {
   ElButton,
@@ -16,9 +16,9 @@ import {
   ElMessageBox,
   ElSwitch,
 } from 'element-plus';
-import { VueDraggableNext } from 'vue-draggable-next';
-import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import type { EntityWithOrdinal } from '@/types/model/basic';
+import {VueDraggableNext} from 'vue-draggable-next';
+import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSupport';
+import type {EntityWithOrdinal} from '@/types/model/basic';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 
 const currentGameAndSaveStore = useCurrentGameAndSaveStore();
@@ -55,16 +55,32 @@ function viewChangelist(changelistId: number): void {
   });
 }
 
+function clearChangelist(changelistId: number): void {
+  const changelist: Changelist | undefined = changelistStore.getById(changelistId);
+  ElMessageBox.confirm(
+      'Are you sure you want to clear all changes in changelist \'' + changelist?.name + '\'?',
+      'Warning',
+      {
+        confirmButtonText: 'Clear',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+      },
+  ).then(() => {
+    changelistApi.clear(changelistId);
+  }).catch(() => {
+  });
+}
+
 function deleteChangelist(changelistId: number): void {
   const changelist: Changelist | undefined = changelistStore.getById(changelistId);
   ElMessageBox.confirm(
-    'Are you sure you want to delete changelist \'' + changelist?.name + '\'?',
-    'Warning',
-    {
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-      type: 'warning',
-    },
+      'Are you sure you want to delete changelist \'' + changelist?.name + '\'?',
+      'Warning',
+      {
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+      },
   ).then(() => {
     changelistApi.delete(changelistId);
   }).catch(() => {
@@ -185,7 +201,7 @@ function onDropdownMenuOpenResetTimer(): void {
               <el-button-group>
                 <custom-el-tooltip content="Apply all changes">
                   <el-button
-                    :icon="Check"
+                      :icon="Finished"
                     @click="askApplyChangelist(changelist.id, changelist.primary)"
                   />
                 </custom-el-tooltip>
@@ -201,8 +217,14 @@ function onDropdownMenuOpenResetTimer(): void {
                       <el-dropdown-item :icon="Edit" @click="editChangelist(changelist.id)">
                         Edit
                       </el-dropdown-item>
+                      <el-dropdown-item :icon="Remove" @click="clearChangelist(changelist.id)"
+                                        class="destructive"
+                                        :class="{disabled: changelist.productionStepChanges.length === 0}"
+                                        :disabled="changelist.productionStepChanges.length === 0">
+                        Clear
+                      </el-dropdown-item>
                       <el-dropdown-item :icon="Delete" @click="deleteChangelist(changelist.id)"
-                                        class="deleteOption"
+                                        class="destructive"
                                         :class="{disabled: changelists.length === 1 || changelist.primary}"
                                         :disabled="changelists.length === 1 || changelist.primary">
                         Delete
@@ -320,11 +342,11 @@ function onDropdownMenuOpenResetTimer(): void {
   border-right-color: var(--el-color-danger-dark-2) !important;
 }
 
-.deleteOption {
+.destructive {
   color: var(--el-color-danger) !important;
 }
 
-.deleteOption.disabled {
+.destructive.disabled {
   color: var(--el-color-danger-light-5) !important;
 }
 </style>
