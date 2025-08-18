@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import type { Item, LocalResource, ProductionStep } from '@/types/model/standalone';
+import type {Item, LocalResource, ProductionStep} from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
-import { useItemStore } from '@/stores/model/itemStore';
-import { computed, type ComputedRef, onMounted, type Ref, ref } from 'vue';
+import {useItemStore} from '@/stores/model/itemStore';
+import {computed, type ComputedRef, onMounted, type Ref, ref} from 'vue';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import _ from 'lodash';
-import { useProductionStepStore } from '@/stores/model/productionStepStore';
+import {useProductionStepStore} from '@/stores/model/productionStepStore';
 import ResourceProductionStep from '@/components/factories/resources/ResourceProductionStep.vue';
-import { useUserSettingsStore } from '@/stores/userSettingsStore';
-import { VisibleResourceContributors } from '@/types/userSettings';
+import {useUserSettingsStore} from '@/stores/userSettingsStore';
+import {VisibleResourceContributors} from '@/types/userSettings';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
-import { Switch } from '@element-plus/icons-vue';
+import {Switch} from '@element-plus/icons-vue';
 import HelpPopover from '@/components/common/HelpPopover.vue';
-import { useLocalResourceApi } from '@/api/model/useLocalResourceApi';
-import { until } from '@vueuse/core';
-import { onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter } from 'vue-router';
+import {useLocalResourceApi} from '@/api/model/useLocalResourceApi';
+import {until} from '@vueuse/core';
+import {onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter} from 'vue-router';
 
 export interface FactoryResourceProps {
   resource: LocalResource;
@@ -166,6 +166,7 @@ onMounted(() => onUpdateRoute(route));
         v-for="productionStep in productionSteps"
         :key="productionStep.id"
         :production-step="productionStep"
+        :resource="resource"
       />
     </div>
   </div>

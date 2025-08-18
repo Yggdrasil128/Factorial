@@ -1,6 +1,6 @@
-import type { Fraction } from '@/types/model/basic';
-import type { ProductionStep } from '@/types/model/standalone';
-import { AbstractBulkCrudEntityApi } from '@/api/model/abstractBulkCrudEntityApi';
+import type {Fraction} from '@/types/model/basic';
+import type {ProductionStep} from '@/types/model/standalone';
+import {AbstractBulkCrudEntityApi} from '@/api/model/abstractBulkCrudEntityApi';
 
 export class ProductionStepApi extends AbstractBulkCrudEntityApi<ProductionStep> {
   constructor() {
@@ -26,6 +26,10 @@ export class ProductionStepApi extends AbstractBulkCrudEntityApi<ProductionStep>
 
   public updateMachineCount(productionStepId: number, machineCount: Fraction): Promise<void> {
     return this.api.patch('/api/productionStep/machineCount', undefined, { productionStepId, machineCount });
+  }
+
+  public satisfy(productionStepId: number, resourceId: number): Promise<void> {
+    return this.api.patch('/api/productionStep/satisfy', undefined, {productionStepId, resourceId});
   }
 }
 

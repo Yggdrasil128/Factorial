@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type {Item, Machine, ProductionStep, Recipe, RecipeModifier} from '@/types/model/standalone';
+import type {Item, LocalResource, Machine, ProductionStep, Recipe, RecipeModifier} from '@/types/model/standalone';
 import {computed, type ComputedRef} from 'vue';
 import {useRecipeStore} from '@/stores/model/recipeStore';
 import {useItemStore} from '@/stores/model/itemStore';
 import {useMachineStore} from '@/stores/model/machineStore';
-import {CaretLeft, Delete, Edit} from '@element-plus/icons-vue';
+import {ArrowDown, CaretLeft, Delete, Edit, MagicStick} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
-import {ElButton, ElButtonGroup, ElPopconfirm, ElTooltip} from 'element-plus';
+import {ElButton, ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessageBox} from 'element-plus';
 import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
 import {useRoute, useRouter} from 'vue-router';
@@ -17,6 +17,7 @@ import CustomElTooltip from "@/components/common/CustomElTooltip.vue";
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
+  resource: LocalResource;
 }
 
 const props: ResourceProductionStepProps = defineProps<ResourceProductionStepProps>();
@@ -70,7 +71,22 @@ function editProductionStep(): void {
 }
 
 function deleteProductionStep(): void {
-  productionStepApi.delete(props.productionStep.id);
+  ElMessageBox.confirm(
+      'Are you sure you want to delete this production step?',
+      'Warning',
+      {
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+      },
+  ).then(() => {
+    productionStepApi.delete(props.productionStep.id);
+  }).catch(() => {
+  });
+}
+
+function optimizeProductionStep(): void {
+  productionStepApi.satisfy(props.productionStep.id, props.resource.id);
 }
 
 </script>
@@ -104,27 +120,24 @@ function deleteProductionStep(): void {
         <ProductionStepMachineCountInput :production-step="productionStep"/>
         &ensp;
         <el-button-group>
-          <custom-el-tooltip content="Edit">
-            <el-button :icon="Edit" @click="editProductionStep"/>
+          <custom-el-tooltip content="Optimize">
+            <el-button :icon="MagicStick" @click="optimizeProductionStep"/>
           </custom-el-tooltip>
 
-          <el-popconfirm
-              title="Delete this production step?"
-              width="200px"
-              @confirm="deleteProductionStep">
-            <template #reference>
-              <span class="row center tooltipHelperSpan">
-                <el-tooltip
-                    effect="dark"
-                    placement="top-start"
-                    transition="none"
-                    :hide-after="0"
-                    content="Delete">
-                  <el-button type="danger" :icon="Delete"/>
-                </el-tooltip>
-              </span>
+          <el-dropdown class="dropdown" trigger="click">
+            <el-button :icon="ArrowDown"/>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item :icon="Edit" @click="editProductionStep">
+                  Edit
+                </el-dropdown-item>
+                <el-dropdown-item :icon="Delete" @click="deleteProductionStep"
+                                  style="color: var(--el-color-danger);">
+                  Delete
+                </el-dropdown-item>
+              </el-dropdown-menu>
             </template>
-          </el-popconfirm>
+          </el-dropdown>
         </el-button-group>
       </div>
     </div>
@@ -157,4 +170,10 @@ function deleteProductionStep(): void {
   margin-top: 6px;
 }
 
+/*noinspection CssUnusedSymbol*/
+.dropdown > .el-button {
+  --el-button-divide-border-color: #60606080;
+  padding-left: 8px;
+  padding-right: 8px;
+}
 </style>
