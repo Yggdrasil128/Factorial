@@ -101,8 +101,6 @@ function deleteProductionStep(): void {
       </div>
 
       <div style="flex: 0 0 auto;">
-        <!--        <machine-count-input :model-value="productionStep.machineCounts.withPrimaryChangelist"-->
-        <!--                             :production-step-id="productionStep.id" />-->
         <ProductionStepMachineCountInput :production-step="productionStep"/>
         &ensp;
         <el-button-group>
