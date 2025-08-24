@@ -114,6 +114,21 @@ public class ProductionStepController {
                 changelistService::getProductionStepChanges, result));
     }
 
+    /**
+     * Computes a machine count for the target {@link ProductionStep} that would satisfy the over-consumption or
+     * -production of the given {@link Resource}. 
+     * 
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}
+     * @return the new machine count (as fraction as JSON string)
+     */
+    @GetMapping("/productionStep/satisfaction")
+    @ResponseStatus(HttpStatus.OK)
+    public CompletableFuture<Fraction> findSatisfaction(int productionStepId, int resourceId) {
+        return asyncHelper.submit(() -> factoryService.findSatisfaction(resourceId, productionStepId,
+                changelistService::getProductionStepChanges));
+    }
+
     private ProductionStepStandalone toOutput(ProductionStep productionStep) {
         return ProductionStepStandalone.of(productionStep, External.FRONTEND);
     }

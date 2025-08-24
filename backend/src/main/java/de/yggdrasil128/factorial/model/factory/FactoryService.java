@@ -218,6 +218,13 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
     public void satisfy(int resourceId, int productionStepId,
                         Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
                         CompletableFuture<Void> result) {
+        Fraction newMachineCount = findSatisfaction(resourceId, productionStepId, changes);
+        changelistService.setPrimaryMachineCount(productionStepId, newMachineCount, result);
+    }
+
+    @Transactional
+    public Fraction findSatisfaction(int resourceId, int productionStepId,
+                                     Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
         ProductionStep productionStep = productionStepService.get(productionStepId);
         ProductionStepThroughputs throughputs = productionStepService.computeThroughputs(productionStep,
                 () -> changes.apply(productionStep));
@@ -225,8 +232,9 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
                 .getContributions(resourceService.get(resourceId));
         Fraction difference = contributions.getOverConsumed().getWithPrimaryChangelist();
 
+        Fraction currentMachineCount = throughputs.getMachineCounts().getWithPrimaryChangelist();
         if (difference.isZero()) {
-            return;
+            return currentMachineCount;
         }
 
         Fraction produced = Optional.ofNullable(throughputs.getOutput(contributions.getItemId()))
@@ -235,16 +243,13 @@ public class FactoryService extends ParentedModelService<Factory, FactoryStandal
                 .orElse(QuantityByChangelist.ZERO).getWithPrimaryChangelist();
         Fraction throughput = produced.subtract(consumed);
 
-        Fraction currentMachineCount = throughputs.getMachineCounts().getWithPrimaryChangelist();
         // both sides describe the effective throughput of a single machine
         // throughput / currentMachineCount = (throughput + difference) / newMachineCount
         // sort to one side
         // newMachineCount = currentMachineCount * (throughput + difference) / throughput
         // push 'throughput' down into the braced term
         // newMachineCount = currentMachineCount * (1 + difference / throughput)
-        Fraction newMachineCount = currentMachineCount.multiply(Fraction.ONE.add(difference.divide(throughput)));
-
-        changelistService.setPrimaryMachineCount(productionStepId, newMachineCount, result);
+        return currentMachineCount.multiply(Fraction.ONE.add(difference.divide(throughput)));
     }
 
     @Transactional
