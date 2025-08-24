@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { ProductionEntry } from '@/types/model/standalone';
-import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
-import { useItemStore } from '@/stores/model/itemStore';
+import type {ProductionEntry} from '@/types/model/standalone';
+import {useItemStore} from '@/stores/model/itemStore';
 import IconImg from '@/components/common/IconImg.vue';
-import { useRoute, useRouter } from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
+import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
+import FractionDisplay from "@/components/common/FractionDisplay.vue";
 
 export interface ProductionEntriesTableProps {
   productionEntries: ProductionEntry[];
@@ -36,7 +37,7 @@ async function onClick(itemId: number): Promise<void> {
   <table>
     <tr v-for="productionEntry in productionEntries" :key="productionEntry.itemId">
       <td>
-        <quantity-display :quantity="productionEntry.quantity" convert-unit />
+        <quantity-by-changelist-display :quantity="productionEntry.quantity" is-throughput hide-throughput-unit/>
       </td>
       <td>
         <icon-img :icon="itemStore.getById(productionEntry.itemId)?.iconId" :size="24" />
@@ -45,7 +46,7 @@ async function onClick(itemId: number): Promise<void> {
         <span class="itemName" @click="onClick(productionEntry.itemId)">
           {{ itemStore.getById(productionEntry.itemId)?.name }}
         </span>
-        <quantity-display :quantity="undefined" show-unit convert-unit />
+        <fraction-display :fraction="undefined" is-throughput/>
       </td>
     </tr>
   </table>

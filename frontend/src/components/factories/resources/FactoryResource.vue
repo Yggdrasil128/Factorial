@@ -3,7 +3,6 @@ import type {Item, LocalResource, ProductionStep} from '@/types/model/standalone
 import IconImg from '@/components/common/IconImg.vue';
 import {useItemStore} from '@/stores/model/itemStore';
 import {computed, type ComputedRef, onMounted, type Ref, ref} from 'vue';
-import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import _ from 'lodash';
 import {useProductionStepStore} from '@/stores/model/productionStepStore';
 import ResourceProductionStep from '@/components/factories/resources/ResourceProductionStep.vue';
@@ -15,6 +14,7 @@ import HelpPopover from '@/components/common/HelpPopover.vue';
 import {useLocalResourceApi} from '@/api/model/useLocalResourceApi';
 import {until} from '@vueuse/core';
 import {onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter} from 'vue-router';
+import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
 
 export interface FactoryResourceProps {
   resource: LocalResource;
@@ -129,13 +129,14 @@ onMounted(() => onUpdateRoute(route));
             <custom-el-tooltip content="The production surplus (if positive), or deficit (if negative)">
               Net:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.overProduced" :color="resource.importExport ? 'none' : 'auto'"
-                              show-unit convert-unit />
+            <quantity-by-changelist-display :quantity="resource.overProduced"
+                                            :color="resource.importExport ? undefined : 'auto'"
+                                            is-throughput/>
             <span v-if="resource.importExport" class="link" @click="goToExportImportOverview">
               <template v-if="resource.overProduced.current === '0'">
                 (no import/export)
               </template>
-              <template v-if="resource.overProduced.current.startsWith('-')">
+              <template v-else-if="resource.overProduced.current.startsWith('-')">
                 (imported)
               </template>
               <template v-else>
@@ -148,14 +149,18 @@ onMounted(() => onUpdateRoute(route));
             <custom-el-tooltip content="The amount being produced">
               Produced:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.produced" color="green" show-unit convert-unit />
+            <quantity-by-changelist-display :quantity="resource.produced"
+                                            color="green"
+                                            is-throughput/>
           </div>
 
           <div>
             <custom-el-tooltip content="The amount being consumed">
               Consumed:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.consumed" color="red" show-unit convert-unit />
+            <quantity-by-changelist-display :quantity="resource.consumed"
+                                            color="red"
+                                            is-throughput/>
           </div>
         </div>
       </div>

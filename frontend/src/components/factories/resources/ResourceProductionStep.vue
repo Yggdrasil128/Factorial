@@ -7,13 +7,13 @@ import {useMachineStore} from '@/stores/model/machineStore';
 import {ArrowDown, CaretLeft, Delete, Edit, MagicStick} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
 import {ElButton, ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessageBox} from 'element-plus';
-import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
 import {useRoute, useRouter} from 'vue-router';
 import {useProductionStepApi} from '@/api/model/useProductionStepApi';
 import ProductionEntriesTable from '@/components/factories/resources/ProductionEntriesTable.vue';
 import ProductionStepMachineCountInput from '@/components/factories/resources/ProductionStepMachineCountInput.vue';
 import CustomElTooltip from "@/components/common/CustomElTooltip.vue";
+import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
 
 export interface ResourceProductionStepProps {
   productionStep: ProductionStep;
@@ -103,7 +103,7 @@ function optimizeProductionStep(): void {
       <icon-img :icon="machine?.iconId" :size="48"/>
       <div style="flex: 0 0 auto; margin-right: 12px;">
         ✕
-        <quantity-display :quantity="productionStep.machineCounts" color="none"/>
+        <quantity-by-changelist-display :quantity="productionStep.machineCounts"/>
       </div>
       <icon-img :icon="recipeIconId" :size="48"/>
 

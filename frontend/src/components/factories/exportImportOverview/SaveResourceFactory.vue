@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { Factory, Item, ProductionEntry } from '@/types/model/standalone';
+import type {Factory, Item, ProductionEntry} from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
-import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
-import { computed, type ComputedRef, onMounted, type Ref, ref } from 'vue';
-import { onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter } from 'vue-router';
+import {computed, type ComputedRef, onMounted, type Ref, ref} from 'vue';
+import {onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter} from 'vue-router';
+import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
+import FractionDisplay from "@/components/common/FractionDisplay.vue";
 
 export interface SaveResourceFactoryProps {
   factory: Factory;
@@ -70,17 +71,17 @@ onMounted(() => onUpdateRoute(route));
       </div>
       <div v-for="(input, index) in imports" :key="index" class="row items-center">
         Imports
-        <quantity-display :quantity="input.quantity" color="red" convert-unit />
+        <quantity-by-changelist-display :quantity="input.quantity" color="red" is-throughput hide-throughput-unit/>
         <icon-img :icon="item.iconId" :size="24" />
         <span class="link" @click="goToFactoryItem">{{ item.name }}</span>
-        <quantity-display :quantity="undefined" show-unit convert-unit />
+        <fraction-display :fraction="undefined" is-throughput/>
       </div>
       <div v-for="(output, index) in exports" :key="index" class="row items-center">
         Exports
-        <quantity-display :quantity="output.quantity" color="green" convert-unit />
+        <quantity-by-changelist-display :quantity="output.quantity" color="green" is-throughput hide-throughput-unit/>
         <icon-img :icon="item.iconId" :size="24" />
         <span class="link" @click="goToFactoryItem">{{ item.name }}</span>
-        <quantity-display :quantity="undefined" show-unit convert-unit />
+        <fraction-display :fraction="undefined" is-throughput/>
       </div>
     </div>
   </div>

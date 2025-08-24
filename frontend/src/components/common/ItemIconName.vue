@@ -10,7 +10,7 @@ defineProps<ItemIconNameProps>();
 </script>
 
 <template>
-  <icon-img :icon="item?.iconId" :size="24" style='vertical-align:middle;'/>
+  <icon-img :icon="item?.iconId" :size="24" style="vertical-align: middle; margin-right: 4px;"/>
   <b>{{ item?.name }}</b>
 </template>
 

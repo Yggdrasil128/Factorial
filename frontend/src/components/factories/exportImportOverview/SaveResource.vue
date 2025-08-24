@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { Factory, GlobalResource, Item } from '@/types/model/standalone';
-import { useItemStore } from '@/stores/model/itemStore';
-import { computed, type ComputedRef } from 'vue';
-import { VisibleResourceContributors } from '@/types/userSettings';
+import type {Factory, GlobalResource, Item} from '@/types/model/standalone';
+import {useItemStore} from '@/stores/model/itemStore';
+import {computed, type ComputedRef} from 'vue';
+import {VisibleResourceContributors} from '@/types/userSettings';
 import _ from 'lodash';
-import { useFactoryStore } from '@/stores/model/factoryStore';
-import { useUserSettingsStore } from '@/stores/userSettingsStore';
+import {useFactoryStore} from '@/stores/model/factoryStore';
+import {useUserSettingsStore} from '@/stores/userSettingsStore';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
-import QuantityDisplay from '@/components/factories/resources/QuantityDisplay.vue';
 import IconImg from '@/components/common/IconImg.vue';
 import SaveResourceFactory from '@/components/factories/exportImportOverview/SaveResourceFactory.vue';
+import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
 
 export interface SaveResourceProps {
   resource: GlobalResource;
@@ -65,21 +65,21 @@ const factories: ComputedRef<Factory[]> = computed(() => {
             <custom-el-tooltip content="The supply/demand surplus (if positive), or deficit (if negative)">
               Net:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.overProduced" color="auto" show-unit convert-unit />
+            <quantity-by-changelist-display :quantity="resource.overProduced" color="auto" is-throughput/>
           </div>
 
           <div>
             <custom-el-tooltip content="The total amount being exported">
               Exported:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.produced" color="green" show-unit convert-unit />
+            <quantity-by-changelist-display :quantity="resource.produced" color="green" is-throughput/>
           </div>
 
           <div>
             <custom-el-tooltip content="The total amount being imported">
               Imported:
             </custom-el-tooltip>
-            <quantity-display :quantity="resource.consumed" color="red" show-unit convert-unit />
+            <quantity-by-changelist-display :quantity="resource.consumed" color="red" is-throughput/>
           </div>
         </div>
       </div>

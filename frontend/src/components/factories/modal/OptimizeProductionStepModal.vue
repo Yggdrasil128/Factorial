@@ -231,7 +231,7 @@ function apply(): void {
               {{ resourceNet.isPositive() ? 'surplus' : resourceNet.isNegative() ? 'deficit' : 'net' }} in factory:
             </td>
             <td>
-              <FractionDisplay :fraction="resourceNet" color="auto" is-throughput/>
+              <FractionDisplay :fraction="resourceNet" color="auto" is-throughput force-sign/>
             </td>
           </tr>
           <tr>

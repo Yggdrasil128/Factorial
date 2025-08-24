@@ -7,10 +7,11 @@ import {useUserSettingsStore} from "@/stores/userSettingsStore";
 import {ThroughputUnit} from "@/types/userSettings";
 
 export interface FractionDisplayProps {
-  fraction: Fraction | ParsedFraction;
+  fraction: Fraction | ParsedFraction | undefined;
   color?: undefined | 'auto' | 'green' | 'red';
   isThroughput?: boolean;
-  hideUnit?: boolean;
+  hideThroughputUnit?: boolean;
+  forceSign?: boolean;
 }
 
 const props: FractionDisplayProps = defineProps<FractionDisplayProps>();
@@ -31,8 +32,10 @@ const parsedFraction: ComputedRef<ParsedFraction> = computed(() => {
   let pf: ParsedFraction;
   if (typeof props.fraction === 'string') {
     pf = ParsedFraction.of(props.fraction);
-  } else {
+  } else if (props.fraction) {
     pf = props.fraction;
+  } else {
+    pf = ParsedFraction.ZERO;
   }
   return pf.multiply(conversionFactor.value);
 });
@@ -41,16 +44,22 @@ const numberFormat: Intl.NumberFormat = new Intl.NumberFormat('en-US', {maximumS
 const intNumberFormat: Intl.NumberFormat = new Intl.NumberFormat('en-US');
 
 function formatNumber(value: number): string {
+  let s: string;
   if (Math.abs(value) >= 1000) {
-    return intNumberFormat.format(Math.round(value));
+    s = intNumberFormat.format(Math.round(value));
   } else {
-    return numberFormat.format(value);
+    s = numberFormat.format(value);
   }
+  if (props.forceSign && value > 0) {
+    s = '+' + s;
+  }
+  return s;
 }
 </script>
 
 <template>
   <custom-el-tooltip
+      v-if="props.fraction"
       :content="parsedFraction.toFraction().replace('/', ' / ')"
   >
     <span :class="{
@@ -60,7 +69,7 @@ function formatNumber(value: number): string {
       {{ formatNumber(parsedFraction.toNumber()) }}
     </span>
   </custom-el-tooltip>
-  <span v-if="isThroughput && !hideUnit" class="unit">
+  <span v-if="isThroughput && !hideThroughputUnit" class="unit">
     <template v-if="userSettingsStore.throughputUnit === ThroughputUnit.ItemsPerSecond">
         / sec
       </template>
