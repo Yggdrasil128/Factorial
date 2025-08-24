@@ -9,7 +9,7 @@ export class ParsedFraction {
   private denominator: bigint;
 
   public static of(fraction: Fraction): ParsedFraction {
-    const i = fraction.indexOf('/');
+    const i: number = fraction.indexOf('/');
     if (i < 0) {
       return new ParsedFraction(BigInt(fraction.trim()));
     }
@@ -120,8 +120,8 @@ export class ParsedFraction {
   }
 
   roundToNearestInteger(): ParsedFraction {
-    const remainder = this.numerator % this.denominator;
-    const quotient = this.numerator / this.denominator;
+    const remainder: bigint = this.numerator % this.denominator;
+    const quotient: bigint = this.numerator / this.denominator;
     if (remainder * 2n >= this.denominator) {
       return new ParsedFraction(quotient + 1n);
     }
@@ -137,29 +137,6 @@ export function gcd(a: bigint, b: bigint): bigint {
   let modulus: bigint = a % b;
   if (modulus < 0) modulus += b;
   return gcd(b, modulus);
-}
-
-export function fractionToNumber(fraction: Fraction): number {
-  const i = fraction.indexOf('/');
-  if (i < 0) {
-    return Number(fraction);
-  }
-  return Number(fraction.substring(0, i)) / Number(fraction.substring(i + 1));
-}
-
-export function modifyFraction(fraction: Fraction, integerDelta: number, allowNegative?: boolean): Fraction {
-  const i = fraction.indexOf('/');
-  if (i < 0) {
-    return String(Math.max(Number(fraction) + integerDelta, 0));
-  } else {
-    let n = Number(fraction.substring(0, i));
-    const d = Number(fraction.substring(i + 1));
-    n += d * integerDelta;
-    if (n <= 0 && !allowNegative) {
-      return '0';
-    }
-    return String(n) + '/' + String(d);
-  }
 }
 
 export interface FractionValidationSettings {
@@ -181,7 +158,7 @@ export function isValidFraction(fraction: Fraction, settings?: FractionValidatio
   return /^(\d+) ?(\/ ?\d+)?$/.test(fraction);
 }
 
-export function elFormFractionValidator(rule: FractionValidationSettings, value: any, callback: any): void {
+export function elFormFractionValidator(rule: FractionValidationSettings, value: any, callback: (error?: Error) => void): void {
   if (!isValidFraction(value, rule)) {
     callback(new Error());
   } else {

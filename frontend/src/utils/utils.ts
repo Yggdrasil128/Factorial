@@ -1,7 +1,7 @@
-import type { EntityWithOrdinal } from '@/types/model/basic';
-import type { RuleItem } from 'async-validator/dist-types/interface';
+import type {EntityWithOrdinal} from '@/types/model/basic';
+import type {RuleItem} from 'async-validator/dist-types/interface';
 
-export function ordinalComparator(a: EntityWithOrdinal, b: EntityWithOrdinal) {
+export function ordinalComparator(a: EntityWithOrdinal, b: EntityWithOrdinal): number {
   return a.ordinal - b.ordinal;
 }
 
@@ -13,7 +13,7 @@ export interface EntityNameUniqueValidationSettings {
 
 function elFormEntityNameUniqueValidatorFunction(rule: EntityNameUniqueValidationSettings,
                                                  value: any,
-                                                 callback: any): void {
+                                                 callback: (error?: Error) => void): void {
   if (!value) {
     callback();
     return;
@@ -36,7 +36,7 @@ export const elFormEntityNameUniqueValidator: RuleItem['validator'] =
 
 
 export async function sleep(ms: number): Promise<void> {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise((r: (value: (PromiseLike<void> | void)) => void) => setTimeout(r, ms));
 }
 
 

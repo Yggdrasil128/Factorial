@@ -1,33 +1,34 @@
 <script setup lang="ts">
-import { getModelSyncService } from '@/services/useModelSyncService';
+import {getModelSyncService, type ModelSyncService} from '@/services/useModelSyncService';
 import {
   onBeforeRouteLeave,
   onBeforeRouteUpdate,
   type RouteLocationNormalizedLoadedGeneric,
+  type Router,
   useRoute,
   useRouter,
 } from 'vue-router';
-import { computed, type ComputedRef, ref, type Ref } from 'vue';
-import { useGameStore } from '@/stores/model/gameStore';
-import type { Game } from '@/types/model/standalone';
+import {computed, type ComputedRef, ref, type Ref} from 'vue';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import type {Game} from '@/types/model/standalone';
 import ItemEditor from '@/components/gameEditor/tabs/ItemEditor.vue';
 import MachineEditor from '@/components/gameEditor/tabs/MachineEditor.vue';
 import RecipeEditor from '@/components/gameEditor/tabs/RecipeEditor.vue';
 import RecipeModifierEditor from '@/components/gameEditor/tabs/RecipeModifierEditor.vue';
 import IconEditor from '@/components/gameEditor/tabs/IconEditor.vue';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
 
-const route = useRoute();
-const router = useRouter();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const gameStore = useGameStore();
-const modelSyncService = getModelSyncService();
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
+const gameStore: GameStore = useGameStore();
+const modelSyncService: ModelSyncService = getModelSyncService();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
 
 const isLoading: Ref<boolean> = ref(false);
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
-  const gameId = Number(route.params.editGameId);
+  const gameId: number = Number(route.params.editGameId);
   if (currentGameAndSaveStore.editingGameId === gameId) {
     return;
   }
@@ -38,7 +39,7 @@ function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
 }
 
 initFromRoute(route);
-onBeforeRouteUpdate(route => initFromRoute(route));
+onBeforeRouteUpdate((route: RouteLocationNormalizedLoadedGeneric) => initFromRoute(route));
 onBeforeRouteLeave(() => modelSyncService.clearEditingGameId());
 
 const gameId: ComputedRef<number> = computed(() => Number(route.params.editGameId));

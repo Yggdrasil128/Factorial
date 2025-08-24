@@ -6,6 +6,7 @@ import {
   VisibleResourceContributors
 } from '@/types/userSettings';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useUserSettingsStore
   = defineStore('userSettingsStore', {
   state: () => {

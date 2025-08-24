@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { useGameStore } from '@/stores/model/gameStore';
-import { useGameApi } from '@/api/model/useGameApi';
-import { computed, type ComputedRef } from 'vue';
-import type { Game } from '@/types/model/standalone';
-import { ordinalComparator } from '@/utils/utils';
-import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import { Plus, Upload } from '@element-plus/icons-vue';
-import { VueDraggableNext } from 'vue-draggable-next';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {GameApi, useGameApi} from '@/api/model/useGameApi';
+import {computed, type ComputedRef} from 'vue';
+import type {Game} from '@/types/model/standalone';
+import {ordinalComparator} from '@/utils/utils';
+import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSupport';
+import {Plus, Upload} from '@element-plus/icons-vue';
+import {VueDraggableNext} from 'vue-draggable-next';
 import GameCard from '@/components/savesAndGames/GameCard.vue';
-import { ElButton } from 'element-plus';
-import { useRouter } from 'vue-router';
+import {ElButton} from 'element-plus';
+import {type Router, useRouter} from 'vue-router';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
-const router = useRouter();
-const gameStore = useGameStore();
-const gameApi = useGameApi();
+const router: Router = useRouter();
+
+const gameStore: GameStore = useGameStore();
+const gameApi: GameApi = useGameApi();
 
 const games: ComputedRef<Game[]> = computed(() => gameStore.getAll().sort(ordinalComparator));
 

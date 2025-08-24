@@ -1,29 +1,25 @@
 <script setup lang="ts">
-import { UploadFilled } from '@element-plus/icons-vue';
-import {
-  genFileId,
-  type UploadInstance,
-  type UploadProps,
-  type UploadRawFile,
-  type UploadUserFile,
-} from 'element-plus';
-import { type Ref, ref, watch } from 'vue';
-import { useVModel } from '@vueuse/core';
+import {UploadFilled} from '@element-plus/icons-vue';
+import {genFileId, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile,} from 'element-plus';
+import {type Ref, ref, watch} from 'vue';
+import {useVModel} from '@vueuse/core';
 
 export interface FileUploadProps {
   modelValue: string | null;
 }
 
 const props: FileUploadProps = defineProps<FileUploadProps>();
-const emit = defineEmits(['update:modelValue']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['update:modelValue']);
 const model: Ref<string | null> = useVModel(props, 'modelValue', emit);
 
 const fileList: Ref<UploadUserFile[]> = ref([]);
-const upload = ref<UploadInstance>();
+const upload: Ref<UploadInstance | undefined> = ref();
 
-const handleExceed: UploadProps['onExceed'] = (files) => {
-  const file = files[0] as UploadRawFile;
-  file.uid = genFileId();
+const handleExceed: UploadProps['onExceed'] = (files: File[]) => {
+  const file: UploadRawFile = {
+    ...files[0],
+    uid: genFileId(),
+  };
   upload.value!.clearFiles();
   upload.value!.handleStart(file);
 };
@@ -44,9 +40,9 @@ watch(fileList, () => {
   }
   const file: UploadRawFile = fileList.value[0].raw as UploadRawFile;
 
-  const reader = new FileReader();
+  const reader: FileReader = new FileReader();
 
-  reader.onload = () => {
+  reader.onload = (): void => {
     model.value = reader.result?.toString() || '';
   };
 

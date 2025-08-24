@@ -1,25 +1,33 @@
 <script setup lang="ts">
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
-import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { useGameStore } from '@/stores/model/gameStore';
-import { useSaveApi } from '@/api/model/useSaveApi';
-import { computed, type ComputedRef, reactive, ref, type Ref } from 'vue';
-import type { Game, Save } from '@/types/model/standalone';
-import { ElFormItem, ElInput } from 'element-plus';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {SaveApi, useSaveApi} from '@/api/model/useSaveApi';
+import {computed, type ComputedRef, ref, type Ref} from 'vue';
+import type {Game, Save} from '@/types/model/standalone';
+import {ElFormItem, ElInput, type FormRules} from 'element-plus';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';
-import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
+import {
+  type EntityCloneNameGeneratorService,
+  useEntityCloneNameGeneratorService
+} from '@/services/useEntityCloneNameGeneratorService';
 import _ from 'lodash';
-import { elFormEntityNameUniqueValidator } from '@/utils/utils';
+import {elFormEntityNameUniqueValidator} from '@/utils/utils';
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const saveStore = useSaveStore();
-const gameStore = useGameStore();
-const saveApi = useSaveApi();
-const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
+const saveStore: SaveStore = useSaveStore();
+const gameStore: GameStore = useGameStore();
+const saveApi: SaveApi = useSaveApi();
+const entityCloneNameGeneratorService: EntityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 type FormModel = {
   saveId: number;
@@ -29,14 +37,14 @@ type FormModel = {
 
 const formModel: Ref<FormModel> = ref({ saveId: 0, saveName: '', gameId: 0 });
 const original: Ref<FormModel> = ref(formModel.value);
-const hasChanges = computed(() => !_.isEqual(formModel.value, original.value));
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(formModel.value, original.value));
 const isSaving: Ref<boolean> = ref(false);
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
-const formRules = reactive({
+const formRules: ComputedRef<FormRules> = computed(() => ({
   gameId: [{
     required: true, message: 'Please select a game.', trigger: 'change',
-    validator: (_: any, value: any, callback: any) => {
+    validator: (_: any, value: any, callback: (error?: Error) => void): void => {
       if (!value) {
         callback(new Error());
       }
@@ -51,10 +59,10 @@ const formRules = reactive({
       message: 'A save with that name already exists.',
     },
   ],
-});
+}));
 
 function initFromRoute(route: RouteLocationNormalizedLoadedGeneric): void {
-  const saveId = Number(route.params.saveId);
+  const saveId: number = Number(route.params.saveId);
   const save: Save | undefined = saveStore.getById(saveId);
   if (!save) {
     console.warn('Save with ID ' + saveId + ' not found.');
@@ -78,7 +86,7 @@ initFromRoute(route);
 onBeforeRouteUpdate(initFromRoute);
 
 async function submitForm(): Promise<void> {
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 
@@ -97,7 +105,7 @@ const save: ComputedRef<Save | undefined> = computed(() => saveStore.getById(for
 
 const gameOptions: ComputedRef<Game[]> = computed(() => {
   if (!save.value) return [];
-  return gameStore.getAll().filter(game => game.id !== save.value?.gameId);
+  return gameStore.getAll().filter((game: Game) => game.id !== save.value?.gameId);
 });
 
 </script>

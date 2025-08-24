@@ -1,19 +1,26 @@
 <script setup lang="ts">
 import type {Item, LocalResource, ProductionStep} from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
-import {useItemStore} from '@/stores/model/itemStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
 import {computed, type ComputedRef, onMounted, type Ref, ref} from 'vue';
 import _ from 'lodash';
-import {useProductionStepStore} from '@/stores/model/productionStepStore';
+import {type ProductionStepStore, useProductionStepStore} from '@/stores/model/productionStepStore';
 import ResourceProductionStep from '@/components/factories/resources/ResourceProductionStep.vue';
-import {useUserSettingsStore} from '@/stores/userSettingsStore';
+import {type UserSettingsStore, useUserSettingsStore} from '@/stores/userSettingsStore';
 import {VisibleResourceContributors} from '@/types/userSettings';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import {Switch} from '@element-plus/icons-vue';
 import HelpPopover from '@/components/common/HelpPopover.vue';
-import {useLocalResourceApi} from '@/api/model/useLocalResourceApi';
+import {type LocalResourceApi, useLocalResourceApi} from '@/api/model/useLocalResourceApi';
 import {until} from '@vueuse/core';
-import {onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter} from 'vue-router';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedGeneric,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
 import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
 
 export interface FactoryResourceProps {
@@ -22,12 +29,13 @@ export interface FactoryResourceProps {
 
 const props: FactoryResourceProps = defineProps<FactoryResourceProps>();
 
-const route = useRoute();
-const router = useRouter();
-const itemStore = useItemStore();
-const productionStepStore = useProductionStepStore();
-const userSettingsStore = useUserSettingsStore();
-const localResourceApi = useLocalResourceApi();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
+
+const itemStore: ItemStore = useItemStore();
+const productionStepStore: ProductionStepStore = useProductionStepStore();
+const userSettingsStore: UserSettingsStore = useUserSettingsStore();
+const localResourceApi: LocalResourceApi = useLocalResourceApi();
 
 const item: ComputedRef<Item> = computed(() =>
   itemStore.getById(props.resource.itemId)!,
@@ -51,8 +59,8 @@ const productionSteps: ComputedRef<ProductionStep[]> = computed(() => {
   }
 
   return productionStepIds
-    .map(productionStepId => productionStepStore.getById(productionStepId))
-    .filter(productionStep => !!productionStep) as ProductionStep[];
+      .map((productionStepId: number) => productionStepStore.getById(productionStepId))
+      .filter((productionStep: ProductionStep | undefined) => !!productionStep) as ProductionStep[];
 });
 
 const importExportSwitchLoading: Ref<boolean> = ref(false);
@@ -76,7 +84,7 @@ function goToExportImportOverview(): void {
   });
 }
 
-const mainDiv = ref<HTMLDivElement>();
+const mainDiv: Ref<HTMLDivElement | undefined> = ref();
 const id: ComputedRef<string> = computed(() => 'item' + props.resource.itemId);
 const highlight: Ref<boolean> = ref(false);
 

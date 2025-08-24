@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
-import { Check, WarnTriangleFilled } from '@element-plus/icons-vue';
-import { ElButton, ElOption, ElSelect } from 'element-plus';
+import {inject, type Ref, ref} from 'vue';
+import {Check, WarnTriangleFilled} from '@element-plus/icons-vue';
+import {ElButton, ElOption, ElSelect} from 'element-plus';
 import ModelStoresDisplay from '@/components/devtools/ModelStoresDisplay.vue';
 import TestComponent from '@/components/devtools/TestComponent.vue';
-import type { AxiosInstance } from 'axios';
+import type {AxiosInstance} from 'axios';
 
 const axios: AxiosInstance = inject('axios')!;
 
-const wipeDatabaseButtonState = ref(0);
-const setupTestDataButtonState = ref(0);
-const selectedTestDataSetup = ref('');
+const wipeDatabaseButtonState: Ref<number> = ref(0);
+const setupTestDataButtonState: Ref<number> = ref(0);
+const selectedTestDataSetup: Ref<string> = ref('');
 
 const availableTestDataSetups: {
   [key: string]: {
@@ -32,7 +32,7 @@ const availableTestDataSetups: {
   }
 };
 
-async function wipeDatabaseAndRestart() {
+async function wipeDatabaseAndRestart(): Promise<void> {
   wipeDatabaseButtonState.value = 1;
 
   await axios.get('api/devtools/wipeDatabaseAndRestart');
@@ -44,14 +44,14 @@ async function wipeDatabaseAndRestart() {
   }, 2000);
 }
 
-async function setupTestData() {
+async function setupTestData(): Promise<void> {
   if (!selectedTestDataSetup.value) {
     return;
   }
 
   setupTestDataButtonState.value = 1;
 
-  const setup = availableTestDataSetups[selectedTestDataSetup.value] as {
+  const setup: { gameFile: string; saveFile: string } = availableTestDataSetups[selectedTestDataSetup.value] as {
     gameFile: string;
     saveFile: string;
   };
@@ -67,7 +67,7 @@ async function setupTestData() {
 }
 
 async function importJsonFile(kind: string, filename: string): Promise<void> {
-  const data = await import(/* @vite-ignore */ './json/' + filename + '.json');
+  const data: { default: any } = await import(/* @vite-ignore */ './json/' + filename + '.json');
   await axios.post('api/migration/' + kind, data.default);
 }
 </script>
@@ -76,43 +76,43 @@ async function importJsonFile(kind: string, filename: string): Promise<void> {
   <h1>Dev Tools</h1>
   <p>
     <el-button
-      :loading="wipeDatabaseButtonState === 1"
-      :disabled="wipeDatabaseButtonState > 0"
-      type="danger"
-      @click="wipeDatabaseAndRestart"
-      :icon="wipeDatabaseButtonState === 2 ? Check : WarnTriangleFilled"
+        :loading="wipeDatabaseButtonState === 1"
+        :disabled="wipeDatabaseButtonState > 0"
+        type="danger"
+        @click="wipeDatabaseAndRestart"
+        :icon="wipeDatabaseButtonState === 2 ? Check : WarnTriangleFilled"
     >
       Wipe database and restart Factorial
     </el-button>
   </p>
   <p>
     <el-select
-      v-model="selectedTestDataSetup"
-      placeholder="Select test data file"
-      style="width: 400px"
+        v-model="selectedTestDataSetup"
+        placeholder="Select test data file"
+        style="width: 400px"
     >
       <el-option
-        v-for="option in Object.keys(availableTestDataSetups)"
-        :key="option"
-        :value="option"
-        :label="option"
+          v-for="option in Object.keys(availableTestDataSetups)"
+          :key="option"
+          :value="option"
+          :label="option"
       ></el-option>
     </el-select>
     &ensp;
     <el-button
-      :loading="setupTestDataButtonState === 1"
-      :disabled="setupTestDataButtonState > 0 || !selectedTestDataSetup"
-      @click="setupTestData"
-      :icon="setupTestDataButtonState === 2 ? Check : undefined"
+        :loading="setupTestDataButtonState === 1"
+        :disabled="setupTestDataButtonState > 0 || !selectedTestDataSetup"
+        @click="setupTestData"
+        :icon="setupTestDataButtonState === 2 ? Check : undefined"
     >
       Setup test data
     </el-button>
   </p>
   <p>
-    <TestComponent />
+    <TestComponent/>
   </p>
   <p>
-    <ModelStoresDisplay />
+    <ModelStoresDisplay/>
   </p>
 </template>
 

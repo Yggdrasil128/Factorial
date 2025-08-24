@@ -1,29 +1,25 @@
 <script setup lang="ts">
-import { UploadFilled } from '@element-plus/icons-vue';
-import { type Ref, ref, watch } from 'vue';
-import {
-  genFileId,
-  type UploadInstance,
-  type UploadProps,
-  type UploadRawFile,
-  type UploadUserFile,
-} from 'element-plus';
-import { useVModel } from '@vueuse/core';
+import {UploadFilled} from '@element-plus/icons-vue';
+import {type Ref, ref, watch} from 'vue';
+import {genFileId, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile,} from 'element-plus';
+import {useVModel} from '@vueuse/core';
 
 export interface IconUploadProps {
   dataBase64: string;
 }
 
 const props: IconUploadProps = defineProps<IconUploadProps>();
-const emit = defineEmits(['update:dataBase64']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['update:dataBase64']);
 const dataBase64Model: Ref<string> = useVModel(props, 'dataBase64', emit);
 
 const fileList: Ref<UploadUserFile[]> = ref([]);
-const upload = ref<UploadInstance>();
+const upload: Ref<UploadInstance | undefined> = ref();
 
-const handleExceed: UploadProps['onExceed'] = (files) => {
-  const file = files[0] as UploadRawFile;
-  file.uid = genFileId();
+const handleExceed: UploadProps['onExceed'] = (files: File[]) => {
+  const file: UploadRawFile = {
+    ...files[0],
+    uid: genFileId(),
+  };
   upload.value!.clearFiles();
   upload.value!.handleStart(file);
 };
@@ -41,9 +37,9 @@ watch(fileList, () => {
   }
   const file: UploadRawFile = fileList.value[0].raw as UploadRawFile;
 
-  const reader = new FileReader();
+  const reader: FileReader = new FileReader();
 
-  reader.onload = () => {
+  reader.onload = (): void => {
     dataBase64Model.value = reader.result?.toString() || '';
   };
 

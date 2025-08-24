@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Goods, GoodsFilled, Sell, SoldOut } from '@element-plus/icons-vue';
-import { useUserSettingsStore } from '@/stores/userSettingsStore';
-import { VisibleResourceContributors } from '@/types/userSettings';
-import { type Component, computed, type ComputedRef, type Ref } from 'vue';
+import {Goods, GoodsFilled, Sell, SoldOut} from '@element-plus/icons-vue';
+import {type UserSettingsStore, useUserSettingsStore} from '@/stores/userSettingsStore';
+import {VisibleResourceContributors} from '@/types/userSettings';
+import {type Component, computed, type ComputedRef, type Ref} from 'vue';
 
 export interface ResourceContributorsDisplayToggleProps {
   global?: boolean;
@@ -10,7 +10,7 @@ export interface ResourceContributorsDisplayToggleProps {
 
 const props: ResourceContributorsDisplayToggleProps = defineProps<ResourceContributorsDisplayToggleProps>();
 
-const userSettingsStore = useUserSettingsStore();
+const userSettingsStore: UserSettingsStore = useUserSettingsStore();
 
 const model: Ref<VisibleResourceContributors> = computed({
   get(): VisibleResourceContributors {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useUserSettingsStore } from '@/stores/userSettingsStore';
-import { ThroughputUnit } from '@/types/userSettings';
+import {type UserSettingsStore, useUserSettingsStore} from '@/stores/userSettingsStore';
+import {ThroughputUnit} from '@/types/userSettings';
 
-const userSettingsStore = useUserSettingsStore();
+const userSettingsStore: UserSettingsStore = useUserSettingsStore();
 </script>
 
 <template>

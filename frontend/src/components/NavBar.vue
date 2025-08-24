@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { getModelSyncService, type ModelSyncService } from '@/services/useModelSyncService';
+import {type Ref, ref} from 'vue';
+import {getModelSyncService, type ModelSyncService} from '@/services/useModelSyncService';
 
-const localTime = ref('');
+const localTime: Ref<string> = ref('');
 
-function updateLocalTime() {
-  const now = new Date();
+function updateLocalTime(): void {
+  const now: Date = new Date();
   localTime.value = now.toLocaleTimeString();
 }
 

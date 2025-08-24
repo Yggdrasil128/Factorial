@@ -1,19 +1,19 @@
-import {createApp} from 'vue';
+import {type App, createApp} from 'vue';
 import ElementPlus from 'element-plus';
 import router from './router';
 import 'element-plus/dist/index.css';
 import 'element-plus/theme-chalk/dark/css-vars.css';
 import mitt from 'mitt';
 import axios from 'axios';
-import {createPinia} from 'pinia';
+import {createPinia, type Pinia} from 'pinia';
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate';
 
-import App from './App.vue';
+import AppRoot from './AppRoot.vue';
 
-const pinia = createPinia();
+const pinia: Pinia = createPinia();
 pinia.use(piniaPluginPersistedState);
 
-const app = createApp(App);
+const app: App<Element> = createApp(AppRoot);
 app.use(pinia);
 app.use(router);
 app.use(ElementPlus);

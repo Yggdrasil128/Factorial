@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import type {ProductionStepChange} from '@/components/factories/modal/ViewChangelistModal.vue';
-import {useMachineStore} from '@/stores/model/machineStore';
-import {useRecipeStore} from '@/stores/model/recipeStore';
-import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {type MachineStore, useMachineStore} from '@/stores/model/machineStore';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type RecipeModifierStore, useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
 import {computed, type ComputedRef, ref, type Ref} from 'vue';
 import type {Changelist, Machine, Recipe, RecipeModifier} from '@/types/model/standalone';
 import {isTruthy} from '@/utils/utils';
 import IconImg from '@/components/common/IconImg.vue';
-import {useRecipeIconService} from '@/services/useRecipeIconService';
+import {type RecipeIconService, useRecipeIconService} from '@/services/useRecipeIconService';
 import FractionInput from '@/components/common/input/FractionInput.vue';
 import {ParsedFraction} from '@/utils/fractionUtils';
 import {Check, Delete, Minus, Plus, Right} from '@element-plus/icons-vue';
 import {ElButtonGroup} from 'element-plus';
 import {until} from '@vueuse/core';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
-import {useChangelistApi} from '@/api/model/useChangelistApi';
+import {ChangelistApi, useChangelistApi} from '@/api/model/useChangelistApi';
 
 export interface ViewChangelistModalProductionStepProps {
   changelist: Changelist;
@@ -24,11 +24,11 @@ export interface ViewChangelistModalProductionStepProps {
 
 const props: ViewChangelistModalProductionStepProps = defineProps<ViewChangelistModalProductionStepProps>();
 
-const machineStore = useMachineStore();
-const recipeStore = useRecipeStore();
-const recipeModifierStore = useRecipeModifierStore();
-const recipeIconService = useRecipeIconService();
-const changelistApi = useChangelistApi();
+const machineStore: MachineStore = useMachineStore();
+const recipeStore: RecipeStore = useRecipeStore();
+const recipeModifierStore: RecipeModifierStore = useRecipeModifierStore();
+const recipeIconService: RecipeIconService = useRecipeIconService();
+const changelistApi: ChangelistApi = useChangelistApi();
 
 const toBeCleared: Ref<boolean> = computed({
   get(): boolean {
@@ -103,7 +103,7 @@ function plusOne(): void {
 }
 
 function minusOne(): void {
-  let newValue = changeModel.value.subtract(ParsedFraction.ONE);
+  let newValue: ParsedFraction = changeModel.value.subtract(ParsedFraction.ONE);
   if (newValue.add(currentMachineCount.value).isNegative()) {
     newValue = currentMachineCount.value.negative();
   }

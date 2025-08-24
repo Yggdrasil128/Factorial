@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { EntityUsages } from '@/services/useEntityUsagesService';
-import { useGameStore } from '@/stores/model/gameStore';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { useFactoryStore } from '@/stores/model/factoryStore';
+import type {EntityUsages} from '@/services/useEntityUsagesService';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
 
 export interface EntityUsagesListProps {
   entityUsages: EntityUsages;
@@ -10,9 +10,9 @@ export interface EntityUsagesListProps {
 
 defineProps<EntityUsagesListProps>();
 
-const gameStore = useGameStore();
-const saveStore = useSaveStore();
-const factoryStore = useFactoryStore();
+const gameStore: GameStore = useGameStore();
+const saveStore: SaveStore = useSaveStore();
+const factoryStore: FactoryStore = useFactoryStore();
 </script>
 
 <template>

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { ItemQuantity } from '@/types/model/basic';
-import { computed, type ComputedRef, nextTick, ref, type Ref } from 'vue';
-import { useVModel } from '@vueuse/core';
+import type {ItemQuantity} from '@/types/model/basic';
+import {computed, type ComputedRef, nextTick, ref, type Ref} from 'vue';
+import {useVModel} from '@vueuse/core';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
-import { useItemStore } from '@/stores/model/itemStore';
-import type { Item } from '@/types/model/standalone';
-import { Delete, Plus } from '@element-plus/icons-vue';
-import type { RuleItem } from 'async-validator/dist-types/interface';
-import { elFormFractionValidator } from '@/utils/fractionUtils';
-import type { FormItemInstance } from 'element-plus';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
+import type {Item} from '@/types/model/standalone';
+import {Delete, Plus} from '@element-plus/icons-vue';
+import type {RuleItem} from 'async-validator/dist-types/interface';
+import {elFormFractionValidator} from '@/utils/fractionUtils';
+import type {FormItemInstance} from 'element-plus';
 import FractionInput from '@/components/common/input/FractionInput.vue';
 
 export interface ItemQuantityListEditorProps {
@@ -18,10 +18,10 @@ export interface ItemQuantityListEditorProps {
 }
 
 const props: ItemQuantityListEditorProps = defineProps<ItemQuantityListEditorProps>();
-const emit = defineEmits(['update:modelValue']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['update:modelValue']);
 const model: Ref<ItemQuantity[]> = useVModel(props, 'modelValue', emit);
 
-const itemStore = useItemStore();
+const itemStore: ItemStore = useItemStore();
 
 const formItemsForItemId: Ref<FormItemInstance[]> = ref([]);
 
@@ -29,12 +29,12 @@ const items: ComputedRef<Item[]> = computed(() => itemStore.getByGameId(props.ga
 
 const duplicateItemIds: ComputedRef<number[]> = computed(() => {
   const itemIds: number[] = model.value
-    .map(itemQuantity => itemQuantity.itemId)
-    .filter(itemId => !!itemId);
+      .map((itemQuantity: ItemQuantity) => itemQuantity.itemId)
+      .filter((itemId: number) => !!itemId);
   nextTick(() => {
-    formItemsForItemId.value.forEach(formItem => formItem.validate('change'));
+    formItemsForItemId.value.forEach((formItem: FormItemInstance) => formItem.validate('change'));
   });
-  return itemIds.filter((itemId, index) => itemIds.includes(itemId, index + 1));
+  return itemIds.filter((itemId: number, index: number) => itemIds.includes(itemId, index + 1));
 });
 
 function add(): void {
@@ -54,7 +54,7 @@ const quantityRules: RuleItem[] = [
 const itemRules: RuleItem[] = [
   {
     required: true, message: 'Please select an item.', trigger: 'change',
-    validator: (_: any, value: any, callback: any) => {
+    validator: (_: any, value: any, callback: (error?: Error) => void) => {
       if (!value) {
         callback(new Error());
       }
@@ -63,7 +63,7 @@ const itemRules: RuleItem[] = [
   } as RuleItem,
   {
     message: 'Duplicate item selected.', trigger: 'change',
-    validator: (_: any, value: any, callback: any) => {
+    validator: (_: any, value: any, callback: (error?: Error) => void) => {
       if (duplicateItemIds.value.includes(value)) {
         callback(new Error());
       }

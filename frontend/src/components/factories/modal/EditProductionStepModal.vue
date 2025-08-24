@@ -1,41 +1,46 @@
 <script setup lang="ts">
-import {onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter} from 'vue-router';
-import {useProductionStepStore} from '@/stores/model/productionStepStore';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
+import {type ProductionStepStore, useProductionStepStore} from '@/stores/model/productionStepStore';
 import {computed, type ComputedRef, reactive, ref, type Ref, watch} from 'vue';
 import type {Machine, ProductionStep, Recipe, RecipeModifier} from '@/types/model/standalone';
 import _ from 'lodash';
 import {ElFormItem, type FormRules} from 'element-plus';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
-import {useRecipeStore} from '@/stores/model/recipeStore';
-import {useMachineStore} from '@/stores/model/machineStore';
-import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
-import {useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type MachineStore, useMachineStore} from '@/stores/model/machineStore';
+import {type RecipeModifierStore, useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
 import IconImg from '@/components/common/IconImg.vue';
 import {elFormFractionValidator, ParsedFraction} from '@/utils/fractionUtils';
 import {Minus, Plus} from '@element-plus/icons-vue';
 import type {RuleItem} from 'async-validator/dist-types/interface';
-import {useProductionStepApi} from '@/api/model/useProductionStepApi';
+import {ProductionStepApi, useProductionStepApi} from '@/api/model/useProductionStepApi';
 import FractionInput from '@/components/common/input/FractionInput.vue';
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const productionStepStore = useProductionStepStore();
-const recipeStore = useRecipeStore();
-const recipeModifierStore = useRecipeModifierStore();
-const machineStore = useMachineStore();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const productionStepStore: ProductionStepStore = useProductionStepStore();
+const recipeStore: RecipeStore = useRecipeStore();
+const recipeModifierStore: RecipeModifierStore = useRecipeModifierStore();
+const machineStore: MachineStore = useMachineStore();
 
-const productionStepApi = useProductionStepApi();
+const productionStepApi: ProductionStepApi = useProductionStepApi();
 
 const isSaving: Ref<boolean> = ref(false);
 const productionStep: Ref<Partial<ProductionStep>> = ref({});
 const original: Ref<Partial<ProductionStep>> = ref({});
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
-const hasChanges = computed(() => !_.isEqual(productionStep.value, original.value));
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(productionStep.value, original.value));
 
 const formRules: FormRules = reactive({
   recipeId: [{ required: true, message: 'Please select a recipe', trigger: 'blur' }],
@@ -79,7 +84,7 @@ initFromRoute(route);
 onBeforeRouteUpdate(initFromRoute);
 
 async function submitForm(): Promise<void> {
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 
@@ -106,15 +111,15 @@ const recipe: ComputedRef<Recipe | undefined> = computed(() => {
 const machines: ComputedRef<Machine[]> = computed(() => {
   if (!recipe.value) return [];
   return recipe.value.applicableMachineIds
-    .map(machineId => machineStore.getById(machineId))
-    .filter(machine => machine !== undefined) as Machine[];
+      .map((machineId: number) => machineStore.getById(machineId))
+      .filter((machine: Machine | undefined) => machine !== undefined) as Machine[];
 });
 
 const modifiers: ComputedRef<RecipeModifier[]> = computed(() => {
   if (!recipe.value) return [];
   return recipe.value.applicableModifierIds
-    .map(modifierId => recipeModifierStore.getById(modifierId))
-    .filter(modifier => modifier !== undefined) as RecipeModifier[];
+      .map((modifierId: number) => recipeModifierStore.getById(modifierId))
+      .filter((modifier: RecipeModifier | undefined) => modifier !== undefined) as RecipeModifier[];
 });
 
 watch(() => productionStep.value.recipeId, () => {
@@ -136,13 +141,13 @@ const machineCountParsedFraction: Ref<ParsedFraction | undefined> = computed({
   },
 });
 
-function incrementMachineCount() {
+function incrementMachineCount(): void {
   if (machineCountParsedFraction.value) {
     machineCountParsedFraction.value = machineCountParsedFraction.value.add(ParsedFraction.ONE);
   }
 }
 
-function decrementMachineCount() {
+function decrementMachineCount(): void {
   if (machineCountParsedFraction.value) {
     let newValue: ParsedFraction = machineCountParsedFraction.value.subtract(ParsedFraction.ONE);
     if (newValue.isNegative()) {

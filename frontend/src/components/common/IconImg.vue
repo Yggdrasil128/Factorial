@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed, type ComputedRef} from 'vue';
 import type {Icon} from '@/types/model/standalone';
-import {useIconStore} from '@/stores/model/iconStore';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
 import {ElTooltip} from 'element-plus';
 
 export interface IconImgProps {
@@ -11,7 +11,7 @@ export interface IconImgProps {
 
 const props: IconImgProps = defineProps<IconImgProps>();
 
-const iconStore = useIconStore();
+const iconStore: IconStore = useIconStore();
 
 const icon: ComputedRef<Icon | undefined> = computed(() => {
   if (!props.icon) return undefined;

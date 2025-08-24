@@ -1,6 +1,6 @@
-import type { GameSummary, SaveSummary } from '@/types/model/summary';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { type ModelSyncWebsocket, useModelSyncWebsocket } from '@/api/useModelSyncWebsocket';
+import type {GameSummary, SaveSummary} from '@/types/model/summary';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type ModelSyncWebsocket, useModelSyncWebsocket} from '@/api/useModelSyncWebsocket';
 import {
   isChangelistRemovedMessage,
   isChangelistsReorderedMessage,
@@ -36,26 +36,26 @@ import {
   isSaveUpdatedMessage,
   type WebsocketMessage,
 } from '@/types/websocketMessages/modelChangedMessages';
-import { useSummaryApi } from '@/api/useSummaryApi';
-import { useChangelistStore } from '@/stores/model/changelistStore';
-import { useFactoryStore } from '@/stores/model/factoryStore';
-import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useLocalResourceStore } from '@/stores/model/localResourceStore';
-import { useIconStore } from '@/stores/model/iconStore';
-import { useItemStore } from '@/stores/model/itemStore';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import { useMachineStore } from '@/stores/model/machineStore';
-import type { EntityWithOrdinal, GameRelatedEntity, SaveRelatedEntity } from '@/types/model/basic';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { useGameStore } from '@/stores/model/gameStore';
-import { useSaveApi } from '@/api/model/useSaveApi';
-import { useGameApi } from '@/api/model/useGameApi';
-import type { Game, Save } from '@/types/model/standalone';
-import { reactive, ref, type Ref } from 'vue';
+import {type SummaryApi, useSummaryApi} from '@/api/useSummaryApi';
+import {type ChangelistStore, useChangelistStore} from '@/stores/model/changelistStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
+import {type ProductionStepStore, useProductionStepStore} from '@/stores/model/productionStepStore';
+import {type LocalResourceStore, useLocalResourceStore} from '@/stores/model/localResourceStore';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type RecipeModifierStore, useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {type MachineStore, useMachineStore} from '@/stores/model/machineStore';
+import type {EntityWithOrdinal, GameRelatedEntity, SaveRelatedEntity} from '@/types/model/basic';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {SaveApi, useSaveApi} from '@/api/model/useSaveApi';
+import {GameApi, useGameApi} from '@/api/model/useGameApi';
+import type {Game, Save} from '@/types/model/standalone';
+import {reactive, ref, type Ref} from 'vue';
 import _ from 'lodash';
-import { useUserSettingsStore } from '@/stores/userSettingsStore';
-import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
+import {type UserSettingsStore, useUserSettingsStore} from '@/stores/userSettingsStore';
+import {type GlobalResourceStore, useGlobalResourceStore} from '@/stores/model/globalResourceStore';
 
 export interface ModelSyncService {
   state: ModelSyncServiceState;
@@ -71,28 +71,28 @@ export type ModelSyncServiceState = {
 }
 
 function useModelSyncService(): ModelSyncService {
-  const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-  const userSettingsStore = useUserSettingsStore();
+  const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+  const userSettingsStore: UserSettingsStore = useUserSettingsStore();
 
   const storedSaveIds: Set<number> = reactive(new Set());
-  const saveStore = useSaveStore();
-  const changelistStore = useChangelistStore();
-  const factoryStore = useFactoryStore();
-  const productionStepStore = useProductionStepStore();
-  const localResourceStore = useLocalResourceStore();
-  const globalResourceStore = useGlobalResourceStore();
+  const saveStore: SaveStore = useSaveStore();
+  const changelistStore: ChangelistStore = useChangelistStore();
+  const factoryStore: FactoryStore = useFactoryStore();
+  const productionStepStore: ProductionStepStore = useProductionStepStore();
+  const localResourceStore: LocalResourceStore = useLocalResourceStore();
+  const globalResourceStore: GlobalResourceStore = useGlobalResourceStore();
 
   const storedGameIds: Set<number> = reactive(new Set());
-  const gameStore = useGameStore();
-  const iconStore = useIconStore();
-  const itemStore = useItemStore();
-  const recipeStore = useRecipeStore();
-  const recipeModifierStore = useRecipeModifierStore();
-  const machineStore = useMachineStore();
+  const gameStore: GameStore = useGameStore();
+  const iconStore: IconStore = useIconStore();
+  const itemStore: ItemStore = useItemStore();
+  const recipeStore: RecipeStore = useRecipeStore();
+  const recipeModifierStore: RecipeModifierStore = useRecipeModifierStore();
+  const machineStore: MachineStore = useMachineStore();
 
-  const summaryApi = useSummaryApi();
-  const saveApi = useSaveApi();
-  const gameApi = useGameApi();
+  const summaryApi: SummaryApi = useSummaryApi();
+  const saveApi: SaveApi = useSaveApi();
+  const gameApi: GameApi = useGameApi();
 
   const modelSyncWebsocket: ModelSyncWebsocket = useModelSyncWebsocket(onWebsocketMessage, reload);
 
@@ -253,7 +253,7 @@ function useModelSyncService(): ModelSyncService {
     map: Map<number, EntityWithOrdinal>;
   }
 
-  function applyOrder(store: EntityWithOrdinalStore, order: EntityWithOrdinal[]) {
+  function applyOrder(store: EntityWithOrdinalStore, order: EntityWithOrdinal[]): void {
     for (const entry of order) {
       const entity: EntityWithOrdinal | undefined = store.map.get(entry.id);
       if (entity) {
@@ -310,7 +310,7 @@ function useModelSyncService(): ModelSyncService {
     }
   }
 
-  function onWebsocketMessage(message: WebsocketMessage) {
+  function onWebsocketMessage(message: WebsocketMessage): void {
     if (isSaveUpdatedMessage(message)) {
       saveStore.map.set(message.save.id, message.save);
     } else if (isSavesReorderedMessage(message)) {

@@ -1,22 +1,24 @@
 <script setup lang="ts">
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
-import { onBeforeRouteUpdate, useRouter } from 'vue-router';
-import { computed, nextTick, ref, type Ref, watch } from 'vue';
+import {onBeforeRouteUpdate, type Router, useRouter} from 'vue-router';
+import {computed, type ComputedRef, nextTick, ref, type Ref, watch} from 'vue';
 import _ from 'lodash';
-import { useGameStore } from '@/stores/model/gameStore';
-import { useGameApi } from '@/api/model/useGameApi';
-import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
-import type { GameSummary } from '@/types/model/summary';
-import { ElFormItem, ElInput, ElMessage, type FormItemInstance } from 'element-plus';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {GameApi, useGameApi} from '@/api/model/useGameApi';
+import {
+  type EntityCloneNameGeneratorService,
+  useEntityCloneNameGeneratorService
+} from '@/services/useEntityCloneNameGeneratorService';
+import type {GameSummary} from '@/types/model/summary';
+import {ElFormItem, ElInput, ElMessage, type FormItemInstance, type FormRules} from 'element-plus';
 import JsonFileUpload from '@/components/savesAndGames/JsonFileUpload.vue';
-import { elFormEntityNameUniqueValidator } from '@/utils/utils';
+import {elFormEntityNameUniqueValidator} from '@/utils/utils';
 
-const router = useRouter();
+const router: Router = useRouter();
 
-const gameStore = useGameStore();
-const gameApi = useGameApi();
-const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
+const gameStore: GameStore = useGameStore();
+const gameApi: GameApi = useGameApi();
+const entityCloneNameGeneratorService: EntityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 type FormModel = {
   gameSummary: GameSummary | undefined;
@@ -28,14 +30,14 @@ function emptyFormModel(): FormModel {
 }
 
 const formModel: Ref<FormModel> = ref(emptyFormModel());
-const formItemUpload = ref<FormItemInstance>();
-const hasChanges = computed(() => !_.isEqual(formModel.value, emptyFormModel()));
+const formItemUpload: Ref<FormItemInstance | undefined> = ref();
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(formModel.value, emptyFormModel()));
 const isSaving: Ref<boolean> = ref(false);
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
 const json: Ref<string | null> = ref(null);
 
-const formRules = computed(() => ({
+const formRules: ComputedRef<FormRules> = computed(() => ({
   gameSummary: [{ required: true, message: 'Please select a file to upload.', trigger: 'change' }],
   gameName: [
     { required: true, message: 'Please enter a name for the game.', trigger: 'blur' },
@@ -59,7 +61,7 @@ onBeforeRouteUpdate(initFromRoute);
 async function submitForm(): Promise<void> {
   formModel.value.gameName = formModel.value.gameName.trim();
 
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 
@@ -90,7 +92,7 @@ watch(json, () => {
 
   convertJsonToGameSummary(json.value)
     .then((gameSummary: GameSummary) => {
-      const gameName = entityCloneNameGeneratorService.generateName(
+      const gameName: string = entityCloneNameGeneratorService.generateName(
         gameSummary.game.name,
         gameStore.getAll(),
       );

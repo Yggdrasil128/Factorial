@@ -2,15 +2,15 @@
 import FactoriesList from '@/components/factories/FactoriesList.vue';
 import ChangelistsList from '@/components/factories/ChangelistsList.vue';
 import FactoryResources from '@/components/factories/resources/FactoryResources.vue';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useRoute, useRouter } from 'vue-router';
-import { computed, type ComputedRef } from 'vue';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type RouteLocationNormalizedLoadedGeneric, type Router, useRoute, useRouter} from 'vue-router';
+import {computed, type ComputedRef} from 'vue';
 import ExportImportOverview from '@/components/factories/exportImportOverview/ExportImportOverview.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const route = useRoute();
-const router = useRouter();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
   route.params.factoryId ? Number(route.params.factoryId) : undefined,

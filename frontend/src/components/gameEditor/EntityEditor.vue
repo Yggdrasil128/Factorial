@@ -5,14 +5,14 @@ import {
   iconOptions,
   iconOptionsForRecipe,
 } from '@/services/useEntityTreeService';
-import { ElButtonGroup, ElFormItem, ElInput, ElTooltip, type FormRules } from 'element-plus';
-import { ref } from 'vue';
-import { Check, Close, Folder, Plus, Search } from '@element-plus/icons-vue';
+import {ElButtonGroup, ElFormItem, ElInput, ElTooltip, type FormInstance, type FormRules} from 'element-plus';
+import {type Ref, ref} from 'vue';
+import {Check, Close, Folder, Plus, Search} from '@element-plus/icons-vue';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 import IconUpload from '@/components/gameEditor/IconUpload.vue';
 import EntityTree from '@/components/gameEditor/EntityTree.vue';
-import type { Game } from '@/types/model/standalone';
-import { useIconStore } from '@/stores/model/iconStore';
+import type {Game} from '@/types/model/standalone';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
 
 export interface EntityEditorProps {
   game: Game;
@@ -24,21 +24,25 @@ export interface EntityEditorProps {
 
 const props: EntityEditorProps = defineProps<EntityEditorProps>();
 
-const iconStore = useIconStore();
-const service = props.service;
+const iconStore: IconStore = useIconStore();
+const service: EntityTreeService<any> = props.service;
 
-const form = ref();
-const folderForm = ref();
+const form: Ref<FormInstance | undefined> = ref();
+const folderForm: Ref<FormInstance | undefined> = ref();
 const folderFormRules: FormRules = {
   name: [{ required: true, message: 'Please enter a name for the folder.', trigger: 'change' }],
 };
 
 async function validateForm(): Promise<boolean> {
-  return await form.value.validate(() => ({}));
+  if (!form.value) return false;
+  return await form.value.validate(() => {
+  });
 }
 
 async function validateFolderForm(): Promise<boolean> {
-  return await folderForm.value.validate(() => ({}));
+  if (!folderForm.value) return false;
+  return await folderForm.value.validate(() => {
+  });
 }
 
 defineExpose({ validateForm, validateFolderForm });

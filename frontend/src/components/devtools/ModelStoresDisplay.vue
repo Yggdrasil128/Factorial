@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { useChangelistStore } from '@/stores/model/changelistStore';
-import { useFactoryStore } from '@/stores/model/factoryStore';
-import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useLocalResourceStore } from '@/stores/model/localResourceStore';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useIconStore } from '@/stores/model/iconStore';
-import { useItemStore } from '@/stores/model/itemStore';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import { useMachineStore } from '@/stores/model/machineStore';
-import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
+import {type ChangelistStore, useChangelistStore} from '@/stores/model/changelistStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
+import {type ProductionStepStore, useProductionStepStore} from '@/stores/model/productionStepStore';
+import {type LocalResourceStore, useLocalResourceStore} from '@/stores/model/localResourceStore';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type RecipeModifierStore, useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {type MachineStore, useMachineStore} from '@/stores/model/machineStore';
+import {type GlobalResourceStore, useGlobalResourceStore} from '@/stores/model/globalResourceStore';
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
 
-const changelistStore = useChangelistStore();
-const factoryStore = useFactoryStore();
-const productionStepStore = useProductionStepStore();
-const localResourceStore = useLocalResourceStore();
-const globalResourceStore = useGlobalResourceStore();
-const iconStore = useIconStore();
-const itemStore = useItemStore();
-const recipeStore = useRecipeStore();
-const recipeModifierStore = useRecipeModifierStore();
-const machineStore = useMachineStore();
+const changelistStore: ChangelistStore = useChangelistStore();
+const factoryStore: FactoryStore = useFactoryStore();
+const productionStepStore: ProductionStepStore = useProductionStepStore();
+const localResourceStore: LocalResourceStore = useLocalResourceStore();
+const globalResourceStore: GlobalResourceStore = useGlobalResourceStore();
+const iconStore: IconStore = useIconStore();
+const itemStore: ItemStore = useItemStore();
+const recipeStore: RecipeStore = useRecipeStore();
+const recipeModifierStore: RecipeModifierStore = useRecipeModifierStore();
+const machineStore: MachineStore = useMachineStore();
 </script>
 
 <template>

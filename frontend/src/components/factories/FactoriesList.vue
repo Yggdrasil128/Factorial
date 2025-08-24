@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import {useFactoryStore} from '@/stores/model/factoryStore';
-import {useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
 import {computed, type ComputedRef, watch} from 'vue';
-import {type RouteLocationAsRelativeGeneric, useRoute, useRouter} from 'vue-router';
+import {
+  type RouteLocationAsRelativeGeneric,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
 import type {Factory} from '@/types/model/standalone';
 import {Delete, Edit, Plus, Switch} from '@element-plus/icons-vue';
 import {ElButton, ElButtonGroup, ElPopconfirm} from 'element-plus';
@@ -14,12 +20,12 @@ import type {EntityWithOrdinal} from '@/types/model/basic';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const factoryStore = useFactoryStore();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const factoryStore: FactoryStore = useFactoryStore();
 const factoryApi: FactoryApi = useFactoryApi();
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
 const currentFactoryId: ComputedRef<number | undefined> = computed(() =>
     route.params.factoryId ? Number(route.params.factoryId) : undefined,
@@ -31,7 +37,7 @@ const showingExportImportOverview: ComputedRef<boolean> = computed(() =>
 
 const factories: ComputedRef<Factory[]> = computed(() => {
   return factoryStore.getBySaveId(currentGameAndSaveStore.currentSaveId)
-      .sort((a, b) => a.ordinal - b.ordinal);
+      .sort((a: Factory, b: Factory) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(factories,
@@ -74,7 +80,7 @@ watch(computed(() => factories.value.length), () => {
   }
 }, {immediate: true});
 
-function deleteFactory(factoryId: number) {
+function deleteFactory(factoryId: number): void {
   factoryApi.delete(factoryId);
 }
 

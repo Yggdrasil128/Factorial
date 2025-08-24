@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Fraction } from '@/types/model/basic';
-import { ParsedFraction } from '@/utils/fractionUtils';
-import { useVModel } from '@vueuse/core';
-import { computed, type ComputedRef, onMounted, ref, type Ref, watch } from 'vue';
-import { parseTerm } from '@/utils/termParser';
+import type {Fraction} from '@/types/model/basic';
+import {ParsedFraction} from '@/utils/fractionUtils';
+import {useVModel} from '@vueuse/core';
+import {computed, type ComputedRef, onMounted, ref, type Ref, watch} from 'vue';
+import {parseTerm} from '@/utils/termParser';
 
 export interface FractionInputProps {
   fraction?: Fraction;
@@ -11,7 +11,7 @@ export interface FractionInputProps {
 }
 
 const props: FractionInputProps = defineProps<FractionInputProps>();
-const emit = defineEmits(['update:fraction', 'update:parsedFraction']);
+const emit: (event: (string), ...args: any[]) => void = defineEmits(['update:fraction', 'update:parsedFraction']);
 const fractionProp: Ref<Fraction | undefined> = useVModel(props, 'fraction', emit);
 const parsedFractionProp: Ref<ParsedFraction | undefined> = useVModel(props, 'parsedFraction', emit);
 

@@ -1,34 +1,39 @@
 <script setup lang="ts">
-import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { computed, reactive, type Ref, ref } from 'vue';
-import type { Factory } from '@/types/model/standalone';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useFactoryStore } from '@/stores/model/factoryStore';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
+import {computed, type ComputedRef, reactive, type Ref, ref} from 'vue';
+import type {Factory} from '@/types/model/standalone';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
 import _ from 'lodash';
-import { useFactoryApi } from '@/api/model/useFactoryApi';
-import { ElFormItem, ElInput } from 'element-plus';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {FactoryApi, useFactoryApi} from '@/api/model/useFactoryApi';
+import {ElFormItem, ElInput, type FormRules} from 'element-plus';
 import EditModal from '@/components/common/EditModal.vue';
-import { useIconStore } from '@/stores/model/iconStore';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const factoryStore = useFactoryStore();
-const iconStore = useIconStore();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const factoryStore: FactoryStore = useFactoryStore();
+const iconStore: IconStore = useIconStore();
 
-const factoryApi = useFactoryApi();
+const factoryApi: FactoryApi = useFactoryApi();
 
 const isSaving: Ref<boolean> = ref(false);
 const factory: Ref<Partial<Factory>> = ref({});
 const original: Ref<Partial<Factory>> = ref({});
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
-const hasChanges = computed(() => !_.isEqual(factory.value, original.value));
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(factory.value, original.value));
 
-const formRules = reactive({
+const formRules: FormRules = reactive({
   name: [{ required: true, message: 'Please enter a name for the factory', trigger: 'blur' }]
 });
 
@@ -65,7 +70,7 @@ onBeforeRouteUpdate(initFromRoute);
 async function submitForm(): Promise<void> {
   factory.value.name = factory.value.name?.trim();
 
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 

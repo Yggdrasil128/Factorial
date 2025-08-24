@@ -1,35 +1,40 @@
 <script setup lang="ts">
-import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useChangelistStore } from '@/stores/model/changelistStore';
-import { useIconStore } from '@/stores/model/iconStore';
-import { useChangelistApi } from '@/api/model/useChangelistApi';
-import { computed, reactive, ref, type Ref } from 'vue';
-import type { Changelist } from '@/types/model/standalone';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type ChangelistStore, useChangelistStore} from '@/stores/model/changelistStore';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
+import {ChangelistApi, useChangelistApi} from '@/api/model/useChangelistApi';
+import {computed, type ComputedRef, reactive, ref, type Ref} from 'vue';
+import type {Changelist} from '@/types/model/standalone';
 import _ from 'lodash';
-import { ElFormItem, ElInput, ElSwitch } from 'element-plus';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {ElFormItem, ElInput, ElSwitch, type FormRules} from 'element-plus';
 import EditModal from '@/components/common/EditModal.vue';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const changelistStore = useChangelistStore();
-const iconStore = useIconStore();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const changelistStore: ChangelistStore = useChangelistStore();
+const iconStore: IconStore = useIconStore();
 
-const changelistApi = useChangelistApi();
+const changelistApi: ChangelistApi = useChangelistApi();
 
 const isSaving: Ref<boolean> = ref(false);
 const isEditingPrimaryChangelist: Ref<boolean> = ref(false);
 const changelist: Ref<Partial<Changelist>> = ref({});
 const original: Ref<Partial<Changelist>> = ref({});
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
-const hasChanges = computed(() => !_.isEqual(changelist.value, original.value));
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(changelist.value, original.value));
 
-const formRules = reactive({
+const formRules: FormRules = reactive({
   name: [{ required: true, message: 'Please enter a name for the changelist', trigger: 'blur' }]
 });
 
@@ -70,7 +75,7 @@ onBeforeRouteUpdate(initFromRoute);
 async function submitForm(): Promise<void> {
   changelist.value.name = changelist.value.name?.trim();
 
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 

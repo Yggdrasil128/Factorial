@@ -1,5 +1,5 @@
 import * as VueRouter from 'vue-router';
-import {createRouter} from 'vue-router';
+import {createRouter, type Router} from 'vue-router';
 
 import HomePage from '@/components/HomePage.vue';
 import AboutPage from '@/components/AboutPage.vue';
@@ -21,7 +21,7 @@ import ImportGameModal from '@/components/savesAndGames/modal/ImportGameModal.vu
 import ViewChangelistModal from '@/components/factories/modal/ViewChangelistModal.vue';
 import OptimizeProductionStepModal from "@/components/factories/modal/OptimizeProductionStepModal.vue";
 
-const router = createRouter({
+const router: Router = createRouter({
   history: VueRouter.createWebHashHistory(),
   routes: [
     { path: '/', component: HomePage },

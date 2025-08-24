@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type {Factory, GlobalResource, Item} from '@/types/model/standalone';
-import {useItemStore} from '@/stores/model/itemStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
 import {computed, type ComputedRef} from 'vue';
 import {VisibleResourceContributors} from '@/types/userSettings';
 import _ from 'lodash';
-import {useFactoryStore} from '@/stores/model/factoryStore';
-import {useUserSettingsStore} from '@/stores/userSettingsStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
+import {type UserSettingsStore, useUserSettingsStore} from '@/stores/userSettingsStore';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import IconImg from '@/components/common/IconImg.vue';
 import SaveResourceFactory from '@/components/factories/exportImportOverview/SaveResourceFactory.vue';
@@ -17,9 +17,9 @@ export interface SaveResourceProps {
 
 const props: SaveResourceProps = defineProps<SaveResourceProps>();
 
-const itemStore = useItemStore();
-const factoryStore = useFactoryStore();
-const userSettingsStore = useUserSettingsStore();
+const itemStore: ItemStore = useItemStore();
+const factoryStore: FactoryStore = useFactoryStore();
+const userSettingsStore: UserSettingsStore = useUserSettingsStore();
 
 
 const item: ComputedRef<Item> = computed(() =>
@@ -44,8 +44,8 @@ const factories: ComputedRef<Factory[]> = computed(() => {
   }
 
   return factoryIds
-    .map(factoryId => factoryStore.getById(factoryId))
-    .filter(factory => !!factory) as Factory[];
+      .map((factoryId: number) => factoryStore.getById(factoryId))
+      .filter((factory: Factory | undefined) => !!factory) as Factory[];
 });
 
 </script>

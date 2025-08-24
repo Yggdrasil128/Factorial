@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { useIconStore } from '@/stores/model/iconStore';
-import { computed, type ComputedRef, type Ref, ref } from 'vue';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
+import {computed, type ComputedRef, type Ref, ref} from 'vue';
 import IconImg from '@/components/common/IconImg.vue';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
-import { useItemStore } from '@/stores/model/itemStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
 import CascaderMultiSelect from '@/components/common/input/CascaderMultiSelect.vue';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';
 import FlatMultiSelect from '@/components/common/input/FlatMultiSelect.vue';
 import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
-import { ParsedFraction } from '@/utils/fractionUtils';
-import { parseTerm } from '@/utils/termParser';
-import type { Fraction } from '@/types/model/basic';
+import {ParsedFraction} from '@/utils/fractionUtils';
+import {parseTerm} from '@/utils/termParser';
+import type {Fraction} from '@/types/model/basic';
 import FractionInput from '@/components/common/input/FractionInput.vue';
 
-const iconStore = useIconStore();
-const itemStore = useItemStore();
+const iconStore: IconStore = useIconStore();
+const itemStore: ItemStore = useItemStore();
 
 const selectedItem: Ref<number> = ref(0);
 const selectedItems: Ref<number[]> = ref([]);

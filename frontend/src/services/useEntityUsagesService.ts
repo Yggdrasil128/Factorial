@@ -11,18 +11,18 @@ import type {
   RecipeModifier,
   Save,
 } from '@/types/model/standalone';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { useChangelistStore } from '@/stores/model/changelistStore';
-import { useFactoryStore } from '@/stores/model/factoryStore';
-import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { useLocalResourceStore } from '@/stores/model/localResourceStore';
-import { useGameStore } from '@/stores/model/gameStore';
-import { useItemStore } from '@/stores/model/itemStore';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import { useMachineStore } from '@/stores/model/machineStore';
-import { ElMessageBox } from 'element-plus';
-import { h } from 'vue';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {type ChangelistStore, useChangelistStore} from '@/stores/model/changelistStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
+import {type ProductionStepStore, useProductionStepStore} from '@/stores/model/productionStepStore';
+import {type LocalResourceStore, useLocalResourceStore} from '@/stores/model/localResourceStore';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type RecipeModifierStore, useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {type MachineStore, useMachineStore} from '@/stores/model/machineStore';
+import {ElMessageBox} from 'element-plus';
+import {h} from 'vue';
 import EntityUsagesList from '@/components/common/EntityUsagesList.vue';
 
 export interface EntityUsagesService {
@@ -77,18 +77,18 @@ export class EntityUsages {
 }
 
 export function useEntityUsagesService(): EntityUsagesService {
-  const gameStore = useGameStore();
-  const itemStore = useItemStore();
-  const machineStore = useMachineStore();
-  const recipeStore = useRecipeStore();
-  const recipeModifierStore = useRecipeModifierStore();
+  const gameStore: GameStore = useGameStore();
+  const itemStore: ItemStore = useItemStore();
+  const machineStore: MachineStore = useMachineStore();
+  const recipeStore: RecipeStore = useRecipeStore();
+  const recipeModifierStore: RecipeModifierStore = useRecipeModifierStore();
   // const iconStore = useIconStore();
 
-  const saveStore = useSaveStore();
-  const factoryStore = useFactoryStore();
-  const changelistStore = useChangelistStore();
-  const productionStepStore = useProductionStepStore();
-  const localResourceStore = useLocalResourceStore();
+  const saveStore: SaveStore = useSaveStore();
+  const factoryStore: FactoryStore = useFactoryStore();
+  const changelistStore: ChangelistStore = useChangelistStore();
+  const productionStepStore: ProductionStepStore = useProductionStepStore();
+  const localResourceStore: LocalResourceStore = useLocalResourceStore();
 
 
   function findGameUsages(gameId: number): EntityUsages {
@@ -102,7 +102,7 @@ export function useEntityUsagesService(): EntityUsagesService {
   function findItemUsages(itemId: number): EntityUsages {
     const usages: EntityUsages = new EntityUsages();
 
-    usages.recipes = recipeStore.getAll().filter(recipe => {
+    usages.recipes = recipeStore.getAll().filter((recipe: Recipe) => {
       for (const ingredient of recipe.ingredients) {
         if (ingredient.itemId === itemId) {
           return true;
@@ -116,7 +116,7 @@ export function useEntityUsagesService(): EntityUsagesService {
       return false;
     });
 
-    usages.productionSteps = productionStepStore.getAll().filter(productionStep => {
+    usages.productionSteps = productionStepStore.getAll().filter((productionStep: ProductionStep): boolean => {
       for (const input of productionStep.inputs) {
         if (input.itemId === itemId) {
           return true;
@@ -131,7 +131,7 @@ export function useEntityUsagesService(): EntityUsagesService {
     });
 
     usages.resources = localResourceStore.getAll()
-      .filter(resource => resource.itemId === itemId);
+      .filter((resource: LocalResource): boolean => resource.itemId === itemId);
 
     return usages;
   }
@@ -140,9 +140,9 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.recipes = recipeStore.getAll()
-      .filter(recipe => recipe.applicableMachineIds.includes(machineId));
+      .filter((recipe: Recipe) => recipe.applicableMachineIds.includes(machineId));
     usages.productionSteps = productionStepStore.getAll()
-      .filter(productionStep => productionStep.machineId === machineId);
+      .filter((productionStep: ProductionStep): boolean => productionStep.machineId === machineId);
 
     return usages;
   }
@@ -151,7 +151,7 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.productionSteps = productionStepStore.getAll()
-      .filter(productionStep => productionStep.recipeId === recipeId);
+      .filter((productionStep: ProductionStep): boolean => productionStep.recipeId === recipeId);
 
     return usages;
   }
@@ -160,11 +160,11 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.machines = machineStore.getAll()
-      .filter(machine => machine.machineModifierIds.includes(recipeModifierId));
+      .filter((machine: Machine) => machine.machineModifierIds.includes(recipeModifierId));
     usages.recipes = recipeStore.getAll()
-      .filter(recipe => recipe.applicableModifierIds.includes(recipeModifierId));
+      .filter((recipe: Recipe) => recipe.applicableModifierIds.includes(recipeModifierId));
     usages.productionSteps = productionStepStore.getAll()
-      .filter(productionStep => productionStep.modifierIds.includes(recipeModifierId));
+      .filter((productionStep: ProductionStep) => productionStep.modifierIds.includes(recipeModifierId));
 
     return usages;
   }
@@ -173,22 +173,22 @@ export function useEntityUsagesService(): EntityUsagesService {
     const usages: EntityUsages = new EntityUsages();
 
     usages.games = gameStore.getAll()
-      .filter(game => game.iconId === iconId);
+      .filter((game: Game): boolean => game.iconId === iconId);
     usages.items = itemStore.getAll()
-      .filter(item => item.iconId === iconId);
+      .filter((item: Item): boolean => item.iconId === iconId);
     usages.machines = machineStore.getAll()
-      .filter(machine => machine.iconId === iconId);
+      .filter((machine: Machine): boolean => machine.iconId === iconId);
     usages.recipes = recipeStore.getAll()
-      .filter(recipe => recipe.iconId === iconId);
+      .filter((recipe: Recipe): boolean => recipe.iconId === iconId);
     usages.recipeModifiers = recipeModifierStore.getAll()
-      .filter(recipeModifier => recipeModifier.iconId === iconId);
+      .filter((recipeModifier: RecipeModifier): boolean => recipeModifier.iconId === iconId);
 
     usages.saves = saveStore.getAll()
-      .filter(save => save.iconId === iconId);
+      .filter((save: Save): boolean => save.iconId === iconId);
     usages.factories = factoryStore.getAll()
-      .filter(factory => factory.iconId === iconId);
+      .filter((factory: Factory): boolean => factory.iconId === iconId);
     usages.changelists = changelistStore.getAll()
-      .filter(changelist => changelist.iconId === iconId);
+      .filter((changelist: Changelist): boolean => changelist.iconId === iconId);
 
     return usages;
   }

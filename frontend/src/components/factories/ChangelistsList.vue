@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
-import {useChangelistStore} from '@/stores/model/changelistStore';
-import {useChangelistApi} from '@/api/model/useChangelistApi';
-import {useRoute, useRouter} from 'vue-router';
-import {computed, type ComputedRef, h, type Ref, ref} from 'vue';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type ChangelistStore, useChangelistStore} from '@/stores/model/changelistStore';
+import {ChangelistApi, useChangelistApi} from '@/api/model/useChangelistApi';
+import {type RouteLocationNormalizedLoadedGeneric, type Router, useRoute, useRouter} from 'vue-router';
+import {computed, type ComputedRef, h, type Ref, ref, type VNode} from 'vue';
 import type {Changelist} from '@/types/model/standalone';
 import {ArrowDown, Delete, Edit, Finished, Hide, Plus, Remove, Star, View} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
@@ -21,16 +21,16 @@ import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSu
 import type {EntityWithOrdinal} from '@/types/model/basic';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const changelistStore = useChangelistStore();
-const changelistApi = useChangelistApi();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const changelistStore: ChangelistStore = useChangelistStore();
+const changelistApi: ChangelistApi = useChangelistApi();
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
 const changelists: ComputedRef<Changelist[]> = computed(() => {
   return changelistStore.getBySaveId(currentGameAndSaveStore.currentSaveId)
-    .sort((a, b) => a.ordinal - b.ordinal);
+      .sort((a: Changelist, b: Changelist) => a.ordinal - b.ordinal);
 });
 
 const draggableSupport: DraggableSupport = useDraggableSupport(changelists,
@@ -97,18 +97,18 @@ function setActive(changelistId: number, active: boolean): void {
 
 async function askApplyChangelist(changelistId: number, isPrimary: boolean): Promise<void> {
   const checked: Ref<boolean> = ref(false);
-  const confirm = await new Promise((r) =>
+  const confirm: boolean = await new Promise((r: (value: (PromiseLike<boolean> | boolean)) => void) =>
     ElMessageBox({
       title: 'Apply all changes from this changelist?',
       confirmButtonText: 'Yes',
       cancelButtonText: 'No',
       showCancelButton: true,
-      message: isPrimary ? undefined : () =>
+      message: isPrimary ? undefined : (): VNode =>
         h('div', null, [
           h(ElSwitch, {
             disabled: isPrimary,
             modelValue: checked.value,
-            'onUpdate:modelValue': (val) => (checked.value = Boolean(val)),
+            'onUpdate:modelValue': (val: string | number | boolean) => (checked.value = Boolean(val)),
           }),
           h('span', { style: 'margin-left: 10px;' }, 'Delete changelist afterwards'),
         ]),

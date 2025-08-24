@@ -8,9 +8,9 @@ import Node from 'element-plus/es/components/tree/src/model/node';
 import {Close, Link, Menu, UploadFilled} from '@element-plus/icons-vue';
 import type {Game, Icon} from '@/types/model/standalone';
 import {ElMessage, type TreeInstance} from 'element-plus';
-import {useIconStore} from '@/stores/model/iconStore';
-import {useIconApi} from '@/api/model/useIconApi';
-import {type EntityUsages, useEntityUsagesService} from '@/services/useEntityUsagesService';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
+import {IconApi, useIconApi} from '@/api/model/useIconApi';
+import {type EntityUsages, type EntityUsagesService, useEntityUsagesService} from '@/services/useEntityUsagesService';
 import type {NodeDropType} from 'element-plus/es/components/tree/src/tree.type';
 
 import {AbstractBulkCrudEntityApi} from '@/api/model/abstractBulkCrudEntityApi';
@@ -89,9 +89,9 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   findEntityUsages: (entityId: number) => EntityUsages,
   entityApi: AbstractBulkCrudEntityApi<T>,
 ): EntityTreeService<T> {
-  const iconApi = useIconApi();
-  const iconStore = useIconStore();
-  const entityUsageService = useEntityUsagesService();
+  const iconApi: IconApi = useIconApi();
+  const iconStore: IconStore = useIconStore();
+  const entityUsageService: EntityUsagesService = useEntityUsagesService();
 
   const treeRef: Ref<TreeInstance | undefined> = ref();
 
@@ -142,7 +142,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     if (category.length < startsWith.length) {
       return false;
     }
-    for (let i = 0; i < startsWith.length; i++) {
+    for (let i: number = 0; i < startsWith.length; i++) {
       if (startsWith[i] !== category[i]) {
         return false;
       }
@@ -151,7 +151,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   }
 
   function removeCategory(categoryToRemove: string[]): void {
-    for (let i = categories.value.length - 1; i >= 0; i--) {
+    for (let i: number = categories.value.length - 1; i >= 0; i--) {
       if (categoryStartsWith(categories.value[i], categoryToRemove)) {
         categories.value.splice(i, 1);
       }
@@ -174,7 +174,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     currentNodeKey.value = String(node.key);
   }
 
-  function setCurrentTreeNode(key: string | number | undefined) {
+  function setCurrentTreeNode(key: string | number | undefined): void {
     treeRef.value?.setCurrentKey(String(key));
   }
 
@@ -219,7 +219,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
   const autoDeleteIcons: Ref<boolean> = ref(true);
 
-  const editingHasChanges = computed(() =>
+  const editingHasChanges: ComputedRef<boolean> = computed(() =>
     !_.isEqual(editingEntityModel.value, editingEntityOriginalModel.value)
     || editingEntityIconDataBase64.value !== ''
     || editingFolderModel.value.name !== editingFolderOriginalModel.value.name,
@@ -256,8 +256,8 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
   function getNodePath(node: Node): string[] {
     const path: string[] = [];
-    const level = node.level;
-    for (let i = 0; i < level; i++) {
+    const level: number = node.level;
+    for (let i: number = 0; i < level; i++) {
       path.unshift(node.data.label);
         if (!node.parent) break;
       node = node.parent;
@@ -280,7 +280,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     createNewEntity(getNodePath(node));
   }
 
-  function createNewEntity(path: string[]) {
+  function createNewEntity(path: string[]): void {
     resetForms();
 
     const entity: Partial<T> = getNewEntityModel();
@@ -295,7 +295,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     focusNameInputField();
   }
 
-  function editEntity(id: number) {
+  function editEntity(id: number): void {
     resetForms();
 
     const entity: Partial<T> = getExistingEntityModel(id);
@@ -314,7 +314,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
   function checkDeleteEntity(id: number, event: PointerEvent): void {
     const entityUsages: EntityUsages = findEntityUsages(id);
     if (entityUsages.hasAnyUsages()) {
-      const entity: T | undefined = entities.value.filter(e => e.id == id)[0];
+      const entity: T | undefined = entities.value.filter((e: T) => e.id == id)[0];
       entityUsages.showMessageBox(
         'Cannot delete ' + entityType.toLowerCase() + ' \'' + (entity?.name ?? '') + '\'.',
         'The ' + entityType.toLowerCase() + ' is still being used in the following places:',
@@ -325,7 +325,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
   async function deleteEntity(id: number): Promise<void> {
     const entity: ComputedRef<T | undefined> = computed(() =>
-      entities.value.filter(e => e.id == id)[0],
+      entities.value.filter((e: T) => e.id == id)[0],
     );
 
     const entityUsages: EntityUsages = findEntityUsages(id);
@@ -375,7 +375,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
         const entityAsIcon: Partial<Icon> = entity as Partial<Icon>;
 
         if (editingEntityIconDataBase64.value) {
-          const { mimeType, imageData } = parseImageData(editingEntityIconDataBase64.value);
+          const {mimeType, imageData}: ParseImageDataResult = parseImageData(editingEntityIconDataBase64.value);
           if (!imageData) {
             ElMessage.error({
               message: 'Unable to upload icon.',
@@ -392,7 +392,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
         let icon: Partial<Icon> | undefined = undefined;
 
         if (selectedIconOption.value === 'new' && editingEntityIconDataBase64.value) {
-          const { mimeType, imageData } = parseImageData(editingEntityIconDataBase64.value);
+          const {mimeType, imageData}: ParseImageDataResult = parseImageData(editingEntityIconDataBase64.value);
           if (!imageData) {
             ElMessage.error({
               message: 'Unable to upload icon.',
@@ -421,7 +421,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
           await iconApi.create(icon);
 
           const savedIcon: ComputedRef<Icon | undefined> = computed(() =>
-            iconStore.getByGameId(game.value.id).filter(icon => icon.name === entity.name)[0],
+            iconStore.getByGameId(game.value.id).filter((icon: Icon) => icon.name === entity.name)[0],
           );
 
           await until(savedIcon).not.toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
@@ -442,7 +442,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
         await entityApi.create(entity);
 
         const savedEntity: ComputedRef<T | undefined> = computed(() =>
-          entities.value.filter(e => e.name === entity.name)[0],
+          entities.value.filter((e: T) => e.name === entity.name)[0],
         );
 
         await until(savedEntity).not.toBeUndefined({ timeout: waitUntilDoneTimeoutMillis });
@@ -463,8 +463,10 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     resetForms();
   }
 
-  function parseImageData(imageData: string): { mimeType: string, imageData: string } {
-    const regexResult = /data:([^;]+);base64,(.*)/.exec(imageData);
+  type ParseImageDataResult = { mimeType: string, imageData: string };
+
+  function parseImageData(imageData: string): ParseImageDataResult {
+    const regexResult: RegExpExecArray | null = /data:([^;]+);base64,(.*)/.exec(imageData);
     if (!regexResult) {
       return { mimeType: '', imageData: '' };
     }
@@ -518,7 +520,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     const path: string[] = getNodePath(node);
 
     const entitiesToDelete: T[] = entities.value.filter(
-      entity => categoryStartsWith(entity.category, path),
+      (entity: T) => categoryStartsWith(entity.category, path),
     );
 
     for (const entity of entitiesToDelete) {
@@ -532,7 +534,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
       }
     }
 
-    const idsToDelete: number[] = entitiesToDelete.map(entity => entity.id);
+    const idsToDelete: number[] = entitiesToDelete.map((entity: T) => entity.id);
 
     await entityApi.bulkDelete(idsToDelete);
 
@@ -543,7 +545,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     }
 
     const numberOfEntitiesLeftToDelete: ComputedRef<number> = computed(() =>
-      entities.value.filter(entity => idsToDelete.includes(entity.id)).length,
+      entities.value.filter((entity: T) => idsToDelete.includes(entity.id)).length,
     );
 
     await until(numberOfEntitiesLeftToDelete).toBe(0, { timeout: waitUntilDoneTimeoutMillis });
@@ -618,7 +620,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
 
       const isDone: ComputedRef<boolean> = computed(() => {
         for (const entityUpdate of entityUpdates) {
-          const entity: T | undefined = entities.value.filter(e => e.id === entityUpdate.id)[0];
+          const entity: T | undefined = entities.value.filter((e: T) => e.id === entityUpdate.id)[0];
           if (!_.isEqual(entity?.category, entityUpdate.category)) {
             return false;
           }
@@ -666,7 +668,7 @@ export function useEntityTreeService<T extends EntityWithCategory>(
     const sourceId: number = sourceNode.data.id;
       const targetPath: string[] = getNodePath(targetIsFolder ? targetNode : targetNode.parent!);
 
-    const entity: ComputedRef<T> = computed(() => entities.value.filter(e => e.id === sourceId)[0]!);
+    const entity: ComputedRef<T> = computed(() => entities.value.filter((e: T) => e.id === sourceId)[0]!);
 
     if (_.isEqual(entity.value.category, targetPath)) {
       return;

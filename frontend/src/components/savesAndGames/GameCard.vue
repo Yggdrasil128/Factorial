@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import type { Game } from '@/types/model/standalone';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { computed, type ComputedRef, ref, type Ref } from 'vue';
-import { ArrowDown, CopyDocument, Delete, Download, Edit, EditPen } from '@element-plus/icons-vue';
+import type {Game} from '@/types/model/standalone';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {computed, type ComputedRef, ref, type Ref} from 'vue';
+import {ArrowDown, CopyDocument, Delete, Download, Edit, EditPen} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
-import { ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessageBox, ElTooltip } from 'element-plus';
-import { useRouter } from 'vue-router';
-import { useEntityUsagesService } from '@/services/useEntityUsagesService';
-import { useGameApi } from '@/api/model/useGameApi';
-import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
-import { useGameStore } from '@/stores/model/gameStore';
-import type { GameSummary } from '@/types/model/summary';
-import { downloadJsonFile } from '@/utils/downloadFileUtil';
+import {ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessageBox, ElTooltip} from 'element-plus';
+import {type Router, useRouter} from 'vue-router';
+import {EntityUsages, type EntityUsagesService, useEntityUsagesService} from '@/services/useEntityUsagesService';
+import {GameApi, useGameApi} from '@/api/model/useGameApi';
+import {
+  type EntityCloneNameGeneratorService,
+  useEntityCloneNameGeneratorService
+} from '@/services/useEntityCloneNameGeneratorService';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import type {GameSummary} from '@/types/model/summary';
+import {downloadJsonFile} from '@/utils/downloadFileUtil';
 
 export interface GameCardProps {
   game: Game;
@@ -22,13 +25,14 @@ const props: GameCardProps = defineProps<GameCardProps>();
 
 const dropdownMenuOpen: Ref<boolean> = ref(false);
 
-const router = useRouter();
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const saveStore = useSaveStore();
-const gameStore = useGameStore();
-const gameApi = useGameApi();
-const entityUsagesService = useEntityUsagesService();
-const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
+const router: Router = useRouter();
+
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const saveStore: SaveStore = useSaveStore();
+const gameStore: GameStore = useGameStore();
+const gameApi: GameApi = useGameApi();
+const entityUsagesService: EntityUsagesService = useEntityUsagesService();
+const entityCloneNameGeneratorService: EntityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 const isCurrentGame: ComputedRef<boolean> = computed(() =>
   props.game.id === currentGameAndSaveStore.currentGameId,
@@ -47,7 +51,7 @@ function editGame(): void {
 }
 
 function cloneGame(): void {
-  const gameName = entityCloneNameGeneratorService.generateName(
+  const gameName: string = entityCloneNameGeneratorService.generateName(
     props.game.name,
     gameStore.getAll(),
   );
@@ -57,12 +61,12 @@ function cloneGame(): void {
 async function exportGame(): Promise<void> {
   const gameSummary: GameSummary = await gameApi.export(props.game.id);
   const data: string = JSON.stringify(gameSummary, undefined, 2);
-  const filename = props.game.name + '.json';
+  const filename: string = props.game.name + '.json';
   downloadJsonFile(data, filename);
 }
 
 function deleteGame(): void {
-  const entityUsages = entityUsagesService.findGameUsages(props.game.id);
+  const entityUsages: EntityUsages = entityUsagesService.findGameUsages(props.game.id);
   if (entityUsages.hasAnyUsages()) {
     entityUsages.showMessageBox(
       'Cannot delete game \'' + props.game.name + '\'.',

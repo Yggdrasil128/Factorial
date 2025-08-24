@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import type {Save} from '@/types/model/standalone';
 import {reactive} from 'vue';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useSaveStore
   = defineStore('saveStore', () => {
 
@@ -17,7 +18,7 @@ export const useSaveStore
 
   function getByGameId(gameId: number | undefined): Save[] {
     if (!gameId) return [];
-    return getAll().filter(save => save.gameId === gameId);
+    return getAll().filter((save: Save): boolean => save.gameId === gameId);
   }
 
   return { map, getAll, getById, getByGameId };

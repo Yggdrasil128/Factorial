@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type {Item, LocalResource, Machine, ProductionStep, Recipe, RecipeModifier} from '@/types/model/standalone';
 import {computed, type ComputedRef} from 'vue';
-import {useRecipeStore} from '@/stores/model/recipeStore';
-import {useItemStore} from '@/stores/model/itemStore';
-import {useMachineStore} from '@/stores/model/machineStore';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
+import {type MachineStore, useMachineStore} from '@/stores/model/machineStore';
 import {ArrowDown, CaretLeft, Delete, Edit, MagicStick} from '@element-plus/icons-vue';
 import IconImg from '@/components/common/IconImg.vue';
 import {ElButton, ElButtonGroup, ElDropdown, ElDropdownItem, ElDropdownMenu, ElMessageBox} from 'element-plus';
-import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
-import {useRoute, useRouter} from 'vue-router';
-import {useProductionStepApi} from '@/api/model/useProductionStepApi';
+import {type RecipeModifierStore, useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {type RouteLocationNormalizedLoadedGeneric, type Router, useRoute, useRouter} from 'vue-router';
+import {ProductionStepApi, useProductionStepApi} from '@/api/model/useProductionStepApi';
 import ProductionEntriesTable from '@/components/factories/resources/ProductionEntriesTable.vue';
 import ProductionStepMachineCountInput from '@/components/factories/resources/ProductionStepMachineCountInput.vue';
 import CustomElTooltip from "@/components/common/CustomElTooltip.vue";
@@ -22,15 +22,15 @@ export interface ResourceProductionStepProps {
 
 const props: ResourceProductionStepProps = defineProps<ResourceProductionStepProps>();
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const recipeStore = useRecipeStore();
-const recipeModifierStore = useRecipeModifierStore();
-const itemStore = useItemStore();
-const machineStore = useMachineStore();
+const recipeStore: RecipeStore = useRecipeStore();
+const recipeModifierStore: RecipeModifierStore = useRecipeModifierStore();
+const itemStore: ItemStore = useItemStore();
+const machineStore: MachineStore = useMachineStore();
 
-const productionStepApi = useProductionStepApi();
+const productionStepApi: ProductionStepApi = useProductionStepApi();
 
 const recipe: ComputedRef<Recipe | undefined> = computed(() => recipeStore.getById(props.productionStep.recipeId));
 const machine: ComputedRef<Machine | undefined> = computed(() => machineStore.getById(props.productionStep.machineId));
@@ -57,8 +57,8 @@ const recipeName: ComputedRef<string> = computed(() => {
 
 const recipeModifiers: ComputedRef<RecipeModifier[]> = computed(() => {
   return props.productionStep.modifierIds
-      .map(recipeModifierId => recipeModifierStore.getById(recipeModifierId))
-      .filter(recipeModifier => recipeModifier !== undefined) as RecipeModifier[];
+      .map((recipeModifierId: number) => recipeModifierStore.getById(recipeModifierId))
+      .filter((recipeModifier: RecipeModifier | undefined) => recipeModifier !== undefined) as RecipeModifier[];
 });
 
 function editProductionStep(): void {

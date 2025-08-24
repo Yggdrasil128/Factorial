@@ -1,6 +1,7 @@
-import { defineStore } from 'pinia';
-import { ref, type Ref } from 'vue';
+import {defineStore} from 'pinia';
+import {ref, type Ref} from 'vue';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useCurrentGameAndSaveStore
   = defineStore('currentGameAndSaveStore', () => {
 
@@ -11,3 +12,5 @@ export const useCurrentGameAndSaveStore
 
   return { currentGameId, currentSaveId, editingGameId };
 });
+
+export type CurrentGameAndSaveStore = ReturnType<typeof useCurrentGameAndSaveStore>;

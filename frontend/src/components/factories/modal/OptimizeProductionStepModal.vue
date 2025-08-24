@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
+import {
+  onBeforeRouteLeave,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from "vue-router";
 import {computed, type ComputedRef, onMounted, ref, type Ref} from "vue";
 import {sleep} from "@/utils/utils";
-import {useProductionStepStore} from "@/stores/model/productionStepStore";
+import {type ProductionStepStore, useProductionStepStore} from "@/stores/model/productionStepStore";
 import {type RecipeStore, useRecipeStore} from "@/stores/model/recipeStore";
 import type {Changelist, Item, LocalResource, ProductionStep, Recipe} from "@/types/model/standalone";
 import {type LocalResourceStore, useLocalResourceStore} from "@/stores/model/localResourceStore";
@@ -16,13 +22,13 @@ import type {Fraction} from "@/types/model/basic";
 import ItemIconName from "@/components/common/ItemIconName.vue";
 import {type UserSettingsStore, useUserSettingsStore} from "@/stores/userSettingsStore";
 import {OptimizeProductionStepMachineCountRounding} from "@/types/userSettings";
-import {useCurrentGameAndSaveStore} from "@/stores/currentGameAndSaveStore";
-import {useChangelistStore} from "@/stores/model/changelistStore";
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from "@/stores/currentGameAndSaveStore";
+import {type ChangelistStore, useChangelistStore} from "@/stores/model/changelistStore";
 import {Check, Close} from "@element-plus/icons-vue";
 import {type ChangelistApi, useChangelistApi} from "@/api/model/useChangelistApi";
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
 const visible: Ref<boolean> = ref(true);
 
@@ -42,12 +48,12 @@ async function close(): Promise<void> {
   await sleep(400);
 }
 
-const productionStepStore = useProductionStepStore();
+const productionStepStore: ProductionStepStore = useProductionStepStore();
 const resourceStore: LocalResourceStore = useLocalResourceStore();
 const recipeStore: RecipeStore = useRecipeStore();
 const itemStore: ItemStore = useItemStore();
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const changelistStore = useChangelistStore();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const changelistStore: ChangelistStore = useChangelistStore();
 
 const productionStepApi: ProductionStepApi = useProductionStepApi();
 const changelistApi: ChangelistApi = useChangelistApi();
@@ -138,7 +144,7 @@ const selectedChangelistId: Ref<number | undefined> = ref(undefined);
 
 const changelists: ComputedRef<Changelist[]> = computed(() => {
   return changelistStore.getBySaveId(currentGameAndSaveStore.currentSaveId)
-      .sort((a, b) => a.ordinal - b.ordinal);
+      .sort((a: Changelist, b: Changelist) => a.ordinal - b.ordinal);
 });
 
 onMounted(() => {

@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import {reactive} from 'vue';
 import type {Factory} from '@/types/model/standalone';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useFactoryStore
   = defineStore('factoryStore', () => {
 
@@ -17,7 +18,7 @@ export const useFactoryStore
 
   function getBySaveId(saveId: number | undefined): Factory[] {
     if (!saveId) return [];
-    return getAll().filter(factory => factory.saveId === saveId);
+    return getAll().filter((factory: Factory): boolean => factory.saveId === saveId);
   }
 
   return { map, getAll, getById, getBySaveId };

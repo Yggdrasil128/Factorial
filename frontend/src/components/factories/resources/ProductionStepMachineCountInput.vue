@@ -7,7 +7,7 @@ import {ParsedFraction} from '@/utils/fractionUtils';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import type {ProductionStep} from '@/types/model/standalone';
 import FractionInput from '@/components/common/input/FractionInput.vue';
-import {useChangelistApi} from "@/api/model/useChangelistApi";
+import {ChangelistApi, useChangelistApi} from "@/api/model/useChangelistApi";
 
 export interface MachineCountInputProps {
   productionStep: ProductionStep;
@@ -31,7 +31,7 @@ const parsedFraction: Ref<ParsedFraction> = computed({
   },
 });
 
-const changelistApi = useChangelistApi();
+const changelistApi: ChangelistApi = useChangelistApi();
 
 const plusButtonLoading: Ref<boolean> = ref(false);
 const minusButtonLoading: Ref<boolean> = ref(false);
@@ -46,7 +46,7 @@ async function plusOne(): Promise<void> {
 }
 
 async function minusOne(): Promise<void> {
-  let newValue = parsedFraction.value.subtract(ParsedFraction.ONE);
+  let newValue: ParsedFraction = parsedFraction.value.subtract(ParsedFraction.ONE);
   if (newValue.isNegative()) {
     newValue = ParsedFraction.ZERO;
   }

@@ -1,14 +1,14 @@
-import type { Item, Recipe } from '@/types/model/standalone';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useItemStore } from '@/stores/model/itemStore';
+import type {Item, Recipe} from '@/types/model/standalone';
+import {type RecipeStore, useRecipeStore} from '@/stores/model/recipeStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
 
 export interface RecipeIconService {
   getRecipeIconId: (recipe: Recipe | number | undefined) => number;
 }
 
 export function useRecipeIconService(): RecipeIconService {
-  const recipeStore = useRecipeStore();
-  const itemStore = useItemStore();
+  const recipeStore: RecipeStore = useRecipeStore();
+  const itemStore: ItemStore = useItemStore();
 
   function getRecipeIconId(recipe: Recipe | number | undefined): number {
     if (!recipe) return 0;

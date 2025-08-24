@@ -1,26 +1,30 @@
 <script setup lang="ts">
-import { useSaveStore } from '@/stores/model/saveStore';
-import { Plus, Upload } from '@element-plus/icons-vue';
-import { ElButton } from 'element-plus';
-import { computed, type ComputedRef } from 'vue';
-import type { Save } from '@/types/model/standalone';
-import { ordinalComparator } from '@/utils/utils';
-import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import { useSaveApi } from '@/api/model/useSaveApi';
-import { VueDraggableNext } from 'vue-draggable-next';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {Plus, Upload} from '@element-plus/icons-vue';
+import {ElButton} from 'element-plus';
+import {computed, type ComputedRef} from 'vue';
+import type {Save} from '@/types/model/standalone';
+import {ordinalComparator} from '@/utils/utils';
+import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSupport';
+import {SaveApi, useSaveApi} from '@/api/model/useSaveApi';
+import {VueDraggableNext} from 'vue-draggable-next';
 import SaveCard from '@/components/savesAndGames/SaveCard.vue';
-import { useRouter } from 'vue-router';
+import {type Router, useRouter} from 'vue-router';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
-import { useGameStore } from '@/stores/model/gameStore';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import type {EntityWithOrdinal} from "@/types/model/basic";
 
-const router = useRouter();
-const saveStore = useSaveStore();
-const gameStore = useGameStore();
-const saveApi = useSaveApi();
+const router: Router = useRouter();
+
+const saveStore: SaveStore = useSaveStore();
+const gameStore: GameStore = useGameStore();
+const saveApi: SaveApi = useSaveApi();
 
 const saves: ComputedRef<Save[]> = computed(() => saveStore.getAll().sort(ordinalComparator));
 
-const draggableSupport: DraggableSupport = useDraggableSupport(saves, input => saveApi.reorder(input));
+const draggableSupport: DraggableSupport = useDraggableSupport(saves,
+    (input: EntityWithOrdinal[]) => saveApi.reorder(input)
+);
 
 function newSave(): void {
   router.push({ name: 'newSave' });

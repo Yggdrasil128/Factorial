@@ -1,5 +1,5 @@
-import type { EntityWithOrdinal } from '@/types/model/basic';
-import type { ComputedRef } from 'vue';
+import type {EntityWithOrdinal} from '@/types/model/basic';
+import type {ComputedRef} from 'vue';
 
 export interface DraggableSupport {
   onDragEnd(event: DragEndEvent): Promise<void>;
@@ -35,7 +35,7 @@ export function useDraggableSupport(list: ComputedRef<EntityWithOrdinal[]>,
 
     const changed: EntityWithOrdinal[] = [];
 
-    for (let i = 0; i < newList.length; i++) {
+    for (let i: number = 0; i < newList.length; i++) {
       if (newList[i].ordinal !== i + 1) {
         newList[i].ordinal = i + 1;
         changed.push({ id: newList[i].id, ordinal: i + 1 });

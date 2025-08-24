@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import {reactive} from 'vue';
 import type {GlobalResource} from '@/types/model/standalone';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useGlobalResourceStore
   = defineStore('globalResourceStore', () => {
 
@@ -17,7 +18,7 @@ export const useGlobalResourceStore
 
   function getBySaveId(saveId: number | undefined): GlobalResource[] {
     if (!saveId) return [];
-    return getAll().filter(globalResource => globalResource.saveId === saveId);
+    return getAll().filter((globalResource: GlobalResource): boolean => globalResource.saveId === saveId);
   }
 
   return { map, getAll, getById, getBySaveId };

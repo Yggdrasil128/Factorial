@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Game, Save } from '@/types/model/standalone';
+import type {Game, Save} from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
-import { ArrowDown, Connection, CopyDocument, Delete, Download, Edit, Promotion } from '@element-plus/icons-vue';
+import {ArrowDown, Connection, CopyDocument, Delete, Download, Edit, Promotion} from '@element-plus/icons-vue';
 import {
   ElButton,
   ElButtonGroup,
@@ -12,16 +12,19 @@ import {
   ElMessageBox,
   ElTooltip,
 } from 'element-plus';
-import { useGameStore } from '@/stores/model/gameStore';
-import { computed, type ComputedRef, type Ref, ref } from 'vue';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { getModelSyncService } from '@/services/useModelSyncService';
-import { useRouter } from 'vue-router';
-import { useSaveApi } from '@/api/model/useSaveApi';
-import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
-import { useSaveStore } from '@/stores/model/saveStore';
-import type { SaveSummary } from '@/types/model/summary';
-import { downloadJsonFile } from '@/utils/downloadFileUtil';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {computed, type ComputedRef, type Ref, ref} from 'vue';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {getModelSyncService, type ModelSyncService} from '@/services/useModelSyncService';
+import {type Router, useRouter} from 'vue-router';
+import {SaveApi, useSaveApi} from '@/api/model/useSaveApi';
+import {
+  type EntityCloneNameGeneratorService,
+  useEntityCloneNameGeneratorService
+} from '@/services/useEntityCloneNameGeneratorService';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import type {SaveSummary} from '@/types/model/summary';
+import {downloadJsonFile} from '@/utils/downloadFileUtil';
 
 export interface SaveCardProps {
   save: Save;
@@ -29,13 +32,14 @@ export interface SaveCardProps {
 
 const props: SaveCardProps = defineProps<SaveCardProps>();
 
-const router = useRouter();
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const saveStore = useSaveStore();
-const gameStore = useGameStore();
-const modelSyncService = getModelSyncService();
-const saveApi = useSaveApi();
-const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
+const router: Router = useRouter();
+
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const saveStore: SaveStore = useSaveStore();
+const gameStore: GameStore = useGameStore();
+const modelSyncService: ModelSyncService = getModelSyncService();
+const saveApi: SaveApi = useSaveApi();
+const entityCloneNameGeneratorService: EntityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 const dropdownMenuOpen: Ref<boolean> = ref(false);
 
@@ -62,7 +66,7 @@ function editSave(): void {
 }
 
 function cloneSave(): void {
-  const saveName = entityCloneNameGeneratorService.generateName(
+  const saveName: string = entityCloneNameGeneratorService.generateName(
     props.save.name,
     saveStore.getAll(),
   );
@@ -72,7 +76,7 @@ function cloneSave(): void {
 async function exportSave(): Promise<void> {
   const saveSummary: SaveSummary = await saveApi.export(props.save.id);
   const data: string = JSON.stringify(saveSummary, undefined, 2);
-  const filename = props.save.name + '.json';
+  const filename: string = props.save.name + '.json';
   downloadJsonFile(data, filename);
 }
 

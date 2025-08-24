@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import {reactive} from 'vue';
 import type {Changelist} from '@/types/model/standalone';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useChangelistStore
   = defineStore('changelistStore', () => {
 
@@ -17,7 +18,7 @@ export const useChangelistStore
 
   function getBySaveId(saveId: number | undefined): Changelist[] {
     if (!saveId) return [];
-    return getAll().filter(changelist => changelist.saveId === saveId);
+    return getAll().filter((changelist: Changelist): boolean => changelist.saveId === saveId);
   }
 
   return { map, getAll, getById, getBySaveId };

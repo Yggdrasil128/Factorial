@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { Game, Icon } from '@/types/model/standalone';
-import { computed, type ComputedRef, ref, watch } from 'vue';
-import { type EntityTreeService, iconOptionsForIcon, useEntityTreeService } from '@/services/useEntityTreeService';
-import { ElFormItem, ElInput, type FormItemInstance, type FormRules } from 'element-plus';
-import { useIconStore } from '@/stores/model/iconStore';
-import { elFormEntityNameUniqueValidator } from '@/utils/utils';
-import { useEntityUsagesService } from '@/services/useEntityUsagesService';
+import type {Game, Icon} from '@/types/model/standalone';
+import {computed, type ComputedRef, type Ref, ref, watch} from 'vue';
+import {type EntityTreeService, iconOptionsForIcon, useEntityTreeService} from '@/services/useEntityTreeService';
+import {ElFormItem, ElInput, type FormItemInstance, type FormRules} from 'element-plus';
+import {type IconStore, useIconStore} from '@/stores/model/iconStore';
+import {elFormEntityNameUniqueValidator} from '@/utils/utils';
+import {type EntityUsagesService, useEntityUsagesService} from '@/services/useEntityUsagesService';
 import EntityEditor from '@/components/gameEditor/EntityEditor.vue';
-import { useIconApi } from '@/api/model/useIconApi';
+import {IconApi, useIconApi} from '@/api/model/useIconApi';
 import IconImg from '@/components/common/IconImg.vue';
 import IconUpload from '@/components/gameEditor/IconUpload.vue';
 
@@ -17,40 +17,46 @@ export interface IconEditorProps {
 
 const props: IconEditorProps = defineProps<IconEditorProps>();
 
-const iconStore = useIconStore();
-const iconApi = useIconApi();
-const entityUsageService = useEntityUsagesService();
+const iconStore: IconStore = useIconStore();
+const iconApi: IconApi = useIconApi();
+const entityUsageService: EntityUsagesService = useEntityUsagesService();
 
 const icons: ComputedRef<Icon[]> = computed(() => iconStore.getByGameId(props.game.id));
 
-const entityEditor = ref();
+const entityEditor: Ref<InstanceType<typeof EntityEditor> | undefined> = ref();
 
 const service: EntityTreeService<Icon> = useEntityTreeService<Icon>(
-  computed(() => props.game),
-  icons,
-  'Icon',
-  () => ({
-    gameId: props.game.id,
-    name: '',
-    // category is set by service
-  }),
-  (id: number) => {
-    const icon: Icon = iconStore.getById(id)!;
-    return {
-      id: icon.id,
-      name: icon.name,
-      category: icon.category,
-    };
-  },
-  () => entityEditor.value?.validateForm(),
-  () => entityEditor.value?.validateFolderForm(),
-  entityUsageService.findIconUsages,
-  iconApi,
+    computed(() => props.game),
+    icons,
+    'Icon',
+    () => ({
+      gameId: props.game.id,
+      name: '',
+      // category is set by service
+    }),
+    (id: number) => {
+      const icon: Icon = iconStore.getById(id)!;
+      return {
+        id: icon.id,
+        name: icon.name,
+        category: icon.category,
+      };
+    },
+    async (): Promise<boolean> => {
+      if (!entityEditor.value) return false;
+      return await entityEditor.value.validateForm();
+    },
+    async (): Promise<boolean> => {
+      if (!entityEditor.value) return false;
+      return await entityEditor.value.validateFolderForm();
+    },
+    entityUsageService.findIconUsages,
+    iconApi,
 );
 
 const formRules: ComputedRef<FormRules> = computed(() => ({
   name: [
-    { required: true, message: 'Please enter a name for the icon.', trigger: 'change' },
+    {required: true, message: 'Please enter a name for the icon.', trigger: 'change'},
     {
       validator: elFormEntityNameUniqueValidator,
       entities: iconStore.getByGameId(props.game.id),
@@ -62,9 +68,9 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
     imageData: [{
       required: true,
       message: service.state.selectedIconOption.value === 'new'
-        ? 'Please select an image file to upload.'
-        : 'Please enter a URL',
-      validator(_, __, callback) {
+          ? 'Please select an image file to upload.'
+          : 'Please enter a URL',
+      validator(_: any, __: any, callback: (error?: Error) => void): void {
         if (service.state.selectedIconOption.value === 'new' && service.state.editingEntityIconDataBase64.value) {
           callback();
         } else if (service.state.selectedIconOption.value === 'url' && service.state.editingEntityIconDataUrl.value) {
@@ -77,7 +83,7 @@ const formRules: ComputedRef<FormRules> = computed(() => ({
   }),
 }));
 
-const formItemImageData = ref<FormItemInstance>();
+const formItemImageData: Ref<FormItemInstance | undefined> = ref();
 
 watch(() => service.state.selectedIconOption.value, async () => {
   setTimeout(() => formItemImageData.value?.clearValidate(), 50);
@@ -89,7 +95,7 @@ watch(() => service.state.selectedIconOption.value, async () => {
   <EntityEditor ref="entityEditor" :game="game" :service="service" entity-type="Icon" :form-rules="formRules">
     <template #form>
       <el-form-item v-if="service.state.editingEntityId.value" label="Current image">
-        <IconImg :icon="service.state.editingEntityId.value" :size="64" />
+        <IconImg :icon="service.state.editingEntityId.value" :size="64"/>
       </el-form-item>
 
       <el-form-item :label="service.state.editingEntityId.value ? 'Replace image' : 'Upload image'"
@@ -105,7 +111,7 @@ watch(() => service.state.selectedIconOption.value, async () => {
                    :style="{mask: 'url(\'' + item.icon + '\') center/contain'}">
               </div>
               <el-icon v-else size="20">
-                <component :is="item.icon" />
+                <component :is="item.icon"/>
               </el-icon>
               <div>{{ item.label }}</div>
             </div>
@@ -114,12 +120,12 @@ watch(() => service.state.selectedIconOption.value, async () => {
 
         <template v-if="service.state.selectedIconOption.value === 'new'">
           <div class="full-width" style="margin-top: 12px;">
-            <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value" />
+            <IconUpload v-model:data-base64="service.state.editingEntityIconDataBase64.value"/>
           </div>
         </template>
         <template v-if="service.state.selectedIconOption.value === 'url'">
           <div class="full-width" style="margin-top: 12px;">
-            <el-input v-model="service.state.editingEntityIconDataUrl.value" placeholder="Enter icon URL" />
+            <el-input v-model="service.state.editingEntityIconDataUrl.value" placeholder="Enter icon URL"/>
           </div>
         </template>
       </el-form-item>

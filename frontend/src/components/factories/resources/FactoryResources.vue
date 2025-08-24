@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
-import { useFactoryStore } from '@/stores/model/factoryStore';
-import { computed, type ComputedRef } from 'vue';
-import type { Factory, LocalResource } from '@/types/model/standalone';
-import { useLocalResourceStore } from '@/stores/model/localResourceStore';
-import { ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon } from 'element-plus';
-import { VueDraggableNext } from 'vue-draggable-next';
-import { Plus } from '@element-plus/icons-vue';
+import {type RouteLocationNormalizedLoadedGeneric, type Router, useRoute, useRouter} from 'vue-router';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
+import {computed, type ComputedRef} from 'vue';
+import type {Factory, LocalResource} from '@/types/model/standalone';
+import {type LocalResourceStore, useLocalResourceStore} from '@/stores/model/localResourceStore';
+import {ElDropdown, ElDropdownItem, ElDropdownMenu, ElIcon} from 'element-plus';
+import {VueDraggableNext} from 'vue-draggable-next';
+import {Plus} from '@element-plus/icons-vue';
 import FactoryResource from '@/components/factories/resources/FactoryResource.vue';
-import { useLocalResourceApi } from '@/api/model/useLocalResourceApi';
-import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import type { EntityWithOrdinal } from '@/types/model/basic';
+import {type LocalResourceApi, useLocalResourceApi} from '@/api/model/useLocalResourceApi';
+import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSupport';
+import type {EntityWithOrdinal} from '@/types/model/basic';
 import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
 import IconImg from '@/components/common/IconImg.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
@@ -21,12 +21,12 @@ export interface FactoryResourcesProps {
 
 const props: FactoryResourcesProps = defineProps<FactoryResourcesProps>();
 
-const route = useRoute();
-const router = useRouter();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const factoryStore = useFactoryStore();
-const localResourceStore = useLocalResourceStore();
-const localResourceApi = useLocalResourceApi();
+const factoryStore: FactoryStore = useFactoryStore();
+const localResourceStore: LocalResourceStore = useLocalResourceStore();
+const localResourceApi: LocalResourceApi = useLocalResourceApi();
 
 const rr: string = 'aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUQ==';
 
@@ -36,18 +36,18 @@ const factory: ComputedRef<Factory> = computed(() =>
 
 const resources: ComputedRef<LocalResource[]> = computed(() =>
   localResourceStore.getByFactoryId(props.factoryId)
-    .sort((a, b) => a.ordinal - b.ordinal),
+      .sort((a: LocalResource, b: LocalResource) => a.ordinal - b.ordinal),
 );
 
 const draggableSupport: DraggableSupport = useDraggableSupport(resources,
   (input: EntityWithOrdinal[]) => localResourceApi.reorder(props.factoryId, input),
 );
 
-function newProductionStep() {
+function newProductionStep(): void {
   router.push({ name: 'newProductionStep', params: { factoryId: route.params.factoryId } });
 }
 
-function newTransportLink() {
+function newTransportLink(): void {
   window.open(atob(rr), '_blank')!.focus();
 }
 

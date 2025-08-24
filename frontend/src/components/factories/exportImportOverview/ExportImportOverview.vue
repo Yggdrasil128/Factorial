@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import ProductionsStepsDisplayChooser from '@/components/factories/resources/ResourceContributorsDisplayToggle.vue';
-import { ElIcon } from 'element-plus';
-import { Switch } from '@element-plus/icons-vue';
-import { computed, type ComputedRef } from 'vue';
-import type { GlobalResource } from '@/types/model/standalone';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
-import { useGlobalResourceStore } from '@/stores/model/globalResourceStore';
-import { useGlobalResourceApi } from '@/api/model/useGlobalResourceApi';
-import { type DraggableSupport, useDraggableSupport } from '@/utils/useDraggableSupport';
-import type { EntityWithOrdinal } from '@/types/model/basic';
-import { VueDraggableNext } from 'vue-draggable-next';
+import {ElIcon} from 'element-plus';
+import {Switch} from '@element-plus/icons-vue';
+import {computed, type ComputedRef} from 'vue';
+import type {GlobalResource} from '@/types/model/standalone';
+import {type CurrentGameAndSaveStore, useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
+import {type GlobalResourceStore, useGlobalResourceStore} from '@/stores/model/globalResourceStore';
+import {type GlobalResourceApi, useGlobalResourceApi} from '@/api/model/useGlobalResourceApi';
+import {type DraggableSupport, useDraggableSupport} from '@/utils/useDraggableSupport';
+import type {EntityWithOrdinal} from '@/types/model/basic';
+import {VueDraggableNext} from 'vue-draggable-next';
 import SaveResource from '@/components/factories/exportImportOverview/SaveResource.vue';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
-import { ordinalComparator } from '@/utils/utils';
+import {ordinalComparator} from '@/utils/utils';
 import HelpPopover from '@/components/common/HelpPopover.vue';
 
-const currentGameAndSaveStore = useCurrentGameAndSaveStore();
-const globalResourceStore = useGlobalResourceStore();
-const globalResourceApi = useGlobalResourceApi();
+const currentGameAndSaveStore: CurrentGameAndSaveStore = useCurrentGameAndSaveStore();
+const globalResourceStore: GlobalResourceStore = useGlobalResourceStore();
+const globalResourceApi: GlobalResourceApi = useGlobalResourceApi();
 
 const resources: ComputedRef<GlobalResource[]> = computed(() =>
   globalResourceStore.getBySaveId(currentGameAndSaveStore.currentSaveId).sort(ordinalComparator),

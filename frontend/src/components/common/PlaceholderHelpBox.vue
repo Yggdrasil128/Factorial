@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { WarningFilled } from '@element-plus/icons-vue';
-import { getModelSyncService } from '@/services/useModelSyncService';
+import {WarningFilled} from '@element-plus/icons-vue';
+import {getModelSyncService, type ModelSyncService} from '@/services/useModelSyncService';
 
 export interface PlaceholderHelpBoxProps {
   title?: string;
@@ -11,7 +11,7 @@ export interface PlaceholderHelpBoxProps {
 
 defineProps<PlaceholderHelpBoxProps>();
 
-const modelSyncService = getModelSyncService();
+const modelSyncService: ModelSyncService = getModelSyncService();
 
 </script>
 

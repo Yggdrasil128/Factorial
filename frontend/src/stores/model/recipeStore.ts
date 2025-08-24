@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import type {Recipe} from '@/types/model/standalone';
 import {reactive} from 'vue';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useRecipeStore
   = defineStore('recipeStore', () => {
 
@@ -17,7 +18,7 @@ export const useRecipeStore
 
   function getByGameId(gameId: number | undefined): Recipe[] {
     if (!gameId) return [];
-    return getAll().filter(recipe => recipe.gameId === gameId);
+    return getAll().filter((recipe: Recipe): boolean => recipe.gameId === gameId);
   }
 
   return { map, getAll, getById, getByGameId };

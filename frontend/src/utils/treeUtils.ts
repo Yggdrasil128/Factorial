@@ -21,7 +21,7 @@ export function convertToTreeByCategory<T extends EntityWithCategory>(
 ): TreeNode[] {
   const tree: TreeNode[] = [];
 
-  function insert(nodes: TreeNode[], element: T | undefined, categoryPath: string[], key: string) {
+  function insert(nodes: TreeNode[], element: T | undefined, categoryPath: string[], key: string): void {
     if (categoryPath.length > 0) {
       const category: string = categoryPath.shift() as string;
       for (const node of nodes) {
@@ -62,7 +62,7 @@ export function convertToTreeByCategory<T extends EntityWithCategory>(
     }
   }
 
-  function sort(nodes: TreeNode[]) {
+  function sort(nodes: TreeNode[]): void {
     nodes.sort((a: TreeNode, b: TreeNode): number => {
       if (!a.children !== !b.children) {
         return !a.children ? 1 : -1;

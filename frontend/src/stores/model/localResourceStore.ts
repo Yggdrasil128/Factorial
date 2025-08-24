@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import {reactive} from 'vue';
 import type {LocalResource} from '@/types/model/standalone';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useLocalResourceStore
   = defineStore('localResourceStore', () => {
 
@@ -17,12 +18,12 @@ export const useLocalResourceStore
 
   function getBySaveId(saveId: number | undefined): LocalResource[] {
     if (!saveId) return [];
-    return getAll().filter(localResource => localResource.saveId === saveId);
+    return getAll().filter((localResource: LocalResource): boolean => localResource.saveId === saveId);
   }
 
   function getByFactoryId(factoryId: number | undefined): LocalResource[] {
     if (!factoryId) return [];
-    return getAll().filter(localResource => localResource.factoryId === factoryId);
+    return getAll().filter((localResource: LocalResource): boolean => localResource.factoryId === factoryId);
   }
 
   return { map, getAll, getById, getBySaveId, getByFactoryId };

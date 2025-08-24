@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type {ProductionEntry} from '@/types/model/standalone';
-import {useItemStore} from '@/stores/model/itemStore';
+import {type ItemStore, useItemStore} from '@/stores/model/itemStore';
 import IconImg from '@/components/common/IconImg.vue';
-import {useRoute, useRouter} from 'vue-router';
+import {type RouteLocationNormalizedLoadedGeneric, type Router, useRoute, useRouter} from 'vue-router';
 import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
 import FractionDisplay from "@/components/common/FractionDisplay.vue";
 
@@ -12,9 +12,10 @@ export interface ProductionEntriesTableProps {
 
 defineProps<ProductionEntriesTableProps>();
 
-const itemStore = useItemStore();
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
+
+const itemStore: ItemStore = useItemStore();
 
 async function onClick(itemId: number): Promise<void> {
   const hash: string = '#item' + itemId;

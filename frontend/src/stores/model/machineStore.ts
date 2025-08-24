@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import type {Machine} from '@/types/model/standalone';
 import {reactive} from 'vue';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useMachineStore
   = defineStore('machineStore', () => {
 
@@ -17,7 +18,7 @@ export const useMachineStore
 
   function getByGameId(gameId: number | undefined): Machine[] {
     if (!gameId) return [];
-    return getAll().filter(machine => machine.gameId === gameId);
+    return getAll().filter((machine: Machine): boolean => machine.gameId === gameId);
   }
 
   return { map, getAll, getById, getByGameId };

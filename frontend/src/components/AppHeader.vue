@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import {type Ref, ref} from 'vue';
 
-const versionInfo = ref({ version: '1.0-SNAPSHOT' });
+const versionInfo: Ref<{ version: string }> = ref({version: '1.0-SNAPSHOT'});
 </script>
 
 <template>

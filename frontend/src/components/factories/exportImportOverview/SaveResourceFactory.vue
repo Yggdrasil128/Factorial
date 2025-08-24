@@ -2,7 +2,14 @@
 import type {Factory, Item, ProductionEntry} from '@/types/model/standalone';
 import IconImg from '@/components/common/IconImg.vue';
 import {computed, type ComputedRef, onMounted, type Ref, ref} from 'vue';
-import {onBeforeRouteUpdate, type RouteLocationNormalizedGeneric, useRoute, useRouter} from 'vue-router';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedGeneric,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
 import QuantityByChangelistDisplay from "@/components/factories/resources/QuantityByChangelistDisplay.vue";
 import FractionDisplay from "@/components/common/FractionDisplay.vue";
 
@@ -13,15 +20,15 @@ export interface SaveResourceFactoryProps {
 
 const props: SaveResourceFactoryProps = defineProps<SaveResourceFactoryProps>();
 
-const route = useRoute();
-const router = useRouter();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
 const imports: ComputedRef<ProductionEntry[]> = computed(() =>
-  props.factory.inputs.filter(entry => entry.itemId === props.item.id),
+    props.factory.inputs.filter((entry: ProductionEntry) => entry.itemId === props.item.id),
 );
 
 const exports: ComputedRef<ProductionEntry[]> = computed(() =>
-  props.factory.outputs.filter(entry => entry.itemId === props.item.id),
+    props.factory.outputs.filter((entry: ProductionEntry) => entry.itemId === props.item.id),
 );
 
 function goToFactory(): void {
@@ -39,7 +46,7 @@ function goToFactoryItem(): void {
   });
 }
 
-const mainDiv = ref<HTMLDivElement>();
+const mainDiv: Ref<HTMLDivElement | undefined> = ref();
 const id: ComputedRef<string> = computed(() =>
   'item' + props.item.id + '-factory' + props.factory.id,
 );

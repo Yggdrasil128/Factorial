@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, type ComputedRef, type Ref } from 'vue';
-import { useVModel } from '@vueuse/core';
+import {computed, type ComputedRef, type Ref} from 'vue';
+import {useVModel} from '@vueuse/core';
 import IconImg from '@/components/common/IconImg.vue';
-import { useRecipeIconService } from '@/services/useRecipeIconService';
+import {type RecipeIconService, useRecipeIconService} from '@/services/useRecipeIconService';
 
 export interface FlatSelectProps {
   modelValue: number;
@@ -18,10 +18,10 @@ export interface Entity {
 }
 
 const props: FlatSelectProps = defineProps<FlatSelectProps>();
-const emit = defineEmits(['update:modelValue']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['update:modelValue']);
 const model: Ref<number> = useVModel(props, 'modelValue', emit);
 
-const recipeIconService = useRecipeIconService();
+const recipeIconService: RecipeIconService = useRecipeIconService();
 
 const selectModel: ComputedRef<number | undefined> = computed({
   get() {
@@ -35,7 +35,7 @@ const selectModel: ComputedRef<number | undefined> = computed({
 const modelIconId: ComputedRef<number> = computed(() => {
   if (props.isIconEntity) return model.value;
   if (props.isRecipeEntity) return recipeIconService.getRecipeIconId(model.value);
-  return props.options.filter(element => element.id === model.value)[0]?.iconId ?? 0;
+  return props.options.filter((element: Entity) => element.id === model.value)[0]?.iconId ?? 0;
 });
 </script>
 

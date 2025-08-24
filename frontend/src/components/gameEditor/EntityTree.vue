@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import IconImg from '@/components/common/IconImg.vue';
-import { Delete, Edit, Folder, Plus } from '@element-plus/icons-vue';
-import { type EntityTreeService, type EntityType } from '@/services/useEntityTreeService';
-import { ElButtonGroup, ElPopconfirm, ElTooltip, type TreeInstance } from 'element-plus';
-import { type Ref } from 'vue';
-import { useRecipeIconService } from '@/services/useRecipeIconService';
+import {Delete, Edit, Folder, Plus} from '@element-plus/icons-vue';
+import {type EntityTreeService, type EntityType} from '@/services/useEntityTreeService';
+import {ElButtonGroup, ElPopconfirm, ElTooltip, type TreeInstance} from 'element-plus';
+import {type Ref} from 'vue';
+import {type RecipeIconService, useRecipeIconService} from '@/services/useRecipeIconService';
 
 export interface EntityTreeProps {
   service: EntityTreeService<any>;
@@ -13,11 +13,11 @@ export interface EntityTreeProps {
 
 const props: EntityTreeProps = defineProps<EntityTreeProps>();
 
-const service = props.service;
+const service: EntityTreeService<any> = props.service;
 
 const treeRef: Ref<TreeInstance | undefined> = service.state.treeRef;
 
-const recipeIconService = useRecipeIconService();
+const recipeIconService: RecipeIconService = useRecipeIconService();
 
 </script>
 

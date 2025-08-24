@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { type Ref, ref } from 'vue';
-import { onBeforeRouteLeave, useRouter } from 'vue-router';
-import { ElMessageBox, type FormRules } from 'element-plus';
-import { Check, Close } from '@element-plus/icons-vue';
-import { useUserSettingsStore } from '@/stores/userSettingsStore';
-import { sleep } from '@/utils/utils';
+import {type Ref, ref} from 'vue';
+import {onBeforeRouteLeave, type Router, useRouter} from 'vue-router';
+import {ElForm, ElMessageBox, type FormInstance, type FormRules} from 'element-plus';
+import {Check, Close} from '@element-plus/icons-vue';
+import {type UserSettingsStore, useUserSettingsStore} from '@/stores/userSettingsStore';
+import {sleep} from '@/utils/utils';
 
 export interface EditModalProps {
   title: string;
@@ -17,10 +17,10 @@ export interface EditModalProps {
 }
 
 const props: EditModalProps = defineProps<EditModalProps>();
-const emit = defineEmits(['submit']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['submit']);
 
-const router = useRouter();
-const userSettingsStore = useUserSettingsStore();
+const router: Router = useRouter();
+const userSettingsStore: UserSettingsStore = useUserSettingsStore();
 
 const visible: Ref<boolean> = ref(true);
 
@@ -32,18 +32,18 @@ onBeforeRouteLeave(async () => {
   }
 });
 
-async function beforeClose() {
+async function beforeClose(): Promise<void> {
   if (await checkLeave()) {
     router.back();
   }
 }
 
-async function checkLeave() {
+async function checkLeave(): Promise<boolean> {
   if (props.isSaving) {
     return true;
   }
   if (!userSettingsStore.skipUnsavedChangesWarning && props.hasChanges) {
-    const answer = await new Promise((r) =>
+    const answer: boolean = await new Promise((r: (value: (PromiseLike<boolean> | boolean)) => void) =>
       ElMessageBox({
         title: 'Warning',
         message: 'Do you really want to leave? You have unsaved changes!',
@@ -64,10 +64,12 @@ async function checkLeave() {
 
 // form validation
 
-const form = ref();
+const form: Ref<FormInstance | undefined> = ref();
 
-async function validate() {
-  return await form.value.validate(() => ({}));
+async function validate(): Promise<boolean> {
+  if (!form.value) return false;
+  return await form.value.validate(() => {
+  });
 }
 
 defineExpose({ validate });

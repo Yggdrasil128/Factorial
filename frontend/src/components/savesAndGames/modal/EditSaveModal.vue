@@ -1,34 +1,38 @@
 <script setup lang="ts">
-import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { useGameStore } from '@/stores/model/gameStore';
-import { computed, type Ref, ref, watch } from 'vue';
-import type { Icon, Save } from '@/types/model/standalone';
-import { useSaveApi } from '@/api/model/useSaveApi';
-import { useIconApi } from '@/api/model/useIconApi';
+import {
+  onBeforeRouteUpdate,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {computed, type ComputedRef, type Ref, ref, watch} from 'vue';
+import type {Icon, Save} from '@/types/model/standalone';
+import {SaveApi, useSaveApi} from '@/api/model/useSaveApi';
+import {IconApi, useIconApi} from '@/api/model/useIconApi';
 import _ from 'lodash';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
-import { ElFormItem, ElInput } from 'element-plus';
+import {ElFormItem, ElInput, type FormRules} from 'element-plus';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';
-import { elFormEntityNameUniqueValidator } from '@/utils/utils';
+import {elFormEntityNameUniqueValidator} from '@/utils/utils';
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
-const saveStore = useSaveStore();
-const gameStore = useGameStore();
-
-const saveApi = useSaveApi();
-const iconApi = useIconApi();
+const saveStore: SaveStore = useSaveStore();
+const gameStore: GameStore = useGameStore();
+const saveApi: SaveApi = useSaveApi();
+const iconApi: IconApi = useIconApi();
 
 const save: Ref<Partial<Save>> = ref({});
 const original: Ref<Partial<Save>> = ref({});
-const hasChanges = computed(() => !_.isEqual(save.value, original.value));
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(save.value, original.value));
 const isSaving: Ref<boolean> = ref(false);
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
-const formRules = computed(() => ({
+const formRules: ComputedRef<FormRules> = computed(() => ({
   name: [
     { required: true, message: 'Please enter a name for the save.', trigger: 'blur' },
     {
@@ -40,7 +44,7 @@ const formRules = computed(() => ({
   ],
   gameId: [{
     required: true, message: 'Please select a game.', trigger: 'change',
-    validator: (_: any, value: any, callback: any) => {
+    validator: (_: any, value: any, callback: (error?: Error) => void): void => {
       if (!value) {
         callback(new Error());
       }
@@ -84,7 +88,7 @@ async function submitForm(): Promise<void> {
   save.value.name = save.value.name?.trim();
   save.value.description = save.value.description?.trim();
 
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 

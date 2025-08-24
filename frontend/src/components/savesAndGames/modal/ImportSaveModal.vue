@@ -1,26 +1,28 @@
 <script setup lang="ts">
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
-import { onBeforeRouteUpdate, useRouter } from 'vue-router';
-import { computed, nextTick, ref, type Ref, watch } from 'vue';
+import {onBeforeRouteUpdate, type Router, useRouter} from 'vue-router';
+import {computed, type ComputedRef, nextTick, ref, type Ref, watch} from 'vue';
 import _ from 'lodash';
-import { useGameStore } from '@/stores/model/gameStore';
-import { useEntityCloneNameGeneratorService } from '@/services/useEntityCloneNameGeneratorService';
-import type { SaveSummary } from '@/types/model/summary';
-import { ElFormItem, ElInput, ElMessage, type FormItemInstance } from 'element-plus';
+import {type GameStore, useGameStore} from '@/stores/model/gameStore';
+import {
+  type EntityCloneNameGeneratorService,
+  useEntityCloneNameGeneratorService
+} from '@/services/useEntityCloneNameGeneratorService';
+import type {SaveSummary} from '@/types/model/summary';
+import {ElFormItem, ElInput, ElMessage, type FormItemInstance, type FormRules} from 'element-plus';
 import JsonFileUpload from '@/components/savesAndGames/JsonFileUpload.vue';
-import { elFormEntityNameUniqueValidator } from '@/utils/utils';
-import { useSaveStore } from '@/stores/model/saveStore';
-import { useSaveApi } from '@/api/model/useSaveApi';
-import type { Game } from '@/types/model/standalone';
+import {elFormEntityNameUniqueValidator} from '@/utils/utils';
+import {type SaveStore, useSaveStore} from '@/stores/model/saveStore';
+import {SaveApi, useSaveApi} from '@/api/model/useSaveApi';
+import type {Game} from '@/types/model/standalone';
 import FlatSelect from '@/components/common/input/FlatSelect.vue';
 
-const router = useRouter();
+const router: Router = useRouter();
 
-const gameStore = useGameStore();
-const saveStore = useSaveStore();
-const saveApi = useSaveApi();
-const entityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
+const gameStore: GameStore = useGameStore();
+const saveStore: SaveStore = useSaveStore();
+const saveApi: SaveApi = useSaveApi();
+const entityCloneNameGeneratorService: EntityCloneNameGeneratorService = useEntityCloneNameGeneratorService();
 
 type FormModel = {
   saveSummary: SaveSummary | undefined;
@@ -33,14 +35,14 @@ function emptyFormModel(): FormModel {
 }
 
 const formModel: Ref<FormModel> = ref(emptyFormModel());
-const formItemUpload = ref<FormItemInstance>();
-const hasChanges = computed(() => !_.isEqual(formModel.value, emptyFormModel()));
+const formItemUpload: Ref<FormItemInstance | undefined> = ref();
+const hasChanges: ComputedRef<boolean> = computed(() => !_.isEqual(formModel.value, emptyFormModel()));
 const isSaving: Ref<boolean> = ref(false);
-const editModal = ref();
+const editModal: Ref<InstanceType<typeof EditModal> | undefined> = ref();
 
 const json: Ref<string | null> = ref(null);
 
-const formRules = computed(() => ({
+const formRules: ComputedRef<FormRules> = computed(() => ({
   saveSummary: [{ required: true, message: 'Please select a file to upload.', trigger: 'change' }],
   saveName: [
     { required: true, message: 'Please enter a name for the save.', trigger: 'blur' },
@@ -55,7 +57,7 @@ const formRules = computed(() => ({
       required: true,
       message: 'Please select a game.',
       trigger: 'change',
-      validator: (_: any, value: any, callback: any) => {
+      validator: (_: any, value: any, callback: (error?: Error) => void): void => {
         if (!value) {
           callback(new Error());
         }
@@ -77,7 +79,7 @@ onBeforeRouteUpdate(initFromRoute);
 async function submitForm(): Promise<void> {
   formModel.value.saveName = formModel.value.saveName.trim();
 
-  if (!(await editModal.value.validate())) {
+  if (!(await editModal.value?.validate())) {
     return;
   }
 
@@ -118,13 +120,13 @@ watch(json, () => {
 
   convertJsonToSaveSummary(json.value)
     .then((saveSummary: SaveSummary) => {
-      const saveName = entityCloneNameGeneratorService.generateName(
+      const saveName: string = entityCloneNameGeneratorService.generateName(
         saveSummary.save.name,
         saveStore.getAll(),
       );
 
       const gameName: string = saveSummary.save.gameId as unknown as string;
-      const game: Game | undefined = gameStore.getAll().filter((game) => game.name === gameName)[0];
+      const game: Game | undefined = gameStore.getAll().filter((game: Game) => game.name === gameName)[0];
       const gameId: number = game?.id ?? 0;
 
       formModel.value.saveSummary = saveSummary;

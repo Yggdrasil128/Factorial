@@ -1,6 +1,6 @@
-import type { AxiosInstance, AxiosResponse, Method } from 'axios';
-import { inject } from 'vue';
-import { ElMessage } from 'element-plus';
+import type {AxiosInstance, AxiosResponse, Method} from 'axios';
+import {inject} from 'vue';
+import {ElMessage} from 'element-plus';
 
 export interface Api {
   get: <T>(url: string, params?: RequestParams) => Promise<T>;
@@ -27,7 +27,7 @@ export function useApi(): Api {
       data: payload,
     }).then((response: AxiosResponse<T>) => {
       return response.data;
-    }).catch(error => {
+    }).catch((error: any) => {
       ElMessage.error({
         message: error.message,
       });

@@ -2,6 +2,7 @@ import {defineStore} from 'pinia';
 import type {Game} from '@/types/model/standalone';
 import {reactive} from 'vue';
 
+// eslint-disable-next-line @typescript-eslint/typedef
 export const useGameStore
   = defineStore('gameStore', () => {
 

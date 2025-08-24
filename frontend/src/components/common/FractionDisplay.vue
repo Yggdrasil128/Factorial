@@ -3,7 +3,7 @@ import type {Fraction} from "@/types/model/basic";
 import {ParsedFraction} from "@/utils/fractionUtils";
 import {computed, type ComputedRef} from "vue";
 import CustomElTooltip from "@/components/common/CustomElTooltip.vue";
-import {useUserSettingsStore} from "@/stores/userSettingsStore";
+import {type UserSettingsStore, useUserSettingsStore} from "@/stores/userSettingsStore";
 import {ThroughputUnit} from "@/types/userSettings";
 
 export interface FractionDisplayProps {
@@ -16,7 +16,7 @@ export interface FractionDisplayProps {
 
 const props: FractionDisplayProps = defineProps<FractionDisplayProps>();
 
-const userSettingsStore = useUserSettingsStore();
+const userSettingsStore: UserSettingsStore = useUserSettingsStore();
 
 const conversionFactor: ComputedRef<ParsedFraction> = computed(() => {
   if (!props.isThroughput) return ParsedFraction.ONE;

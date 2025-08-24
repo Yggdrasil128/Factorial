@@ -1,4 +1,4 @@
-export function downloadJsonFile(data: string, filename: string) {
+export function downloadJsonFile(data: string, filename: string): void {
   const element: HTMLAnchorElement = document.createElement('a');
   element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(data));
   element.setAttribute('download', filename);

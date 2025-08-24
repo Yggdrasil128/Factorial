@@ -1,19 +1,25 @@
 <script setup lang="ts">
 import {computed, type ComputedRef, reactive, ref, type Ref} from 'vue';
-import {onBeforeRouteLeave, useRoute, useRouter} from 'vue-router';
+import {
+  onBeforeRouteLeave,
+  type RouteLocationNormalizedLoadedGeneric,
+  type Router,
+  useRoute,
+  useRouter
+} from 'vue-router';
 import {sleep} from '@/utils/utils';
-import {useChangelistStore} from '@/stores/model/changelistStore';
+import {type ChangelistStore, useChangelistStore} from '@/stores/model/changelistStore';
 import type {Changelist, Factory, ProductionStep} from '@/types/model/standalone';
 import type {Fraction} from '@/types/model/basic';
-import {useProductionStepStore} from '@/stores/model/productionStepStore';
-import {useFactoryStore} from '@/stores/model/factoryStore';
+import {type ProductionStepStore, useProductionStepStore} from '@/stores/model/productionStepStore';
+import {type FactoryStore, useFactoryStore} from '@/stores/model/factoryStore';
 import ViewChangelistModalFactory from '@/components/factories/modal/ViewChangelistModalFactory.vue';
-import {useChangelistApi} from '@/api/model/useChangelistApi';
+import {ChangelistApi, useChangelistApi} from '@/api/model/useChangelistApi';
 import PlaceholderHelpBox from '@/components/common/PlaceholderHelpBox.vue';
 import {ElPopconfirm} from "element-plus";
 
-const router = useRouter();
-const route = useRoute();
+const router: Router = useRouter();
+const route: RouteLocationNormalizedLoadedGeneric = useRoute();
 
 const visible: Ref<boolean> = ref(true);
 
@@ -33,15 +39,15 @@ async function close(): Promise<void> {
   await Promise.all([
     sleep(200),
     ...[...productionStepIdsToClear.values()]
-        .map(productionStepId => changelistApi.deleteChange(changelistId.value, productionStepId)),
+        .map((productionStepId: number) => changelistApi.deleteChange(changelistId.value, productionStepId)),
   ]);
   await sleep(200);
 }
 
-const changelistStore = useChangelistStore();
-const productionStepStore = useProductionStepStore();
-const factoryStore = useFactoryStore();
-const changelistApi = useChangelistApi();
+const changelistStore: ChangelistStore = useChangelistStore();
+const productionStepStore: ProductionStepStore = useProductionStepStore();
+const factoryStore: FactoryStore = useFactoryStore();
+const changelistApi: ChangelistApi = useChangelistApi();
 
 const productionStepIdsToClear: Set<number> = reactive(new Set());
 
@@ -89,7 +95,7 @@ const changesByFactory: ComputedRef<ProductionStepChangesByFactory[]> = computed
     });
   }
 
-  result.sort((a, b) => a.factory.ordinal - b.factory.ordinal);
+  result.sort((a: ProductionStepChangesByFactory, b: ProductionStepChangesByFactory) => a.factory.ordinal - b.factory.ordinal);
 
   return result;
 });

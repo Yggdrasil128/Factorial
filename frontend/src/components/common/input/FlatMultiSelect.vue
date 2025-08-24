@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { type Ref } from 'vue';
-import { useVModel } from '@vueuse/core';
-import { useRecipeIconService } from '@/services/useRecipeIconService';
+import {type Ref} from 'vue';
+import {useVModel} from '@vueuse/core';
+import {type RecipeIconService, useRecipeIconService} from '@/services/useRecipeIconService';
 import IconImg from '@/components/common/IconImg.vue';
 
 export interface FlatMultiSelectProps {
@@ -18,10 +18,10 @@ export interface Entity {
 }
 
 const props: FlatMultiSelectProps = defineProps<FlatMultiSelectProps>();
-const emit = defineEmits(['update:modelValue']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['update:modelValue']);
 const model: Ref<number[]> = useVModel(props, 'modelValue', emit);
 
-const recipeIconService = useRecipeIconService();
+const recipeIconService: RecipeIconService = useRecipeIconService();
 </script>
 
 <template>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, type ComputedRef, type Ref } from 'vue';
-import { useVModel } from '@vueuse/core';
+import {computed, type ComputedRef, type Ref} from 'vue';
+import {useVModel} from '@vueuse/core';
 import IconImg from '@/components/common/IconImg.vue';
-import { convertToTreeByCategory, type EntityWithCategory, type TreeNode } from '@/utils/treeUtils';
-import type { CascaderProps } from 'element-plus';
+import {convertToTreeByCategory, type EntityWithCategory, type TreeNode} from '@/utils/treeUtils';
+import type {CascaderProps} from 'element-plus';
 import type Node from 'element-plus/es/components/tree/src/model/node';
 
 export interface CascaderSelectProps {
@@ -16,17 +16,17 @@ export interface CascaderSelectProps {
 }
 
 const props: CascaderSelectProps = defineProps<CascaderSelectProps>();
-const emit = defineEmits(['update:modelValue']);
+const emit: (event: string, ...args: any[]) => void = defineEmits(['update:modelValue']);
 const model: Ref<number[]> = useVModel(props, 'modelValue', emit);
 
-const cascaderModel: Ref<any> = computed({
+const cascaderModel: Ref = computed({
   get: () => model.value,
   set(value: any) {
     if (!value) {
       model.value = [];
     } else {
-      const array = value as (number | undefined)[][];
-      model.value = array.map(element => element[element.length - 1] as number);
+      const array: (number | undefined)[][] = value as (number | undefined)[][];
+      model.value = array.map((element: (number | undefined)[]) => element[element.length - 1] as number);
     }
   },
 });
@@ -34,15 +34,15 @@ const options: ComputedRef<TreeNode[]> = computed(() =>
   convertToTreeByCategory(props.options, props.isIconEntity),
 );
 
-function filterMethod(node: TreeNode, keyword: string) {
+function filterMethod(node: TreeNode, keyword: string): boolean {
   return node.label.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
 }
 
-function getLeafCount(node: any) {
+function getLeafCount(node: any): number {
   if (node.isLeaf) {
     return 1;
   }
-  let c = 0;
+  let c: number = 0;
   for (const child of node.children) {
     c += getLeafCount(child);
   }
