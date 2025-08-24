@@ -305,12 +305,29 @@ public class ChangelistService
     }
 
     @Transactional
+    public void setPrimaryMachineCountChange(int productionStepId, Fraction machineCountChange,
+                                             CompletableFuture<Void> result) {
+        Changelist changelist = findPrimaryChangelist(productionStepId);
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        AsyncHelper.complete(result);
+        setChange(changelist, productionStep, machineCountChange);
+    }
+
+    @Transactional
     public void setMachineCountChange(int id, int productionStepId, Fraction machineCountChange,
                                       CompletableFuture<Void> result) {
         Changelist changelist = get(id);
         ProductionStep productionStep = productionStepService.get(productionStepId);
         AsyncHelper.complete(result);
         setChange(changelist, productionStep, machineCountChange);
+    }
+    
+    @Transactional
+    public void applyPrimaryChange(int productionStepId, CompletableFuture<Void> result) {
+        Changelist changelist = findPrimaryChangelist(productionStepId);
+        ProductionStep productionStep = productionStepService.get(productionStepId);
+        AsyncHelper.complete(result);
+        applyChange(changelist, productionStep);
     }
 
     @Transactional

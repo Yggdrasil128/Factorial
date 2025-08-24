@@ -67,21 +67,6 @@ public class ProductionStepController {
     }
 
     /**
-     * Applies the primary {@link Changelist} to the target {@link ProductionStep}.
-     * <p>
-     * In contrast to {@link ChangelistController#apply(int) /changelist/apply}, this only applies the change to the
-     * target production step. Other {@link Changelist#getProductionStepChanges() changes} in the primary
-     * {@link Changelist} are unaffected and the change for the target {@link ProductionStep} will be removed.
-     * 
-     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
-     */
-    @PatchMapping("/productionStep/applyPrimaryChangelist")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> applyPrimaryChangelist(int productionStepId) {
-        return asyncHelper.submit(result -> changelistService.applyPrimaryChangelist(productionStepId, result));
-    }
-
-    /**
      * Sets the machine count of the target {@link ProductionStep} to {@code machineCount}.
      * <p>
      * This will <b>not</b> change the production step's current machine count but rather add (or update) a
@@ -93,30 +78,13 @@ public class ProductionStepController {
     @PatchMapping("/productionStep/machineCount")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CompletableFuture<Void> updateMachineCount(int productionStepId, String machineCount) {
-        return asyncHelper.submit(result -> changelistService.setPrimaryMachineCount(productionStepId,
-                Fraction.of(machineCount), result));
-    }
-
-    /**
-     * Sets the machine count of the target {@link ProductionStep} to a value that satisfies the over-consumption or
-     * -production of the given {@link Resource}.
-     * <p>
-     * This will <b>not</b> change the production step's current machine count but rather add (or update) a
-     * corresponding {@link Changelist#getProductionStepChanges() change} to the primary {@link Changelist}.
-     * 
-     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
-     * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}
-     */
-    @PatchMapping("/productionStep/satisfy")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public CompletableFuture<Void> satisfy(int productionStepId, int resourceId) {
-        return asyncHelper.submit(result -> factoryService.satisfy(resourceId, productionStepId,
-                changelistService::getProductionStepChanges, result));
+        return asyncHelper.submit(result -> productionStepService.setMachineCount(productionStepId,
+                Fraction.of(machineCount), changelistService::getProductionStepChanges));
     }
 
     /**
      * Computes a machine count for the target {@link ProductionStep} that would satisfy the over-consumption or
-     * -production of the given {@link Resource}. 
+     * -production of the given {@link Resource}.
      * 
      * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
      * @param resourceId the {@link Resource#getId() id} of the target {@link Resource}

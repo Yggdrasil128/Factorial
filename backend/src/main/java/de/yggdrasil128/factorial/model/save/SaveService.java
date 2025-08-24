@@ -129,11 +129,11 @@ public class SaveService extends OrphanModelService<Save, SaveStandalone, SaveRe
 
     public ProductionLine
             computeProductionLine(Save save, Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
-        return cache.computeIfAbsent(save.getId(), key -> initProduictionLine(save, changes));
+        return cache.computeIfAbsent(save.getId(), key -> initProductionLine(save, changes));
     }
 
     private ProductionLine
-            initProduictionLine(Save save, Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
+            initProductionLine(Save save, Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
         ProductionLine productionLine = new ProductionLine(save.getId(), this);
         for (GlobalResource resource : save.getResources()) {
             productionLine.addResource(resource, () -> resourceService.computeContributions(resource));

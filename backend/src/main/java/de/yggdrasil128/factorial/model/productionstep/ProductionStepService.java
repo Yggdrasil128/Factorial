@@ -10,9 +10,11 @@ import de.yggdrasil128.factorial.model.recipemodifier.RecipeModifierService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Service
@@ -114,6 +116,14 @@ public class ProductionStepService
                                                         Supplier<? extends QuantityByChangelist> changes) {
         return cache.computeIfAbsent(productionStep.getId(),
                 key -> new ProductionStepThroughputs(productionStep, changes.get()));
+    }
+
+    @Transactional
+    public void setMachineCount(int id, Fraction change,
+                                Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
+        ProductionStep productionStep = get(id);
+        ProductionStepThroughputs throughputs = computeThroughputs(productionStep, () -> changes.apply(productionStep));
+        setMachineCount(productionStep, throughputs, change);
     }
 
     public void setMachineCount(ProductionStep productionStep, ProductionStepThroughputs throughputs, Fraction change) {

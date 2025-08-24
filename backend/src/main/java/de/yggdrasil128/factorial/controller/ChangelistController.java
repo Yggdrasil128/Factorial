@@ -99,6 +99,17 @@ public class ChangelistController {
     }
 
     /**
+     * Applies the change from the primary {@link Changelist} to the target {@link ProductionStep}.
+     * 
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     */
+    @PatchMapping("/changelist/primary/change/apply")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> applyPrimaryChange(int productionStepId) {
+        return asyncHelper.submit(result -> changelistService.applyPrimaryChange(productionStepId, result));
+    }
+
+    /**
      * Applies the change from the target {@link Changelist} to the target {@link ProductionStep}.
      * 
      * @param changelistId {@link Changelist#getId() id} of the target {@link Changelist}
@@ -108,6 +119,20 @@ public class ChangelistController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CompletableFuture<Void> applyChange(int changelistId, int productionStepId) {
         return asyncHelper.submit(result -> changelistService.applyChange(changelistId, productionStepId, result));
+    }
+
+    /**
+     * Sets the change for the target {@link ProductionStep} in the primary {@link Changelist}. Setting the change to a
+     * value of {@code 0} (zero) will implicitly remove it.
+     * 
+     * @param productionStepId the {@link ProductionStep#getId() id} of the target {@link ProductionStep}
+     * @param machineCountChange the change of machineCount to record
+     */
+    @PatchMapping("/changelist/primary/change/machineCount")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public CompletableFuture<Void> updateMachineCount(int productionStepId, String machineCountChange) {
+        return asyncHelper.submit(result -> changelistService.setPrimaryMachineCountChange(productionStepId,
+                Fraction.of(machineCountChange), result));
     }
 
     /**
