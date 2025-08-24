@@ -223,7 +223,9 @@ function apply(): void {
           <tbody>
           <tr>
             <td>Current machine count:</td>
-            <td>{{ productionStep?.machineCount }}</td>
+            <td>
+              <FractionDisplay :fraction="productionStep?.machineCount"/>
+            </td>
           </tr>
           <tr>
             <td>
