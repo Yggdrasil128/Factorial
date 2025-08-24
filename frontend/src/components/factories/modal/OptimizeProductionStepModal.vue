@@ -83,7 +83,7 @@ const recipeName: ComputedRef<string> = computed(() => {
 });
 
 const recipeIsSameAsResource: ComputedRef<boolean> = computed(() => {
-  return recipeName.value === resourceItem.value?.name && recipeIconId.value === resourceItem.value?.iconId
+  return recipeName.value === resourceItem.value?.name && recipeIconId.value === resourceItem.value?.iconId;
 });
 
 const isProducer: ComputedRef<boolean> = computed(() => {
@@ -129,6 +129,8 @@ const roundedOptimalMachineCount: Ref<ParsedFraction | undefined> = computed(() 
       return optimalMachineCount.value.roundDown();
     case OptimizeProductionStepMachineCountRounding.RoundToNearest:
       return optimalMachineCount.value.roundToNearestInteger();
+    default:
+      return undefined;
   }
 });
 
@@ -152,7 +154,7 @@ const changelistHasChangeAlready: ComputedRef<boolean> = computed(() => {
   if (!selectedChangelistId.value) return false;
   const changelist: Changelist | undefined = changelistStore.getById(selectedChangelistId.value);
   if (!changelist) return false;
-  for (let productionStepChange of changelist.productionStepChanges) {
+  for (const productionStepChange of changelist.productionStepChanges) {
     if (productionStepChange.productionStepId === productionStepId.value) {
       return true;
     }
@@ -170,7 +172,7 @@ function apply(): void {
         productionStepId.value,
         roundedOptimalMachineCount.value.toFraction(),
     ).then(() => {
-      closeAndGoBack()
+      closeAndGoBack();
     });
     return;
   }
@@ -188,7 +190,7 @@ function apply(): void {
       productionStepId.value,
       machineCountChange
   ).then(() => {
-    closeAndGoBack()
+    closeAndGoBack();
   });
 }
 </script>
@@ -270,7 +272,7 @@ function apply(): void {
               Save to changelist:
               <el-select v-model="selectedChangelistId" style="width: 180px;"
                          :disabled="userSettingsStore.optimizeProductionStep.applyDirectly">
-                <el-option v-for="changelist in changelists"
+                <el-option v-for="changelist in changelists" :key="changelist.id"
                            :value="changelist.id"
                            :label="changelist.name"/>
               </el-select>
