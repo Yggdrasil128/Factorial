@@ -3,11 +3,11 @@ import {computed, type Ref, ref} from 'vue';
 import {Check, Minus, Plus} from '@element-plus/icons-vue';
 import {ElButtonGroup} from 'element-plus';
 import {until} from '@vueuse/core';
-import {useProductionStepApi} from '@/api/model/useProductionStepApi';
 import {ParsedFraction} from '@/utils/fractionUtils';
 import CustomElTooltip from '@/components/common/CustomElTooltip.vue';
 import type {ProductionStep} from '@/types/model/standalone';
 import FractionInput from '@/components/common/input/FractionInput.vue';
+import {useChangelistApi} from "@/api/model/useChangelistApi";
 
 export interface MachineCountInputProps {
   productionStep: ProductionStep;
@@ -23,14 +23,15 @@ const parsedFraction: Ref<ParsedFraction> = computed({
       return;
     }
     buttonsDisabled.value = true;
-    productionStepApi.updateMachineCount(props.productionStep.id, value.toFraction())
+    const newDelta: ParsedFraction = value.subtract(ParsedFraction.of(props.productionStep.machineCounts.current));
+    changelistApi.updatePrimaryMachineCountChange(props.productionStep.id, newDelta.toFraction())
         .finally(() => {
           buttonsDisabled.value = false;
         });
   },
 });
 
-const productionStepApi = useProductionStepApi();
+const changelistApi = useChangelistApi();
 
 const plusButtonLoading: Ref<boolean> = ref(false);
 const minusButtonLoading: Ref<boolean> = ref(false);
@@ -58,7 +59,7 @@ async function minusOne(): Promise<void> {
 async function apply(): Promise<void> {
   checkButtonLoading.value = true;
   buttonsDisabled.value = true;
-  await productionStepApi.applyPrimaryChangelist(props.productionStep.id)
+  await changelistApi.applyPrimaryChange(props.productionStep.id)
       .finally(() => buttonsDisabled.value = checkButtonLoading.value = false);
 }
 </script>

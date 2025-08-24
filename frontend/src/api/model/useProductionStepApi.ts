@@ -20,10 +20,6 @@ export class ProductionStepApi extends AbstractBulkCrudEntityApi<ProductionStep>
   }
 
 
-  public applyPrimaryChangelist(productionStepId: number): Promise<void> {
-    return this.api.patch('/api/productionStep/applyPrimaryChangelist', undefined, { productionStepId });
-  }
-
   public updateMachineCount(productionStepId: number, machineCount: Fraction): Promise<void> {
     return this.api.patch('/api/productionStep/machineCount', undefined, { productionStepId, machineCount });
   }

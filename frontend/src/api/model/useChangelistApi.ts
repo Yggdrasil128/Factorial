@@ -52,6 +52,15 @@ export class ChangelistApi extends AbstractBulkCrudEntityApi<Changelist> {
       {changelistId, productionStepId, machineCountChange});
   }
 
+  public async applyPrimaryChange(productionStepId: number): Promise<void> {
+    return this.api.patch('/api/changelist/primary/change/apply', undefined, {productionStepId});
+  }
+
+  public async updatePrimaryMachineCountChange(productionStepId: number, machineCountChange: Fraction): Promise<void> {
+    return this.api.patch('/api/changelist/primary/change/machineCount', undefined,
+      {productionStepId, machineCountChange});
+  }
+
   public async deleteChange(changelistId: number, productionStepId: number): Promise<void> {
     return this.updateMachineCountChange(changelistId, productionStepId, '0');
   }
