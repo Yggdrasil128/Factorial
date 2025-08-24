@@ -120,13 +120,17 @@ public class ProductionStepService
     }
 
     @Transactional
-    public void setMachineCount(int id, Fraction change,
+    public void setMachineCount(int id, Fraction machineCount,
                                 Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
                                 CompletableFuture<Void> result) {
         ProductionStep productionStep = get(id);
         ProductionStepThroughputs throughputs = computeThroughputs(productionStep, () -> changes.apply(productionStep));
         AsyncHelper.complete(result);
-        setMachineCount(productionStep, throughputs, change);
+        Fraction change = machineCount.subtract(productionStep.getMachineCount());
+        productionStep.setMachineCount(machineCount);
+        throughputs.changeMachineCounts(QuantityByChangelist.allAt(change));
+        ProductionStep productionStep2 = repository.save(productionStep);
+        events.publishEvent(new ProductionStepThroughputsChangedEvent(productionStep2, throughputs, false));
     }
 
     public void setMachineCount(ProductionStep productionStep, ProductionStepThroughputs throughputs, Fraction change) {
