@@ -1,6 +1,6 @@
-import { reactive, type Ref, ref } from 'vue';
-import { ElLoading } from 'element-plus';
-import { isInitialMessage, type WebsocketMessage } from '@/types/websocketMessages/modelChangedMessages';
+import {reactive, type Ref, ref} from 'vue';
+import {ElLoading} from 'element-plus';
+import {isInitialMessage, type WebsocketMessage} from '@/types/websocketMessages/modelChangedMessages';
 
 export interface ModelSyncWebsocket {
   connect: () => void;
@@ -11,7 +11,7 @@ interface ElLoadingInstance {
   close: () => void;
 }
 
-const websocketUrl: string = 'ws://localhost:8080/websocket';
+const websocketUrl: string = '/websocket';
 const websocketReconnectMillis: number = 2000;
 const missedMessageTimeoutMillis: number = 3000;
 

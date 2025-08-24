@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, type ComputedRef } from 'vue';
-import type { Icon } from '@/types/model/standalone';
-import { useIconStore } from '@/stores/model/iconStore';
-import { ElTooltip } from 'element-plus';
+import {computed, type ComputedRef} from 'vue';
+import type {Icon} from '@/types/model/standalone';
+import {useIconStore} from '@/stores/model/iconStore';
+import {ElTooltip} from 'element-plus';
 
 export interface IconImgProps {
   icon: Icon | number | undefined;
@@ -30,7 +30,7 @@ const src: ComputedRef<string> = computed(() => {
   if (!icon.value) {
     return '';
   }
-  return 'http://localhost:8080/api/icon/raw' +
+  return '/api/icon/raw' +
     '?id=' + icon.value.id +
     '&lastUpdated=' + icon.value.lastUpdated;
 });
