@@ -79,7 +79,7 @@ public class ProductionStepController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public CompletableFuture<Void> updateMachineCount(int productionStepId, String machineCount) {
         return asyncHelper.submit(result -> productionStepService.setMachineCount(productionStepId,
-                Fraction.of(machineCount), changelistService::getProductionStepChanges));
+                Fraction.of(machineCount), changelistService::getProductionStepChanges, result));
     }
 
     /**

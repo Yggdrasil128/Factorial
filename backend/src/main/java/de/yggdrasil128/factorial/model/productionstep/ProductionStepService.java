@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -120,9 +121,11 @@ public class ProductionStepService
 
     @Transactional
     public void setMachineCount(int id, Fraction change,
-                                Function<? super ProductionStep, ? extends QuantityByChangelist> changes) {
+                                Function<? super ProductionStep, ? extends QuantityByChangelist> changes,
+                                CompletableFuture<Void> result) {
         ProductionStep productionStep = get(id);
         ProductionStepThroughputs throughputs = computeThroughputs(productionStep, () -> changes.apply(productionStep));
+        AsyncHelper.complete(result);
         setMachineCount(productionStep, throughputs, change);
     }
 
