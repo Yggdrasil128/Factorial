@@ -10,10 +10,21 @@ export enum VisibleResourceContributors {
   All = 'All',
 }
 
+export enum OptimizeProductionStepMachineCountRounding {
+  None = 'None',
+  RoundUp = 'RoundUp',
+  RoundDown = 'RoundDown',
+  RoundToNearest = 'RoundToNearest',
+}
+
 export type UserSettings = {
   throughputUnit: ThroughputUnit;
   lastSaveId: number;
   skipUnsavedChangesWarning: boolean;
   visibleLocalResourceContributors: VisibleResourceContributors;
   visibleGlobalResourceContributors: VisibleResourceContributors;
+  optimizeProductionStep: {
+    machineCountRounding: OptimizeProductionStepMachineCountRounding;
+    applyDirectly: boolean;
+  }
 }

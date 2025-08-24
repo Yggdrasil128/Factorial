@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { reactive } from 'vue';
-import type { GlobalResource } from '@/types/model/standalone';
+import {defineStore} from 'pinia';
+import {reactive} from 'vue';
+import type {GlobalResource} from '@/types/model/standalone';
 
 export const useGlobalResourceStore
   = defineStore('globalResourceStore', () => {
@@ -22,3 +22,5 @@ export const useGlobalResourceStore
 
   return { map, getAll, getById, getBySaveId };
 });
+
+export type GlobalResourceStore = ReturnType<typeof useGlobalResourceStore>;

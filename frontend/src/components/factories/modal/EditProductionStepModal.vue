@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter } from 'vue-router';
-import { useProductionStepStore } from '@/stores/model/productionStepStore';
-import { computed, type ComputedRef, reactive, ref, type Ref, watch } from 'vue';
-import type { Machine, ProductionStep, Recipe, RecipeModifier } from '@/types/model/standalone';
+import {onBeforeRouteUpdate, type RouteLocationNormalizedLoadedGeneric, useRoute, useRouter} from 'vue-router';
+import {useProductionStepStore} from '@/stores/model/productionStepStore';
+import {computed, type ComputedRef, reactive, ref, type Ref, watch} from 'vue';
+import type {Machine, ProductionStep, Recipe, RecipeModifier} from '@/types/model/standalone';
 import _ from 'lodash';
-import { ElFormItem, type FormRules } from 'element-plus';
+import {ElFormItem, type FormRules} from 'element-plus';
 import CascaderSelect from '@/components/common/input/CascaderSelect.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EditModal from '@/components/common/EditModal.vue';
-import { useRecipeStore } from '@/stores/model/recipeStore';
-import { useMachineStore } from '@/stores/model/machineStore';
-import { useRecipeModifierStore } from '@/stores/model/recipeModifierStore';
-import { useCurrentGameAndSaveStore } from '@/stores/currentGameAndSaveStore';
+import {useRecipeStore} from '@/stores/model/recipeStore';
+import {useMachineStore} from '@/stores/model/machineStore';
+import {useRecipeModifierStore} from '@/stores/model/recipeModifierStore';
+import {useCurrentGameAndSaveStore} from '@/stores/currentGameAndSaveStore';
 import IconImg from '@/components/common/IconImg.vue';
-import { elFormFractionValidator, ParsedFraction } from '@/utils/fractionUtils';
-import { Minus, Plus } from '@element-plus/icons-vue';
-import type { RuleItem } from 'async-validator/dist-types/interface';
-import { useProductionStepApi } from '@/api/model/useProductionStepApi';
+import {elFormFractionValidator, ParsedFraction} from '@/utils/fractionUtils';
+import {Minus, Plus} from '@element-plus/icons-vue';
+import type {RuleItem} from 'async-validator/dist-types/interface';
+import {useProductionStepApi} from '@/api/model/useProductionStepApi';
 import FractionInput from '@/components/common/input/FractionInput.vue';
 
 const router = useRouter();
@@ -145,7 +145,7 @@ function incrementMachineCount() {
 function decrementMachineCount() {
   if (machineCountParsedFraction.value) {
     let newValue: ParsedFraction = machineCountParsedFraction.value.subtract(ParsedFraction.ONE);
-    if (newValue.isLessThanZero()) {
+    if (newValue.isNegative()) {
       newValue = ParsedFraction.ZERO;
     }
     machineCountParsedFraction.value = newValue;

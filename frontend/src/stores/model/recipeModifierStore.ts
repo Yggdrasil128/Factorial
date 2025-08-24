@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import type { RecipeModifier } from '@/types/model/standalone';
-import { reactive } from 'vue';
+import {defineStore} from 'pinia';
+import type {RecipeModifier} from '@/types/model/standalone';
+import {reactive} from 'vue';
 
 export const useRecipeModifierStore
   = defineStore('recipeModifierStore', () => {
@@ -22,3 +22,5 @@ export const useRecipeModifierStore
 
   return { map, getAll, getById, getByGameId };
 });
+
+export type RecipeModifierStore = ReturnType<typeof useRecipeModifierStore>;

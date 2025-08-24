@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import type { Save } from '@/types/model/standalone';
-import { reactive } from 'vue';
+import {defineStore} from 'pinia';
+import type {Save} from '@/types/model/standalone';
+import {reactive} from 'vue';
 
 export const useSaveStore
   = defineStore('saveStore', () => {
@@ -22,3 +22,5 @@ export const useSaveStore
 
   return { map, getAll, getById, getByGameId };
 });
+
+export type SaveStore = ReturnType<typeof useSaveStore>;

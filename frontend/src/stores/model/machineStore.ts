@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import type { Machine } from '@/types/model/standalone';
-import { reactive } from 'vue';
+import {defineStore} from 'pinia';
+import type {Machine} from '@/types/model/standalone';
+import {reactive} from 'vue';
 
 export const useMachineStore
   = defineStore('machineStore', () => {
@@ -22,3 +22,5 @@ export const useMachineStore
 
   return { map, getAll, getById, getByGameId };
 });
+
+export type MachineStore = ReturnType<typeof useMachineStore>;

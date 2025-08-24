@@ -46,7 +46,7 @@ async function plusOne(): Promise<void> {
 
 async function minusOne(): Promise<void> {
   let newValue = parsedFraction.value.subtract(ParsedFraction.ONE);
-  if (newValue.isLessThanZero()) {
+  if (newValue.isNegative()) {
     newValue = ParsedFraction.ZERO;
   }
   parsedFraction.value = newValue;

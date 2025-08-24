@@ -1,5 +1,5 @@
 import * as VueRouter from 'vue-router';
-import { createRouter } from 'vue-router';
+import {createRouter} from 'vue-router';
 
 import HomePage from '@/components/HomePage.vue';
 import AboutPage from '@/components/AboutPage.vue';
@@ -19,6 +19,7 @@ import EditGameModal from '@/components/savesAndGames/modal/EditGameModal.vue';
 import ImportSaveModal from '@/components/savesAndGames/modal/ImportSaveModal.vue';
 import ImportGameModal from '@/components/savesAndGames/modal/ImportGameModal.vue';
 import ViewChangelistModal from '@/components/factories/modal/ViewChangelistModal.vue';
+import OptimizeProductionStepModal from "@/components/factories/modal/OptimizeProductionStepModal.vue";
 
 const router = createRouter({
   history: VueRouter.createWebHashHistory(),
@@ -111,6 +112,11 @@ const router = createRouter({
           path: 'editProductionStep/:editProductionStepId',
           name: 'editProductionStep',
           components: { modal: EditProductionStepModal },
+        },
+        {
+          path: 'optimizeProductionStep/:productionStepId/resource/:resourceId',
+          name: 'optimizeProductionStep',
+          components: {modal: OptimizeProductionStepModal},
         },
       ],
     },

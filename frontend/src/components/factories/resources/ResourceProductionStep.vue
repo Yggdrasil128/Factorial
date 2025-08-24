@@ -86,7 +86,13 @@ function deleteProductionStep(): void {
 }
 
 function optimizeProductionStep(): void {
-  productionStepApi.satisfy(props.productionStep.id, props.resource.id);
+  //productionStepApi.satisfy(props.productionStep.id, props.resource.id);
+  router.push({
+    name: 'optimizeProductionStep', params: {
+      productionStepId: props.productionStep.id,
+      resourceId: props.resource.id,
+    },
+  });
 }
 
 </script>
@@ -120,7 +126,7 @@ function optimizeProductionStep(): void {
         <ProductionStepMachineCountInput :production-step="productionStep"/>
         &ensp;
         <el-button-group>
-          <custom-el-tooltip content="Optimize">
+          <custom-el-tooltip content="Optimize...">
             <el-button :icon="MagicStick" @click="optimizeProductionStep"/>
           </custom-el-tooltip>
 

@@ -1,4 +1,4 @@
-import type { Fraction } from '@/types/model/basic';
+import type {Fraction} from '@/types/model/basic';
 
 // noinspection JSUnusedGlobalSymbols
 export class ParsedFraction {
@@ -39,6 +39,14 @@ export class ParsedFraction {
     }
     this.numerator /= n;
     this.denominator /= n;
+  }
+
+  getNumerator(): bigint {
+    return this.numerator;
+  }
+
+  getDenominator(): bigint {
+    return this.denominator;
   }
 
   toFraction(): Fraction {
@@ -91,12 +99,33 @@ export class ParsedFraction {
     return this.numerator === 0n;
   }
 
-  isLessThanZero(): boolean {
+  isNegative(): boolean {
     return this.numerator < 0n;
   }
 
-  isGreaterThanZero(): boolean {
+  isPositive(): boolean {
     return this.numerator > 0n;
+  }
+
+  roundUp(): ParsedFraction {
+    return new ParsedFraction(
+      (this.numerator + this.denominator - 1n) / this.denominator,
+    );
+  }
+
+  roundDown(): ParsedFraction {
+    return new ParsedFraction(
+      this.numerator / this.denominator,
+    );
+  }
+
+  roundToNearestInteger(): ParsedFraction {
+    const remainder = this.numerator % this.denominator;
+    const quotient = this.numerator / this.denominator;
+    if (remainder * 2n >= this.denominator) {
+      return new ParsedFraction(quotient + 1n);
+    }
+    return new ParsedFraction(quotient);
   }
 }
 

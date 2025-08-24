@@ -28,8 +28,8 @@ export class ProductionStepApi extends AbstractBulkCrudEntityApi<ProductionStep>
     return this.api.patch('/api/productionStep/machineCount', undefined, { productionStepId, machineCount });
   }
 
-  public satisfy(productionStepId: number, resourceId: number): Promise<void> {
-    return this.api.patch('/api/productionStep/satisfy', undefined, {productionStepId, resourceId});
+  public findSatisfaction(productionStepId: number, resourceId: number): Promise<Fraction> {
+    return this.api.get('/api/productionStep/satisfaction', {productionStepId, resourceId});
   }
 }
 

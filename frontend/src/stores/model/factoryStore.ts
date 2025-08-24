@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { reactive } from 'vue';
-import type { Factory } from '@/types/model/standalone';
+import {defineStore} from 'pinia';
+import {reactive} from 'vue';
+import type {Factory} from '@/types/model/standalone';
 
 export const useFactoryStore
   = defineStore('factoryStore', () => {
@@ -22,3 +22,5 @@ export const useFactoryStore
 
   return { map, getAll, getById, getBySaveId };
 });
+
+export type FactoryStore = ReturnType<typeof useFactoryStore>;

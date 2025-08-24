@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { reactive } from 'vue';
-import type { Changelist } from '@/types/model/standalone';
+import {defineStore} from 'pinia';
+import {reactive} from 'vue';
+import type {Changelist} from '@/types/model/standalone';
 
 export const useChangelistStore
   = defineStore('changelistStore', () => {
@@ -22,3 +22,5 @@ export const useChangelistStore
 
   return { map, getAll, getById, getBySaveId };
 });
+
+export type ChangelistStore = ReturnType<typeof useChangelistStore>;

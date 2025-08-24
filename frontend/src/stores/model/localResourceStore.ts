@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { reactive } from 'vue';
-import type { LocalResource } from '@/types/model/standalone';
+import {defineStore} from 'pinia';
+import {reactive} from 'vue';
+import type {LocalResource} from '@/types/model/standalone';
 
 export const useLocalResourceStore
   = defineStore('localResourceStore', () => {
@@ -27,3 +27,5 @@ export const useLocalResourceStore
 
   return { map, getAll, getById, getBySaveId, getByFactoryId };
 });
+
+export type LocalResourceStore = ReturnType<typeof useLocalResourceStore>;

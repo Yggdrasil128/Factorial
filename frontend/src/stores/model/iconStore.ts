@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import type { Icon } from '@/types/model/standalone';
-import { reactive } from 'vue';
+import {defineStore} from 'pinia';
+import type {Icon} from '@/types/model/standalone';
+import {reactive} from 'vue';
 
 export const useIconStore
   = defineStore('iconStore', () => {
@@ -22,3 +22,5 @@ export const useIconStore
 
   return { map, getAll, getById, getByGameId };
 });
+
+export type IconStore = ReturnType<typeof useIconStore>;

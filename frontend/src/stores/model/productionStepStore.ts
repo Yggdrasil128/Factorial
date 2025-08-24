@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import { reactive } from 'vue';
-import type { ProductionStep } from '@/types/model/standalone';
+import {defineStore} from 'pinia';
+import {reactive} from 'vue';
+import type {ProductionStep} from '@/types/model/standalone';
 
 export const useProductionStepStore
   = defineStore('productionStepStore', () => {
@@ -27,3 +27,5 @@ export const useProductionStepStore
 
   return { map, getAll, getById, getBySaveId, getByFactoryId };
 });
+
+export type ProductionStepStore = ReturnType<typeof useProductionStepStore>;

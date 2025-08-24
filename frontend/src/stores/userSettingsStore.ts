@@ -1,6 +1,10 @@
-import { defineStore } from 'pinia';
-import type { UserSettings } from '@/types/userSettings';
-import { ThroughputUnit, VisibleResourceContributors } from '@/types/userSettings';
+import {defineStore} from 'pinia';
+import {
+  OptimizeProductionStepMachineCountRounding,
+  ThroughputUnit,
+  type UserSettings,
+  VisibleResourceContributors
+} from '@/types/userSettings';
 
 export const useUserSettingsStore
   = defineStore('userSettingsStore', {
@@ -11,9 +15,15 @@ export const useUserSettingsStore
       skipUnsavedChangesWarning: false,
       visibleLocalResourceContributors: VisibleResourceContributors.Producers,
       visibleGlobalResourceContributors: VisibleResourceContributors.All,
+      optimizeProductionStep: {
+        machineCountRounding: OptimizeProductionStepMachineCountRounding.None,
+        applyDirectly: true,
+      }
     } as UserSettings;
   },
   persist: {
     storage: localStorage,
   },
 });
+
+export type UserSettingsStore = ReturnType<typeof useUserSettingsStore>;
