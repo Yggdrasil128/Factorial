@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {UploadFilled} from '@element-plus/icons-vue';
-import {genFileId, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile,} from 'element-plus';
+import {genFileId, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile} from 'element-plus';
 import {type Ref, ref, watch} from 'vue';
 import {useVModel} from '@vueuse/core';
 
