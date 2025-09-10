@@ -18,7 +18,7 @@
     "@vueuse/components": "^11.3.0",
     "@vueuse/core": "^13.7.0",
     "axios": "^1.11.0",
-    "element-plus": "^2.10.7",
+    "element-plus": "^2.11.0",
     "lodash": "^4.17.21",
     "mitt": "^3.0.1",
     "pegjs": "^0.10.0",
